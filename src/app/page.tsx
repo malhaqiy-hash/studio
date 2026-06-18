@@ -2,5 +2,6 @@
 import { redirect } from "next/navigation";
 
 export default function Home() {
-  redirect("/feed");
+  // Redirect to the login page as the primary entry point
+  redirect("/login");
 }
