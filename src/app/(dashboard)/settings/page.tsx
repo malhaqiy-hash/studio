@@ -15,35 +15,86 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { 
-  Globe, 
   Palette, 
   Bell, 
   Database, 
   Save, 
   ShieldCheck,
-  Zap,
   Languages
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+const SETTINGS_KEY = "ontapp_system_settings";
+
+interface SettingsState {
+  language: string;
+  theme: string;
+  emailUpdates: boolean;
+  directMessages: boolean;
+  networkActivity: boolean;
+  apiEndpoint: string;
+}
+
+const DEFAULT_SETTINGS: SettingsState = {
+  language: "en",
+  theme: "system",
+  emailUpdates: true,
+  directMessages: true,
+  networkActivity: false,
+  apiEndpoint: "https://api.ontapp.network/v1/discover",
+};
+
 export default function SettingsPage() {
   const { toast } = useToast();
   const [loading, setLoading] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+  const [settings, setSettings] = React.useState<SettingsState>(DEFAULT_SETTINGS);
+
+  // Load settings from localStorage on mount
+  React.useEffect(() => {
+    const saved = localStorage.getItem(SETTINGS_KEY);
+    if (saved) {
+      try {
+        setSettings(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse settings", e);
+      }
+    }
+    setMounted(true);
+  }, []);
 
   const handleSave = () => {
     setLoading(true);
+    // Simulate network delay
     setTimeout(() => {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
       setLoading(false);
       toast({
         title: "Settings Saved",
-        description: "Your configuration has been updated successfully.",
+        description: "Your configuration has been updated and persisted successfully.",
       });
-    }, 1000);
+    }, 800);
   };
+
+  const updateSetting = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Prevent hydration mismatch by not rendering the form values until mounted
+  if (!mounted) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-4xl mx-auto space-y-8 animate-pulse">
+          <div className="h-10 w-48 bg-slate-200 rounded-lg" />
+          <div className="h-64 bg-slate-100 rounded-3xl" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 pb-20">
         <div>
           <h1 className="text-3xl font-headline font-black text-slate-900">System Settings</h1>
           <p className="text-slate-500 font-medium">Manage your platform preferences and network configurations.</p>
@@ -62,7 +113,10 @@ export default function SettingsPage() {
             <CardContent className="p-6">
               <div className="max-w-xs space-y-2">
                 <Label htmlFor="language" className="font-bold text-slate-700">Display Language</Label>
-                <Select defaultValue="en">
+                <Select 
+                  value={settings.language} 
+                  onValueChange={(val) => updateSetting("language", val)}
+                >
                   <SelectTrigger id="language" className="rounded-xl border-slate-200">
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
@@ -87,7 +141,10 @@ export default function SettingsPage() {
             <CardContent className="p-6">
               <div className="max-w-xs space-y-2">
                 <Label htmlFor="theme" className="font-bold text-slate-700">Interface Theme</Label>
-                <Select defaultValue="system">
+                <Select 
+                  value={settings.theme} 
+                  onValueChange={(val) => updateSetting("theme", val)}
+                >
                   <SelectTrigger id="theme" className="rounded-xl border-slate-200">
                     <SelectValue placeholder="Select theme" />
                   </SelectTrigger>
@@ -116,21 +173,30 @@ export default function SettingsPage() {
                   <Label className="font-bold text-slate-700">Email Updates</Label>
                   <p className="text-xs text-slate-400 font-medium">Receive weekly digest and major platform updates.</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch 
+                  checked={settings.emailUpdates} 
+                  onCheckedChange={(val) => updateSetting("emailUpdates", val)}
+                />
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="font-bold text-slate-700">Direct Messages</Label>
                   <p className="text-xs text-slate-400 font-medium">Get notified when a potential partner messages you.</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch 
+                  checked={settings.directMessages} 
+                  onCheckedChange={(val) => updateSetting("directMessages", val)}
+                />
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="font-bold text-slate-700">Network Activity</Label>
                   <p className="text-xs text-slate-400 font-medium">Alerts for new opportunities in your sector.</p>
                 </div>
-                <Switch />
+                <Switch 
+                  checked={settings.networkActivity} 
+                  onCheckedChange={(val) => updateSetting("networkActivity", val)}
+                />
               </div>
             </CardContent>
           </Card>
@@ -148,7 +214,12 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="api-endpoint" className="font-bold text-slate-700">Discovery API Endpoint</Label>
-                  <Input id="api-endpoint" defaultValue="https://api.ontapp.network/v1/discover" className="rounded-xl border-slate-200" />
+                  <Input 
+                    id="api-endpoint" 
+                    value={settings.apiEndpoint} 
+                    onChange={(e) => updateSetting("apiEndpoint", e.target.value)}
+                    className="rounded-xl border-slate-200" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="api-key" className="font-bold text-slate-700">Secret Access Key</Label>
@@ -159,7 +230,7 @@ export default function SettingsPage() {
                 <ShieldCheck className="size-5 text-emerald-600 shrink-0" />
                 <div className="space-y-1">
                   <h4 className="text-sm font-black text-emerald-900 leading-none">Discovery Indexing Active</h4>
-                  <p className="text-xs text-emerald-700 font-medium">Your account is currently syncing with 12 external business directories.</p>
+                  <p className="text-xs text-emerald-700 font-medium">Your account is currently syncing with external business directories.</p>
                 </div>
               </div>
             </CardContent>
