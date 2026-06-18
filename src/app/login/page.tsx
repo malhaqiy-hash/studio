@@ -49,12 +49,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) return;
+
     setLoading(true);
-    
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (error: any) {
+      console.error("Login Error:", error);
       toast({
         variant: "destructive",
         title: "Authentication Failed",
@@ -72,10 +74,11 @@ export default function LoginPage() {
       await signInWithPopup(auth, provider);
       router.push("/dashboard");
     } catch (error: any) {
+      console.error("Google Login Error:", error);
       toast({
         variant: "destructive",
         title: "Google Login Error",
-        description: error.message || "Could not sign in with Google.",
+        description: error.message || "Could not sign in with Google. Check if API keys are valid.",
       });
     } finally {
       setLoading(false);
@@ -108,7 +111,6 @@ export default function LoginPage() {
   };
 
   const handlePhoneLoginPlaceholder = () => {
-    console.log("Phone login sequence initiated...");
     toast({
       title: "Security Update",
       description: "Mobile OTP authentication is being provisioned for your region.",
@@ -120,7 +122,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-10">
         {/* Branding Section */}
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center size-16 rounded-2xl bg-accent text-white font-black text-4xl shadow-2xl shadow-indigo-200 mb-2 transform transition-transform hover:rotate-6">
+          <div className="inline-flex items-center justify-center size-16 rounded-2xl bg-accent text-white font-black text-4xl shadow-2xl shadow-indigo-200 mb-2 transform transition-transform hover:rotate-6 select-none">
             O
           </div>
           <div className="space-y-1">
@@ -219,6 +221,7 @@ export default function LoginPage() {
                     variant="outline"
                     className="h-14 rounded-2xl border-slate-200 hover:bg-slate-50 font-bold flex gap-2"
                     onClick={handleGoogleSignIn}
+                    disabled={loading}
                   >
                     <svg className="size-5" viewBox="0 0 24 24">
                       <path
@@ -245,6 +248,7 @@ export default function LoginPage() {
                     variant="outline"
                     className="h-14 rounded-2xl border-slate-200 hover:bg-slate-50 font-bold flex gap-2"
                     onClick={handlePhoneLoginPlaceholder}
+                    disabled={loading}
                   >
                     <Phone className="size-4" />
                     Phone
