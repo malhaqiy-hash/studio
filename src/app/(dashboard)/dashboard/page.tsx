@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -29,6 +28,7 @@ import {
   Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const ENGAGEMENT_DATA = [
   { name: "Mon", posts: 24, interactions: 400 },
