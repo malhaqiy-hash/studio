@@ -57,14 +57,25 @@ export default function SettingsPage() {
   const [mounted, setMounted] = React.useState(false);
   const [settings, setSettings] = React.useState<SettingsState>(DEFAULT_SETTINGS);
 
+  const applyTheme = (theme: string) => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (theme === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else if (theme === 'system') {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', isDark);
+    }
+  };
+
   // Load settings from localStorage on mount
   React.useEffect(() => {
     const saved = localStorage.getItem(SETTINGS_KEY);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Merge with defaults to ensure any new keys are present
         setSettings({ ...DEFAULT_SETTINGS, ...parsed });
+        applyTheme(parsed.theme);
       } catch (e) {
         console.error("Failed to parse settings from localStorage", e);
       }
@@ -75,11 +86,10 @@ export default function SettingsPage() {
   const handleSave = () => {
     setLoading(true);
     
-    // In a real app, you might also send this to a backend API
-    // We'll simulate a small delay for better UX feedback
     setTimeout(() => {
       try {
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        applyTheme(settings.theme);
         setLoading(false);
         toast({
           title: "Configuration Saved",
@@ -100,7 +110,6 @@ export default function SettingsPage() {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  // Prevent hydration mismatch by not rendering the form until client-side mount
   if (!mounted) {
     return (
       <DashboardLayout>
@@ -119,7 +128,6 @@ export default function SettingsPage() {
   return (
     <DashboardLayout>
       <div className="max-w-5xl mx-auto space-y-10 pb-20 pt-4">
-        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
           <div className="space-y-1">
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">System Settings</h1>
@@ -136,7 +144,6 @@ export default function SettingsPage() {
         </div>
 
         <div className="grid gap-8">
-          {/* Visuals & Localization */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden group hover:shadow-md transition-shadow">
               <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
@@ -208,7 +215,6 @@ export default function SettingsPage() {
             </Card>
           </div>
 
-          {/* Notifications */}
           <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden group hover:shadow-md transition-shadow">
             <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
@@ -270,7 +276,6 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* API & Network */}
           <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden group hover:shadow-md transition-shadow">
             <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
@@ -321,7 +326,6 @@ export default function SettingsPage() {
           </Card>
         </div>
 
-        {/* Action Footer */}
         <div className="flex items-center justify-between p-8 bg-slate-900 text-white rounded-[2rem] shadow-xl overflow-hidden relative">
           <div className="relative z-10">
             <h3 className="text-lg font-bold">Persistence & Backup</h3>

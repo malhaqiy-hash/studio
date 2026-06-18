@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -60,6 +61,30 @@ const navItems = [
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
+  // Apply theme from localStorage on mount
+  React.useEffect(() => {
+    const applyStoredTheme = () => {
+      const saved = localStorage.getItem("ontapp_system_settings_v2");
+      if (saved) {
+        try {
+          const { theme } = JSON.parse(saved);
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else if (theme === 'light') {
+            document.documentElement.classList.remove('dark');
+          } else if (theme === 'system') {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.classList.toggle('dark', isDark);
+          }
+        } catch (e) {
+          console.error("Theme application failed", e);
+        }
+      }
+    };
+
+    applyStoredTheme();
+  }, [pathname]); // Check theme on navigation too
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
@@ -100,7 +125,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-xl border border-slate-100 bg-slate-50/50"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-xl border border-slate-100 bg-slate-50/50 cursor-pointer"
                 >
                   <Avatar className="h-9 w-9 rounded-lg shadow-sm ring-2 ring-white">
                     <AvatarImage src="https://picsum.photos/seed/user/100" />
@@ -134,13 +159,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuSeparator className="my-2 bg-slate-50" />
                 <div className="space-y-1">
                   <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors" asChild>
-                    <Link href="/profile" className="flex items-center gap-3">
+                    <Link href="/profile">
                       <UserCircle className="size-5" />
                       Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors" asChild>
-                    <Link href="/settings" className="flex items-center gap-3">
+                    <Link href="/settings">
                       <Settings className="size-5" />
                       Account Settings
                     </Link>
