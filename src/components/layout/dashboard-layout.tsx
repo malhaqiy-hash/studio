@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -18,7 +17,8 @@ import {
   Menu,
   Settings,
   ChevronsUpDown,
-  User
+  User,
+  Sliders
 } from "lucide-react";
 import { 
   Sidebar, 
@@ -54,6 +54,7 @@ const navItems = [
   { icon: Briefcase, label: "Opportunities", href: "/opportunities" },
   { icon: MessageSquare, label: "Messages", href: "/messages" },
   { icon: Bell, label: "Notifications", href: "/notifications" },
+  { icon: Sliders, label: "Settings", href: "/settings" },
 ];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -132,13 +133,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="my-2 bg-slate-50" />
                 <div className="space-y-1">
-                  <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors">
-                    <UserCircle className="size-5" />
-                    Profile
+                  <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors" asChild>
+                    <Link href="/profile" className="flex items-center gap-3">
+                      <UserCircle className="size-5" />
+                      Profile
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors">
-                    <Settings className="size-5" />
-                    Account Settings
+                  <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors" asChild>
+                    <Link href="/settings" className="flex items-center gap-3">
+                      <Settings className="size-5" />
+                      Account Settings
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors">
                     <Globe className="size-5" />
@@ -163,9 +168,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </h2>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" className="hidden sm:flex rounded-full px-4 gap-2 border-slate-200 font-bold text-slate-600">
-                <UserCircle className="size-4" />
-                <span>Account</span>
+              <Button variant="outline" size="sm" className="hidden sm:flex rounded-full px-4 gap-2 border-slate-200 font-bold text-slate-600" asChild>
+                <Link href="/settings">
+                  <Sliders className="size-4" />
+                  <span>Settings</span>
+                </Link>
               </Button>
             </div>
           </header>
