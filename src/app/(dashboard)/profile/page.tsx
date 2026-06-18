@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -17,7 +16,8 @@ import {
   Edit3,
   Link as LinkIcon,
   Twitter,
-  Linkedin
+  Linkedin,
+  User
 } from "lucide-react";
 
 export default function ProfilePage() {
@@ -25,10 +25,10 @@ export default function ProfilePage() {
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-8 pb-20">
         {/* Profile Header Card */}
-        <Card className="border-slate-200 shadow-sm overflow-hidden">
+        <Card className="border-slate-200 shadow-sm overflow-hidden rounded-[2rem]">
           <div className="h-48 bg-gradient-to-r from-indigo-500 via-accent to-indigo-700 relative">
-            <div className="absolute top-4 right-4 flex gap-2">
-              <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md font-bold rounded-xl h-9 px-4">
+            <div className="absolute top-6 right-6 flex gap-2">
+              <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md font-bold rounded-xl h-10 px-6">
                 <Edit3 className="size-4 mr-2" />
                 Edit Profile
               </Button>
@@ -60,11 +60,18 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Contact & Links */}
           <div className="space-y-6">
-            <Card className="border-slate-200 shadow-sm">
+            <Card className="border-slate-200 shadow-sm rounded-[1.5rem]">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold">Contact Info</CardTitle>
+                <CardTitle className="text-lg font-bold">Account Info</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Admin Name</span>
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                    <User className="size-4 text-slate-300" />
+                    Jane Cooper
+                  </div>
+                </div>
                 <div className="space-y-1">
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email Address</span>
                   <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
@@ -73,11 +80,11 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Website</span>
-                  <a href="#" className="flex items-center gap-2 text-sm font-bold text-accent hover:underline">
-                    <Globe className="size-4" />
-                    alphatech.solutions
-                  </a>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Type</span>
+                  <div className="flex items-center gap-2 text-sm font-bold text-accent">
+                    <ShieldCheck className="size-4" />
+                    Enterprise Member
+                  </div>
                 </div>
                 <div className="pt-4 flex gap-3">
                   <Button variant="outline" size="icon" className="rounded-xl border-slate-200 hover:bg-slate-50">
@@ -93,9 +100,9 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200 shadow-sm bg-slate-900 text-white">
+            <Card className="border-slate-200 shadow-sm bg-slate-900 text-white rounded-[1.5rem]">
               <CardContent className="p-6 space-y-4">
-                <h3 className="font-bold text-lg">Network Stats</h3>
+                <h3 className="font-bold text-lg">Network Influence</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                     <span className="block text-2xl font-black">1.2K</span>
@@ -112,9 +119,9 @@ export default function ProfilePage() {
 
           {/* About & Details */}
           <div className="md:col-span-2 space-y-6">
-            <Card className="border-slate-200 shadow-sm">
+            <Card className="border-slate-200 shadow-sm rounded-[1.5rem]">
               <CardHeader>
-                <CardTitle className="text-lg font-bold">About Alpha Tech Solutions</CardTitle>
+                <CardTitle className="text-lg font-bold">Business Overview</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <p className="text-slate-600 leading-relaxed font-medium">
@@ -133,9 +140,9 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200 shadow-sm">
+            <Card className="border-slate-200 shadow-sm rounded-[1.5rem]">
               <CardHeader>
-                <CardTitle className="text-lg font-bold">Active Opportunities</CardTitle>
+                <CardTitle className="text-lg font-bold">Active Engagements</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-slate-100">
