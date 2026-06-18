@@ -7,20 +7,35 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Globe, Lock, Mail, ArrowRight, ShieldCheck } from "lucide-react";
+import { Globe, Lock, Mail, ArrowRight, ShieldCheck, Phone } from "lucide-react";
+import { useAuth } from "@/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const router = useRouter();
+  const auth = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate network latency for the authentication process
-    setTimeout(() => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
-    }, 1500);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Failed",
+        description: error.message || "Please check your credentials and try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,6 +74,8 @@ export default function LoginPage() {
                     id="email" 
                     type="email" 
                     placeholder="name@company.com" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required 
                     className="h-14 pl-12 rounded-2xl border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-accent/10 transition-all font-medium"
                   />
@@ -77,24 +94,52 @@ export default function LoginPage() {
                     id="password" 
                     type="password" 
                     placeholder="••••••••" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required 
                     className="h-14 pl-12 rounded-2xl border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-accent/10 transition-all font-medium"
                   />
                 </div>
               </div>
-              <Button 
-                type="submit" 
-                disabled={loading}
-                className="w-full h-14 rounded-2xl bg-accent hover:bg-indigo-600 text-white font-black text-lg shadow-xl shadow-indigo-100 transition-all active:scale-[0.98] group relative overflow-hidden"
-              >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  {loading ? "Verifying Identity..." : "Authorize Login"}
-                  {!loading && <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />}
-                </span>
-                {loading && (
-                  <div className="absolute inset-0 bg-indigo-600/50 animate-pulse" />
-                )}
-              </Button>
+              <div className="space-y-4 pt-2">
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full h-14 rounded-2xl bg-accent hover:bg-indigo-600 text-white font-black text-lg shadow-xl shadow-indigo-100 transition-all active:scale-[0.98] group relative overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    {loading ? "Verifying..." : "Authorize Login"}
+                    {!loading && <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />}
+                  </span>
+                  {loading && (
+                    <div className="absolute inset-0 bg-indigo-600/50 animate-pulse" />
+                  )}
+                </Button>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-slate-100" />
+                  </div>
+                  <div className="relative flex justify-center text-[10px] uppercase font-black text-slate-400 tracking-widest">
+                    <span className="bg-white px-4">Alternative Secure Access</span>
+                  </div>
+                </div>
+
+                <Button 
+                  type="button"
+                  variant="outline"
+                  className="w-full h-14 rounded-2xl border-slate-200 hover:bg-slate-50 font-bold flex gap-2"
+                  onClick={() => {
+                    toast({
+                      title: "Feature coming soon",
+                      description: "Mobile OTP authentication is being provisioned for your region.",
+                    });
+                  }}
+                >
+                  <Phone className="size-4" />
+                  Sign in with Phone
+                </Button>
+              </div>
             </form>
           </CardContent>
           <CardFooter className="bg-slate-50/50 p-8 border-t border-slate-100 flex flex-col gap-4">
