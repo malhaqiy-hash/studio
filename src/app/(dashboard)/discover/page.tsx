@@ -1,28 +1,57 @@
-
 "use client";
 
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Sparkles, Building2, Package, Headphones, MapPin, Target } from "lucide-react";
+import { 
+  Search, 
+  Sparkles, 
+  Building2, 
+  Package, 
+  Headphones, 
+  MapPin, 
+  CheckCircle2, 
+  Globe, 
+  Filter, 
+  UserPlus, 
+  ExternalLink, 
+  ShieldCheck,
+  Zap,
+  ChevronDown
+} from "lucide-react";
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function DiscoverPage() {
   const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
+  
+  // Advanced Filters State
+  const [filters, setFilters] = React.useState({
+    verifiedOnly: false,
+    onTappOnly: false,
+    externalOnly: false
+  });
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!query) return;
     
     setLoading(true);
     try {
-      const output = await aiIntentSearch({ query });
+      const output = await aiIntentSearch({ query, filters });
       setResults(output);
     } catch (err) {
       console.error(err);
@@ -31,59 +60,115 @@ export default function DiscoverPage() {
     }
   };
 
-  const getIcon = (type: string) => {
+  const getSourceBadge = (source: string) => {
+    switch(source) {
+      case 'ontapp_verified': 
+        return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 flex gap-1 items-center px-3 py-1 font-bold">
+          <ShieldCheck className="size-3" /> Verified Member
+        </Badge>;
+      case 'ontapp_member': 
+        return <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200 flex gap-1 items-center px-3 py-1 font-bold">
+          <Zap className="size-3" /> OnTapp Member
+        </Badge>;
+      default: 
+        return <Badge variant="outline" className="bg-slate-50 text-slate-500 flex gap-1 items-center px-3 py-1 font-bold">
+          <Globe className="size-3" /> External Source
+        </Badge>;
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
     switch(type) {
-      case 'business': return <Building2 className="size-5 text-indigo-500" />;
-      case 'product': return <Package className="size-5 text-emerald-500" />;
-      case 'service': return <Headphones className="size-5 text-orange-500" />;
-      default: return <Sparkles className="size-5 text-slate-400" />;
+      case 'business': return <Building2 className="size-5" />;
+      case 'product': return <Package className="size-5" />;
+      case 'service': return <Headphones className="size-5" />;
+      default: return <Search className="size-5" />;
     }
   };
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-12 py-10">
-        <div className="text-center space-y-4">
-          <Badge variant="outline" className="rounded-full px-4 py-1 bg-white border-accent/20 text-accent font-bold animate-bounce">
-            AI-Powered Discovery
-          </Badge>
-          <h1 className="text-4xl md:text-5xl font-headline font-black text-slate-900 tracking-tight">
-            Find exactly what your <span className="text-accent underline decoration-indigo-200 underline-offset-8">business needs.</span>
+      <div className="max-w-6xl mx-auto space-y-10 py-6">
+        {/* Header section */}
+        <div className="text-center space-y-6 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
+            <Sparkles className="size-3 animate-pulse" />
+            Hybrid Discovery Engine
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-black text-slate-900 tracking-tight leading-[1.1]">
+            Explore the <span className="text-accent underline decoration-indigo-200 underline-offset-8">Global Business</span> Ecosystem.
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-medium">
-            Describe your requirement in plain English. Our AI will scan the OnTapp network to find the best matches for your business.
+          <p className="text-lg text-slate-500 font-medium">
+            Discover verified OnTapp members and index-linked external businesses using natural language intelligence.
           </p>
         </div>
 
-        <form onSubmit={handleSearch} className="relative group max-w-2xl mx-auto">
-          <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-            <Sparkles className="size-6 text-accent animate-pulse" />
-          </div>
-          <Input 
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g., 'Eco-friendly packaging suppliers in Europe with bulk discounts'"
-            className="h-16 pl-16 pr-32 rounded-3xl border-slate-200 bg-white shadow-xl text-lg font-medium ring-accent/20 transition-all focus:border-accent"
-          />
-          <Button 
-            disabled={loading}
-            className="absolute right-2 top-2 bottom-2 rounded-2xl px-8 bg-accent hover:bg-accent/90 text-white font-bold transition-all shadow-lg active:scale-95"
-          >
-            {loading ? "Searching..." : "Explore"}
-          </Button>
-        </form>
+        {/* Search & Filters */}
+        <div className="space-y-6">
+          <form onSubmit={handleSearch} className="relative group max-w-3xl mx-auto">
+            <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+              <Search className="size-6 text-slate-400 group-focus-within:text-accent transition-colors" />
+            </div>
+            <Input 
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="e.g., 'Coffee suppliers in South East Asia with eco-certifications'"
+              className="h-20 pl-16 pr-40 rounded-[2rem] border-slate-200 bg-white shadow-2xl text-xl font-medium ring-accent/10 transition-all focus:border-accent"
+            />
+            <Button 
+              type="submit"
+              disabled={loading}
+              className="absolute right-3 top-3 bottom-3 rounded-full px-10 bg-accent hover:bg-indigo-600 text-white font-black text-lg transition-all shadow-lg active:scale-95"
+            >
+              {loading ? "Scanning..." : "Search"}
+            </Button>
+          </form>
 
+          {/* Filter Toggles */}
+          <div className="flex flex-wrap items-center justify-center gap-6 p-4 bg-white/50 border border-white/20 rounded-2xl backdrop-blur-sm max-w-fit mx-auto shadow-sm">
+             <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="verified" 
+                  checked={filters.verifiedOnly} 
+                  onCheckedChange={(checked) => setFilters(prev => ({...prev, verifiedOnly: !!checked}))}
+                />
+                <Label htmlFor="verified" className="text-sm font-bold text-slate-600 cursor-pointer">Verified Only</Label>
+             </div>
+             <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="ontapp" 
+                  checked={filters.onTappOnly} 
+                  onCheckedChange={(checked) => setFilters(prev => ({...prev, onTappOnly: !!checked}))}
+                />
+                <Label htmlFor="ontapp" className="text-sm font-bold text-slate-600 cursor-pointer">OnTapp Members</Label>
+             </div>
+             <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="external" 
+                  checked={filters.externalOnly} 
+                  onCheckedChange={(checked) => setFilters(prev => ({...prev, externalOnly: !!checked}))}
+                />
+                <Label htmlFor="external" className="text-sm font-bold text-slate-600 cursor-pointer">External Sources</Label>
+             </div>
+          </div>
+        </div>
+
+        {/* Results Section */}
         <div className="space-y-6">
           {loading && (
-            <div className="space-y-4">
+            <div className="grid gap-6">
               {[1, 2, 3].map((i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardContent className="p-6">
-                    <div className="flex gap-4">
-                      <Skeleton className="size-12 rounded-xl" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-6 w-1/4" />
-                        <Skeleton className="h-4 w-3/4" />
+                <Card key={i} className="animate-pulse border-slate-100">
+                  <CardContent className="p-8">
+                    <div className="flex gap-6">
+                      <Skeleton className="size-16 rounded-2xl" />
+                      <div className="flex-1 space-y-3">
+                        <Skeleton className="h-8 w-1/3" />
+                        <Skeleton className="h-4 w-2/3" />
+                        <div className="flex gap-2">
+                           <Skeleton className="h-6 w-20 rounded-full" />
+                           <Skeleton className="h-6 w-20 rounded-full" />
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -93,84 +178,141 @@ export default function DiscoverPage() {
           )}
 
           {results && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between pb-4">
-                <h3 className="font-bold text-slate-700">Discovered Results ({results.results.length})</h3>
-                <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">Ranked by relevance</span>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-black text-slate-900 text-lg uppercase tracking-tight">Discovery Results</h3>
+                  <Badge variant="secondary" className="bg-slate-100 text-slate-500">{results.results.length}</Badge>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="font-bold text-slate-400 hover:text-slate-600 gap-2">
+                      Sort by: Match Score <ChevronDown className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem className="font-bold">Match Score</DropdownMenuItem>
+                    <DropdownMenuItem className="font-bold">Latest Activity</DropdownMenuItem>
+                    <DropdownMenuItem className="font-bold">Verification</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              {results.results.map((result, idx) => (
-                <Card key={idx} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
-                  <div className="flex items-stretch">
-                    <div className="w-1 bg-accent/20 group-hover:bg-accent transition-colors" />
-                    <CardContent className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 flex-1">
-                      <div className="flex gap-4">
-                        <div className="size-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
-                          {getIcon(result.type)}
-                        </div>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-3">
-                            <h4 className="font-black text-lg text-slate-900 leading-none">{result.name}</h4>
-                            <Badge variant="outline" className="bg-slate-50 text-[10px] uppercase font-black tracking-tighter">
-                              {result.type}
-                            </Badge>
-                          </div>
-                          <p className="text-slate-500 text-sm font-medium line-clamp-2 leading-relaxed">
-                            {result.description}
-                          </p>
-                          <div className="flex flex-wrap gap-4 pt-2">
-                            {result.industry && (
-                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-tighter">
-                                <Target className="size-3" />
-                                {result.industry}
-                              </div>
-                            )}
-                            {result.location && (
-                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-tighter">
-                                <MapPin className="size-3" />
-                                {result.location}
-                              </div>
-                            )}
-                          </div>
-                        </div>
+
+              <div className="grid gap-6">
+                {results.results.map((result, idx) => (
+                  <Card key={idx} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-white relative">
+                    {result.matchScore >= 90 && (
+                      <div className="absolute top-0 right-0 p-3">
+                        <Badge className="bg-amber-500 text-white border-none font-black text-[10px] uppercase shadow-md flex gap-1">
+                          <Zap className="size-3 fill-white" /> Top Match
+                        </Badge>
                       </div>
-                      <div className="flex items-center gap-6 shrink-0 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-6">
-                        <div className="text-center">
-                          <span className="block text-2xl font-black text-indigo-600">{result.relevanceScore}%</span>
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">Match</span>
+                    )}
+                    <CardContent className="p-0">
+                      <div className="flex flex-col md:flex-row">
+                        <div className={`w-2 shrink-0 ${result.source === 'external' ? 'bg-slate-200' : 'bg-accent'}`} />
+                        <div className="p-8 flex-1 flex flex-col md:flex-row gap-8 items-start">
+                          <div className={`size-16 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform ${result.source === 'external' ? 'bg-slate-50 text-slate-400' : 'bg-indigo-50 text-accent'}`}>
+                            {getTypeIcon(result.type)}
+                          </div>
+                          
+                          <div className="flex-1 space-y-4">
+                            <div className="space-y-2">
+                              <div className="flex flex-wrap items-center gap-3">
+                                <h4 className="text-2xl font-black text-slate-900 leading-tight">{result.name}</h4>
+                                {getSourceBadge(result.source)}
+                              </div>
+                              <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-3xl">
+                                {result.description}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-6 pt-2">
+                              {result.location && (
+                                <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
+                                  <MapPin className="size-3.5" />
+                                  {result.location}
+                                </div>
+                              )}
+                              {result.industry && (
+                                <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
+                                  <Filter className="size-3.5" />
+                                  {result.industry}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Match Reasons */}
+                            <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-100">
+                               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                  <CheckCircle2 className="size-3 text-emerald-500" />
+                                  AI Match Confidence
+                               </div>
+                               <div className="flex flex-wrap gap-2">
+                                  {result.matchReasons.map((reason, rIdx) => (
+                                    <span key={rIdx} className="text-xs font-bold text-slate-600 bg-white border px-2 py-1 rounded-md shadow-sm">
+                                      • {reason}
+                                    </span>
+                                  ))}
+                               </div>
+                            </div>
+                          </div>
+
+                          <div className="md:w-48 shrink-0 flex flex-col items-center justify-center gap-4 border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-8">
+                             <div className="text-center space-y-1">
+                                <div className="text-4xl font-black text-indigo-600 leading-none">{result.matchScore}%</div>
+                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Match Score</div>
+                             </div>
+                             
+                             {result.source === 'external' ? (
+                               <Button variant="outline" className="w-full rounded-xl h-11 border-slate-200 hover:bg-indigo-50 hover:text-accent font-bold group/btn flex gap-2">
+                                 <UserPlus className="size-4" />
+                                 Invite to OnTapp
+                               </Button>
+                             ) : (
+                               <Button className="w-full rounded-xl h-11 bg-accent hover:bg-indigo-600 text-white font-black shadow-lg shadow-indigo-100 flex gap-2">
+                                 <ExternalLink className="size-4" />
+                                 View Profile
+                               </Button>
+                             )}
+                          </div>
                         </div>
-                        <Button variant="outline" className="rounded-xl font-bold border-slate-200 hover:bg-slate-50">
-                          View Details
-                        </Button>
                       </div>
                     </CardContent>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))}
+              </div>
             </div>
           )}
 
-          {!loading && !results && query === "" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-10">
-              <div className="p-8 rounded-3xl bg-white border border-slate-100 text-center space-y-3 shadow-sm">
-                <div className="size-12 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Search className="size-6" />
+          {!loading && !results && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10">
+              <div className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm space-y-6 text-center group hover:shadow-xl transition-all">
+                <div className="size-16 bg-indigo-50 text-accent rounded-3xl flex items-center justify-center mx-auto group-hover:rotate-12 transition-transform">
+                  <Zap className="size-8" />
                 </div>
-                <h4 className="font-bold">Natural Search</h4>
-                <p className="text-sm text-slate-500 leading-relaxed">No more rigid keywords. Search the way you talk.</p>
+                <div className="space-y-2">
+                  <h4 className="text-xl font-black text-slate-900">Priority Ranking</h4>
+                  <p className="text-slate-500 font-medium">OnTapp members and verified businesses always appear first in discovery.</p>
+                </div>
               </div>
-              <div className="p-8 rounded-3xl bg-white border border-slate-100 text-center space-y-3 shadow-sm">
-                <div className="size-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="size-6" />
+              <div className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm space-y-6 text-center group hover:shadow-xl transition-all">
+                <div className="size-16 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto group-hover:rotate-12 transition-transform">
+                  <Globe className="size-8" />
                 </div>
-                <h4 className="font-bold">Intent Ranking</h4>
-                <p className="text-sm text-slate-500 leading-relaxed">Our AI understands what you want, not just what you say.</p>
+                <div className="space-y-2">
+                  <h4 className="text-xl font-black text-slate-900">External Indexing</h4>
+                  <p className="text-slate-500 font-medium">We scan the global web to bring you relevant leads outside our network.</p>
+                </div>
               </div>
-              <div className="p-8 rounded-3xl bg-white border border-slate-100 text-center space-y-3 shadow-sm">
-                <div className="size-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Target className="size-6" />
+              <div className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm space-y-6 text-center group hover:shadow-xl transition-all">
+                <div className="size-16 bg-orange-50 text-orange-500 rounded-3xl flex items-center justify-center mx-auto group-hover:rotate-12 transition-transform">
+                  <ShieldCheck className="size-8" />
                 </div>
-                <h4 className="font-bold">Smart Filters</h4>
-                <p className="text-sm text-slate-500 leading-relaxed">Industry, location, and type are auto-filtered for precision.</p>
+                <div className="space-y-2">
+                  <h4 className="text-xl font-black text-slate-900">AI Verification</h4>
+                  <p className="text-slate-500 font-medium">Our engine analyzes reputations and certificates to ensure quality results.</p>
+                </div>
               </div>
             </div>
           )}
