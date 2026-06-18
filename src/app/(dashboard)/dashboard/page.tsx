@@ -3,6 +3,7 @@
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { 
   BarChart, 
   Bar, 
@@ -11,8 +12,6 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  LineChart,
-  Line,
   AreaChart,
   Area
 } from "recharts";
@@ -20,47 +19,50 @@ import {
   Users, 
   TrendingUp, 
   MessageSquare, 
-  Eye, 
+  Briefcase, 
   ArrowUpRight, 
   ArrowDownRight,
-  Target,
-  Globe,
-  Plus
+  Plus,
+  Zap,
+  LayoutDashboard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
-const ENGAGEMENT_DATA = [
-  { name: "Mon", posts: 24, interactions: 400 },
-  { name: "Tue", posts: 13, interactions: 300 },
-  { name: "Wed", posts: 38, interactions: 900 },
-  { name: "Thu", posts: 29, interactions: 700 },
-  { name: "Fri", posts: 48, interactions: 1200 },
-  { name: "Sat", posts: 21, interactions: 500 },
-  { name: "Sun", posts: 15, interactions: 200 },
+const PERFORMANCE_DATA = [
+  { name: "Mon", interaction: 4000, reach: 2400 },
+  { name: "Tue", interaction: 3000, reach: 1398 },
+  { name: "Wed", interaction: 2000, reach: 9800 },
+  { name: "Thu", interaction: 2780, reach: 3908 },
+  { name: "Fri", interaction: 1890, reach: 4800 },
+  { name: "Sat", interaction: 2390, reach: 3800 },
+  { name: "Sun", interaction: 3490, reach: 4300 },
 ];
 
-const FOLLOWER_DATA = [
-  { month: "Jan", count: 800 },
-  { month: "Feb", count: 950 },
-  { month: "Mar", count: 1100 },
-  { month: "Apr", count: 1400 },
-  { month: "May", count: 1800 },
-  { month: "Jun", count: 2400 },
+const OPPORTUNITY_DATA = [
+  { month: "Jan", count: 12 },
+  { month: "Feb", count: 19 },
+  { month: "Mar", count: 15 },
+  { month: "Apr", count: 22 },
+  { month: "May", count: 30 },
+  { month: "Jun", count: 28 },
 ];
 
 export default function DashboardPage() {
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-8 pb-10">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-headline font-black text-slate-900">Analytical Insights</h1>
-            <p className="text-slate-500 font-medium">Tracking performance across the OnTapp network.</p>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-widest">
+              <LayoutDashboard className="size-3" />
+              Intelligence Dashboard
+            </div>
+            <h1 className="text-3xl font-headline font-black text-slate-900 tracking-tight">Performance Summary</h1>
+            <p className="text-slate-500 font-medium">Real-time metrics for your business network activity.</p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="rounded-xl font-bold border-slate-200">Export Report</Button>
-            <Button className="rounded-xl bg-accent hover:bg-indigo-400 font-bold text-white shadow-lg flex gap-2">
+            <Button variant="outline" className="rounded-xl font-bold border-slate-200 hover:bg-slate-50">Generate Report</Button>
+            <Button className="rounded-xl bg-accent hover:bg-indigo-600 font-bold text-white shadow-lg flex gap-2">
               <Plus className="size-4" />
               New Campaign
             </Button>
@@ -69,74 +71,78 @@ export default function DashboardPage() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all rounded-2xl group overflow-hidden">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div className="size-10 rounded-xl bg-indigo-50 text-accent flex items-center justify-center">
-                  <Users className="size-5" />
+                <div className="size-12 rounded-2xl bg-indigo-50 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Briefcase className="size-6" />
                 </div>
-                <div className="flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold px-2 py-0.5 flex gap-1">
                   <ArrowUpRight className="size-3" />
                   12%
-                </div>
+                </Badge>
               </div>
-              <div className="mt-4">
-                <span className="text-sm text-slate-400 font-bold uppercase tracking-wider">Total Reach</span>
-                <h3 className="text-2xl font-black text-slate-900 mt-1">45.2K</h3>
+              <div className="mt-6">
+                <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Total Opportunities</span>
+                <h3 className="text-3xl font-black text-slate-900 mt-1">1,284</h3>
+                <p className="text-xs text-slate-400 font-medium mt-1">+14 this week</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all rounded-2xl group overflow-hidden">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div className="size-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center">
-                  <TrendingUp className="size-5" />
+                <div className="size-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Zap className="size-6" />
                 </div>
-                <div className="flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold px-2 py-0.5 flex gap-1">
                   <ArrowUpRight className="size-3" />
-                  8%
-                </div>
+                  8.4%
+                </Badge>
               </div>
-              <div className="mt-4">
-                <span className="text-sm text-slate-400 font-bold uppercase tracking-wider">Post Engagement</span>
-                <h3 className="text-2xl font-black text-slate-900 mt-1">12.8%</h3>
+              <div className="mt-6">
+                <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Active Leads</span>
+                <h3 className="text-3xl font-black text-slate-900 mt-1">452</h3>
+                <p className="text-xs text-slate-400 font-medium mt-1">Across 12 industries</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all rounded-2xl group overflow-hidden">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div className="size-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center">
-                  <MessageSquare className="size-5" />
+                <div className="size-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <MessageSquare className="size-6" />
                 </div>
-                <div className="flex items-center gap-1 text-xs font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">
+                <Badge className="bg-rose-50 text-rose-600 border-none font-bold px-2 py-0.5 flex gap-1">
                   <ArrowDownRight className="size-3" />
-                  3%
-                </div>
+                  2%
+                </Badge>
               </div>
-              <div className="mt-4">
-                <span className="text-sm text-slate-400 font-bold uppercase tracking-wider">Direct Leads</span>
-                <h3 className="text-2xl font-black text-slate-900 mt-1">184</h3>
+              <div className="mt-6">
+                <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Recent Messages</span>
+                <h3 className="text-3xl font-black text-slate-900 mt-1">86</h3>
+                <p className="text-xs text-slate-400 font-medium mt-1">Average response: 2h</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all rounded-2xl group overflow-hidden">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div className="size-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center">
-                  <Globe className="size-5" />
+                <div className="size-12 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Users className="size-6" />
                 </div>
-                <div className="flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold px-2 py-0.5 flex gap-1">
                   <ArrowUpRight className="size-3" />
-                  22%
-                </div>
+                  24%
+                </Badge>
               </div>
-              <div className="mt-4">
-                <span className="text-sm text-slate-400 font-bold uppercase tracking-wider">Global Rank</span>
-                <h3 className="text-2xl font-black text-slate-900 mt-1">#422</h3>
+              <div className="mt-6">
+                <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Total Reach</span>
+                <h3 className="text-3xl font-black text-slate-900 mt-1">45.2K</h3>
+                <p className="text-xs text-slate-400 font-medium mt-1">Global impressions</p>
               </div>
             </CardContent>
           </Card>
@@ -144,37 +150,66 @@ export default function DashboardPage() {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <Card className="lg:col-span-8 border-slate-200 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between p-6">
-              <div>
-                <CardTitle className="text-lg font-bold">Network Interactions</CardTitle>
-                <CardDescription className="text-xs font-medium">Daily social activity across all published posts.</CardDescription>
+          <Card className="lg:col-span-8 border-slate-200 shadow-sm rounded-3xl overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between p-8">
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-black text-slate-900">Network Engagement</CardTitle>
+                <CardDescription className="font-medium">Interaction vs Reach over the last 7 days.</CardDescription>
               </div>
-              <Badge variant="secondary" className="bg-slate-50 text-slate-500 border-slate-100">Last 7 Days</Badge>
+              <div className="flex gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-accent" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Interaction</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-slate-200" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reach</span>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="px-2 pb-6">
+            <CardContent className="px-4 pb-8">
               <div className="h-[350px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={ENGAGEMENT_DATA}>
+                  <AreaChart data={PERFORMANCE_DATA}>
                     <defs>
-                      <linearGradient id="colorInteractions" x1="0" y1="0" x2="0" y2="1">
+                      <linearGradient id="colorInter" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#6366F1" stopOpacity={0.1}/>
                         <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 600, fill: '#94A3B8'}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 600, fill: '#94A3B8'}} />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
+                      dy={10}
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
+                      dx={-10}
+                    />
                     <Tooltip 
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                      cursor={{ stroke: '#6366F1', strokeWidth: 1, strokeDasharray: '4 4' }}
                     />
                     <Area 
                       type="monotone" 
-                      dataKey="interactions" 
+                      dataKey="interaction" 
                       stroke="#6366F1" 
                       strokeWidth={3}
                       fillOpacity={1} 
-                      fill="url(#colorInteractions)" 
+                      fill="url(#colorInter)" 
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="reach" 
+                      stroke="#CBD5E1" 
+                      strokeWidth={2}
+                      fill="transparent"
+                      strokeDasharray="5 5"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -182,23 +217,34 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="lg:col-span-4 border-slate-200 shadow-sm">
-            <CardHeader className="p-6">
-              <CardTitle className="text-lg font-bold">Follower Growth</CardTitle>
-              <CardDescription className="text-xs font-medium">Net new following per month.</CardDescription>
+          <Card className="lg:col-span-4 border-slate-200 shadow-sm rounded-3xl overflow-hidden">
+            <CardHeader className="p-8">
+              <CardTitle className="text-xl font-black text-slate-900">Opportunity Growth</CardTitle>
+              <CardDescription className="font-medium">Monthly lead acquisition rate.</CardDescription>
             </CardHeader>
-            <CardContent className="px-2 pb-6">
+            <CardContent className="px-4 pb-8">
               <div className="h-[350px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={FOLLOWER_DATA}>
+                  <BarChart data={OPPORTUNITY_DATA}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 600, fill: '#94A3B8'}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 600, fill: '#94A3B8'}} />
-                    <Tooltip 
-                      cursor={{fill: '#F1F5F9'}}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    <XAxis 
+                      dataKey="month" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
+                      dy={10}
                     />
-                    <Bar dataKey="count" fill="#6366F1" radius={[6, 6, 0, 0]} barSize={40} />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
+                      dx={-10}
+                    />
+                    <Tooltip 
+                      cursor={{fill: '#F8FAFC'}}
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                    />
+                    <Bar dataKey="count" fill="#6366F1" radius={[8, 8, 0, 0]} barSize={32} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -206,37 +252,37 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Action Widgets */}
+        {/* Feature Teasers */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-slate-200 shadow-sm bg-indigo-900 text-white overflow-hidden relative group cursor-pointer">
-            <CardContent className="p-8 space-y-4">
-              <div className="size-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md">
-                <Target className="size-6 text-indigo-300" />
+          <Card className="border-none shadow-xl bg-slate-900 text-white rounded-[2rem] overflow-hidden relative group cursor-pointer p-8">
+            <div className="relative z-10 flex flex-col justify-between h-full space-y-6">
+              <div className="size-14 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+                <TrendingUp className="size-7 text-indigo-300" />
               </div>
-              <div>
-                <h3 className="text-xl font-bold">Strategy Review</h3>
-                <p className="text-indigo-200 font-medium">Get an AI-generated report on how to improve your business profile to attract better partners.</p>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black tracking-tight leading-none">AI Market Forecast</h3>
+                <p className="text-indigo-200/80 font-medium text-sm">Predict trends in your sector based on real-time network data streams.</p>
               </div>
-              <Button variant="outline" className="bg-white/10 hover:bg-white/20 border-white/20 text-white font-bold rounded-xl border-none">
-                Start Analysis
+              <Button variant="ghost" className="w-fit bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl border-none gap-2">
+                Explore Analytics
+                <ArrowUpRight className="size-4" />
               </Button>
-            </CardContent>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/20 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform" />
+            </div>
+            <div className="absolute top-0 right-0 w-48 h-48 bg-accent/20 rounded-full blur-[80px] -mr-16 -mt-16 group-hover:scale-125 transition-transform duration-500" />
           </Card>
 
-          <Card className="border-slate-200 shadow-sm bg-white overflow-hidden relative group cursor-pointer">
-            <CardContent className="p-8 space-y-4">
-              <div className="size-12 rounded-2xl bg-slate-50 flex items-center justify-center">
-                <Eye className="size-6 text-slate-400" />
+          <Card className="border-slate-200 shadow-sm bg-white rounded-[2rem] overflow-hidden group cursor-pointer p-8 flex flex-col justify-between space-y-6">
+             <div className="size-14 rounded-2xl bg-indigo-50 flex items-center justify-center group-hover:rotate-6 transition-transform">
+                <Users className="size-7 text-accent" />
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-slate-900">Competitor Insights</h3>
-                <p className="text-slate-500 font-medium">See how your engagement ranks against 5 similar businesses in the SaaS infrastructure sector.</p>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-none">Partner Synergy</h3>
+                <p className="text-slate-500 font-medium text-sm">See which businesses in the network share your current strategic goals.</p>
               </div>
-              <Button variant="outline" className="border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50">
-                View Comparison
+              <Button variant="outline" className="w-fit border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 gap-2">
+                View Matches
+                <ArrowUpRight className="size-4" />
               </Button>
-            </CardContent>
           </Card>
         </div>
       </div>
