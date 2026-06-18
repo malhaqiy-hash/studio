@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -27,9 +28,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 
-const SETTINGS_KEY = "ontapp_system_settings";
+const SETTINGS_KEY = "ontapp_system_settings_v2";
 
 interface SettingsState {
   language: string;
@@ -62,9 +62,11 @@ export default function SettingsPage() {
     const saved = localStorage.getItem(SETTINGS_KEY);
     if (saved) {
       try {
-        setSettings(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // Merge with defaults to ensure any new keys are present
+        setSettings({ ...DEFAULT_SETTINGS, ...parsed });
       } catch (e) {
-        console.error("Failed to parse settings", e);
+        console.error("Failed to parse settings from localStorage", e);
       }
     }
     setMounted(true);
@@ -72,30 +74,43 @@ export default function SettingsPage() {
 
   const handleSave = () => {
     setLoading(true);
-    // Simulate network delay
+    
+    // In a real app, you might also send this to a backend API
+    // We'll simulate a small delay for better UX feedback
     setTimeout(() => {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-      setLoading(false);
-      toast({
-        title: "Configuration Saved",
-        description: "Your system preferences have been updated successfully.",
-      });
-    }, 1000);
+      try {
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        setLoading(false);
+        toast({
+          title: "Configuration Saved",
+          description: "Your system preferences have been updated and persisted successfully.",
+        });
+      } catch (e) {
+        setLoading(false);
+        toast({
+          variant: "destructive",
+          title: "Save Failed",
+          description: "There was an error saving your preferences to the browser storage.",
+        });
+      }
+    }, 800);
   };
 
   const updateSetting = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
+  // Prevent hydration mismatch by not rendering the form until client-side mount
   if (!mounted) {
     return (
       <DashboardLayout>
-        <div className="max-w-4xl mx-auto space-y-8 animate-pulse">
-          <div className="h-10 w-48 bg-slate-200 rounded-lg" />
-          <div className="space-y-4">
-            <div className="h-48 bg-slate-100 rounded-3xl" />
-            <div className="h-48 bg-slate-100 rounded-3xl" />
+        <div className="max-w-5xl mx-auto space-y-10 py-4 animate-pulse">
+          <div className="h-32 bg-white rounded-[2rem] border border-slate-100" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="h-64 bg-slate-100 rounded-[2rem]" />
+            <div className="h-64 bg-slate-100 rounded-[2rem]" />
           </div>
+          <div className="h-96 bg-slate-100 rounded-[2rem]" />
         </div>
       </DashboardLayout>
     );
@@ -310,9 +325,16 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between p-8 bg-slate-900 text-white rounded-[2rem] shadow-xl overflow-hidden relative">
           <div className="relative z-10">
             <h3 className="text-lg font-bold">Persistence & Backup</h3>
-            <p className="text-slate-400 text-sm font-medium">Settings are automatically synchronized across your devices.</p>
+            <p className="text-slate-400 text-sm font-medium">Settings are automatically synchronized and stored locally.</p>
           </div>
-          <div className="relative z-10">
+          <div className="relative z-10 flex gap-4">
+            <Button 
+              variant="outline"
+              onClick={() => setSettings(DEFAULT_SETTINGS)}
+              className="rounded-xl border-white/20 bg-white/10 text-white hover:bg-white/20 font-black px-6 h-12 border-none"
+            >
+              Reset to Defaults
+            </Button>
             <Button 
               onClick={handleSave} 
               disabled={loading}
