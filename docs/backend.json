@@ -1,0 +1,44 @@
+
+{
+  "entities": {
+    "Opportunity": {
+      "title": "Opportunity",
+      "description": "A business lead or opportunity in the network.",
+      "type": "object",
+      "properties": {
+        "companyName": {
+          "type": "string",
+          "description": "Name of the company offering the opportunity."
+        },
+        "logo": {
+          "type": "string",
+          "description": "URL to the company logo."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Verified", "Closing Soon", "Pending", "Active"],
+          "description": "Current status of the opportunity."
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Deadline or significant date for the opportunity."
+        },
+        "type": {
+          "type": "string",
+          "description": "Category of the opportunity (e.g., Sourcing, Strategic)."
+        }
+      },
+      "required": ["companyName", "status", "type"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "password"]
+  },
+  "firestore": {
+    "/opportunities/{opportunityId}": {
+      "schema": "#/backend/entities/Opportunity",
+      "description": "A global collection of business opportunities."
+    }
+  }
+}
