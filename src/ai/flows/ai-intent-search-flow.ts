@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Hybrid Business Discovery Engine that intelligently ranks internal and external business results.
@@ -47,13 +48,17 @@ export async function aiIntentSearch(input: AIIntentSearchInput): Promise<AIInte
 
 const aiIntentSearchPrompt = ai.definePrompt({
   name: 'aiIntentSearchPrompt',
-  input: { schema: AIIntentSearchInputSchema },
+  input: { 
+    schema: AIIntentSearchInputSchema.extend({
+      filterSummary: z.string().optional()
+    })
+  },
   output: { schema: AIIntentSearchOutputSchema },
   prompt: `You are the OnTapp Hybrid Business Discovery Engine. Your goal is to find businesses, products, and services that match a user's intent, prioritizing OnTapp members.
 
 ### Intent Analysis
 Analyze the user's query: "{{{query}}}"
-Current Filters: {{#if filters}}{{{JSON.stringify filters}}}{{else}}None{{/if}}
+Current Filters Applied: {{{filterSummary}}}
 
 ### Ranking System (Mandatory)
 Calculate a Match Score (0-100) using these weights:
@@ -85,7 +90,15 @@ const aiIntentSearchFlow = ai.defineFlow(
     outputSchema: AIIntentSearchOutputSchema,
   },
   async (input) => {
-    const { output } = await aiIntentSearchPrompt(input);
+    // Pre-process filters into a string to avoid Handlebars helper errors like 'unknown helper JSON'
+    const filterSummary = input.filters 
+      ? `Verified: ${input.filters.verifiedOnly}, OnTapp Only: ${input.filters.onTappOnly}, External Only: ${input.filters.externalOnly}`
+      : 'None';
+
+    const { output } = await aiIntentSearchPrompt({
+      ...input,
+      filterSummary
+    });
     return output!;
   }
 );

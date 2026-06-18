@@ -15,7 +15,10 @@ import {
   UserCircle,
   LogOut,
   Globe,
-  Menu
+  Menu,
+  Settings,
+  ChevronsUpDown,
+  User
 } from "lucide-react";
 import { 
   Sidebar, 
@@ -37,7 +40,9 @@ import {
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -90,31 +95,63 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </SidebarGroup>
           </SidebarContent>
           <SidebarFooter className="p-4 border-t border-border">
-            <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100">
-              <div className="flex items-center gap-3">
-                <Avatar className="size-9 ring-2 ring-white shadow-sm">
-                  <AvatarImage src="https://picsum.photos/seed/user/100" />
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold truncate max-w-[120px]">Alpha Tech Solutions</span>
-                  <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">Enterprise</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-xl border border-slate-100 bg-slate-50/50"
+                >
+                  <Avatar className="h-9 w-9 rounded-lg shadow-sm ring-2 ring-white">
+                    <AvatarImage src="https://picsum.photos/seed/user/100" />
+                    <AvatarFallback className="rounded-lg bg-indigo-100 text-accent font-bold">AT</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight ml-2">
+                    <span className="truncate font-bold text-slate-900">Alpha Tech</span>
+                    <span className="truncate text-[10px] font-black uppercase text-slate-400 tracking-tighter">Enterprise</span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4 text-slate-400" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-2xl p-2 shadow-2xl border-slate-100"
+                side="bottom"
+                align="end"
+                sideOffset={8}
+              >
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-3 px-2 py-3">
+                    <Avatar className="h-10 w-10 rounded-xl shadow-sm">
+                      <AvatarImage src="https://picsum.photos/seed/user/100" />
+                      <AvatarFallback className="rounded-xl bg-indigo-50 text-accent font-bold">AT</AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-black text-slate-900 leading-none mb-1">Alpha Tech Solutions</span>
+                      <span className="truncate text-xs font-medium text-slate-400">admin@alphatech.solutions</span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="my-2 bg-slate-50" />
+                <div className="space-y-1">
+                  <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors">
+                    <UserCircle className="size-5" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors">
+                    <Settings className="size-5" />
+                    Account Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors">
+                    <Globe className="size-5" />
+                    Language
+                  </DropdownMenuItem>
                 </div>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="size-8">
-                    <Globe className="size-4 text-slate-400" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem className="gap-2"><span className="text-xs">🇺🇸 English</span></DropdownMenuItem>
-                  <DropdownMenuItem className="gap-2"><span className="text-xs">🇮🇩 Indonesia</span></DropdownMenuItem>
-                  <DropdownMenuItem className="gap-2"><span className="text-xs">🇯🇵 日本語</span></DropdownMenuItem>
-                  <DropdownMenuItem className="gap-2"><span className="text-xs">🇰🇷 한국어</span></DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                <DropdownMenuSeparator className="my-2 bg-slate-50" />
+                <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-rose-600 focus:bg-rose-50 focus:text-rose-700 cursor-pointer transition-colors">
+                  <LogOut className="size-5" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarFooter>
         </Sidebar>
         <SidebarInset className="flex flex-col">
@@ -126,7 +163,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </h2>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" className="hidden sm:flex rounded-full px-4 gap-2">
+              <Button variant="outline" size="sm" className="hidden sm:flex rounded-full px-4 gap-2 border-slate-200 font-bold text-slate-600">
                 <UserCircle className="size-4" />
                 <span>Account</span>
               </Button>
