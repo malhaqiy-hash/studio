@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -16,57 +17,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Filter, MoreHorizontal, Download, Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const MOCK_OPPORTUNITIES = [
-  {
-    id: "1",
-    company: "PlanetBottles Ltd",
-    logo: "https://picsum.photos/seed/pb/100",
-    status: "Verified",
-    date: "Dec 15, 2023",
-    type: "Sourcing",
-  },
-  {
-    id: "2",
-    company: "NextGen Solar Components",
-    logo: "https://picsum.photos/seed/sol/100",
-    status: "Closing Soon",
-    date: "Jan 10, 2024",
-    type: "Distributor",
-  },
-  {
-    id: "3",
-    company: "QuantLogics AI",
-    logo: "https://picsum.photos/seed/ql/100",
-    status: "Pending",
-    date: "Nov 30, 2023",
-    type: "Investment",
-  },
-  {
-    id: "4",
-    company: "GreenEco Packaging",
-    logo: "https://picsum.photos/seed/eco/100",
-    status: "Verified",
-    date: "Feb 22, 2024",
-    type: "Service",
-  },
-  {
-    id: "5",
-    company: "Global Logistics Co",
-    logo: "https://picsum.photos/seed/logi/100",
-    status: "Active",
-    date: "Mar 05, 2024",
-    type: "Strategic",
-  }
-];
+import { useCollection, useFirestore } from "@/firebase";
+import { collection, query, orderBy } from "firebase/firestore";
 
 export default function OpportunitiesPage() {
-  const [isLoading, setIsLoading] = React.useState(true);
+  const db = useFirestore();
+  
+  const opportunitiesQuery = React.useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, "opportunities"), orderBy("date", "desc"));
+  }, [db]);
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
+  const { data: opportunities, loading: isLoading } = useCollection(opportunitiesQuery);
 
   return (
     <DashboardLayout>
@@ -130,17 +92,23 @@ export default function OpportunitiesPage() {
                     <TableCell className="text-right px-8"><Skeleton className="h-9 w-24 ml-auto rounded-xl" /></TableCell>
                   </TableRow>
                 ))
+              ) : opportunities.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-32 text-center text-slate-400 font-medium">
+                    No opportunities found in the network.
+                  </TableCell>
+                </TableRow>
               ) : (
-                MOCK_OPPORTUNITIES.map((opp) => (
+                opportunities.map((opp: any) => (
                   <TableRow key={opp.id} className="border-slate-50 hover:bg-slate-50/50 transition-colors group">
                     <TableCell className="py-5 px-8">
                       <div className="flex items-center gap-3">
                         <Avatar className="size-10 rounded-xl border-2 border-white shadow-sm shrink-0">
                           <AvatarImage src={opp.logo} />
-                          <AvatarFallback className="font-bold bg-slate-100 text-slate-400">{opp.company[0]}</AvatarFallback>
+                          <AvatarFallback className="font-bold bg-slate-100 text-slate-400">{opp.companyName?.[0] || '?'}</AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
-                          <span className="font-bold text-slate-900 leading-tight group-hover:text-accent transition-colors">{opp.company}</span>
+                          <span className="font-bold text-slate-900 leading-tight group-hover:text-accent transition-colors">{opp.companyName}</span>
                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{opp.type}</span>
                         </div>
                       </div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -28,6 +29,8 @@ import {
   LayoutDashboard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCollection, useFirestore } from "@/firebase";
+import { collection } from "firebase/firestore";
 
 const PERFORMANCE_DATA = [
   { name: "Mon", interaction: 4000, reach: 2400 },
@@ -39,7 +42,7 @@ const PERFORMANCE_DATA = [
   { name: "Sun", interaction: 3490, reach: 4300 },
 ];
 
-const OPPORTUNITY_DATA = [
+const OPPORTUNITY_GROWTH_MOCK = [
   { month: "Jan", count: 12 },
   { month: "Feb", count: 19 },
   { month: "Mar", count: 15 },
@@ -49,12 +52,17 @@ const OPPORTUNITY_DATA = [
 ];
 
 export default function DashboardPage() {
-  const [isLoading, setIsLoading] = React.useState(true);
+  const db = useFirestore();
+  const { data: opportunities, loading: opportunitiesLoading } = useCollection(
+    db ? collection(db, "opportunities") : null
+  );
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1200);
-    return () => clearTimeout(timer);
-  }, []);
+  const stats = [
+    { label: "Total Opportunities", value: opportunities?.length || 0, icon: Briefcase, color: "text-indigo-600", trend: "+14%" },
+    { label: "Active Leads", value: 452, icon: Zap, color: "text-amber-500", trend: "+12%" },
+    { label: "Recent Messages", value: 86, icon: MessageSquare, color: "text-emerald-500", trend: "+2%" },
+    { label: "Total Reach", value: "45.2K", icon: Users, color: "text-rose-500", trend: "+8%" },
+  ];
 
   return (
     <DashboardLayout>
@@ -79,10 +87,10 @@ export default function DashboardPage() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
+          {stats.map((stat, i) => (
             <Card key={i} className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
               <CardContent className="p-6">
-                {isLoading ? (
+                {opportunitiesLoading ? (
                   <div className="space-y-6">
                     <div className="flex justify-between">
                       <Skeleton className="size-12 rounded-2xl" />
@@ -91,42 +99,26 @@ export default function DashboardPage() {
                     <div className="space-y-2">
                       <Skeleton className="h-3 w-20" />
                       <Skeleton className="h-8 w-24" />
-                      <Skeleton className="h-3 w-32" />
                     </div>
                   </div>
                 ) : (
                   <>
                     <div className="flex items-center justify-between">
-                      <div className="size-12 rounded-2xl bg-indigo-50 text-accent flex items-center justify-center">
-                        {i === 1 && <Briefcase className="size-6" />}
-                        {i === 2 && <Zap className="size-6" />}
-                        {i === 3 && <MessageSquare className="size-6" />}
-                        {i === 4 && <Users className="size-6" />}
+                      <div className="size-12 rounded-2xl bg-slate-50 flex items-center justify-center">
+                        <stat.icon className={`size-6 ${stat.color}`} />
                       </div>
                       <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold px-2 py-0.5 flex gap-1">
                         <ArrowUpRight className="size-3" />
-                        {i === 3 ? "2%" : "12%"}
+                        {stat.trend}
                       </Badge>
                     </div>
                     <div className="mt-6">
                       <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
-                        {i === 1 && "Total Opportunities"}
-                        {i === 2 && "Active Leads"}
-                        {i === 3 && "Recent Messages"}
-                        {i === 4 && "Total Reach"}
+                        {stat.label}
                       </span>
                       <h3 className="text-3xl font-black text-slate-900 mt-1">
-                        {i === 1 && "1,284"}
-                        {i === 2 && "452"}
-                        {i === 3 && "86"}
-                        {i === 4 && "45.2K"}
+                        {stat.value}
                       </h3>
-                      <p className="text-xs text-slate-400 font-medium mt-1">
-                        {i === 1 && "+14 this week"}
-                        {i === 2 && "Across 12 industries"}
-                        {i === 3 && "Average response: 2h"}
-                        {i === 4 && "Global impressions"}
-                      </p>
                     </div>
                   </>
                 )}
@@ -145,55 +137,51 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="px-4 pb-8">
-              {isLoading ? (
-                <Skeleton className="h-[350px] w-full rounded-2xl" />
-              ) : (
-                <div className="h-[350px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={PERFORMANCE_DATA}>
-                      <defs>
-                        <linearGradient id="colorInter" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366F1" stopOpacity={0.1}/>
-                          <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                      <XAxis 
-                        dataKey="name" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
-                        dy={10}
-                      />
-                      <YAxis 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
-                        dx={-10}
-                      />
-                      <Tooltip 
-                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="interaction" 
-                        stroke="#6366F1" 
-                        strokeWidth={3}
-                        fillOpacity={1} 
-                        fill="url(#colorInter)" 
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="reach" 
-                        stroke="#CBD5E1" 
-                        strokeWidth={2}
-                        fill="transparent"
-                        strokeDasharray="5 5"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
+              <div className="h-[350px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={PERFORMANCE_DATA}>
+                    <defs>
+                      <linearGradient id="colorInter" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366F1" stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
+                      dy={10}
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
+                      dx={-10}
+                    />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="interaction" 
+                      stroke="#6366F1" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorInter)" 
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="reach" 
+                      stroke="#CBD5E1" 
+                      strokeWidth={2}
+                      fill="transparent"
+                      strokeDasharray="5 5"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
 
@@ -203,35 +191,31 @@ export default function DashboardPage() {
               <CardDescription className="font-medium">Monthly lead acquisition rate.</CardDescription>
             </CardHeader>
             <CardContent className="px-4 pb-8">
-              {isLoading ? (
-                <Skeleton className="h-[350px] w-full rounded-2xl" />
-              ) : (
-                <div className="h-[350px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={OPPORTUNITY_DATA}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                      <XAxis 
-                        dataKey="month" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
-                        dy={10}
-                      />
-                      <YAxis 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
-                        dx={-10}
-                      />
-                      <Tooltip 
-                        cursor={{fill: '#F8FAFC'}}
-                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                      />
-                      <Bar dataKey="count" fill="#6366F1" radius={[8, 8, 0, 0]} barSize={32} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
+              <div className="h-[350px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={OPPORTUNITY_GROWTH_MOCK}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis 
+                      dataKey="month" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
+                      dy={10}
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fontSize: 11, fontWeight: 700, fill: '#94A3B8'}} 
+                      dx={-10}
+                    />
+                    <Tooltip 
+                      cursor={{fill: '#F8FAFC'}}
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                    />
+                    <Bar dataKey="count" fill="#6366F1" radius={[8, 8, 0, 0]} barSize={32} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
         </div>
