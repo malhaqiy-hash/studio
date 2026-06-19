@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -282,15 +283,6 @@ export default function ProfilePage() {
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8 pb-20">
-        <div className="flex justify-center">
-          <Badge className={cn(
-            "px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest shadow-sm",
-            activeAccount.type === 'bisnis' ? "bg-indigo-600" : activeAccount.type === 'professional' ? "bg-emerald-600" : "bg-slate-900"
-          )}>
-            Mode {activeAccount.type} Aktif
-          </Badge>
-        </div>
-
         <div className="relative">
           <div className="h-64 md:h-80 w-full rounded-[2.5rem] bg-slate-200 overflow-hidden relative shadow-lg">
             <img src={currentCover} alt="Cover" className="w-full h-full object-cover" />

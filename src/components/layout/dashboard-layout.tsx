@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -140,44 +141,33 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-72 rounded-2xl p-2 shadow-2xl border-slate-100">
-              <DropdownMenuLabel className="p-2 font-normal">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 rounded-xl">
-                    <AvatarImage src={activeAccount.avatar} />
-                    <AvatarFallback className="rounded-xl bg-indigo-50 text-accent font-bold">{activeAccount.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-black text-slate-900 leading-none mb-1">{activeAccount.name}</span>
-                    <Badge className={cn(
-                      "w-fit text-[9px] font-black uppercase tracking-widest px-1.5 py-0",
-                      activeAccount.type === 'bisnis' ? "bg-indigo-600" : activeAccount.type === 'professional' ? "bg-emerald-600" : "bg-slate-500"
-                    )}>
-                      {activeAccount.type}
-                    </Badge>
-                  </div>
-                </div>
+              <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b mb-2">
+                Ganti Akun
               </DropdownMenuLabel>
               
-              <DropdownMenuSeparator className="my-2" />
-              
               <DropdownMenuGroup>
-                <DropdownMenuLabel className="px-3 py-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  Beralih Akun
-                </DropdownMenuLabel>
                 {availableAccounts.map((acc) => (
                   <DropdownMenuItem 
                     key={acc.id}
                     onClick={() => switchAccount(acc.id)}
-                    className="flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer"
+                    className={cn(
+                      "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors",
+                      activeAccount.id === acc.id 
+                        ? "bg-indigo-50 text-accent" 
+                        : "text-slate-600 focus:bg-slate-50"
+                    )}
                   >
                     <div className="flex items-center gap-3">
-                      <Avatar className="size-6 rounded-md">
+                      <Avatar className="size-8 rounded-xl">
                         <AvatarImage src={acc.avatar} />
-                        <AvatarFallback className="text-[8px]">{acc.name[0]}</AvatarFallback>
+                        <AvatarFallback className="text-[8px] bg-slate-100">{acc.name[0]}</AvatarFallback>
                       </Avatar>
-                      <span className="text-sm">{acc.name}</span>
+                      <div className="flex flex-col">
+                        <span className="text-sm leading-none mb-1">{acc.name}</span>
+                        <span className="text-[9px] uppercase tracking-widest opacity-60">{acc.type}</span>
+                      </div>
                     </div>
-                    {activeAccount.id === acc.id && <Check className="size-4 text-accent" />}
+                    {activeAccount.id === acc.id && <Check className="size-4" />}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
@@ -212,15 +202,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-
-              <DropdownMenuSeparator className="my-2" />
-              
-              <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer" asChild>
-                <Link href="/profile">
-                  <User className="size-4" />
-                  {t('profile')}
-                </Link>
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
