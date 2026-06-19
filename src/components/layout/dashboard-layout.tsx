@@ -319,7 +319,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                       <LayoutGrid className="size-5 text-accent" />
-                      Network Hub
+                      OnTapp Hub
                     </SheetTitle>
                     <Badge variant="outline" className="bg-white border-slate-200 text-slate-500 font-bold px-3">
                       Enterprise Mode
