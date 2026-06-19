@@ -1,7 +1,7 @@
+
 /**
  * Firebase client configuration.
- * All values are pulled from environment variables. 
- * Ensure these are set in your Firebase Studio project settings.
+ * All values are pulled from environment variables with NEXT_PUBLIC_ prefix.
  */
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
@@ -12,15 +12,15 @@ export const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
 };
 
-// Debugging logs to verify keys are loaded in the browser
+// Runtime debug logs to verify environment variable loading
 if (typeof window !== "undefined") {
-  console.log("🔥 Project ID termuat:", firebaseConfig.projectId);
   if (!firebaseConfig.projectId || firebaseConfig.projectId === "undefined") {
-    console.error("❌ ERROR: Kunci Firebase tidak terbaca oleh Next.js! Periksa file .env Anda.");
+    console.error("❌ ERROR: Firebase Project ID is missing. Check your .env file.");
+  } else {
+    console.log("🔥 Firebase initialized for project:", firebaseConfig.projectId);
   }
 }
 
-// A more robust check for valid configuration
 export const isConfigValid = 
   !!firebaseConfig.apiKey && 
   firebaseConfig.apiKey !== "undefined" &&
