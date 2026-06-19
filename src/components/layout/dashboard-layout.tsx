@@ -101,7 +101,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const drawerItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
-    { icon: Globe, label: t('discovery'), href: "/discover" },
+    { icon: Globe, label: t('discovery'), href: "/cari" },
     { icon: Users, label: t('matchmaker'), href: "/matchmaker" },
     { icon: Target, label: t('matches'), href: "/matches" },
     { icon: Briefcase, label: t('opportunities'), href: "/opportunities" },
@@ -126,8 +126,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   };
 
   const handleOpenRegistration = (type: AccountType) => {
-    // Check if user already has an account of this type (except for personal which can have multiples maybe?)
-    // For MVP, just open the modal.
     setPendingType(type);
     setRegFormData({ name: "", bio: "", contact: "", extra: "" });
     setIsRegModalOpen(true);
@@ -288,10 +286,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </Link>
 
           <Link 
-            href="/discover" 
+            href="/cari" 
             className={cn(
               "flex flex-col items-center gap-1 w-full py-2 transition-colors",
-              pathname === "/discover" || pathname === "/search" ? "text-accent" : "hover:text-slate-600"
+              pathname === "/cari" ? "text-accent" : "hover:text-slate-600"
             )}
           >
             <Search className="size-6" />
