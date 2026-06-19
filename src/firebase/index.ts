@@ -5,27 +5,31 @@ import { getAuth, Auth } from 'firebase/auth';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { firebaseConfig, isConfigValid } from './config';
 
+let app: FirebaseApp;
+let firestore: Firestore;
+let auth: Auth;
+let storage: FirebaseStorage;
+
 /**
- * Initializes Firebase services safely.
- * Returns the app, firestore, auth, and storage instances.
+ * Initializes Firebase services safely using the singleton pattern.
+ * This prevents multi-initialization errors during Turbopack Hot Reloads.
  */
-export function initializeFirebase(): {
-  firebaseApp: FirebaseApp;
-  firestore: Firestore;
-  auth: Auth;
-  storage: FirebaseStorage;
-} {
+export function initializeFirebase() {
   if (!isConfigValid) {
     console.warn("Firebase configuration is missing or incomplete. Check your environment variables.");
   }
 
-  const firebaseApp =
-    getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-  const firestore = getFirestore(firebaseApp);
-  const auth = getAuth(firebaseApp);
-  const storage = getStorage(firebaseApp);
+  if (getApps().length === 0) {
+    app = initializeApp(firebaseConfig);
+  } else {
+    app = getApp();
+  }
 
-  return { firebaseApp, firestore, auth, storage };
+  firestore = getFirestore(app);
+  auth = getAuth(app);
+  storage = getStorage(app);
+
+  return { firebaseApp: app, firestore, auth, storage };
 }
 
 export * from './provider';

@@ -1,8 +1,9 @@
+
 "use client";
 
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,9 +28,11 @@ import {
   ShoppingBag,
   Link as LinkIcon,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  AlertCircle
 } from "lucide-react";
-import { useUser, useFirestore, useStorage, useCollection } from "@/firebase";
+import { useAuth, useFirestore, useStorage, useCollection } from "@/firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { doc, setDoc, getDoc, collection, query, where, addDoc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
@@ -51,6 +54,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Custom Brand Icons (SVGs)
 const TikTokIcon = () => (
@@ -89,13 +93,15 @@ interface Product {
 }
 
 export default function ProfilePage() {
-  const { user } = useUser();
+  const auth = useAuth();
   const db = useFirestore();
   const storage = useStorage();
   const { toast } = useToast();
 
+  const [currentUser, setCurrentUser] = React.useState<User | null>(null);
   const [initialLoading, setInitialLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
+  const [isOffline, setIsOffline] = React.useState(false);
   
   const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
   const [coverFile, setCoverFile] = React.useState<File | null>(null);
@@ -129,9 +135,9 @@ export default function ProfilePage() {
 
   // Real-time products fetching
   const productsQuery = React.useMemo(() => {
-    if (!db || !user) return null;
-    return query(collection(db, "products"), where("userId", "==", user.uid));
-  }, [db, user]);
+    if (!db || !currentUser) return null;
+    return query(collection(db, "products"), where("userId", "==", currentUser.uid));
+  }, [db, currentUser]);
 
   const { data: products, loading: productsLoading } = useCollection<Product>(productsQuery);
 
@@ -145,42 +151,54 @@ export default function ProfilePage() {
     imageUrl: ""
   });
 
-  // Fetch data on mount
+  // Secure Auth Listener and Data Fetching
   React.useEffect(() => {
-    if (!user || !db) return;
-
-    async function loadProfile() {
-      try {
-        const userRef = doc(db, "users", user.uid);
-        const snap = await getDoc(userRef);
-        if (snap.exists()) {
-          const data = snap.data();
-          if (data.profile) setProfile(prev => ({ ...prev, ...data.profile }));
-          if (data.socialLinks) setSocialLinks(prev => ({ ...prev, ...data.socialLinks }));
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setCurrentUser(user);
+      if (user && db) {
+        try {
+          setIsOffline(false);
+          const userRef = doc(db, "users", user.uid);
+          const snap = await getDoc(userRef);
+          
+          if (snap.exists()) {
+            const data = snap.data();
+            if (data.profile) setProfile(prev => ({ ...prev, ...data.profile, email: user.email || prev.email }));
+            if (data.socialLinks) setSocialLinks(prev => ({ ...prev, ...data.socialLinks }));
+          } else {
+            // New user, set email from auth
+            setProfile(prev => ({ ...prev, email: user.email || "" }));
+          }
+        } catch (err: any) {
+          console.error("Firestore fetch error:", err);
+          if (err.code === 'unavailable' || err.message?.includes('offline')) {
+            setIsOffline(true);
+          }
+        } finally {
+          setInitialLoading(false);
         }
-      } catch (err) {
-        console.error("Error loading profile:", err);
-      } finally {
+      } else if (!user) {
         setInitialLoading(false);
       }
-    }
+    });
 
-    loadProfile();
-  }, [user, db]);
+    return () => unsubscribe();
+  }, [auth, db]);
 
-  // Handle Hydration mismatches for dynamic values
+  // Initial UI state setup for placeholders
   React.useEffect(() => {
-    setProfile(prev => ({
-      ...prev,
-      email: user?.email || "",
-      avatarUrl: prev.avatarUrl || `https://picsum.photos/seed/${user?.uid || '123'}/400`,
-      coverUrl: prev.coverUrl || "https://picsum.photos/seed/cover88/1600/800"
-    }));
-    setNewProduct(prev => ({
-      ...prev,
-      imageUrl: prev.imageUrl || `https://picsum.photos/seed/${Math.random()}/400/300`
-    }));
-  }, [user]);
+    if (currentUser) {
+      setProfile(prev => ({
+        ...prev,
+        avatarUrl: prev.avatarUrl || `https://picsum.photos/seed/${currentUser.uid}/400`,
+        coverUrl: prev.coverUrl || "https://picsum.photos/seed/cover88/1600/800"
+      }));
+      setNewProduct(prev => ({
+        ...prev,
+        imageUrl: prev.imageUrl || `https://picsum.photos/seed/${Math.random()}/400/300`
+      }));
+    }
+  }, [currentUser]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -201,22 +219,27 @@ export default function ProfilePage() {
   };
 
   const uploadFile = async (file: File, path: string) => {
-    const fileRef = storageRef(storage, path);
-    await uploadBytes(fileRef, file);
-    return getDownloadURL(fileRef);
+    try {
+      const fileRef = storageRef(storage, path);
+      await uploadBytes(fileRef, file);
+      return getDownloadURL(fileRef);
+    } catch (err) {
+      console.error("Storage upload failed:", err);
+      throw err;
+    }
   };
 
   const handleSaveProfile = async () => {
-    if (!user || !db || !storage) return;
+    if (!currentUser || !db || !storage) return;
     setSaving(true);
     try {
       let finalAvatarUrl = profile.avatarUrl;
       let finalCoverUrl = profile.coverUrl;
       
-      if (avatarFile) finalAvatarUrl = await uploadFile(avatarFile, `profiles/${user.uid}/avatar`);
-      if (coverFile) finalCoverUrl = await uploadFile(coverFile, `profiles/${user.uid}/cover`);
+      if (avatarFile) finalAvatarUrl = await uploadFile(avatarFile, `profiles/${currentUser.uid}/avatar`);
+      if (coverFile) finalCoverUrl = await uploadFile(coverFile, `profiles/${currentUser.uid}/cover`);
       
-      const userRef = doc(db, "users", user.uid);
+      const userRef = doc(db, "users", currentUser.uid);
       await setDoc(userRef, { 
         profile: { ...profile, avatarUrl: finalAvatarUrl, coverUrl: finalCoverUrl }, 
         socialLinks, 
@@ -229,17 +252,25 @@ export default function ProfilePage() {
       setCoverPreview(null);
       
       setProfile(prev => ({ ...prev, avatarUrl: finalAvatarUrl, coverUrl: finalCoverUrl }));
+      setIsOffline(false);
       toast({ title: "Profile Synchronized", description: "Your business ecosystem profile has been successfully secured." });
     } catch (err: any) {
       console.error(err);
-      toast({ variant: "destructive", title: "Synchronization Failed", description: err.message || "An error occurred." });
+      const isOfflineError = err.code === 'unavailable' || err.message?.includes('offline');
+      if (isOfflineError) setIsOffline(true);
+      
+      toast({ 
+        variant: "destructive", 
+        title: isOfflineError ? "Connection Lost" : "Synchronization Failed", 
+        description: isOfflineError ? "Please check your internet connection." : (err.message || "An unexpected error occurred.") 
+      });
     } finally {
       setSaving(false);
     }
   };
 
   const handleAddOrEditProduct = async () => {
-    if (!user || !db) return;
+    if (!currentUser || !db) return;
     
     try {
       if (editingProduct) {
@@ -247,14 +278,14 @@ export default function ProfilePage() {
         updateDoc(productRef, {
           ...newProduct,
           updatedAt: serverTimestamp()
-        }).catch(e => console.error("Update product error", e));
+        }).catch(e => console.error("Update product failed", e));
         toast({ title: "Product Updated", description: `${newProduct.name} has been updated.` });
       } else {
         addDoc(collection(db, "products"), {
           ...newProduct,
-          userId: user.uid,
+          userId: currentUser.uid,
           createdAt: serverTimestamp()
-        }).catch(e => console.error("Add product error", e));
+        }).catch(e => console.error("Add product failed", e));
         toast({ title: "Product Added", description: `${newProduct.name} is now live.` });
       }
       setIsProductModalOpen(false);
@@ -262,18 +293,18 @@ export default function ProfilePage() {
       setNewProduct({ name: "", category: "Software", price: 0, description: "", imageUrl: `https://picsum.photos/seed/${Math.random()}/400/300` });
     } catch (err: any) {
       console.error(err);
-      toast({ variant: "destructive", title: "Action Failed", description: "Could not save product." });
+      toast({ variant: "destructive", title: "Action Failed", description: "Could not save product. Please try again." });
     }
   };
 
   const handleDeleteProduct = async (id: string) => {
     if (!db) return;
     try {
-      deleteDoc(doc(db, "products", id)).catch(e => console.error("Delete product error", e));
+      deleteDoc(doc(db, "products", id)).catch(e => console.error("Delete product failed", e));
       toast({ title: "Product Removed", description: "Item has been removed from your catalog." });
     } catch (err: any) {
       console.error(err);
-      toast({ variant: "destructive", title: "Delete Failed", description: "Could not remove item." });
+      toast({ variant: "destructive", title: "Delete Failed", description: "Could not remove item from database." });
     }
   };
 
@@ -315,6 +346,16 @@ export default function ProfilePage() {
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8 pb-20">
         
+        {isOffline && (
+          <Alert variant="destructive" className="rounded-2xl border-rose-100 bg-rose-50 text-rose-800 animate-in fade-in duration-300">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle className="font-black uppercase text-[10px] tracking-widest">Network Interrupted</AlertTitle>
+            <AlertDescription className="font-medium text-sm">
+              We're having trouble reaching the database. Your local changes will be synchronized once the connection is restored.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <input type="file" ref={avatarInputRef} className="hidden" accept="image/*" onChange={handleAvatarChange} />
         <input type="file" ref={coverInputRef} className="hidden" accept="image/*" onChange={handleCoverChange} />
 
