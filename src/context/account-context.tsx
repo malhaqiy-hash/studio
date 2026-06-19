@@ -5,6 +5,14 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 export type AccountType = 'pribadi' | 'professional' | 'bisnis';
 
+export interface ContentItem {
+  id: string;
+  image: string;
+  title?: string;
+  description?: string;
+  price?: string;
+}
+
 export interface Account {
   id: string;
   name: string;
@@ -14,13 +22,14 @@ export interface Account {
   contact?: string;
   extra?: string; // Keahlian for Professional, Kategori for Bisnis
   links?: string[];
+  items?: ContentItem[];
 }
 
 interface AccountContextProps {
   activeAccount: Account;
   availableAccounts: Account[];
   switchAccount: (id: string) => void;
-  registerAccount: (data: Omit<Account, 'id' | 'avatar'>) => void;
+  registerAccount: (data: Omit<Account, 'id' | 'avatar' | 'items'>) => void;
   updateActiveAccount: (data: Partial<Account>) => void;
 }
 
@@ -31,7 +40,11 @@ const DEFAULT_PRIBADI: Account = {
   avatar: 'https://picsum.photos/seed/user1/100',
   bio: 'Networking enthusiast and business connector.',
   contact: '+62 812 3456 7890',
-  links: ['https://instagram.com/johndoe', 'https://linkedin.com/in/johndoe']
+  links: ['https://instagram.com/johndoe', 'https://linkedin.com/in/johndoe'],
+  items: [
+    { id: 'item-1', image: 'https://picsum.photos/seed/post1/600/600', description: 'Checking out the new office today!' },
+    { id: 'item-2', image: 'https://picsum.photos/seed/post2/600/600', description: 'Great meeting with the OnTapp team.' }
+  ]
 };
 
 const AccountContext = createContext<AccountContextProps | undefined>(undefined);
@@ -59,7 +72,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('ontapp_active_account_id', id);
   };
 
-  const registerAccount = (data: Omit<Account, 'id' | 'avatar'>) => {
+  const registerAccount = (data: Omit<Account, 'id' | 'avatar' | 'items'>) => {
     const newAccount: Account = {
       ...data,
       id: `acc-${Date.now()}`,
@@ -68,7 +81,8 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
         : data.type === 'professional' 
           ? `https://picsum.photos/seed/pro${Date.now()}/100` 
           : `https://picsum.photos/seed/user${Date.now()}/100`,
-      links: []
+      links: [],
+      items: []
     };
 
     const updatedAccounts = [...accounts, newAccount];
