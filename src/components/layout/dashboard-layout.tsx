@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -51,34 +50,37 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { AIAssistant } from "@/components/chat/ai-assistant";
-
-const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: Rss, label: "Feed", href: "/feed" },
-  { icon: Search, label: "AI Search Hub", href: "/search" },
-  { icon: Globe, label: "AI Discovery", href: "/discover" },
-  { icon: Target, label: "Intelligent Matches", href: "/matches" },
-  { icon: Users, label: "Matchmaker", href: "/matchmaker" },
-  { icon: Briefcase, label: "Opportunities", href: "/opportunities" },
-  { icon: MessageSquare, label: "Messages", href: "/messages" },
-  { icon: Bell, label: "Notifications", href: "/notifications" },
-  { icon: Sliders, label: "Settings", href: "/settings" },
-];
+import { LanguagePicker } from "@/components/language-picker";
+import { useLanguage, translations } from "@/context/language-context";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading } = useUser();
   const auth = useAuth();
+  const { t } = useLanguage();
 
-  // Route Protection: Redirect to login if not authenticated
+  const navItems = [
+    { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
+    { icon: Rss, label: t('feed'), href: "/feed" },
+    { icon: Search, label: t('search'), href: "/search" },
+    { icon: Globe, label: t('discovery'), href: "/discover" },
+    { icon: Target, label: t('matches'), href: "/matches" },
+    { icon: Users, label: t('matchmaker'), href: "/matchmaker" },
+    { icon: Briefcase, label: t('opportunities'), href: "/opportunities" },
+    { icon: MessageSquare, label: t('messages'), href: "/messages" },
+    { icon: Bell, label: t('notifications'), href: "/notifications" },
+    { icon: Sliders, label: t('settings'), href: "/settings" },
+  ];
+
+  // Route Protection
   React.useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
     }
   }, [user, loading, router]);
 
-  // Apply theme from localStorage on mount
+  // Apply theme from localStorage
   React.useEffect(() => {
     const applyStoredTheme = () => {
       const saved = localStorage.getItem("ontapp_system_settings_v2");
@@ -98,7 +100,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         }
       }
     };
-
     applyStoredTheme();
   }, [pathname]);
 
@@ -111,7 +112,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8FAFC]">
@@ -124,7 +124,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Prevent flash of protected content
   if (!user) return null;
 
   const userInitial = user.email ? user.email[0].toUpperCase() : "U";
@@ -144,7 +143,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <SidebarContent className="py-4">
             <SidebarGroup>
               <SidebarGroupLabel className="px-6 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Menu
+                {t('welcome')}
               </SidebarGroupLabel>
               <SidebarMenu className="px-3 gap-1">
                 {navItems.map((item) => (
@@ -205,13 +204,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors" asChild>
                     <Link href="/profile">
                       <UserCircle className="size-5" />
-                      Profile
+                      {t('profile')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors" asChild>
                     <Link href="/settings">
                       <Settings className="size-5" />
-                      Account Settings
+                      {t('settings')}
                     </Link>
                   </DropdownMenuItem>
                 </div>
@@ -221,7 +220,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   className="gap-3 px-3 py-2.5 rounded-xl font-bold text-rose-600 focus:bg-rose-50 focus:text-rose-700 cursor-pointer transition-colors"
                 >
                   <LogOut className="size-5" />
-                  Log out
+                  {t('logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -237,11 +236,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                  </h2>
                  <div className="text-xs font-medium text-slate-500 flex items-center gap-2">
                     <Sparkles className="size-3 text-accent" />
-                    Welcome, <span className="font-bold text-slate-900">{user.email}</span>
+                    {t('welcome')}, <span className="font-bold text-slate-900">{user.email}</span>
                  </div>
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <LanguagePicker />
               <Button variant="outline" size="sm" className="hidden sm:flex rounded-full px-4 gap-2 border-slate-200 font-bold text-slate-600" asChild>
                 <Link href="/settings">
                   <Sliders className="size-4" />
@@ -257,7 +257,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </main>
         </SidebarInset>
 
-        {/* Global AI Assistant FAB */}
         <AIAssistant />
       </div>
     </SidebarProvider>
