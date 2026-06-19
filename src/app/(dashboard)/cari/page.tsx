@@ -313,7 +313,7 @@ export default function CariPage() {
                     </div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
-                </DropdownMenuTrigger>
+                </PopoverTrigger>
                 <PopoverContent align="end" className="w-[280px] rounded-2xl p-3 shadow-2xl border-slate-100 space-y-3">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
@@ -426,7 +426,7 @@ export default function CariPage() {
                               <div className="space-y-1">
                                 <div className="flex flex-wrap items-center gap-2">
                                   <h4 className="text-lg font-black text-slate-900 group-hover:text-accent transition-colors tracking-tight">{result.name}</h4>
-                                  {getSourceBadge(result.source)}
+                                  {getSourceBadge(source)}
                                 </div>
                                 <div className="relative">
                                   <p className="text-slate-500 font-medium text-xs leading-relaxed line-clamp-2">
