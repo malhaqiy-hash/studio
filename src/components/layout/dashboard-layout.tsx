@@ -228,19 +228,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
           {/* TAB 3: Menu Utama / Lainnya (≡) */}
           <div className="relative w-full h-full flex flex-col items-center justify-center">
-            
-            {/* ✨ INDIKATOR AI ADVISOR (Floating high and clean) */}
-            <div className="absolute bottom-24 flex flex-col items-center pointer-events-none">
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg border border-indigo-400/50">
-                <span className="text-sm">✨</span>
-                <span className="absolute inline-flex h-full w-full rounded-full bg-indigo-500 opacity-40 animate-ping -z-10"></span>
-              </div>
-              <div className="w-2 h-2 bg-indigo-600 rotate-45 -mt-1 shadow-sm"></div>
+            {/* AI Advisor Chat Icon (Positioned cleanly above the Lainnya button) */}
+            <div className="absolute -top-10 bg-indigo-600 p-2 rounded-full shadow-lg text-white ring-2 ring-white">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
             </div>
 
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild>
-                <button className="flex flex-col items-center gap-1 hover:text-accent w-full py-2 outline-none">
+                {/* Tombol Pemicu Menu Lainnya */}
+                <button className="flex flex-col items-center gap-1 hover:text-indigo-600 w-full pt-4 pb-2 outline-none">
                   <Menu className="size-6" />
                   <span>Lainnya</span>
                 </button>
