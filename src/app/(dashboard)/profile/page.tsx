@@ -31,7 +31,7 @@ import {
   Link as LinkIcon
 } from "lucide-react";
 import { useUser, useFirestore, useStorage } from "@/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Custom Brand Icons (SVGs)
 const TikTokIcon = () => (
@@ -93,7 +94,9 @@ export default function ProfilePage() {
   const storage = useStorage();
   const { toast } = useToast();
 
+  const [initialLoading, setInitialLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
+  
   const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
   const [coverFile, setCoverFile] = React.useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
@@ -114,34 +117,17 @@ export default function ProfilePage() {
   });
 
   const [socialLinks, setSocialLinks] = React.useState({
-    whatsapp: "+628123456789",
-    instagram: "alphatech_official",
-    facebook: "AlphaTechEnterprise",
-    tiktok: "alphatech.biz",
-    youtube: "AlphaTechMedia",
-    shopee: "alphatech_store",
-    tokopedia: "alphatech-solutions",
-    linkedin: "alpha-tech-solutions",
+    whatsapp: "",
+    instagram: "",
+    facebook: "",
+    tiktok: "",
+    youtube: "",
+    shopee: "",
+    tokopedia: "",
+    linkedin: "",
   });
 
-  const [products, setProducts] = React.useState<Product[]>([
-    {
-      id: "1",
-      name: "Enterprise AI Dashboard",
-      category: "Software",
-      price: 15000000,
-      description: "Full-scale analytics and predictive maintenance dashboard for industrial facilities.",
-      imageUrl: "https://picsum.photos/seed/p1/400/300"
-    },
-    {
-      id: "2",
-      name: "Cloud Node Cluster",
-      category: "Hardware",
-      price: 45000000,
-      description: "High-performance edge computing cluster for real-time manufacturing data processing.",
-      imageUrl: "https://picsum.photos/seed/p2/400/300"
-    }
-  ]);
+  const [products, setProducts] = React.useState<Product[]>([]);
 
   const [isProductModalOpen, setIsProductModalOpen] = React.useState(false);
   const [editingProduct, setEditingProduct] = React.useState<Product | null>(null);
@@ -152,6 +138,31 @@ export default function ProfilePage() {
     description: "",
     imageUrl: `https://picsum.photos/seed/${Math.random()}/400/300`
   });
+
+  // Fetch data on mount
+  React.useEffect(() => {
+    if (!user || !db) return;
+
+    async function loadProfile() {
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.profile) setProfile(prev => ({ ...prev, ...data.profile }));
+          if (data.socialLinks) setSocialLinks(prev => ({ ...prev, ...data.socialLinks }));
+          if (data.products) setProducts(data.products);
+        }
+      } catch (err) {
+        console.error("Error loading profile:", err);
+        toast({ variant: "destructive", title: "Load Failed", description: "Failed to synchronize profile data." });
+      } finally {
+        setInitialLoading(false);
+      }
+    }
+
+    loadProfile();
+  }, [user, db, toast]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -183,8 +194,10 @@ export default function ProfilePage() {
     try {
       let finalAvatarUrl = profile.avatarUrl;
       let finalCoverUrl = profile.coverUrl;
+      
       if (avatarFile) finalAvatarUrl = await uploadFile(avatarFile, `profiles/${user.uid}/avatar`);
       if (coverFile) finalCoverUrl = await uploadFile(coverFile, `profiles/${user.uid}/cover`);
+      
       const userRef = doc(db, "users", user.uid);
       await setDoc(userRef, { 
         profile: { ...profile, avatarUrl: finalAvatarUrl, coverUrl: finalCoverUrl }, 
@@ -192,12 +205,15 @@ export default function ProfilePage() {
         products,
         updatedAt: new Date().toISOString() 
       }, { merge: true });
+      
       if (avatarPreview) URL.revokeObjectURL(avatarPreview);
       if (coverPreview) URL.revokeObjectURL(coverPreview);
+      
       setAvatarFile(null);
       setCoverFile(null);
       setAvatarPreview(null);
       setCoverPreview(null);
+      
       setProfile(prev => ({ ...prev, avatarUrl: finalAvatarUrl, coverUrl: finalCoverUrl }));
       toast({ title: "Profile Synchronized", description: "Your business ecosystem profile and assets have been successfully secured." });
     } catch (err: any) {
@@ -244,6 +260,31 @@ export default function ProfilePage() {
     { key: "linkedin", label: "LinkedIn", icon: Linkedin, color: "text-indigo-700", prefix: "https://linkedin.com/in/" },
   ] as const;
 
+  if (initialLoading) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-6xl mx-auto space-y-10">
+          <Skeleton className="h-64 md:h-80 w-full rounded-[2.5rem]" />
+          <div className="flex flex-col md:flex-row gap-6 px-12 -mt-24">
+            <Skeleton className="size-40 md:size-48 rounded-full border-[6px] border-white" />
+            <div className="mt-24 md:mt-0 space-y-4 flex-1">
+              <Skeleton className="h-10 w-64" />
+              <Skeleton className="h-6 w-48" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8">
+            <div className="lg:col-span-7 space-y-8">
+              <Skeleton className="h-96 w-full rounded-[2rem]" />
+            </div>
+            <div className="lg:col-span-5 space-y-8">
+              <Skeleton className="h-96 w-full rounded-[2rem]" />
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8 pb-20">
@@ -258,7 +299,7 @@ export default function ProfilePage() {
             <img 
               src={coverPreview || profile.coverUrl} 
               alt="Cover" 
-              className={cn("w-full h-full object-cover transition-opacity duration-300", saving && coverFile ? "opacity-50" : "opacity-100")}
+              className={cn("w-full h-full object-cover transition-opacity duration-300", (saving && coverFile) ? "opacity-50" : "opacity-100")}
             />
             <div className="absolute inset-0 bg-black/10 transition-colors hover:bg-black/20" />
             
@@ -278,7 +319,7 @@ export default function ProfilePage() {
               <Avatar className="size-40 md:size-48 border-[6px] border-white shadow-2xl ring-2 ring-slate-100/50">
                 <AvatarImage 
                   src={avatarPreview || profile.avatarUrl} 
-                  className={cn("object-cover transition-opacity duration-300", saving && avatarFile ? "opacity-50" : "opacity-100")} 
+                  className={cn("object-cover transition-opacity duration-300", (saving && avatarFile) ? "opacity-50" : "opacity-100")} 
                 />
                 <AvatarFallback className="text-4xl font-black bg-indigo-50 text-accent">AT</AvatarFallback>
               </Avatar>
