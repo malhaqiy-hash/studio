@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -49,7 +50,11 @@ export default function LoginPage() {
   const [isRegistrationAlertOpen, setIsRegistrationAlertOpen] = React.useState(false);
 
   const handleAuthError = (error: any) => {
-    console.error("Auth Error:", error);
+    // Gracefully handle common user-cancelled errors
+    if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+      return;
+    }
+
     let title = "Authentication Failed";
     let message = error.message || "Please check your credentials and try again.";
 
