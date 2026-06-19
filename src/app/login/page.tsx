@@ -48,6 +48,28 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = React.useState(false);
   const [isRegistrationAlertOpen, setIsRegistrationAlertOpen] = React.useState(false);
 
+  const handleAuthError = (error: any) => {
+    console.error("Auth Error:", error);
+    let title = "Authentication Failed";
+    let message = error.message || "Please check your credentials and try again.";
+
+    if (error.code === 'auth/unauthorized-domain') {
+      title = "Unauthorized Domain";
+      message = "This domain is not authorized for Firebase Auth. Go to Firebase Console -> Authentication -> Settings -> Authorized Domains and add this domain.";
+    } else if (error.code === 'auth/api-keys-are-not-supported-by-this-api' || error.message?.includes('api-keys-are-not-supported')) {
+      title = "API Configuration Error";
+      message = "Identity Toolkit API is disabled. Enable Email/Password in Firebase Console -> Authentication.";
+    } else if (error.code === 'auth/invalid-credential') {
+      message = "Invalid email or password. Please try again.";
+    }
+
+    toast({
+      variant: "destructive",
+      title: title,
+      description: message,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
@@ -56,7 +78,7 @@ export default function LoginPage() {
       toast({
         variant: "destructive",
         title: "Configuration Error",
-        description: "Firebase API Key is missing. Please set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.",
+        description: "Firebase configuration is missing. Please set your environment variables.",
       });
       return;
     }
@@ -66,22 +88,7 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (error: any) {
-      console.error("Login Error:", error);
-      
-      let errorMessage = error.message || "Please check your credentials and try again.";
-      
-      // Handle the specific Identity Toolkit API error
-      if (error.code === 'auth/api-keys-are-not-supported-by-this-api' || error.message?.includes('api-keys-are-not-supported')) {
-        errorMessage = "Identity Toolkit API is disabled. Go to Firebase Console -> Authentication -> Get Started -> Enable Email/Password to fix this.";
-      } else if (error.code === 'auth/invalid-credential') {
-        errorMessage = "Invalid email or password. Please try again.";
-      }
-
-      toast({
-        variant: "destructive",
-        title: "Authentication Failed",
-        description: errorMessage,
-      });
+      handleAuthError(error);
     } finally {
       setLoading(false);
     }
@@ -95,12 +102,7 @@ export default function LoginPage() {
       await signInWithPopup(auth, provider);
       router.push("/dashboard");
     } catch (error: any) {
-      console.error("Google Login Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Google Login Error",
-        description: error.message || "Could not sign in with Google.",
-      });
+      handleAuthError(error);
     } finally {
       setLoading(false);
     }
@@ -123,11 +125,7 @@ export default function LoginPage() {
         description: "A password reset link has been dispatched to your email address.",
       });
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Reset Error",
-        description: error.message || "Failed to send reset email.",
-      });
+      handleAuthError(error);
     }
   };
 
@@ -180,14 +178,14 @@ export default function LoginPage() {
                 <Label htmlFor="email" className="font-bold text-slate-700 ml-1 text-sm">Business Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                  <Input 
+                  <input 
                     id="email" 
                     type="email" 
                     placeholder="name@company.com" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required 
-                    className="h-14 pl-12 rounded-2xl border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-accent/10 transition-all font-medium"
+                    className="flex h-14 w-full pl-12 rounded-2xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-accent/10 focus:outline-none transition-all font-medium text-sm px-3"
                   />
                 </div>
               </div>
@@ -204,14 +202,14 @@ export default function LoginPage() {
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                  <Input 
+                  <input 
                     id="password" 
                     type={showPassword ? "text" : "password"} 
                     placeholder="••••••••" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required 
-                    className="h-14 pl-12 pr-12 rounded-2xl border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-accent/10 transition-all font-medium"
+                    className="flex h-14 w-full pl-12 pr-12 rounded-2xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-accent/10 focus:outline-none transition-all font-medium text-sm px-3"
                   />
                   <button
                     type="button"
