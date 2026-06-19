@@ -12,7 +12,7 @@ import {
   MessageSquare, 
   Briefcase, 
   Bell, 
-  LogOut,
+  LogOut, 
   Globe,
   Settings,
   User,
@@ -26,7 +26,10 @@ import {
   CreditCard,
   UserPlus,
   Sparkles,
-  Check
+  Check,
+  Plus,
+  Camera,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +53,24 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -65,8 +86,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
   const auth = useAuth();
   const { t } = useLanguage();
-  const { activeAccount, availableAccounts, switchAccount, activateAccountType } = useAccount();
+  const { activeAccount, availableAccounts, switchAccount, registerAccount } = useAccount();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
+  
+  // Registration Modal State
+  const [isRegModalOpen, setIsRegModalOpen] = React.useState(false);
+  const [pendingType, setPendingType] = React.useState<AccountType | null>(null);
+  const [regFormData, setRegFormData] = React.useState({
+    name: "",
+    bio: "",
+    contact: "",
+    extra: ""
+  });
 
   const drawerItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
@@ -94,13 +125,27 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const handleSwitchAccount = (id: string) => {
-    switchAccount(id);
-    router.push("/profile");
+  const handleOpenRegistration = (type: AccountType) => {
+    // Check if user already has an account of this type (except for personal which can have multiples maybe?)
+    // For MVP, just open the modal.
+    setPendingType(type);
+    setRegFormData({ name: "", bio: "", contact: "", extra: "" });
+    setIsRegModalOpen(true);
   };
 
-  const handleActivate = (type: AccountType) => {
-    activateAccountType(type);
+  const handleRegisterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingType) return;
+    
+    registerAccount({
+      name: regFormData.name,
+      type: pendingType,
+      bio: regFormData.bio,
+      contact: regFormData.contact,
+      extra: regFormData.extra
+    });
+
+    setIsRegModalOpen(false);
     router.push("/profile");
   };
 
@@ -160,7 +205,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 {availableAccounts.map((acc) => (
                   <DropdownMenuItem 
                     key={acc.id}
-                    onSelect={() => handleSwitchAccount(acc.id)}
+                    onSelect={() => {
+                      switchAccount(acc.id);
+                      router.push("/profile");
+                    }}
                     className={cn(
                       "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1",
                       activeAccount.id === acc.id 
@@ -193,19 +241,19 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="rounded-xl border-slate-100 shadow-xl p-1 min-w-[160px] bg-white">
                     <DropdownMenuItem 
-                      onSelect={() => handleActivate('pribadi')}
+                      onSelect={() => handleOpenRegistration('pribadi')}
                       className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
                     >
                       <User className="size-4 text-slate-400" /> Pribadi
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      onSelect={() => handleActivate('professional')}
+                      onSelect={() => handleOpenRegistration('professional')}
                       className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
                     >
                       <ShieldCheck className="size-4 text-emerald-400" /> Professional
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      onSelect={() => handleActivate('bisnis')}
+                      onSelect={() => handleOpenRegistration('bisnis')}
                       className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
                     >
                       <Briefcase className="size-4 text-indigo-400" /> Bisnis
@@ -252,7 +300,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
           {/* AI Advisor Trigger & Lainnya Menu */}
           <div className="relative w-full h-full flex flex-col items-center justify-center">
-            {/* AI Advisor Button - Floats cleanly above the burger menu */}
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
               className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-[95] ring-4 ring-white"
@@ -334,6 +381,118 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </nav>
+
+      {/* Account Registration Onboarding Modal */}
+      <Dialog open={isRegModalOpen} onOpenChange={setIsRegModalOpen}>
+        <DialogContent className="max-w-md rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-white">
+          <form onSubmit={handleRegisterSubmit} className="flex flex-col h-full">
+            <DialogHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100">
+              <div className="flex items-center justify-between mb-2">
+                <Badge className={cn(
+                  "px-3 py-1 font-black text-[10px] uppercase border-none",
+                  pendingType === 'pribadi' ? "bg-blue-100 text-blue-600" :
+                  pendingType === 'professional' ? "bg-emerald-100 text-emerald-600" :
+                  "bg-indigo-100 text-indigo-600"
+                )}>
+                  {pendingType} Onboarding
+                </Badge>
+                <button type="button" onClick={() => setIsRegModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                  <X className="size-5" />
+                </button>
+              </div>
+              <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Setup Your New Profile</DialogTitle>
+              <DialogDescription className="font-medium text-slate-500">
+                Unlock specialized networking features for your {pendingType} context.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh]">
+              {/* Photo Placeholder */}
+              <div className="flex flex-col items-center gap-4">
+                <div className="size-24 rounded-3xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 group cursor-pointer hover:border-accent hover:bg-indigo-50 transition-all">
+                  <Camera className="size-8 group-hover:scale-110 transition-transform" />
+                </div>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Unggah Foto Profil</span>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="font-bold text-slate-700">Nama Tampilan / Bisnis</Label>
+                  <Input 
+                    required
+                    value={regFormData.name}
+                    onChange={(e) => setRegFormData({...regFormData, name: e.target.value})}
+                    placeholder={pendingType === 'bisnis' ? "e.g. Acme Corp" : "e.g. John Doe"}
+                    className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="font-bold text-slate-700">Bio / Deskripsi</Label>
+                  <Textarea 
+                    required
+                    value={regFormData.bio}
+                    onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})}
+                    placeholder="Ceritakan tentang dirimu atau bisnis Anda..."
+                    className="rounded-xl border-slate-200 min-h-[100px] bg-slate-50/50 focus:bg-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="font-bold text-slate-700">Kontak (WhatsApp / Email)</Label>
+                  <Input 
+                    required
+                    value={regFormData.contact}
+                    onChange={(e) => setRegFormData({...regFormData, contact: e.target.value})}
+                    placeholder="+62..."
+                    className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white"
+                  />
+                </div>
+
+                {pendingType === 'professional' && (
+                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                    <Label className="font-bold text-slate-700">Keahlian Utama / Skills</Label>
+                    <Input 
+                      required
+                      value={regFormData.extra}
+                      onChange={(e) => setRegFormData({...regFormData, extra: e.target.value})}
+                      placeholder="e.g. UI/UX Design, React, Project Management"
+                      className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white"
+                    />
+                  </div>
+                )}
+
+                {pendingType === 'bisnis' && (
+                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                    <Label className="font-bold text-slate-700">Kategori Bisnis / Sektor</Label>
+                    <Select value={regFormData.extra} onValueChange={(v) => setRegFormData({...regFormData, extra: v})}>
+                      <SelectTrigger className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white">
+                        <SelectValue placeholder="Pilih Sektor" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="Tech & SaaS">Tech & SaaS</SelectItem>
+                        <SelectItem value="Logistics">Logistics</SelectItem>
+                        <SelectItem value="Retail">Retail</SelectItem>
+                        <SelectItem value="Service">Service Provider</SelectItem>
+                        <SelectItem value="F&B">Food & Beverage</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter className="p-8 pt-4 bg-slate-50 border-t border-slate-100">
+              <Button 
+                type="submit"
+                className="w-full h-14 rounded-2xl bg-accent hover:bg-indigo-600 text-white font-black text-lg shadow-xl shadow-indigo-100 transition-all active:scale-95"
+              >
+                Simpan & Beralih Akun
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <AIAssistant />
     </div>

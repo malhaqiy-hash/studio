@@ -10,39 +10,45 @@ export interface Account {
   name: string;
   type: AccountType;
   avatar: string;
+  bio?: string;
+  contact?: string;
+  extra?: string; // Keahlian for Professional, Kategori for Bisnis
 }
 
 interface AccountContextProps {
   activeAccount: Account;
   availableAccounts: Account[];
   switchAccount: (id: string) => void;
-  activateAccountType: (type: AccountType) => void;
+  registerAccount: (data: Omit<Account, 'id' | 'avatar'>) => void;
 }
 
-const ALL_POSSIBLE_ACCOUNTS: Account[] = [
-  { id: 'acc-1', name: 'John Doe', type: 'pribadi', avatar: 'https://picsum.photos/seed/user1/100' },
-  { id: 'acc-2', name: 'John Studio', type: 'professional', avatar: 'https://picsum.photos/seed/pro1/100' },
-  { id: 'acc-3', name: 'OnTapp Corp', type: 'bisnis', avatar: 'https://picsum.photos/seed/biz1/100' },
-];
+const DEFAULT_PRIBADI: Account = { 
+  id: 'acc-1', 
+  name: 'John Doe', 
+  type: 'pribadi', 
+  avatar: 'https://picsum.photos/seed/user1/100',
+  bio: 'Networking enthusiast and business connector.',
+  contact: '+62 812 3456 7890'
+};
 
 const AccountContext = createContext<AccountContextProps | undefined>(undefined);
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
   const [activeAccountId, setActiveAccountId] = useState<string>('acc-1');
-  const [activatedIds, setActivatedIds] = useState<string[]>(['acc-1']);
+  const [accounts, setAccounts] = useState<Account[]>([DEFAULT_PRIBADI]);
 
   useEffect(() => {
     const savedActive = localStorage.getItem('ontapp_active_account_id');
-    const savedActivated = localStorage.getItem('ontapp_activated_account_ids');
+    const savedAccounts = localStorage.getItem('ontapp_user_accounts');
     
-    if (savedActive) setActiveAccountId(savedActive);
-    if (savedActivated) {
+    if (savedAccounts) {
       try {
-        setActivatedIds(JSON.parse(savedActivated));
+        setAccounts(JSON.parse(savedAccounts));
       } catch (e) {
-        setActivatedIds(['acc-1']);
+        setAccounts([DEFAULT_PRIBADI]);
       }
     }
+    if (savedActive) setActiveAccountId(savedActive);
   }, []);
 
   const switchAccount = (id: string) => {
@@ -50,21 +56,27 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('ontapp_active_account_id', id);
   };
 
-  const activateAccountType = (type: AccountType) => {
-    const accountToActivate = ALL_POSSIBLE_ACCOUNTS.find(a => a.type === type);
-    if (accountToActivate) {
-      const newActivatedIds = Array.from(new Set([...activatedIds, accountToActivate.id]));
-      setActivatedIds(newActivatedIds);
-      localStorage.setItem('ontapp_activated_account_ids', JSON.stringify(newActivatedIds));
-      switchAccount(accountToActivate.id);
-    }
+  const registerAccount = (data: Omit<Account, 'id' | 'avatar'>) => {
+    const newAccount: Account = {
+      ...data,
+      id: `acc-${Date.now()}`,
+      avatar: data.type === 'bisnis' 
+        ? `https://picsum.photos/seed/biz${Date.now()}/100` 
+        : data.type === 'professional' 
+          ? `https://picsum.photos/seed/pro${Date.now()}/100` 
+          : `https://picsum.photos/seed/user${Date.now()}/100`,
+    };
+
+    const updatedAccounts = [...accounts, newAccount];
+    setAccounts(updatedAccounts);
+    localStorage.setItem('ontapp_user_accounts', JSON.stringify(updatedAccounts));
+    switchAccount(newAccount.id);
   };
 
-  const availableAccounts = ALL_POSSIBLE_ACCOUNTS.filter(a => activatedIds.includes(a.id));
-  const activeAccount = ALL_POSSIBLE_ACCOUNTS.find(a => a.id === activeAccountId) || ALL_POSSIBLE_ACCOUNTS[0];
+  const activeAccount = accounts.find(a => a.id === activeAccountId) || accounts[0];
 
   return (
-    <AccountContext.Provider value={{ activeAccount, availableAccounts, switchAccount, activateAccountType }}>
+    <AccountContext.Provider value={{ activeAccount, availableAccounts: accounts, switchAccount, registerAccount }}>
       {children}
     </AccountContext.Provider>
   );
