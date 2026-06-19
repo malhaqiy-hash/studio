@@ -6,77 +6,52 @@
       "description": "A business lead or opportunity in the network.",
       "type": "object",
       "properties": {
-        "companyName": {
-          "type": "string",
-          "description": "Name of the company offering the opportunity."
-        },
-        "category": {
-          "type": "string",
-          "enum": ["Retail", "Service", "Tech", "F&B", "Others"],
-          "description": "Industry category."
-        },
-        "value": {
-          "type": "number",
-          "description": "The financial value of the deal."
-        },
-        "status": {
-          "type": "string",
-          "enum": ["Lead", "Proposal", "Negotiation", "Won", "Lost"],
-          "description": "Current status of the opportunity."
-        },
-        "whatsapp": {
-          "type": "string",
-          "description": "Client WhatsApp contact number."
-        },
-        "date": {
-          "type": "string",
-          "format": "date",
-          "description": "Target deadline for the opportunity."
-        },
-        "description": {
-          "type": "string",
-          "description": "Detailed notes about the lead."
-        }
+        "companyName": { "type": "string" },
+        "category": { "type": "string", "enum": ["Retail", "Service", "Tech", "F&B", "Others"] },
+        "value": { "type": "number" },
+        "status": { "type": "string", "enum": ["Lead", "Proposal", "Negotiation", "Won", "Lost"] },
+        "whatsapp": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "description": { "type": "string" },
+        "location": { "type": "object", "properties": { "lat": { "type": "number" }, "lng": { "type": "number" }, "city": { "type": "string" }, "country": { "type": "string" } } }
       },
       "required": ["companyName", "category", "status"]
     },
-    "Demand": {
-      "title": "Demand",
-      "description": "Detected market demand or buyer intent.",
+    "MarketTrend": {
+      "title": "Market Trend",
+      "description": "AI-detected market trends and growth signals.",
       "type": "object",
       "properties": {
-        "title": { "type": "string" },
+        "industry": { "type": "string" },
+        "growthRate": { "type": "number" },
+        "signalType": { "type": "string", "enum": ["Rising Demand", "Saturation", "Emerging Tech"] },
         "description": { "type": "string" },
-        "category": { "type": "string" },
+        "topProducts": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "BusinessRegistry": {
+      "title": "Business Registry",
+      "description": "Public business profiles available for claiming.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "industry": { "type": "string" },
         "location": { "type": "string" },
-        "urgency": { "type": "string", "enum": ["Low", "Medium", "High"] },
-        "buyerType": { "type": "string" },
-        "volume": { "type": "string" },
+        "isClaimed": { "type": "boolean" },
+        "ownerId": { "type": "string" },
+        "verificationStatus": { "type": "string", "enum": ["Unverified", "Pending", "Verified"] }
+      }
+    },
+    "ClaimRequest": {
+      "title": "Claim Request",
+      "description": "User requests to own a business profile.",
+      "type": "object",
+      "properties": {
+        "businessId": { "type": "string" },
+        "userId": { "type": "string" },
+        "documentUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["Submitted", "Reviewing", "Approved", "Rejected"] },
         "timestamp": { "type": "string", "format": "date-time" }
-      }
-    },
-    "ScoutReport": {
-      "title": "Scout Report",
-      "description": "AI generated business scout report on market gaps.",
-      "type": "object",
-      "properties": {
-        "marketGap": { "type": "string" },
-        "reasoning": { "type": "string" },
-        "suggestedAction": { "type": "string" },
-        "potentialValue": { "type": "string" },
-        "confidenceScore": { "type": "number" }
-      }
-    },
-    "KnowledgeArticle": {
-      "title": "Knowledge Article",
-      "description": "Educational content for business growth.",
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "content": { "type": "string" },
-        "tags": { "type": "array", "items": { "type": "string" } },
-        "type": { "type": "string", "enum": ["Guide", "Analysis", "Insight"] },
-        "author": { "type": "string" }
       }
     }
   },
@@ -84,21 +59,9 @@
     "providers": ["google.com", "password"]
   },
   "firestore": {
-    "/opportunities/{opportunityId}": {
-      "schema": "#/backend/entities/Opportunity",
-      "description": "A global collection of business opportunities."
-    },
-    "/demands/{demandId}": {
-      "schema": "#/backend/entities/Demand",
-      "description": "Aggregated market demands and buyer signals."
-    },
-    "/scout_reports/{reportId}": {
-      "schema": "#/backend/entities/ScoutReport",
-      "description": "AI Generated market intelligence reports."
-    },
-    "/knowledge_articles/{articleId}": {
-      "schema": "#/backend/entities/KnowledgeArticle",
-      "description": "Educational business content."
-    }
+    "/opportunities/{opportunityId}": { "schema": "#/backend/entities/Opportunity", "description": "Business opportunities." },
+    "/market_trends/{trendId}": { "schema": "#/backend/entities/MarketTrend", "description": "Global market intelligence." },
+    "/business_registry/{businessId}": { "schema": "#/backend/entities/BusinessRegistry", "description": "Public business records." },
+    "/claim_requests/{requestId}": { "schema": "#/backend/entities/ClaimRequest", "description": "Ownership verification requests." }
   }
 }

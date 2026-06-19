@@ -32,7 +32,10 @@ import {
   X,
   Radar,
   Magnet,
-  BookOpen
+  BookOpen,
+  TrendingUp,
+  Map as MapIcon,
+  Building2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -105,6 +108,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const drawerItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
     { icon: Globe, label: t('discovery'), href: "/cari" },
+    { icon: TrendingUp, label: "Market Radar", href: "/market-radar" },
+    { icon: MapIcon, label: "Opportunity Map", href: "/opportunity-map" },
+    { icon: Building2, label: "OnTapp Registry", href: "/registry" },
     { icon: Radar, label: t('scout'), href: "/scout" },
     { icon: Magnet, label: t('reverse_discovery'), href: "/reverse-discovery" },
     { icon: BookOpen, label: t('knowledge'), href: "/knowledge" },
