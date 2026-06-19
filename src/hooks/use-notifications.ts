@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { getToken, onMessage, Messaging } from 'firebase/messaging';
-import { doc, setDoc, arrayUnion, Firestore } from 'firebase/firestore';
+import { doc, setDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth, useFirestore, useMessaging } from '@/firebase';
 import { useToast } from './use-toast';
 
@@ -14,15 +14,33 @@ export function useNotifications() {
   const [loading, setLoading] = React.useState(false);
 
   const requestPermission = async () => {
-    if (!messaging) return;
+    if (!messaging) {
+      toast({
+        variant: "destructive",
+        title: "Layanan Tidak Tersedia",
+        description: "Firebase Messaging tidak didukung di browser ini atau belum terinisialisasi.",
+      });
+      return;
+    }
     
     setLoading(true);
     try {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        const token = await getToken(messaging, {
-          vapidKey: 'BIsW9_Y3_6X...YOUR_VAPID_KEY_FROM_CONSOLE...', // Ganti dengan VAPID key asli di console
-        });
+        const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+        
+        if (!vapidKey) {
+          console.error("Missing NEXT_PUBLIC_FIREBASE_VAPID_KEY in environment variables.");
+          toast({
+            variant: "destructive",
+            title: "Konfigurasi Hilang",
+            description: "VAPID Key belum dikonfigurasi di server. Silakan hubungi admin.",
+          });
+          setLoading(false);
+          return;
+        }
+
+        const token = await getToken(messaging, { vapidKey });
 
         if (token && auth.currentUser) {
           // Simpan token ke Firestore untuk user saat ini
@@ -30,6 +48,7 @@ export function useNotifications() {
           await setDoc(userRef, {
             fcmTokens: arrayUnion(token),
             notificationsEnabled: true,
+            updatedAt: new Date().toISOString()
           }, { merge: true });
 
           toast({
@@ -49,7 +68,7 @@ export function useNotifications() {
       toast({
         variant: "destructive",
         title: "Gagal Mengaktifkan Notifikasi",
-        description: "Terjadi kesalahan saat menghubungkan ke layanan pesan.",
+        description: "Terjadi kesalahan saat menghubungkan ke layanan pesan. Pastikan VAPID Key valid.",
       });
     } finally {
       setLoading(false);
