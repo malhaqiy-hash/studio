@@ -68,7 +68,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { activeAccount, availableAccounts, switchAccount, activateAccountType } = useAccount();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
 
-  // Strictly controlled list for "Lainnya" menu
   const drawerItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
     { icon: Globe, label: t('discovery'), href: "/discover" },
@@ -122,7 +121,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-body relative">
       
-      {/* High priority header with z-index to ensure clickability */}
+      {/* Top Header */}
       <header className="sticky top-0 z-[100] w-full border-b bg-white/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm pointer-events-auto">
         <div className="flex items-center gap-2">
           <Link href="/dashboard" className="flex items-center gap-2">
@@ -142,7 +141,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </Button>
           </Link>
 
-          {/* Profile Dropdown Hub */}
+          {/* Profile Switcher Hub */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center rounded-full border-2 border-indigo-100 hover:border-accent transition p-0.5 outline-none pointer-events-auto">
@@ -163,7 +162,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     key={acc.id}
                     onSelect={() => handleSwitchAccount(acc.id)}
                     className={cn(
-                      "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1 pointer-events-auto",
+                      "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1",
                       activeAccount.id === acc.id 
                         ? "bg-indigo-50 text-accent" 
                         : "text-slate-600 focus:bg-slate-50"
@@ -187,27 +186,27 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuSeparator className="my-2" />
 
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer pointer-events-auto">
+                <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer">
                   <UserPlus className="size-4" />
                   Tambahkan Akun
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="rounded-xl border-slate-100 shadow-xl p-1 min-w-[160px] bg-white pointer-events-auto">
+                  <DropdownMenuSubContent className="rounded-xl border-slate-100 shadow-xl p-1 min-w-[160px] bg-white">
                     <DropdownMenuItem 
                       onSelect={() => handleActivate('pribadi')}
-                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3 pointer-events-auto"
+                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
                     >
                       <User className="size-4 text-slate-400" /> Pribadi
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onSelect={() => handleActivate('professional')}
-                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3 pointer-events-auto"
+                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
                     >
                       <ShieldCheck className="size-4 text-emerald-400" /> Professional
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onSelect={() => handleActivate('bisnis')}
-                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3 pointer-events-auto"
+                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
                     >
                       <Briefcase className="size-4 text-indigo-400" /> Bisnis
                     </DropdownMenuItem>
@@ -219,13 +218,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 pb-28 pt-4 px-4 w-full overflow-x-hidden relative">
+      <main className="flex-1 pb-28 pt-4 px-4 w-full overflow-x-hidden relative pointer-events-auto">
         <div className="max-w-4xl mx-auto">
           {children}
         </div>
       </main>
 
-      {/* Bottom Navigation */}
+      {/* Fixed Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t bg-white/95 backdrop-blur-md pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.03)] pointer-events-auto">
         <div className="grid grid-cols-3 h-16 items-center justify-items-center text-[10px] font-black uppercase tracking-widest text-slate-400 relative">
           
@@ -251,9 +250,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <span>Cari</span>
           </Link>
 
-          {/* AI Advisor Trigger & More Menu Hub */}
+          {/* AI Advisor Trigger & Lainnya Menu */}
           <div className="relative w-full h-full flex flex-col items-center justify-center">
-            {/* AI ADVISOR BUTTON (Cleanly above Lainnya) */}
+            {/* AI Advisor Button - Floats cleanly above the burger menu */}
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
               className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-[95] ring-4 ring-white"
@@ -270,7 +269,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <span>Lainnya</span>
                 </button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 overflow-hidden h-[90vh] bg-white">
+              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 overflow-hidden h-[90vh] bg-white pointer-events-auto">
                 <SheetHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100">
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
