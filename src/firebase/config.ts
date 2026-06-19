@@ -1,4 +1,3 @@
-
 /**
  * Firebase client configuration.
  * All values are pulled from environment variables. 
@@ -13,4 +12,9 @@ export const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
 };
 
-export const isConfigValid = !!firebaseConfig.apiKey && !!firebaseConfig.projectId;
+// A more robust check for valid configuration
+export const isConfigValid = 
+  !!firebaseConfig.apiKey && 
+  firebaseConfig.apiKey !== "undefined" &&
+  !!firebaseConfig.projectId &&
+  firebaseConfig.projectId !== "undefined";

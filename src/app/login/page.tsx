@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -16,7 +15,8 @@ import {
   Phone, 
   Eye, 
   EyeOff,
-  AlertCircle
+  AlertCircle,
+  ExternalLink
 } from "lucide-react";
 import { useAuth } from "@/firebase";
 import { 
@@ -56,7 +56,7 @@ export default function LoginPage() {
       toast({
         variant: "destructive",
         title: "Configuration Error",
-        description: "Firebase API Key is missing. Please set it in the console.",
+        description: "Firebase API Key is missing. Please set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.",
       });
       return;
     }
@@ -70,8 +70,11 @@ export default function LoginPage() {
       
       let errorMessage = error.message || "Please check your credentials and try again.";
       
+      // Handle the specific Identity Toolkit API error
       if (error.code === 'auth/api-keys-are-not-supported-by-this-api' || error.message?.includes('api-keys-are-not-supported')) {
-        errorMessage = "Identity Toolkit API is not enabled. Please go to the Firebase Console, enable Authentication, and ensure your API key allows this service.";
+        errorMessage = "Identity Toolkit API is disabled. Go to Firebase Console -> Authentication -> Get Started -> Enable Email/Password to fix this.";
+      } else if (error.code === 'auth/invalid-credential') {
+        errorMessage = "Invalid email or password. Please try again.";
       }
 
       toast({
@@ -85,6 +88,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!isConfigValid) return;
     const provider = new GoogleAuthProvider();
     setLoading(true);
     try {
@@ -148,9 +152,14 @@ export default function LoginPage() {
         </div>
 
         {!isConfigValid && (
-          <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex gap-3 text-amber-800 text-sm font-medium">
-            <AlertCircle className="size-5 shrink-0" />
-            <p>Authentication is not yet configured. Please set your Firebase API Key in the settings.</p>
+          <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl flex flex-col gap-3 text-amber-800 text-sm font-medium shadow-sm">
+            <div className="flex gap-3 items-center">
+              <AlertCircle className="size-5 shrink-0 text-amber-600" />
+              <p className="font-bold">Missing Firebase Configuration</p>
+            </div>
+            <p className="text-xs text-amber-700 leading-relaxed">
+              Firebase API Key or Project ID is not set. Please ensure your <code className="bg-amber-100 px-1 rounded">.env</code> file or Project Settings include the necessary Firebase keys.
+            </p>
           </div>
         )}
 
@@ -264,8 +273,8 @@ export default function LoginPage() {
               </div>
             </form>
           </CardContent>
-          <CardFooter className="bg-slate-50/50 p-8 border-t border-slate-100 flex flex-col gap-4">
-            <p className="text-sm font-bold text-slate-500 text-center">
+          <CardFooter className="bg-slate-50/50 p-8 border-t border-slate-100 flex flex-col gap-4 text-center">
+            <p className="text-sm font-bold text-slate-500">
               New to the ecosystem? 
               <button 
                 onClick={() => setIsRegistrationAlertOpen(true)}
@@ -274,6 +283,16 @@ export default function LoginPage() {
                 Request Access
               </button>
             </p>
+            {!isConfigValid && (
+              <a 
+                href="https://console.firebase.google.com/" 
+                target="_blank" 
+                rel="noreferrer"
+                className="text-[10px] text-slate-400 hover:text-accent font-bold flex items-center justify-center gap-1 uppercase tracking-wider"
+              >
+                Open Firebase Console <ExternalLink className="size-2.5" />
+              </a>
+            )}
           </CardFooter>
         </Card>
 
