@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -20,12 +19,27 @@ import {
   RefreshCw,
   Sparkles,
   Monitor,
-  X
+  X,
+  Cloud,
+  Check
 } from "lucide-react";
 import { translateText } from "@/ai/flows/translate-flow";
 import { useLanguage } from "@/context/language-context";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+
+const MOCK_GOOGLE_PHOTOS = [
+  'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1454165833767-027ffea9e77b?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=400&h=400&auto=format&fit=crop'
+];
 
 const INITIAL_MOCK_POSTS = [
   {
@@ -76,6 +90,7 @@ export default function FeedPage() {
 
   // Media Picker State
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
+  const [isCloudPickerOpen, setIsCloudPickerOpen] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Translation State
@@ -118,6 +133,11 @@ export default function FeedPage() {
     fileInputRef.current?.click();
   };
 
+  const openCloudPicker = () => {
+    setIsSourcePickerOpen(false);
+    setIsCloudPickerOpen(true);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -130,6 +150,12 @@ export default function FeedPage() {
       reader.readAsDataURL(file);
     }
     if (e.target) e.target.value = '';
+  };
+
+  const handleCloudSelect = (url: string) => {
+    setNewPostImage(url);
+    setIsCloudPickerOpen(false);
+    toast({ title: "Media terpilih dari Google Foto" });
   };
 
   const handlePost = () => {
@@ -416,7 +442,7 @@ export default function FeedPage() {
 
               {/* Google Foto Item */}
               <button 
-                onClick={triggerFilePicker}
+                onClick={openCloudPicker}
                 className="w-full flex items-center justify-between group text-left active:scale-[0.98] transition-transform"
               >
                 <div className="flex items-center gap-5">
@@ -465,6 +491,47 @@ export default function FeedPage() {
               </button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Google Photos Cloud Picker Simulation */}
+      <Dialog open={isCloudPickerOpen} onOpenChange={setIsCloudPickerOpen}>
+        <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 bg-white overflow-hidden">
+          <DialogHeader className="p-8 pb-4 bg-slate-50 border-b flex flex-row items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-widest">
+                <Cloud className="size-3" /> Cloud Storage
+              </div>
+              <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Google Photos</DialogTitle>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="size-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">J</div>
+            </div>
+          </DialogHeader>
+          <ScrollArea className="h-[450px] p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {MOCK_GOOGLE_PHOTOS.map((url, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleCloudSelect(url)}
+                  className="group relative aspect-square rounded-2xl overflow-hidden bg-slate-100 hover:ring-4 hover:ring-accent transition-all active:scale-95"
+                >
+                  <img src={url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Cloud Photo" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="size-6 rounded-full bg-accent text-white flex items-center justify-center shadow-lg">
+                      <Check className="size-4" />
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
+          <DialogFooter className="p-6 bg-slate-50 border-t flex items-center justify-center">
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <Sparkles className="size-3 text-amber-500" /> Disinkronkan dengan Google Photos
+             </p>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </DashboardLayout>

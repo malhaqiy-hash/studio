@@ -36,7 +36,8 @@ import {
   FolderOpen,
   Check,
   TrendingUp,
-  Monitor
+  Monitor,
+  Sparkles
 } from 'lucide-react';
 import {
   Dialog,
@@ -55,6 +56,19 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
+// Mock Cloud Data for Google Photos simulation
+const MOCK_GOOGLE_PHOTOS = [
+  'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1454165833767-027ffea9e77b?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=400&h=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=400&h=400&auto=format&fit=crop'
+];
+
 export default function ProfilePage() {
   const { activeAccount, updateActiveAccount } = useAccount();
   const { toast } = useToast();
@@ -65,6 +79,7 @@ export default function ProfilePage() {
   const [isLinksModalOpen, setIsLinksModalOpen] = React.useState(false);
   const [isContentModalOpen, setIsContentModalOpen] = React.useState(false);
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
+  const [isCloudPickerOpen, setIsCloudPickerOpen] = React.useState(false);
 
   // Form States
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
@@ -118,7 +133,7 @@ export default function ProfilePage() {
     toast({ title: 'Konten dihapus' });
   };
 
-  // Unified File Handler
+  // Local File Handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -130,12 +145,24 @@ export default function ProfilePage() {
       };
       reader.readAsDataURL(file);
     }
-    // Reset input value so same file can be picked again
     if (e.target) e.target.value = '';
+  };
+
+  // Cloud Selection Handler
+  const handleCloudSelect = (url: string) => {
+    setNewItem(prev => ({ ...prev, image: url }));
+    setIsCloudPickerOpen(false);
+    setIsSourcePickerOpen(false);
+    toast({ title: 'Foto terpilih dari Google Foto' });
   };
 
   const triggerFilePicker = () => {
     fileBrowserRef.current?.click();
+  };
+
+  const openCloudPicker = () => {
+    setIsSourcePickerOpen(false);
+    setIsCloudPickerOpen(true);
   };
 
   const getLinkIcon = (url: string) => {
@@ -708,7 +735,7 @@ export default function ProfilePage() {
 
               {/* Google Foto Item */}
               <button 
-                onClick={triggerFilePicker}
+                onClick={openCloudPicker}
                 className="w-full flex items-center justify-between group text-left"
               >
                 <div className="flex items-center gap-4">
@@ -769,6 +796,53 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
+      {/* Google Photos Cloud Picker Simulation */}
+      <Dialog open={isCloudPickerOpen} onOpenChange={setIsCloudPickerOpen}>
+        <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 bg-white overflow-hidden">
+          <DialogHeader className="p-8 pb-4 bg-slate-50 border-b flex flex-row items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-widest">
+                <Cloud className="size-3" /> Cloud Storage
+              </div>
+              <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Google Photos</DialogTitle>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="size-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">J</div>
+            </div>
+          </DialogHeader>
+          <ScrollArea className="h-[450px] p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {MOCK_GOOGLE_PHOTOS.map((url, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleCloudSelect(url)}
+                  className="group relative aspect-square rounded-2xl overflow-hidden bg-slate-100 hover:ring-4 hover:ring-accent transition-all active:scale-95"
+                >
+                  <img src={url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Cloud Photo" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="size-6 rounded-full bg-accent text-white flex items-center justify-center shadow-lg">
+                      <Check className="size-4" />
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <div className="mt-8 text-center pb-6">
+              <Button variant="ghost" className="text-slate-400 font-bold text-xs uppercase tracking-widest gap-2">
+                <RefreshCw className="size-3" /> Muat Lebih Banyak
+              </Button>
+            </div>
+          </ScrollArea>
+          <DialogFooter className="p-6 bg-slate-50 border-t flex items-center justify-center">
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <Sparkles className="size-3 text-amber-500" /> Disinkronkan dengan Google Photos Anda
+             </p>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </DashboardLayout>
   );
 }
+
