@@ -35,7 +35,8 @@ import {
   Cloud,
   FolderOpen,
   Check,
-  TrendingUp
+  TrendingUp,
+  Monitor
 } from 'lucide-react';
 import {
   Dialog,
@@ -129,6 +130,12 @@ export default function ProfilePage() {
       };
       reader.readAsDataURL(file);
     }
+    // Reset input value so same file can be picked again
+    if (e.target) e.target.value = '';
+  };
+
+  const triggerFilePicker = () => {
+    fileBrowserRef.current?.click();
   };
 
   const getLinkIcon = (url: string) => {
@@ -673,39 +680,84 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Multi-Source Media Picker Modal */}
+      {/* Native-Style Media Picker Modal (Pilih dari) */}
       <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
-        <DialogContent className="max-w-sm rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white">
-          <DialogHeader className="p-6 pb-2 border-b bg-slate-50">
-            <DialogTitle className="text-lg font-black tracking-tight text-center">Pilih Sumber Media</DialogTitle>
-          </DialogHeader>
-          <div className="p-4 space-y-2">
-            {/* All options trigger the same native file input */}
-            <Button 
-              variant="ghost" 
-              className="w-full h-14 rounded-2xl justify-start gap-4 px-6 hover:bg-slate-50 hover:text-accent font-bold group"
-              onClick={() => fileBrowserRef.current?.click()}
-            >
-              <ImageIcon className="size-5 text-indigo-500 group-hover:scale-110 transition-transform" />
-              Galeri Foto
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full h-14 rounded-2xl justify-start gap-4 px-6 hover:bg-slate-50 hover:text-accent font-bold group"
-              onClick={() => fileBrowserRef.current?.click()}
-            >
-              <Cloud className="size-5 text-blue-500 group-hover:scale-110 transition-transform" />
-              Google Photos
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full h-14 rounded-2xl justify-start gap-4 px-6 hover:bg-slate-50 hover:text-accent font-bold group"
-              onClick={() => fileBrowserRef.current?.click()}
-            >
-              <FolderOpen className="size-5 text-emerald-500 group-hover:scale-110 transition-transform" />
-              File Browser
-            </Button>
+        <DialogContent className="max-w-[320px] rounded-3xl border-none shadow-2xl p-6 bg-[#2d3035] text-white overflow-hidden outline-none">
+          <div className="space-y-6">
+            <h2 className="text-xl font-semibold text-white/90">Pilih dari</h2>
+            
+            <div className="space-y-5">
+              {/* Galeri Item */}
+              <button 
+                onClick={triggerFilePicker}
+                className="w-full flex items-center justify-between group text-left"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="size-11 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
+                    <div className="grid grid-cols-2 gap-0.5 scale-75">
+                      <div className="size-2.5 bg-blue-400 rounded-sm" />
+                      <div className="size-2.5 bg-green-400 rounded-sm" />
+                      <div className="size-2.5 bg-orange-400 rounded-sm" />
+                      <div className="size-2.5 bg-purple-400 rounded-sm" />
+                    </div>
+                  </div>
+                  <span className="font-medium text-[15px]">Galeri</span>
+                </div>
+                <div className="size-5 rounded-full border-2 border-gray-500" />
+              </button>
+
+              {/* Google Foto Item */}
+              <button 
+                onClick={triggerFilePicker}
+                className="w-full flex items-center justify-between group text-left"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="size-11 rounded-full bg-white/10 flex items-center justify-center relative">
+                    <div className="absolute top-1.5 left-1.5 size-4 bg-red-400 rounded-full blur-[1px]" />
+                    <div className="absolute top-1.5 right-1.5 size-4 bg-blue-400 rounded-full blur-[1px]" />
+                    <div className="absolute bottom-1.5 left-1.5 size-4 bg-yellow-400 rounded-full blur-[1px]" />
+                    <div className="absolute bottom-1.5 right-1.5 size-4 bg-green-400 rounded-full blur-[1px]" />
+                    <div className="relative size-5 bg-white/20 rounded-sm rotate-45" />
+                  </div>
+                  <span className="font-medium text-[15px]">Google Foto</span>
+                </div>
+                <div className="size-5 rounded-full border-2 border-gray-500" />
+              </button>
+
+              {/* Browser Item */}
+              <button 
+                onClick={triggerFilePicker}
+                className="w-full flex items-center justify-between group text-left"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="size-11 rounded-full bg-white/10 flex items-center justify-center">
+                    <Monitor className="size-5 text-gray-300" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-[15px]">Browser</span>
+                    <span className="text-[11px] text-gray-400 mt-0.5">File Browser</span>
+                  </div>
+                </div>
+                <div className="size-5 rounded-full border-2 border-gray-500" />
+              </button>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <button 
+                onClick={triggerFilePicker}
+                className="text-blue-400 font-medium text-sm ml-6 hover:text-blue-300 transition-colors"
+              >
+                Selalu
+              </button>
+              <button 
+                onClick={triggerFilePicker}
+                className="text-blue-400 font-medium text-sm ml-6 hover:text-blue-300 transition-colors"
+              >
+                Cuma sekali
+              </button>
+            </div>
           </div>
+          
           {/* Hidden Native Input */}
           <input 
             type="file" 
