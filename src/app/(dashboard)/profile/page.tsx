@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -27,7 +28,9 @@ import {
   Pencil,
   Trash2,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  X,
+  Check
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -78,6 +81,9 @@ export default function ProfilePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
 
+  // View/Edit state for Business Overview
+  const [isEditingOverview, setIsEditingOverview] = useState(false);
+
   // Form States
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -86,6 +92,9 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   
+  // Backup states for cancelling
+  const [originalData, setOriginalData] = useState<any>(null);
+
   const [links, setLinks] = useState({
     whatsapp: "",
     instagram: "",
@@ -140,22 +149,33 @@ export default function ProfilePage() {
 
           if (docSnap.exists()) {
             const data = docSnap.data();
-            setName(data.name || user.displayName || "");
-            setBio(data.bio || "");
-            setCategory(data.category || "General Business");
-            setLocation(data.location || "");
-            setAvatarUrl(data.avatarUrl || null);
-            setCoverUrl(data.coverUrl || null);
-            setLinks({
-              whatsapp: data.links?.whatsapp || "",
-              instagram: data.links?.instagram || "",
-              facebook: data.links?.facebook || "",
-              tiktok: data.links?.tiktok || "",
-              youtube: data.links?.youtube || "",
-              shopee: data.links?.shopee || "",
-              tokopedia: data.links?.tokopedia || "",
-              linkedin: data.links?.linkedin || ""
-            });
+            const userData = {
+              name: data.name || user.displayName || "",
+              bio: data.bio || "",
+              category: data.category || "General Business",
+              location: data.location || "",
+              avatarUrl: data.avatarUrl || null,
+              coverUrl: data.coverUrl || null,
+              links: {
+                whatsapp: data.links?.whatsapp || "",
+                instagram: data.links?.instagram || "",
+                facebook: data.links?.facebook || "",
+                tiktok: data.links?.tiktok || "",
+                youtube: data.links?.youtube || "",
+                shopee: data.links?.shopee || "",
+                tokopedia: data.links?.tokopedia || "",
+                linkedin: data.links?.linkedin || ""
+              }
+            };
+            
+            setName(userData.name);
+            setBio(userData.bio);
+            setCategory(userData.category);
+            setLocation(userData.location);
+            setAvatarUrl(userData.avatarUrl);
+            setCoverUrl(userData.coverUrl);
+            setLinks(userData.links);
+            setOriginalData(userData);
           }
         } catch (error: any) {
           console.error("Firestore Error:", error);
@@ -193,6 +213,40 @@ export default function ProfilePage() {
     const fileRef = storageRef(storage, path);
     await uploadBytes(fileRef, file);
     return getDownloadURL(fileRef);
+  };
+
+  // Dedicated save for Business Overview
+  const handleSaveOverview = async () => {
+    if (!userId || !db) return;
+    setSaving(true);
+    try {
+      const docRef = doc(db, "users", userId);
+      await setDoc(docRef, {
+        name,
+        bio,
+        category,
+        location,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      
+      setOriginalData({ ...originalData, name, bio, category, location });
+      setIsEditingOverview(false);
+      toast({ title: "Profil Diperbarui", description: "Ringkasan bisnis Anda telah berhasil disimpan." });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Gagal Menyimpan", description: error.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelOverview = () => {
+    if (originalData) {
+      setName(originalData.name);
+      setBio(originalData.bio);
+      setCategory(originalData.category);
+      setLocation(originalData.location);
+    }
+    setIsEditingOverview(false);
   };
 
   const handleSaveProfile = async (e?: React.FormEvent) => {
@@ -371,32 +425,91 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">
             <div className="lg:col-span-7 space-y-6">
-              <Card className="border-slate-200 shadow-sm rounded-[2rem]">
-                <CardHeader className="p-8 pb-4 border-b border-slate-100">
-                  <CardTitle className="text-xl font-black flex items-center gap-2"><Globe className="size-5 text-accent" /> Business Overview</CardTitle>
+              <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden">
+                <CardHeader className="p-8 pb-4 border-b border-slate-100 flex flex-row items-center justify-between">
+                  <CardTitle className="text-xl font-black flex items-center gap-2">
+                    <Globe className="size-5 text-accent" /> 
+                    Business Overview
+                  </CardTitle>
+                  {!isEditingOverview && (
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setIsEditingOverview(true)}
+                      className="rounded-lg text-slate-400 hover:text-accent font-bold gap-2"
+                    >
+                      <Pencil className="size-4" /> Edit
+                    </Button>
+                  )}
                 </CardHeader>
-                <CardContent className="p-8 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label className="font-bold text-slate-700">Display Name</Label>
-                      <Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl h-12" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-bold text-slate-700">Industry Sector</Label>
-                      <Input value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-xl h-12" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-bold text-slate-700">Geographic Base</Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                        <Input value={location} onChange={(e) => setLocation(e.target.value)} className="pl-10 rounded-xl h-12" />
+                <CardContent className="p-8">
+                  {isEditingOverview ? (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label className="font-bold text-slate-700">Display Name</Label>
+                          <Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl h-12" placeholder="Nama Bisnis Anda" required />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold text-slate-700">Industry Sector</Label>
+                          <Input value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-xl h-12" placeholder="e.g. Technology" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold text-slate-700">Geographic Base</Label>
+                          <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                            <Input value={location} onChange={(e) => setLocation(e.target.value)} className="pl-10 rounded-xl h-12" placeholder="Lokasi" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-bold text-slate-700">Mission Statement / Bio</Label>
+                        <Textarea value={bio} onChange={(e) => setBio(e.target.value)} className="rounded-xl min-h-[120px]" placeholder="Ceritakan tentang visi misi bisnis Anda..." />
+                      </div>
+                      <div className="flex gap-3 justify-end pt-4">
+                        <Button type="button" variant="ghost" onClick={handleCancelOverview} className="rounded-xl font-bold h-11 px-6">
+                          <X className="size-4 mr-2" /> Batal
+                        </Button>
+                        <Button type="button" onClick={handleSaveOverview} disabled={saving} className="rounded-xl bg-accent text-white font-bold h-11 px-8 shadow-md">
+                          {saving ? <RefreshCw className="size-4 mr-2 animate-spin" /> : <Check className="size-4 mr-2" />}
+                          Simpan
+                        </Button>
                       </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="font-bold text-slate-700">Mission Statement / Bio</Label>
-                    <Textarea value={bio} onChange={(e) => setBio(e.target.value)} className="rounded-xl min-h-[120px]" />
-                  </div>
+                  ) : (
+                    <div className="space-y-8 animate-in fade-in duration-300">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Company Identity</span>
+                          <p className="text-lg font-black text-slate-900">{name || "Belum diatur"}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Industry Sector</span>
+                          <p className="text-sm font-bold text-slate-600 flex items-center gap-2">
+                            <Building2 className="size-4 text-indigo-400" />
+                            {category || "Belum diatur"}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Geographic Base</span>
+                          <p className="text-sm font-bold text-slate-600 flex items-center gap-2">
+                            <MapPin className="size-4 text-rose-400" />
+                            {location || "Belum diatur"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-2 pt-4 border-t border-slate-50">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mission & Vision</span>
+                        <p className={cn(
+                          "text-sm font-medium leading-relaxed italic",
+                          bio ? "text-slate-600" : "text-slate-400"
+                        )}>
+                          {bio || "Tidak ada mission statement yang ditampilkan."}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
