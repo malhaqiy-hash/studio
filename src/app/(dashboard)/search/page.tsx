@@ -23,9 +23,13 @@ import {
   Zap,
   MapPin,
   CheckCircle2,
-  Cpu
+  Cpu,
+  Star,
+  ExternalLink,
+  Info
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 const SEARCH_SCOPES = [
   { id: "products", label: "Product Search", icon: Package, color: "text-indigo-500", bg: "bg-indigo-50" },
@@ -40,6 +44,55 @@ const RECENT_SEARCHES = [
   "AI implementation partners EU",
   "Solar panel distributors Jakarta",
   "Logistics tech startups Series A"
+];
+
+// Mock Result Type
+interface SearchResult {
+  id: string;
+  name: string;
+  matchScore: number;
+  reputation: number;
+  location: string;
+  verified: boolean;
+  tags: string[];
+  description: string;
+  type: string;
+}
+
+const MOCK_RESULTS: SearchResult[] = [
+  {
+    id: "1",
+    name: "Nusantara Eco-Pack Solutions",
+    matchScore: 98,
+    reputation: 4.9,
+    location: "Jakarta, Indonesia",
+    verified: true,
+    tags: ["Halal Certified", "Export Ready", "ISO 14001"],
+    description: "Specializing in high-grade biodegradable food packaging with full halal certification and export experience to East Asian markets.",
+    type: "supplier"
+  },
+  {
+    id: "2",
+    name: "Global Halal Logistics",
+    matchScore: 92,
+    reputation: 4.7,
+    location: "Surabaya, Indonesia",
+    verified: true,
+    tags: ["Cold Chain", "Halal Logix", "Japan Route"],
+    description: "Integrated logistics provider with specialized halal-certified storage and transport lines established between Indonesia and Tokyo.",
+    type: "service"
+  },
+  {
+    id: "3",
+    name: "Pacific Rim Distributors",
+    matchScore: 85,
+    reputation: 4.5,
+    location: "Osaka, Japan",
+    verified: false,
+    tags: ["Retail Network", "Import Specialist"],
+    description: "A leading distributor in the Kansai region looking for sustainable and halal-certified Indonesian products for the 2025 retail season.",
+    type: "distributor"
+  }
 ];
 
 export default function SearchHubPage() {
@@ -198,40 +251,105 @@ export default function SearchHubPage() {
                       </Button>
                     </div>
 
-                    <div className="grid gap-4">
+                    <div className="grid gap-6">
                       {/* Empty State / Initial Suggestions */}
-                      {!extractedData && (
-                        <div className="p-10 border-2 border-dashed border-slate-100 rounded-[2rem] flex flex-col items-center justify-center text-center space-y-4">
-                          <div className={`size-16 rounded-3xl ${scope.bg} flex items-center justify-center`}>
-                            <scope.icon className={`size-8 ${scope.color}`} />
+                      {!extractedData && !isAnalyzing && (
+                        <div className="p-20 border-2 border-dashed border-slate-100 rounded-[3rem] flex flex-col items-center justify-center text-center space-y-6">
+                          <div className={`size-24 rounded-[2rem] ${scope.bg} flex items-center justify-center rotate-3`}>
+                            <scope.icon className={`size-12 ${scope.color}`} />
                           </div>
-                          <div className="space-y-1">
-                            <h4 className="font-bold text-slate-900">Ready to Discover {scope.label.split(' ')[0]}s</h4>
-                            <p className="text-sm text-slate-400 font-medium max-w-xs">
-                              Type your requirements above to see real-time matches from the OnTapp network.
+                          <div className="space-y-2">
+                            <h4 className="text-2xl font-black text-slate-900">Ready to Discover {scope.label.split(' ')[0]}s</h4>
+                            <p className="text-slate-400 font-medium max-w-sm mx-auto">
+                              Our AI is ready to synthesize results from the global network. Type your business requirements above to begin indexing.
                             </p>
                           </div>
                         </div>
                       )}
 
-                      {/* Results Placeholder when data is extracted */}
-                      {extractedData && (
-                        <div className="space-y-4">
-                          {[1, 2, 3].map((i) => (
-                            <div key={i} className="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-between group hover:border-accent transition-all">
-                              <div className="flex items-center gap-4">
-                                <div className="size-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
-                                   <scope.icon className={`size-5 ${scope.color}`} />
-                                </div>
-                                <div>
-                                  <h5 className="font-bold text-slate-900">Verified {scope.label.split(' ')[0]} {i}</h5>
-                                  <p className="text-xs text-slate-500 font-medium">Matching intent: {extractedData.industry} / {extractedData.certification}</p>
-                                </div>
+                      {/* Ranked Search Results Grid */}
+                      {extractedData && !isAnalyzing && (
+                        <div className="grid gap-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
+                          {MOCK_RESULTS.map((result) => (
+                            <Card key={result.id} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-white relative">
+                              {/* Match Score Badge with Gradient */}
+                              <div className="absolute top-4 right-4">
+                                <Badge className={cn(
+                                  "border-none font-black text-xs uppercase px-4 py-1.5 shadow-lg flex gap-1.5",
+                                  result.matchScore >= 95 
+                                    ? "bg-gradient-to-r from-indigo-500 via-accent to-indigo-600 text-white"
+                                    : "bg-slate-200 text-slate-600"
+                                )}>
+                                  <Sparkles className="size-3 text-white fill-white" />
+                                  {result.matchScore}% Match
+                                </Badge>
                               </div>
-                              <Button variant="ghost" className="rounded-xl font-bold text-accent group-hover:bg-indigo-50">
-                                View Profile
-                              </Button>
-                            </div>
+
+                              <CardContent className="p-8 flex flex-col md:flex-row gap-8 items-start">
+                                {/* Visual Avatar/Icon */}
+                                <div className={cn(
+                                  "size-20 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:rotate-6 transition-all duration-300",
+                                  result.matchScore >= 95 ? "bg-indigo-50 text-accent" : "bg-slate-50 text-slate-400"
+                                )}>
+                                  {result.type === 'supplier' && <Truck className="size-10" />}
+                                  {result.type === 'service' && <Headphones className="size-10" />}
+                                  {result.type === 'distributor' && <Network className="size-10" />}
+                                </div>
+
+                                {/* Content Details */}
+                                <div className="flex-1 space-y-4">
+                                  <div className="space-y-2">
+                                    <div className="flex flex-wrap items-center gap-3">
+                                      <h4 className="text-2xl font-black text-slate-900 leading-tight group-hover:text-accent transition-colors">
+                                        {result.name}
+                                      </h4>
+                                      {result.verified && (
+                                        <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 border-emerald-100 flex gap-1.5 items-center px-3 py-1 font-black text-[10px] uppercase tracking-wider">
+                                          <ShieldCheck className="size-3.5 fill-emerald-50" />
+                                          AI Verified
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <p className="text-slate-500 font-medium leading-relaxed max-w-2xl">
+                                      {result.description}
+                                    </p>
+                                  </div>
+
+                                  <div className="flex flex-wrap items-center gap-6">
+                                    <div className="flex items-center gap-1.5 text-xs font-black text-slate-400 uppercase tracking-widest">
+                                      <MapPin className="size-4" />
+                                      {result.location}
+                                    </div>
+                                    <div className="flex items-center gap-1.5 p-1 px-3 bg-slate-50 border border-slate-100 rounded-full">
+                                      <Star className="size-4 text-amber-500 fill-amber-500" />
+                                      <span className="text-sm font-black text-slate-900 leading-none">{result.reputation}</span>
+                                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">/ 5.0 Rating</span>
+                                    </div>
+                                  </div>
+
+                                  {/* Criteria Chips */}
+                                  <div className="flex flex-wrap gap-2 pt-2">
+                                    {result.tags.map((tag, tIdx) => (
+                                      <span key={tIdx} className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
+                                        [{tag}]
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Action Side Column */}
+                                <div className="md:w-48 shrink-0 flex flex-col gap-3 pt-4 md:pt-0">
+                                  <Button className="w-full rounded-xl h-12 bg-accent hover:bg-indigo-600 text-white font-black shadow-lg shadow-indigo-100 flex gap-2">
+                                    <ExternalLink className="size-4" />
+                                    View Details
+                                  </Button>
+                                  <Button variant="ghost" className="w-full rounded-xl h-12 font-bold text-slate-400 hover:text-slate-600 flex gap-2">
+                                    <Info className="size-4" />
+                                    Compare
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
                           ))}
                         </div>
                       )}
