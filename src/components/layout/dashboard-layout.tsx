@@ -21,7 +21,8 @@ import {
   Menu,
   ChevronRight,
   ShieldCheck,
-  LayoutGrid
+  LayoutGrid,
+  Languages
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,11 +56,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const { t } = useLanguage();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
-
-  const mainNavItems = [
-    { icon: Rss, label: t('feed'), href: "/feed" },
-    { icon: Search, label: t('search'), href: "/search" },
-  ];
 
   const extendedNavItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
@@ -140,8 +136,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <span className="font-headline font-black text-lg tracking-tight text-slate-900">OnTapp</span>
         </Link>
         
-        <div className="flex items-center gap-2">
-          <LanguagePicker />
+        <div className="flex items-center gap-3">
+          {/* Notifications in Header */}
+          <Link href="/notifications">
+            <Button variant="ghost" size="icon" className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition">
+              <Bell className="size-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+            </Button>
+          </Link>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center rounded-full border-2 border-indigo-100 hover:border-accent transition p-0.5 outline-none">
@@ -171,12 +174,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   {t('profile')}
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer" asChild>
-                <Link href="/settings">
-                  <Settings className="size-4" />
-                  {t('settings')}
-                </Link>
-              </DropdownMenuItem>
+              {/* Settings removed from here per requirement */}
               <DropdownMenuSeparator className="bg-slate-50" />
               <DropdownMenuItem 
                 onClick={handleLogout}
@@ -227,7 +225,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
           {/* TAB 3: Menu Utama / Lainnya (≡) */}
           <div className="relative w-full h-full flex flex-col items-center justify-center">
-            {/* 🤖 TOMBOL AI ADVISOR (Sekarang melayang pas di atas garis tiga) */}
+            {/* 🤖 TOMBOL AI ADVISOR (Floating Chat Button) */}
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
               className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-50"
@@ -239,7 +237,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild>
-                {/* Tombol Pemicu Menu Lainnya (Garis Tiga - Bersih Tanpa Tertutup) */}
                 <button className="flex flex-col items-center gap-1 hover:text-indigo-600 w-full py-2 outline-none">
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -281,6 +278,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       <span className="text-[10px] font-black uppercase tracking-widest text-center">{item.label}</span>
                     </Link>
                   ))}
+                  
+                  {/* Language Settings moved here */}
+                  <div className="col-span-2 p-6 rounded-3xl border border-slate-100 bg-white space-y-3">
+                    <div className="flex items-center gap-3 text-slate-900">
+                      <Languages className="size-5 text-accent" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Setelan Bahasa</span>
+                    </div>
+                    <LanguagePicker />
+                  </div>
+
                   <button 
                     onClick={handleLogout}
                     className="col-span-2 flex items-center justify-between p-6 rounded-3xl bg-rose-50 border border-rose-100 text-rose-600 font-black uppercase tracking-widest text-[11px]"
