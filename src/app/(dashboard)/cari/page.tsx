@@ -84,15 +84,16 @@ export default function CariPage() {
   // Translation state
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean, detected: string }>>({});
 
-  const handleSearch = async (e?: React.FormEvent) => {
+  const handleSearch = async (e?: React.FormEvent, overrideQuery?: string) => {
     e?.preventDefault();
-    if (!query && !activeCategory) return;
+    const finalQuery = overrideQuery || query;
+    if (!finalQuery && !activeCategory) return;
     
     setLoading(true);
     setTranslations({});
     try {
       const output = await aiIntentSearch({ 
-        query: query || (activeCategory ? `Cari ${activeCategory}` : ""), 
+        query: finalQuery || (activeCategory ? `Cari ${activeCategory}` : ""), 
         filters: {
           category: activeCategory || undefined,
           location: activeLocation !== "Pilih Lokasi" ? activeLocation : undefined
@@ -107,7 +108,7 @@ export default function CariPage() {
   };
 
   const toggleVoiceSearch = () => {
-    if (!('webkitSpeechRecognition' in window) && !('speechRecognition' in window)) {
+    if (typeof window !== 'undefined' && !('webkitSpeechRecognition' in window) && !('speechRecognition' in window)) {
       toast({
         variant: "destructive",
         title: "Browser Tidak Mendukung",
@@ -138,7 +139,7 @@ export default function CariPage() {
       setQuery(transcript);
       setIsListening(false);
       toast({ title: "Suara Terdeteksi", description: `Mencari: "${transcript}"` });
-      setTimeout(() => handleSearch(), 500);
+      setTimeout(() => handleSearch(undefined, transcript), 500);
     };
 
     recognition.onerror = () => {
@@ -220,12 +221,26 @@ export default function CariPage() {
     loc.toLowerCase().includes(locationSearch.toLowerCase())
   );
 
+  const handleFeatureClick = (type: string) => {
+    switch(type) {
+      case 'voice':
+        toggleVoiceSearch();
+        break;
+      case 'priority':
+        handleSearch(undefined, "Tampilkan anggota OnTapp terverifikasi");
+        break;
+      case 'hybrid':
+        handleSearch(undefined, "Cari data bisnis global di seluruh web");
+        break;
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-6 py-2">
         {/* Search & Filters Area */}
         <div className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
-          <form onSubmit={handleSearch} className="space-y-3">
+          <form onSubmit={(e) => handleSearch(e)} className="space-y-3">
             <div className="relative group w-full">
               <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                 <Search className="size-5 text-slate-400 group-focus-within:text-accent transition-colors" />
@@ -298,7 +313,7 @@ export default function CariPage() {
                     </div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
-                </PopoverTrigger>
+                </DropdownMenuTrigger>
                 <PopoverContent align="end" className="w-[280px] rounded-2xl p-3 shadow-2xl border-slate-100 space-y-3">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
@@ -344,7 +359,7 @@ export default function CariPage() {
             </div>
 
             <Button 
-              onClick={handleSearch}
+              onClick={(e) => handleSearch(e)}
               disabled={loading}
               className="w-full h-12 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-sm shadow-md transition-all active:scale-95 flex gap-2"
             >
@@ -482,11 +497,15 @@ export default function CariPage() {
           {!loading && !results && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
               {[
-                { title: "Prioritas OnTapp", desc: "Internal member diprioritaskan.", icon: Zap, color: "text-accent", bg: "bg-indigo-50" },
-                { title: "Web Hibrida", desc: "Data global dari seluruh web.", icon: Globe, color: "text-emerald-500", bg: "bg-emerald-50" },
-                { title: "Voice AI", desc: "Cari hanya dengan berbicara.", icon: Mic, color: "text-rose-500", bg: "bg-rose-50" }
+                { id: 'priority', title: "Prioritas OnTapp", desc: "Internal member diprioritaskan.", icon: Zap, color: "text-accent", bg: "bg-indigo-50" },
+                { id: 'hybrid', title: "Web Hibrida", desc: "Data global dari seluruh web.", icon: Globe, color: "text-emerald-500", bg: "bg-emerald-50" },
+                { id: 'voice', title: "Voice AI", desc: "Cari hanya dengan berbicara.", icon: Mic, color: "text-rose-500", bg: "bg-rose-50" }
               ].map((feature, i) => (
-                <div key={i} className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm text-center space-y-3 hover:shadow-md transition-all group">
+                <button 
+                  key={i} 
+                  onClick={() => handleFeatureClick(feature.id)}
+                  className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm text-center space-y-3 hover:shadow-md transition-all group active:scale-95 cursor-pointer outline-none focus:ring-2 focus:ring-accent/10"
+                >
                   <div className={cn("size-10 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform", feature.bg, feature.color)}>
                     <feature.icon className="size-5" />
                   </div>
@@ -494,7 +513,7 @@ export default function CariPage() {
                     <h4 className="text-sm font-black text-slate-900">{feature.title}</h4>
                     <p className="text-slate-400 text-[9px] font-medium leading-relaxed">{feature.desc}</p>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}
