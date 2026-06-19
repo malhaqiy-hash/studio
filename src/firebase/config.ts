@@ -1,7 +1,8 @@
 
 /**
  * Firebase client configuration.
- * All values are pulled from environment variables for security and flexibility.
+ * All values are pulled from environment variables. 
+ * Ensure these are set in your Firebase Studio project settings.
  */
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
@@ -11,3 +12,5 @@ export const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
 };
+
+export const isConfigValid = !!firebaseConfig.apiKey && !!firebaseConfig.projectId;
