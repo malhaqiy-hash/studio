@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -11,32 +12,18 @@ import {
   MessageSquare, 
   Briefcase, 
   Bell, 
-  UserCircle,
   LogOut,
   Globe,
-  Menu,
   Settings,
-  ChevronsUpDown,
   User,
   Sliders,
   Sparkles,
-  Target
+  Target,
+  Menu,
+  ChevronRight,
+  ShieldCheck,
+  LayoutGrid
 } from "lucide-react";
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarFooter, 
-  SidebarGroup, 
-  SidebarGroupContent, 
-  SidebarGroupLabel, 
-  SidebarHeader, 
-  SidebarInset, 
-  SidebarMenu, 
-  SidebarMenuButton, 
-  SidebarMenuItem, 
-  SidebarProvider,
-  SidebarTrigger
-} from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -46,12 +33,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { AIAssistant } from "@/components/chat/ai-assistant";
 import { LanguagePicker } from "@/components/language-picker";
-import { useLanguage, translations } from "@/context/language-context";
+import { useLanguage } from "@/context/language-context";
+import { cn } from "@/lib/utils";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -59,11 +54,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
   const auth = useAuth();
   const { t } = useLanguage();
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
 
-  const navItems = [
-    { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
+  const mainNavItems = [
     { icon: Rss, label: t('feed'), href: "/feed" },
     { icon: Search, label: t('search'), href: "/search" },
+  ];
+
+  const extendedNavItems = [
+    { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
     { icon: Globe, label: t('discovery'), href: "/discover" },
     { icon: Target, label: t('matches'), href: "/matches" },
     { icon: Users, label: t('matchmaker'), href: "/matchmaker" },
@@ -71,6 +70,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { icon: MessageSquare, label: t('messages'), href: "/messages" },
     { icon: Bell, label: t('notifications'), href: "/notifications" },
     { icon: Sliders, label: t('settings'), href: "/settings" },
+    { icon: User, label: t('profile'), href: "/profile" },
   ];
 
   // Route Protection
@@ -129,136 +129,176 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const userInitial = user.email ? user.email[0].toUpperCase() : "U";
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background relative">
-        <Sidebar className="border-r border-border">
-          <SidebarHeader className="h-16 flex items-center px-6 border-b border-border">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white font-bold text-xl">
-                O
-              </div>
-              <span className="font-headline font-bold text-lg tracking-tight">OnTapp</span>
-            </Link>
-          </SidebarHeader>
-          <SidebarContent className="py-4">
-            <SidebarGroup>
-              <SidebarGroupLabel className="px-6 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                {t('welcome')}
-              </SidebarGroupLabel>
-              <SidebarMenu className="px-3 gap-1">
-                {navItems.map((item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton 
-                      asChild 
-                      isActive={pathname === item.href}
-                      className="rounded-lg px-3 py-6 h-11"
-                    >
-                      <Link href={item.href}>
-                        <item.icon className="size-5" />
-                        <span className="font-medium">{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter className="p-4 border-t border-border">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-xl border border-slate-100 bg-slate-50/50 cursor-pointer"
-                >
-                  <Avatar className="h-9 w-9 rounded-lg shadow-sm ring-2 ring-white">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-body">
+      
+      {/* ==================== 1. TOP HEADER ==================== */}
+      <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm">
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <div className="size-8 rounded-lg bg-accent flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-100">
+            O
+          </div>
+          <span className="font-headline font-black text-lg tracking-tight text-slate-900">OnTapp</span>
+        </Link>
+        
+        <div className="flex items-center gap-2">
+          <LanguagePicker />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center rounded-full border-2 border-indigo-100 hover:border-accent transition p-0.5 outline-none">
+                <Avatar className="h-7 w-7 rounded-full shadow-sm">
+                  <AvatarImage src={`https://picsum.photos/seed/${user.uid}/100`} />
+                  <AvatarFallback className="bg-accent text-white font-bold text-[10px]">{userInitial}</AvatarFallback>
+                </Avatar>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-2xl border-slate-100">
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-3 px-2 py-3">
+                  <Avatar className="h-9 w-9 rounded-xl">
                     <AvatarImage src={`https://picsum.photos/seed/${user.uid}/100`} />
-                    <AvatarFallback className="rounded-lg bg-indigo-100 text-accent font-bold">{userInitial}</AvatarFallback>
+                    <AvatarFallback className="rounded-xl bg-indigo-50 text-accent font-bold">{userInitial}</AvatarFallback>
                   </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight ml-2">
-                    <span className="truncate font-bold text-slate-900">{user.displayName || "Business Member"}</span>
-                    <span className="truncate text-[10px] font-black uppercase text-slate-400 tracking-tighter">Enterprise</span>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-black text-slate-900 leading-none mb-1">Business Account</span>
+                    <span className="truncate text-[10px] font-medium text-slate-400">{user.email}</span>
                   </div>
-                  <ChevronsUpDown className="ml-auto size-4 text-slate-400" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-2xl p-2 shadow-2xl border-slate-100"
-                side="bottom"
-                align="end"
-                sideOffset={8}
-              >
-                <DropdownMenuLabel className="p-0 font-normal">
-                  <div className="flex items-center gap-3 px-2 py-3">
-                    <Avatar className="h-10 w-10 rounded-xl shadow-sm">
-                      <AvatarImage src={`https://picsum.photos/seed/${user.uid}/100`} />
-                      <AvatarFallback className="rounded-xl bg-indigo-50 text-accent font-bold">{userInitial}</AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-black text-slate-900 leading-none mb-1">{user.displayName || "Welcome"}</span>
-                      <span className="truncate text-xs font-medium text-slate-400">{user.email}</span>
-                    </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="my-2 bg-slate-50" />
-                <div className="space-y-1">
-                  <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors" asChild>
-                    <Link href="/profile">
-                      <UserCircle className="size-5" />
-                      {t('profile')}
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer transition-colors" asChild>
-                    <Link href="/settings">
-                      <Settings className="size-5" />
-                      {t('settings')}
-                    </Link>
-                  </DropdownMenuItem>
                 </div>
-                <DropdownMenuSeparator className="my-2 bg-slate-50" />
-                <DropdownMenuItem 
-                  onClick={handleLogout}
-                  className="gap-3 px-3 py-2.5 rounded-xl font-bold text-rose-600 focus:bg-rose-50 focus:text-rose-700 cursor-pointer transition-colors"
-                >
-                  <LogOut className="size-5" />
-                  {t('logout')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarFooter>
-        </Sidebar>
-        <SidebarInset className="flex flex-col">
-          <header className="h-16 flex items-center justify-between px-6 border-b border-border sticky top-0 bg-background/80 backdrop-blur-md z-30">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger className="md:hidden" />
-              <div className="flex flex-col">
-                 <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
-                    {navItems.find(i => i.href === pathname)?.label || "Explore"}
-                 </h2>
-                 <div className="text-xs font-medium text-slate-500 flex items-center gap-2">
-                    <Sparkles className="size-3 text-accent" />
-                    {t('welcome')}, <span className="font-bold text-slate-900">{user.email}</span>
-                 </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <LanguagePicker />
-              <Button variant="outline" size="sm" className="hidden sm:flex rounded-full px-4 gap-2 border-slate-200 font-bold text-slate-600" asChild>
-                <Link href="/settings">
-                  <Sliders className="size-4" />
-                  <span>Config</span>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-slate-50" />
+              <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer" asChild>
+                <Link href="/profile">
+                  <User className="size-4" />
+                  {t('profile')}
                 </Link>
-              </Button>
-            </div>
-          </header>
-          <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#F8FAFC]">
-            <div className="max-w-7xl mx-auto space-y-8">
-              {children}
-            </div>
-          </main>
-        </SidebarInset>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer" asChild>
+                <Link href="/settings">
+                  <Settings className="size-4" />
+                  {t('settings')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-slate-50" />
+              <DropdownMenuItem 
+                onClick={handleLogout}
+                className="gap-3 px-3 py-2.5 rounded-xl font-bold text-rose-600 focus:bg-rose-50 focus:text-rose-700 cursor-pointer"
+              >
+                <LogOut className="size-4" />
+                {t('logout')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </header>
 
-        <AIAssistant />
-      </div>
-    </SidebarProvider>
+      {/* ==================== 2. MAIN CONTENT AREA ==================== */}
+      <main className="flex-1 pb-28 pt-4 px-4 w-full overflow-x-hidden">
+        <div className="max-w-4xl mx-auto">
+          {children}
+        </div>
+      </main>
+
+      {/* ==================== 3. MOBILE BOTTOM NAVIGATION ==================== */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-md pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
+        <div className="grid grid-cols-3 h-16 items-center justify-items-center text-[10px] font-black uppercase tracking-widest text-slate-400 relative">
+          
+          {/* TAB 1: Beranda (Feed) */}
+          <Link 
+            href="/feed" 
+            className={cn(
+              "flex flex-col items-center gap-1 w-full py-2 transition-colors",
+              pathname === "/feed" ? "text-accent" : "hover:text-slate-600"
+            )}
+          >
+            <Rss className="size-6" />
+            <span>Beranda</span>
+          </Link>
+
+          {/* TAB 2: Cari */}
+          <Link 
+            href="/search" 
+            className={cn(
+              "flex flex-col items-center gap-1 w-full py-2 transition-colors",
+              pathname === "/search" ? "text-accent" : "hover:text-slate-600"
+            )}
+          >
+            <Search className="size-6" />
+            <span>Cari</span>
+          </Link>
+
+          {/* TAB 3: Lainnya */}
+          <div className="relative w-full h-full flex flex-col items-center justify-center">
+            
+            {/* AI Agent Banner */}
+            <div className="absolute bottom-20 flex flex-col items-center animate-bounce pointer-events-none">
+              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[9px] font-black px-3 py-1.5 rounded-2xl shadow-xl whitespace-nowrap flex items-center gap-1.5 border border-indigo-400">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                AI Agent Aktif
+              </div>
+              <div className="w-3 h-3 bg-indigo-600 rotate-45 -mt-1.5 shadow-md"></div>
+            </div>
+
+            <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
+              <SheetTrigger asChild>
+                <button className="flex flex-col items-center gap-1 hover:text-accent w-full py-2 outline-none">
+                  <Menu className="size-6" />
+                  <span>Lainnya</span>
+                </button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 overflow-hidden h-[85vh]">
+                <SheetHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <SheetTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                      <LayoutGrid className="size-5 text-accent" />
+                      Network Hub
+                    </SheetTitle>
+                    <Badge variant="outline" className="bg-white border-slate-200 text-slate-500 font-bold px-3">
+                      Enterprise Mode
+                    </Badge>
+                  </div>
+                </SheetHeader>
+                <div className="p-4 grid grid-cols-2 gap-4 overflow-y-auto max-h-full pb-20">
+                  {extendedNavItems.map((item) => (
+                    <Link 
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsMoreMenuOpen(false)}
+                      className={cn(
+                        "flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 gap-3 group",
+                        pathname === item.href 
+                          ? "bg-indigo-50 border-accent/20 text-accent" 
+                          : "bg-white border-slate-100 hover:border-accent/20 hover:bg-slate-50"
+                      )}
+                    >
+                      <div className={cn(
+                        "size-12 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110",
+                        pathname === item.href ? "bg-accent text-white" : "bg-slate-50 text-slate-400"
+                      )}>
+                        <item.icon className="size-6" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-center">{item.label}</span>
+                    </Link>
+                  ))}
+                  <button 
+                    onClick={handleLogout}
+                    className="col-span-2 flex items-center justify-between p-6 rounded-3xl bg-rose-50 border border-rose-100 text-rose-600 font-black uppercase tracking-widest text-[11px]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <LogOut className="size-5" />
+                      Logout Session
+                    </div>
+                    <ChevronRight className="size-4" />
+                  </button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </nav>
+
+      <AIAssistant />
+    </div>
   );
 }
