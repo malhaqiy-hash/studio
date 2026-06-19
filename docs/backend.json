@@ -10,26 +10,35 @@
           "type": "string",
           "description": "Name of the company offering the opportunity."
         },
-        "logo": {
+        "category": {
           "type": "string",
-          "description": "URL to the company logo."
+          "enum": ["Retail", "Service", "Tech", "F&B", "Others"],
+          "description": "Industry category."
+        },
+        "value": {
+          "type": "number",
+          "description": "The financial value of the deal."
         },
         "status": {
           "type": "string",
-          "enum": ["Verified", "Closing Soon", "Pending", "Active"],
+          "enum": ["Lead", "Proposal", "Negotiation", "Won", "Lost"],
           "description": "Current status of the opportunity."
+        },
+        "whatsapp": {
+          "type": "string",
+          "description": "Client WhatsApp contact number."
         },
         "date": {
           "type": "string",
           "format": "date",
-          "description": "Deadline or significant date for the opportunity."
+          "description": "Target deadline for the opportunity."
         },
-        "type": {
+        "description": {
           "type": "string",
-          "description": "Category of the opportunity (e.g., Sourcing, Strategic)."
+          "description": "Detailed notes about the lead."
         }
       },
-      "required": ["companyName", "status", "type"]
+      "required": ["companyName", "category", "status"]
     }
   },
   "auth": {
