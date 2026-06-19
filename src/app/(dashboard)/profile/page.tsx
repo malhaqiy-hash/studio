@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -431,4 +430,62 @@ export default function ProfilePage() {
                 </DialogHeader>
                 <div className="p-8 space-y-6">
                   <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2"><
+                    <div className="space-y-2"><Label className="font-bold">Nama Produk</Label><Input value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} className="rounded-xl" /></div>
+                    <div className="space-y-2">
+                      <Label className="font-bold">Kategori</Label>
+                      <Select value={newProduct.category} onValueChange={(val) => setNewProduct({ ...newProduct, category: val })}>
+                        <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Software">Software</SelectItem>
+                          <SelectItem value="Hardware">Hardware</SelectItem>
+                          <SelectItem value="Service">Professional Service</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2 col-span-2"><Label className="font-bold">Harga (IDR)</Label><Input type="number" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })} className="rounded-xl" /></div>
+                    <div className="space-y-2 col-span-2"><Label className="font-bold">Deskripsi</Label><Textarea value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })} className="rounded-xl" /></div>
+                  </div>
+                </div>
+                <DialogFooter className="p-8 pt-0 flex gap-3">
+                  <Button variant="ghost" onClick={() => setIsProductModalOpen(false)} className="rounded-xl font-bold">Batal</Button>
+                  <Button onClick={handleAddOrEditProduct} className="rounded-xl bg-accent text-white px-10 font-black">Simpan</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {productsLoading ? (
+              [1, 2, 3].map(i => <Skeleton key={i} className="h-80 rounded-[2rem]" />)
+            ) : (products || []).length === 0 ? (
+              <div className="col-span-full p-20 text-center border-2 border-dashed rounded-[2.5rem] bg-slate-50/50">
+                <ShoppingBag className="size-12 text-slate-300 mx-auto mb-4" />
+                <p className="font-bold text-slate-400">Belum ada produk dalam katalog Anda.</p>
+              </div>
+            ) : (
+              products.map((p) => (
+                <Card key={p.id} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all rounded-[2rem] bg-white">
+                  <div className="aspect-[4/3] w-full relative overflow-hidden">
+                    <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute top-4 left-4"><Badge className="bg-white/90 text-slate-900 border-none font-black text-[10px] px-3 py-1 shadow-md">{p.category}</Badge></div>
+                  </div>
+                  <CardHeader className="p-6">
+                    <CardTitle className="text-xl font-black text-slate-900 truncate">{p.name}</CardTitle>
+                    <div className="text-lg font-black text-indigo-600">Rp {p.price.toLocaleString("id-ID")}</div>
+                  </CardHeader>
+                  <CardContent className="px-6 pb-6">
+                    <p className="text-sm text-slate-500 font-medium line-clamp-2 h-10">{p.description}</p>
+                  </CardContent>
+                  <CardFooter className="px-4 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                    <Button variant="ghost" size="sm" onClick={() => openEditModal(p)} className="font-bold text-slate-500 hover:text-accent gap-2"><Pencil className="size-3.5" /> Edit</Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDeleteProduct(p.id)} className="font-bold text-rose-500 hover:text-rose-600 gap-2"><Trash2 className="size-3.5" /> Hapus</Button>
+                  </CardFooter>
+                </Card>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
