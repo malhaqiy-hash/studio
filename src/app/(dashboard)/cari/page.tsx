@@ -23,7 +23,9 @@ import {
   Building2,
   Filter,
   Mic,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles,
+  Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -496,6 +498,3 @@ export default function CariPage() {
     </DashboardLayout>
   );
 }
-
-// Add these Lucide icons that were missing in the original imports but are common
-import { Plus } from 'lucide-react';
