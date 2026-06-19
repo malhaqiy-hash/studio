@@ -19,3 +19,10 @@ export const isConfigValid = Boolean(
   firebaseConfig.projectId && 
   firebaseConfig.appId
 );
+
+// Debugging helper for environment variables
+if (typeof window !== "undefined") {
+  if (!isConfigValid) {
+    console.warn("🔥 Firebase keys missing. Check NEXT_PUBLIC_ variables.");
+  }
+}

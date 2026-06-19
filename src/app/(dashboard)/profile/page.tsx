@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -27,7 +26,8 @@ import {
   Plus,
   Pencil,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Sparkles
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -159,7 +159,7 @@ export default function ProfilePage() {
           }
         } catch (error: any) {
           console.error("Firestore Error:", error);
-          if (error.code === 'unavailable') {
+          if (error.code === 'unavailable' || error.message?.includes('offline')) {
             setIsOffline(true);
           }
         } finally {
@@ -318,14 +318,15 @@ export default function ProfilePage() {
         <input type="file" ref={coverInputRef} className="hidden" accept="image/*" onChange={handleCoverChange} />
 
         <form onSubmit={handleSaveProfile} className="space-y-8">
-          {/* Visual Header */}
           <div className="relative">
             <div className="h-64 md:h-80 w-full rounded-[2.5rem] bg-slate-200 overflow-hidden relative shadow-lg">
-              <img 
-                src={currentCover} 
-                alt="Cover" 
-                className={cn("w-full h-full object-cover transition-opacity duration-300", saving && coverFile ? "opacity-50" : "opacity-100")}
-              />
+              {currentCover && (
+                <img 
+                  src={currentCover} 
+                  alt="Cover" 
+                  className={cn("w-full h-full object-cover transition-opacity duration-300", saving && coverFile ? "opacity-50" : "opacity-100")}
+                />
+              )}
               <Button 
                 type="button"
                 onClick={() => coverInputRef.current?.click()}
@@ -350,6 +351,11 @@ export default function ProfilePage() {
                 <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
                    <Camera className="size-10 text-white" />
                 </div>
+                {saving && avatarFile && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <RefreshCw className="size-8 text-white animate-spin" />
+                  </div>
+                )}
               </div>
               <div className="pb-2 text-center md:text-left space-y-1">
                 <div className="flex flex-col md:flex-row items-center gap-3">
