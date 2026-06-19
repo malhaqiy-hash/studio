@@ -39,8 +39,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
   DropdownMenuPortal,
+  DropdownMenuSubContent,
   DropdownMenuGroup
 } from "@/components/ui/dropdown-menu";
 import {
@@ -149,9 +149,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 {availableAccounts.map((acc) => (
                   <DropdownMenuItem 
                     key={acc.id}
-                    onClick={() => switchAccount(acc.id)}
+                    onSelect={() => switchAccount(acc.id)}
                     className={cn(
-                      "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors",
+                      "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1",
                       activeAccount.id === acc.id 
                         ? "bg-indigo-50 text-accent" 
                         : "text-slate-600 focus:bg-slate-50"
@@ -182,19 +182,19 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="rounded-xl border-slate-100 shadow-xl p-1 min-w-[160px]">
                     <DropdownMenuItem 
-                      onClick={() => activateAccountType('pribadi')}
+                      onSelect={() => activateAccountType('pribadi')}
                       className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
                     >
                       <User className="size-4 text-slate-400" /> Pribadi
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      onClick={() => activateAccountType('professional')}
+                      onSelect={() => activateAccountType('professional')}
                       className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
                     >
                       <ShieldCheck className="size-4 text-emerald-400" /> Professional
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      onClick={() => activateAccountType('bisnis')}
+                      onSelect={() => activateAccountType('bisnis')}
                       className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
                     >
                       <Briefcase className="size-4 text-indigo-400" /> Bisnis
