@@ -23,7 +23,8 @@ import {
   LayoutGrid,
   Languages,
   CreditCard,
-  UserPlus
+  UserPlus,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,7 +63,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { t } = useLanguage();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
 
-  // Vertical list order for drawer
+  // Vertical list order for drawer (Requirement #4)
   const drawerItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
     { icon: Globe, label: t('discovery'), href: "/discover" },
@@ -133,16 +134,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-body">
       
-      {/* ==================== 1. TOP HEADER ==================== */}
+      {/* ==================== 1. TOP HEADER (Refactored Requirement #1) ==================== */}
       <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="size-8 rounded-lg bg-accent flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-100">
-            O
-          </div>
-          <span className="font-headline font-black text-lg tracking-tight text-slate-900">OnTapp</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <div className="size-8 rounded-lg bg-accent flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-100">
+              O
+            </div>
+            <span className="font-headline font-black text-lg tracking-tight text-slate-900">OnTapp</span>
+          </Link>
+          <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter px-1.5 py-0 border-accent/20 text-accent bg-accent/5">Beta</Badge>
+        </div>
         
         <div className="flex items-center gap-3">
+          {/* Notification Icon moved here (Requirement #1) */}
           <Link href="/notifications">
             <Button variant="ghost" size="icon" className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition">
               <Bell className="size-5" />
@@ -150,6 +155,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </Button>
           </Link>
 
+          {/* Profile Avatar (Requirement #1) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center rounded-full border-2 border-indigo-100 hover:border-accent transition p-0.5 outline-none">
@@ -159,7 +165,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </Avatar>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-2xl border-slate-100">
+            <DropdownMenuContent align="end" className="w-64 rounded-2xl p-2 shadow-2xl border-slate-100">
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-3 px-2 py-3">
                   <Avatar className="h-9 w-9 rounded-xl">
@@ -181,20 +187,26 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </DropdownMenuItem>
 
+              {/* Multi-Account Management (Requirement #5) */}
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer">
                   <UserPlus className="size-4" />
                   Tambahkan Akun
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="rounded-xl border-slate-100 shadow-xl">
-                    <DropdownMenuItem className="font-bold px-4 py-2 cursor-pointer">Pribadi</DropdownMenuItem>
-                    <DropdownMenuItem className="font-bold px-4 py-2 cursor-pointer">Professional</DropdownMenuItem>
-                    <DropdownMenuItem className="font-bold px-4 py-2 cursor-pointer">Bisnis</DropdownMenuItem>
+                  <DropdownMenuSubContent className="rounded-xl border-slate-100 shadow-xl p-1">
+                    <DropdownMenuItem className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3">
+                      <User className="size-4 text-slate-400" /> Pribadi
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3">
+                      <ShieldCheck className="size-4 text-emerald-400" /> Professional
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3">
+                      <Briefcase className="size-4 text-indigo-400" /> Bisnis
+                    </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -207,15 +219,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </main>
 
-      {/* ==================== 3. MOBILE BOTTOM NAVIGATION ==================== */}
+      {/* ==================== 3. MOBILE BOTTOM NAVIGATION (3 TABS) (Requirement #2) ==================== */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-md pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
         <div className="grid grid-cols-3 h-16 items-center justify-items-center text-[10px] font-black uppercase tracking-widest text-slate-400 relative">
           
           <Link 
-            href="/feed" 
+            href="/dashboard" 
             className={cn(
               "flex flex-col items-center gap-1 w-full py-2 transition-colors",
-              pathname === "/feed" ? "text-accent" : "hover:text-slate-600"
+              pathname === "/dashboard" ? "text-accent" : "hover:text-slate-600"
             )}
           >
             <Rss className="size-6" />
@@ -226,7 +238,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             href="/search" 
             className={cn(
               "flex flex-col items-center gap-1 w-full py-2 transition-colors",
-              pathname === "/search" ? "text-accent" : "hover:text-slate-600"
+              pathname === "/search" || pathname === "/discover" ? "text-accent" : "hover:text-slate-600"
             )}
           >
             <Search className="size-6" />
@@ -234,9 +246,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </Link>
 
           <div className="relative w-full h-full flex flex-col items-center justify-center">
+            {/* 🤖 AI ADVISOR FLOATING BUTTON (Requirement #3) */}
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
-              className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-50"
+              className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-50 ring-4 ring-white"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -250,6 +263,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <span>Lainnya</span>
                 </button>
               </SheetTrigger>
+              {/* LAINNYA (NETWORK HUB) DRAWER (Requirement #4) */}
               <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 overflow-hidden h-[90vh]">
                 <SheetHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100">
                   <div className="flex items-center justify-between">
@@ -264,14 +278,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </SheetHeader>
                 
                 <div className="overflow-y-auto max-h-full pb-32">
-                  <div className="flex flex-col">
+                  <div className="flex flex-col divide-y divide-slate-100">
                     {drawerItems.map((item) => (
                       <Link 
                         key={item.href}
                         href={item.href}
                         onClick={() => setIsMoreMenuOpen(false)}
                         className={cn(
-                          "flex items-center px-8 py-5 border-b border-slate-50 transition-colors gap-6 group",
+                          "flex items-center px-8 py-5 transition-colors gap-6 group",
                           pathname === item.href 
                             ? "bg-indigo-50/50 text-accent" 
                             : "bg-white hover:bg-slate-50"
@@ -288,7 +302,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       </Link>
                     ))}
 
-                    <div className="px-8 py-6 bg-white border-b border-slate-50">
+                    <div className="px-8 py-6 bg-white">
                       <div className="flex items-center gap-6 mb-4">
                         <div className="size-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center">
                           <Languages className="size-5" />
