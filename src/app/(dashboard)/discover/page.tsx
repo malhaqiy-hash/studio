@@ -21,21 +21,40 @@ import {
   ShieldCheck,
   Zap,
   ChevronDown,
-  RefreshCw
+  RefreshCw,
+  Users,
+  Truck,
+  Briefcase,
+  Layers
 } from "lucide-react";
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
 import { translateText } from "@/ai/flows/translate-flow";
 import { useLanguage } from "@/context/language-context";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+
+const ENTITY_CATEGORIES = [
+  { id: 'products', label: 'Produk', icon: Package },
+  { id: 'services', label: 'Layanan', icon: Headphones },
+  { id: 'suppliers', label: 'Supplier', icon: Truck },
+  { id: 'distributors', label: 'Distributor', icon: Layers },
+  { id: 'freelancers', label: 'Freelancer', icon: Users },
+  { id: 'communities', label: 'Komunitas', icon: Users },
+  { id: 'transporters', label: 'Transporter', icon: Truck },
+  { id: 'opportunities', label: 'Peluang Bisnis', icon: Briefcase },
+  { id: 'partners', label: 'Mitra Bisnis', icon: Users },
+];
+
+const LOCATIONS = [
+  "Global", "Jakarta", "Surabaya", "Medan", "Bandung", "Bali", "Singapore", "Malaysia", "Japan"
+];
 
 export default function DiscoverPage() {
   const { language } = useLanguage();
@@ -43,24 +62,27 @@ export default function DiscoverPage() {
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
   
-  // Translation state for discovery results
+  // Filters
+  const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = React.useState("Global");
+  
+  // Translation state
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean, detected: string }>>({});
-
-  // Advanced Filters State
-  const [filters, setFilters] = React.useState({
-    verifiedOnly: false,
-    onTappOnly: false,
-    externalOnly: false
-  });
 
   const handleSearch = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!query) return;
+    if (!query && !activeCategory) return;
     
     setLoading(true);
-    setTranslations({}); // Reset translations on new search
+    setTranslations({});
     try {
-      const output = await aiIntentSearch({ query, filters });
+      const output = await aiIntentSearch({ 
+        query: query || (activeCategory ? `Discover ${activeCategory}` : ""), 
+        filters: {
+          category: activeCategory || undefined,
+          location: selectedLocation === "Global" ? undefined : selectedLocation
+        } 
+      });
       setResults(output);
     } catch (err) {
       console.error(err);
@@ -106,25 +128,27 @@ export default function DiscoverPage() {
     switch(source) {
       case 'ontapp_verified': 
         return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 flex gap-1 items-center px-3 py-1 font-bold">
-          <ShieldCheck className="size-3" /> Verified Member
+          <ShieldCheck className="size-3" /> Terverifikasi OnTapp
         </Badge>;
       case 'ontapp_member': 
         return <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200 flex gap-1 items-center px-3 py-1 font-bold">
-          <Zap className="size-3" /> OnTapp Member
+          <Zap className="size-3" /> Anggota OnTapp
         </Badge>;
       default: 
-        return <Badge variant="outline" className="bg-slate-50 text-slate-500 flex gap-1 items-center px-3 py-1 font-bold">
-          <Globe className="size-3" /> External Source
+        return <Badge variant="outline" className="bg-slate-50 text-slate-400 flex gap-1 items-center px-3 py-1 font-bold">
+          <Globe className="size-3" /> Media Eksternal
         </Badge>;
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch(type) {
-      case 'business': return <Building2 className="size-5" />;
       case 'product': return <Package className="size-5" />;
       case 'service': return <Headphones className="size-5" />;
-      default: return <Search className="size-5" />;
+      case 'supplier': return <Truck className="size-5" />;
+      case 'transporter': return <Truck className="size-5" />;
+      case 'opportunity': return <Briefcase className="size-5" />;
+      default: return <Building2 className="size-5" />;
     }
   };
 
@@ -132,21 +156,17 @@ export default function DiscoverPage() {
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-10 py-6">
         {/* Header section */}
-        <div className="text-center space-y-6 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
-            <Sparkles className="size-3 animate-pulse" />
-            Hybrid Discovery Engine
-          </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-black text-slate-900 tracking-tight leading-[1.1]">
-            Explore the <span className="text-accent underline decoration-indigo-200 underline-offset-8">Global Business</span> Ecosystem.
+        <div className="text-center space-y-4 max-w-3xl mx-auto">
+          <h1 className="text-5xl md:text-6xl font-headline font-black text-slate-900 tracking-tight leading-[1.1]">
+            Temukan
           </h1>
           <p className="text-lg text-slate-500 font-medium">
-            Discover verified OnTapp members and index-linked external businesses using natural language intelligence.
+            Cari produk, layanan, atau mitra strategis di seluruh ekosistem OnTapp.
           </p>
         </div>
 
         {/* Search & Filters */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           <form onSubmit={handleSearch} className="relative group max-w-3xl mx-auto">
             <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
               <Search className="size-6 text-slate-400 group-focus-within:text-accent transition-colors" />
@@ -154,43 +174,63 @@ export default function DiscoverPage() {
             <Input 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g., 'Coffee suppliers in South East Asia with eco-certifications'"
-              className="h-20 pl-16 pr-40 rounded-[2rem] border-slate-200 bg-white shadow-2xl text-xl font-medium ring-accent/10 transition-all focus:border-accent"
+              placeholder="Cari apa saja... (cth: Supplier kopi organik)"
+              className="h-20 pl-16 pr-40 rounded-[2.5rem] border-slate-200 bg-white shadow-2xl text-xl font-medium focus:ring-accent/10 transition-all focus:border-accent"
             />
             <Button 
               type="submit"
               disabled={loading}
               className="absolute right-3 top-3 bottom-3 rounded-full px-10 bg-accent hover:bg-indigo-600 text-white font-black text-lg transition-all shadow-lg active:scale-95"
             >
-              {loading ? "Scanning..." : "Search"}
+              {loading ? <RefreshCw className="size-5 animate-spin" /> : "Cari"}
             </Button>
           </form>
 
-          {/* Filter Toggles */}
-          <div className="flex flex-wrap items-center justify-center gap-6 p-4 bg-white/50 border border-white/20 rounded-2xl backdrop-blur-sm max-w-fit mx-auto shadow-sm">
-             <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="verified" 
-                  checked={filters.verifiedOnly} 
-                  onCheckedChange={(checked) => setFilters(prev => ({...prev, verifiedOnly: !!checked}))}
-                />
-                <Label htmlFor="verified" className="text-sm font-bold text-slate-600 cursor-pointer">Verified Only</Label>
-             </div>
-             <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="ontapp" 
-                  checked={filters.onTappOnly} 
-                  onCheckedChange={(checked) => setFilters(prev => ({...prev, onTappOnly: !!checked}))}
-                />
-                <Label htmlFor="ontapp" className="text-sm font-bold text-slate-600 cursor-pointer">OnTapp Members</Label>
-             </div>
-             <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="external" 
-                  checked={filters.externalOnly} 
-                  onCheckedChange={(checked) => setFilters(prev => ({...prev, externalOnly: !!checked}))}
-                />
-                <Label htmlFor="external" className="text-sm font-bold text-slate-600 cursor-pointer">External Sources</Label>
+          {/* New Categories UI */}
+          <div className="space-y-6">
+             <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between px-2">
+                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Pilih Kategori</h3>
+                   <div className="flex items-center gap-2">
+                      <MapPin className="size-3 text-slate-400" />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-7 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-accent">
+                            Lokasi: {selectedLocation} <ChevronDown className="size-3 ml-1" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-xl">
+                          {LOCATIONS.map(loc => (
+                            <DropdownMenuItem 
+                              key={loc} 
+                              onClick={() => setSelectedLocation(loc)}
+                              className="font-bold text-xs"
+                            >
+                              {loc}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                   </div>
+                </div>
+                
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {ENTITY_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategory(activeCategory === cat.label ? null : cat.label)}
+                      className={cn(
+                        "px-6 py-3 rounded-2xl text-xs font-bold transition-all border flex items-center gap-2 shadow-sm",
+                        activeCategory === cat.label 
+                          ? "bg-slate-900 text-white border-slate-900 scale-105" 
+                          : "bg-white text-slate-500 border-slate-100 hover:border-slate-300 hover:bg-slate-50"
+                      )}
+                    >
+                      <cat.icon className="size-3.5" />
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
              </div>
           </div>
         </div>
@@ -200,17 +240,13 @@ export default function DiscoverPage() {
           {loading && (
             <div className="grid gap-6">
               {[1, 2, 3].map((i) => (
-                <Card key={i} className="animate-pulse border-slate-100">
-                  <CardContent className="p-8">
-                    <div className="flex gap-6">
-                      <Skeleton className="size-16 rounded-2xl" />
-                      <div className="flex-1 space-y-3">
-                        <Skeleton className="h-8 w-1/3" />
-                        <Skeleton className="h-4 w-2/3" />
-                        <div className="flex gap-2">
-                           <Skeleton className="h-6 w-20 rounded-full" />
-                           <Skeleton className="h-6 w-20 rounded-full" />
-                        </div>
+                <Card key={i} className="animate-pulse border-slate-100 rounded-[2.5rem]">
+                  <CardContent className="p-10">
+                    <div className="flex gap-8">
+                      <Skeleton className="size-20 rounded-3xl" />
+                      <div className="flex-1 space-y-4">
+                        <Skeleton className="h-10 w-1/3 rounded-xl" />
+                        <Skeleton className="h-6 w-2/3 rounded-lg" />
                       </div>
                     </div>
                   </CardContent>
@@ -220,24 +256,16 @@ export default function DiscoverPage() {
           )}
 
           {results && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-black text-slate-900 text-lg uppercase tracking-tight">Discovery Results</h3>
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-500">{results.results.length}</Badge>
+            <div className="space-y-8">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-6 px-4">
+                <div className="flex items-center gap-3">
+                  <div className="size-8 bg-indigo-50 rounded-lg flex items-center justify-center text-accent">
+                    <Search className="size-4" />
+                  </div>
+                  <h3 className="font-black text-slate-900 text-xl tracking-tight">Hasil Penemuan</h3>
+                  <Badge className="bg-slate-100 text-slate-500 font-bold px-3">{results.results.length}</Badge>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="font-bold text-slate-400 hover:text-slate-600 gap-2">
-                      Sort by: Match Score <ChevronDown className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem className="font-bold">Match Score</DropdownMenuItem>
-                    <DropdownMenuItem className="font-bold">Latest Activity</DropdownMenuItem>
-                    <DropdownMenuItem className="font-bold">Verification</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Prioritas Jaringan OnTapp Aktif</p>
               </div>
 
               <div className="grid gap-6">
@@ -245,81 +273,75 @@ export default function DiscoverPage() {
                   const resId = `res-${idx}`;
                   const trans = translations[resId];
                   return (
-                    <Card key={idx} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-white relative">
+                    <Card key={idx} className={cn(
+                      "group overflow-hidden border shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 bg-white relative rounded-[2.5rem]",
+                      result.source !== 'external' ? "border-indigo-100" : "border-slate-100"
+                    )}>
                       {result.matchScore >= 90 && (
-                        <div className="absolute top-0 right-0 p-3">
-                          <Badge className="bg-amber-500 text-white border-none font-black text-[10px] uppercase shadow-md flex gap-1">
-                            <Zap className="size-3 fill-white" /> Top Match
+                        <div className="absolute top-0 right-0 p-4">
+                          <Badge className="bg-amber-500 text-white border-none font-black text-[10px] uppercase shadow-lg flex gap-1 animate-in zoom-in-50">
+                            <Sparkles className="size-3 fill-white" /> Top Synergy
                           </Badge>
                         </div>
                       )}
                       <CardContent className="p-0">
                         <div className="flex flex-col md:flex-row">
-                          <div className={`w-2 shrink-0 ${result.source === 'external' ? 'bg-slate-200' : 'bg-accent'}`} />
-                          <div className="p-8 flex-1 flex flex-col md:flex-row gap-8 items-start">
-                            <div className={`size-16 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform ${result.source === 'external' ? 'bg-slate-50 text-slate-400' : 'bg-indigo-50 text-accent'}`}>
+                          <div className={cn(
+                            "w-2 shrink-0 transition-colors",
+                            result.source === 'ontapp_verified' ? 'bg-emerald-500' : 
+                            result.source === 'ontapp_member' ? 'bg-accent' : 'bg-slate-200'
+                          )} />
+                          <div className="p-10 flex-1 flex flex-col md:flex-row gap-10 items-start">
+                            <div className={cn(
+                              "size-20 rounded-3xl flex items-center justify-center shrink-0 shadow-inner group-hover:rotate-6 transition-transform duration-500",
+                              result.source === 'external' ? 'bg-slate-50 text-slate-400' : 'bg-indigo-50 text-accent'
+                            )}>
                               {getTypeIcon(result.type)}
                             </div>
                             
-                            <div className="flex-1 space-y-4">
-                              <div className="space-y-2">
-                                <div className="flex flex-wrap items-center justify-between gap-3">
-                                  <div className="flex flex-wrap items-center gap-3">
-                                    <h4 className="text-2xl font-black text-slate-900 leading-tight">{result.name}</h4>
-                                    {getSourceBadge(result.source)}
-                                  </div>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    onClick={() => handleTranslateResult(resId, result.description)}
-                                    className="h-7 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-accent"
-                                    disabled={trans?.loading}
-                                  >
-                                    {trans?.loading ? (
-                                      <RefreshCw className="size-3 mr-1 animate-spin" />
-                                    ) : (
-                                      <Globe className="size-3 mr-1" />
-                                    )}
-                                    {trans?.show ? "Original" : "Translate"}
-                                  </Button>
+                            <div className="flex-1 space-y-5">
+                              <div className="space-y-3">
+                                <div className="flex flex-wrap items-center gap-4">
+                                  <h4 className="text-3xl font-black text-slate-900 leading-tight group-hover:text-accent transition-colors">{result.name}</h4>
+                                  {getSourceBadge(result.source)}
                                 </div>
                                 <div className="relative">
                                   <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-3xl">
                                     {trans?.show ? trans.text : result.description}
                                   </p>
                                   {trans?.show && (
-                                    <div className="mt-2 text-[10px] font-black text-accent uppercase tracking-[0.1em] flex items-center gap-1.5 bg-indigo-50/50 w-fit px-3 py-1.5 rounded-lg">
-                                      <Sparkles className="size-3" />
-                                      Translated from {trans.detected?.toUpperCase() || "INTL"}
+                                    <div className="mt-3 text-[10px] font-black text-accent uppercase tracking-[0.15em] flex items-center gap-2 bg-indigo-50/50 w-fit px-4 py-2 rounded-xl">
+                                      <Sparkles className="size-3.5" />
+                                      Diterjemahkan dari {trans.detected?.toUpperCase()}
                                     </div>
                                   )}
                                 </div>
                               </div>
 
-                              <div className="flex flex-wrap items-center gap-6 pt-2">
+                              <div className="flex flex-wrap items-center gap-8 pt-2">
                                 {result.location && (
                                   <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
-                                    <MapPin className="size-3.5" />
+                                    <MapPin className="size-4 text-rose-400" />
                                     {result.location}
                                   </div>
                                 )}
                                 {result.industry && (
                                   <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
-                                    <Filter className="size-3.5" />
+                                    <Filter className="size-4 text-indigo-400" />
                                     {result.industry}
                                   </div>
                                 )}
                               </div>
 
                               {/* Match Reasons */}
-                              <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-100">
+                              <div className="bg-slate-50/50 p-6 rounded-3xl space-y-3 border border-slate-100/50">
                                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                                     <CheckCircle2 className="size-3 text-emerald-500" />
-                                    AI Match Confidence
+                                    Analisis Kecocokan AI
                                  </div>
-                                 <div className="flex flex-wrap gap-2">
+                                 <div className="flex flex-wrap gap-3">
                                     {result.matchReasons.map((reason, rIdx) => (
-                                      <span key={rIdx} className="text-xs font-bold text-slate-600 bg-white border px-2 py-1 rounded-md shadow-sm">
+                                      <span key={rIdx} className="text-xs font-bold text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm">
                                         • {reason}
                                       </span>
                                     ))}
@@ -327,23 +349,36 @@ export default function DiscoverPage() {
                               </div>
                             </div>
 
-                            <div className="md:w-48 shrink-0 flex flex-col items-center justify-center gap-4 border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-8">
+                            <div className="md:w-56 shrink-0 flex flex-col items-center justify-center gap-6 border-t md:border-t-0 md:border-l border-slate-100 pt-8 md:pt-0 md:pl-10">
                                <div className="text-center space-y-1">
-                                  <div className="text-4xl font-black text-indigo-600 leading-none">{result.matchScore}%</div>
-                                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Match Score</div>
+                                  <div className="text-5xl font-black text-indigo-600 leading-none">{result.matchScore}%</div>
+                                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Synergy Score</div>
                                </div>
                                
-                               {result.source === 'external' ? (
-                                 <Button variant="outline" className="w-full rounded-xl h-11 border-slate-200 hover:bg-indigo-50 hover:text-accent font-bold group/btn flex gap-2">
-                                   <UserPlus className="size-4" />
-                                   Invite to OnTapp
-                                 </Button>
-                               ) : (
-                                 <Button className="w-full rounded-xl h-11 bg-accent hover:bg-indigo-600 text-white font-black shadow-lg shadow-indigo-100 flex gap-2">
-                                   <ExternalLink className="size-4" />
-                                   View Profile
-                                 </Button>
-                               )}
+                               <div className="w-full space-y-3">
+                                 <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    onClick={() => handleTranslateResult(resId, result.description)}
+                                    className="w-full h-10 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-accent gap-2 border border-transparent hover:border-indigo-100"
+                                    disabled={trans?.loading}
+                                  >
+                                    {trans?.loading ? <RefreshCw className="size-3 animate-spin" /> : <Globe className="size-3" />}
+                                    {trans?.show ? "Asli" : "Terjemahkan"}
+                                  </Button>
+                                  
+                                  {result.source === 'external' ? (
+                                    <Button variant="outline" className="w-full rounded-2xl h-14 border-slate-200 hover:bg-indigo-50 hover:text-accent font-black shadow-sm group/btn gap-3 transition-all">
+                                      <UserPlus className="size-5" />
+                                      Undang ke OnTapp
+                                    </Button>
+                                  ) : (
+                                    <Button className="w-full rounded-2xl h-14 bg-accent hover:bg-indigo-600 text-white font-black shadow-xl shadow-indigo-100 gap-3 transition-all active:scale-95">
+                                      <ExternalLink className="size-5" />
+                                      Lihat Profil
+                                    </Button>
+                                  )}
+                               </div>
                             </div>
                           </div>
                         </div>
@@ -357,33 +392,21 @@ export default function DiscoverPage() {
 
           {!loading && !results && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10">
-              <div className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm space-y-6 text-center group hover:shadow-xl transition-all">
-                <div className="size-16 bg-indigo-50 text-accent rounded-3xl flex items-center justify-center mx-auto group-hover:rotate-12 transition-transform">
-                  <Zap className="size-8" />
+              {[
+                { title: "Prioritas Anggota", desc: "Anggota jaringan OnTapp selalu muncul pertama untuk menjamin kepercayaan.", icon: Zap, color: "text-accent", bg: "bg-indigo-50" },
+                { title: "Indeks Eksternal", desc: "Kami memindai web global untuk menemukan peluang di luar jaringan utama.", icon: Globe, color: "text-emerald-500", bg: "bg-emerald-50" },
+                { title: "Verifikasi AI", desc: "Mesin kami menganalisis reputasi dan sertifikat untuk hasil berkualitas.", icon: ShieldCheck, color: "text-orange-500", bg: "bg-orange-50" }
+              ].map((feature, i) => (
+                <div key={i} className="p-10 rounded-[3rem] bg-white border border-slate-100 shadow-sm space-y-6 text-center group hover:shadow-xl hover:-translate-y-2 transition-all">
+                  <div className={cn("size-20 rounded-[2rem] flex items-center justify-center mx-auto group-hover:rotate-12 transition-transform", feature.bg, feature.color)}>
+                    <feature.icon className="size-10" />
+                  </div>
+                  <div className="space-y-3">
+                    <h4 className="text-2xl font-black text-slate-900 tracking-tight">{feature.title}</h4>
+                    <p className="text-slate-500 font-medium leading-relaxed">{feature.desc}</p>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <h4 className="text-xl font-black text-slate-900">Priority Ranking</h4>
-                  <p className="text-slate-500 font-medium">OnTapp members and verified businesses always appear first in discovery.</p>
-                </div>
-              </div>
-              <div className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm space-y-6 text-center group hover:shadow-xl transition-all">
-                <div className="size-16 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto group-hover:rotate-12 transition-transform">
-                  <Globe className="size-8" />
-                </div>
-                <div className="space-y-2">
-                  <h4 className="text-xl font-black text-slate-900">External Indexing</h4>
-                  <p className="text-slate-500 font-medium">We scan the global web to bring you relevant leads outside our network.</p>
-                </div>
-              </div>
-              <div className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm space-y-6 text-center group hover:shadow-xl transition-all">
-                <div className="size-16 bg-orange-50 text-orange-500 rounded-3xl flex items-center justify-center mx-auto group-hover:rotate-12 transition-transform">
-                  <ShieldCheck className="size-8" />
-                </div>
-                <div className="space-y-2">
-                  <h4 className="text-xl font-black text-slate-900">AI Verification</h4>
-                  <p className="text-slate-500 font-medium">Our engine analyzes reputations and certificates to ensure quality results.</p>
-                </div>
-              </div>
+              ))}
             </div>
           )}
         </div>

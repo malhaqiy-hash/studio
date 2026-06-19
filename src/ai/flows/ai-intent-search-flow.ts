@@ -17,7 +17,7 @@ const AIIntentSearchInputSchema = z.object({
     verifiedOnly: z.boolean().optional(),
     onTappOnly: z.boolean().optional(),
     externalOnly: z.boolean().optional(),
-    industry: z.string().optional(),
+    category: z.string().optional(),
     location: z.string().optional(),
   }).optional(),
 });
@@ -26,7 +26,7 @@ export type AIIntentSearchInput = z.infer<typeof AIIntentSearchInputSchema>;
 const AIIntentSearchOutputSchema = z.object({
   results: z.array(
     z.object({
-      type: z.enum(['business', 'product', 'service']).describe('The type of the discovered item.'),
+      type: z.enum(['business', 'product', 'service', 'supplier', 'distributor', 'freelancer', 'community', 'transporter', 'opportunity', 'partner']).describe('The type of the discovered item.'),
       name: z.string().describe('The name of the business or product.'),
       description: z.string().describe('A brief description.'),
       matchScore: z.number().int().min(0).max(100).describe('The calculated match score based on priority and relevance.'),
@@ -54,33 +54,32 @@ const aiIntentSearchPrompt = ai.definePrompt({
     })
   },
   output: { schema: AIIntentSearchOutputSchema },
-  prompt: `You are the OnTapp Hybrid Business Discovery Engine. Your goal is to find businesses, products, and services that match a user's intent, prioritizing OnTapp members.
+  prompt: `You are the OnTapp Hybrid Business Discovery Engine. Your goal is to find businesses, products, and services that match a user's intent.
+
+### CRITICAL REQUIREMENT: PRIORITIZATION
+You MUST prioritize internal OnTapp results over external ones.
+1. First, find or simulate highly relevant businesses that are "ontapp_verified" or "ontapp_member".
+2. Only if internal results are insufficient or specific external data is highly relevant, provide results from "external" sources.
 
 ### Intent Analysis
 Analyze the user's query: "{{{query}}}"
-Current Filters Applied: {{{filterSummary}}}
+Selected Category Filter: {{{filters.category}}}
+Selected Location Filter: {{{filters.location}}}
 
 ### Ranking System (Mandatory)
 Calculate a Match Score (0-100) using these weights:
-- Internal OnTapp business: +50 points
-- Verified OnTapp business: +20 points
-- Matching industry: +20 points
-- Matching location/country: +15 points
-- Matching product/service: +15 points
-- Profile completeness/reputation: +10-15 points
-- External source: 0 points base score (rely solely on relevance)
-
-### Data Simulation
-Provide a mix of simulated internal OnTapp members and external businesses found on the web (directories, public databases).
-- For internal results, use source: "ontapp_member" or "ontapp_verified".
-- For external results, use source: "external".
+- Internal OnTapp Verified business: +50-60 points (Top Priority)
+- Internal OnTapp Member: +30-40 points
+- Matching Industry/Category: +20 points
+- Matching Location: +15 points
+- External source: 0 points base (rely solely on relevance, max score usually 70-80)
 
 ### Response Requirements
 - Rank strictly by Match Score descending.
-- For each result, provide 2-3 specific "matchReasons" (e.g., "Verified coffee supplier", "Active on OnTapp this week").
-- If it's an external result, describe it as a relevant business not yet on the platform.
+- Ensure OnTapp results appear at the top.
+- For each result, provide 2-3 specific "matchReasons".
 
-Output must be valid JSON adhering to the schema.`,
+Output must be valid JSON.`,
 });
 
 const aiIntentSearchFlow = ai.defineFlow(
@@ -90,9 +89,8 @@ const aiIntentSearchFlow = ai.defineFlow(
     outputSchema: AIIntentSearchOutputSchema,
   },
   async (input) => {
-    // Pre-process filters into a string to avoid Handlebars helper errors like 'unknown helper JSON'
     const filterSummary = input.filters 
-      ? `Verified: ${input.filters.verifiedOnly}, OnTapp Only: ${input.filters.onTappOnly}, External Only: ${input.filters.externalOnly}`
+      ? `Category: ${input.filters.category}, Location: ${input.filters.location}, Verified: ${input.filters.verifiedOnly}`
       : 'None';
 
     const { output } = await aiIntentSearchPrompt({
