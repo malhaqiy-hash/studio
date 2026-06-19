@@ -20,18 +20,18 @@ import {
   Youtube,
   Linkedin,
   Twitter,
-  ExternalLink,
   Save,
   Loader2,
   Trash2,
   Plus,
-  Package,
   Pencil,
   ShoppingBag,
-  Link as LinkIcon
+  Link as LinkIcon,
+  RefreshCw,
+  Sparkles
 } from "lucide-react";
-import { useUser, useFirestore, useStorage } from "@/firebase";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { useUser, useFirestore, useStorage, useCollection } from "@/firebase";
+import { doc, setDoc, getDoc, collection, query, where, addDoc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +39,6 @@ import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -81,11 +80,13 @@ const TokopediaIcon = () => (
 
 interface Product {
   id: string;
+  userId: string;
   name: string;
   category: string;
   price: number;
   description: string;
   imageUrl: string;
+  createdAt?: any;
 }
 
 export default function ProfilePage() {
@@ -108,7 +109,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = React.useState({
     companyName: "Alpha Tech Solutions",
     category: "SaaS & AI Infrastructure",
-    description: "A leading provider of enterprise AI solutions and cloud infrastructure for the manufacturing sector. Focused on industrial efficiency and global networking.",
+    description: "A leading provider of enterprise AI solutions and cloud infrastructure for the manufacturing sector.",
     location: "Jakarta, Indonesia",
     website: "https://alphatech.example.com",
     email: user?.email || "",
@@ -127,11 +128,17 @@ export default function ProfilePage() {
     linkedin: "",
   });
 
-  const [products, setProducts] = React.useState<Product[]>([]);
+  // Real-time products fetching
+  const productsQuery = React.useMemo(() => {
+    if (!db || !user) return null;
+    return query(collection(db, "products"), where("userId", "==", user.uid));
+  }, [db, user]);
+
+  const { data: products, loading: productsLoading } = useCollection<Product>(productsQuery);
 
   const [isProductModalOpen, setIsProductModalOpen] = React.useState(false);
   const [editingProduct, setEditingProduct] = React.useState<Product | null>(null);
-  const [newProduct, setNewProduct] = React.useState<Omit<Product, "id">>({
+  const [newProduct, setNewProduct] = React.useState<Omit<Product, "id" | "userId">>({
     name: "",
     category: "Software",
     price: 0,
@@ -151,7 +158,6 @@ export default function ProfilePage() {
           const data = snap.data();
           if (data.profile) setProfile(prev => ({ ...prev, ...data.profile }));
           if (data.socialLinks) setSocialLinks(prev => ({ ...prev, ...data.socialLinks }));
-          if (data.products) setProducts(data.products);
         }
       } catch (err) {
         console.error("Error loading profile:", err);
@@ -202,7 +208,6 @@ export default function ProfilePage() {
       await setDoc(userRef, { 
         profile: { ...profile, avatarUrl: finalAvatarUrl, coverUrl: finalCoverUrl }, 
         socialLinks, 
-        products,
         updatedAt: new Date().toISOString() 
       }, { merge: true });
       
@@ -215,32 +220,52 @@ export default function ProfilePage() {
       setCoverPreview(null);
       
       setProfile(prev => ({ ...prev, avatarUrl: finalAvatarUrl, coverUrl: finalCoverUrl }));
-      toast({ title: "Profile Synchronized", description: "Your business ecosystem profile and assets have been successfully secured." });
+      toast({ title: "Profile Synchronized", description: "Your business ecosystem profile has been successfully secured." });
     } catch (err: any) {
       console.error(err);
-      toast({ variant: "destructive", title: "Synchronization Failed", description: err.message || "An error occurred while saving your profile." });
+      toast({ variant: "destructive", title: "Synchronization Failed", description: err.message || "An error occurred." });
     } finally {
       setSaving(false);
     }
   };
 
-  const handleAddOrEditProduct = () => {
-    if (editingProduct) {
-      setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...newProduct, id: p.id } : p));
-      toast({ title: "Product Updated", description: `${newProduct.name} has been updated in your catalog.` });
-    } else {
-      const productToAdd: Product = { ...newProduct, id: Math.random().toString(36).substr(2, 9) };
-      setProducts(prev => [...prev, productToAdd]);
-      toast({ title: "Product Added", description: `${newProduct.name} is now live in your catalog.` });
+  const handleAddOrEditProduct = async () => {
+    if (!user || !db) return;
+    
+    try {
+      if (editingProduct) {
+        const productRef = doc(db, "products", editingProduct.id);
+        await updateDoc(productRef, {
+          ...newProduct,
+          updatedAt: serverTimestamp()
+        });
+        toast({ title: "Product Updated", description: `${newProduct.name} has been updated.` });
+      } else {
+        await addDoc(collection(db, "products"), {
+          ...newProduct,
+          userId: user.uid,
+          createdAt: serverTimestamp()
+        });
+        toast({ title: "Product Added", description: `${newProduct.name} is now live.` });
+      }
+      setIsProductModalOpen(false);
+      setEditingProduct(null);
+      setNewProduct({ name: "", category: "Software", price: 0, description: "", imageUrl: `https://picsum.photos/seed/${Math.random()}/400/300` });
+    } catch (err: any) {
+      console.error(err);
+      toast({ variant: "destructive", title: "Action Failed", description: "Could not save product." });
     }
-    setIsProductModalOpen(false);
-    setEditingProduct(null);
-    setNewProduct({ name: "", category: "Software", price: 0, description: "", imageUrl: `https://picsum.photos/seed/${Math.random()}/400/300` });
   };
 
-  const handleDeleteProduct = (id: string) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
-    toast({ title: "Product Removed", description: "Item has been removed from your catalog." });
+  const handleDeleteProduct = async (id: string) => {
+    if (!db) return;
+    try {
+      await deleteDoc(doc(db, "products", id));
+      toast({ title: "Product Removed", description: "Item has been removed from your catalog." });
+    } catch (err: any) {
+      console.error(err);
+      toast({ variant: "destructive", title: "Delete Failed", description: "Could not remove item." });
+    }
   };
 
   const openEditModal = (product: Product) => {
@@ -272,14 +297,6 @@ export default function ProfilePage() {
               <Skeleton className="h-6 w-48" />
             </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8">
-            <div className="lg:col-span-7 space-y-8">
-              <Skeleton className="h-96 w-full rounded-[2rem]" />
-            </div>
-            <div className="lg:col-span-5 space-y-8">
-              <Skeleton className="h-96 w-full rounded-[2rem]" />
-            </div>
-          </div>
         </div>
       </DashboardLayout>
     );
@@ -289,11 +306,10 @@ export default function ProfilePage() {
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8 pb-20">
         
-        {/* File Inputs (Hidden) */}
         <input type="file" ref={avatarInputRef} className="hidden" accept="image/*" onChange={handleAvatarChange} />
         <input type="file" ref={coverInputRef} className="hidden" accept="image/*" onChange={handleCoverChange} />
 
-        {/* Header Section: Foto Sampul */}
+        {/* Profile Header */}
         <div className="relative">
           <div className="h-64 md:h-80 w-full rounded-[2.5rem] bg-slate-200 overflow-hidden relative shadow-lg">
             <img 
@@ -301,261 +317,163 @@ export default function ProfilePage() {
               alt="Cover" 
               className={cn("w-full h-full object-cover transition-opacity duration-300", (saving && coverFile) ? "opacity-50" : "opacity-100")}
             />
-            <div className="absolute inset-0 bg-black/10 transition-colors hover:bg-black/20" />
-            
             <Button 
               onClick={() => coverInputRef.current?.click()}
               disabled={saving}
               variant="secondary" 
-              className="absolute top-4 right-4 z-10 rounded-xl bg-white/30 hover:bg-white/50 text-white border-white/20 backdrop-blur-md h-10 px-4 font-bold shadow-xl"
+              className="absolute top-4 right-4 z-10 rounded-xl bg-white/30 hover:bg-white/50 text-white border-white/20 backdrop-blur-md h-10 px-4 font-bold"
             >
-              <Camera className="size-4 mr-2" />
-              Edit Sampul
+              <Camera className="size-4 mr-2" /> Edit Sampul
             </Button>
           </div>
 
           <div className="flex flex-col md:flex-row items-center md:items-end gap-6 px-6 md:px-12 -mt-20 md:-mt-24 relative z-20">
             <div className="relative group/avatar">
-              <Avatar className="size-40 md:size-48 border-[6px] border-white shadow-2xl ring-2 ring-slate-100/50">
-                <AvatarImage 
-                  src={avatarPreview || profile.avatarUrl} 
-                  className={cn("object-cover transition-opacity duration-300", (saving && avatarFile) ? "opacity-50" : "opacity-100")} 
-                />
+              <Avatar className="size-40 md:size-48 border-[6px] border-white shadow-2xl">
+                <AvatarImage src={avatarPreview || profile.avatarUrl} className={cn("object-cover", (saving && avatarFile) && "opacity-50")} />
                 <AvatarFallback className="text-4xl font-black bg-indigo-50 text-accent">AT</AvatarFallback>
               </Avatar>
               <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center">
-                <Button 
-                  onClick={() => avatarInputRef.current?.click()}
-                  disabled={saving}
-                  variant="ghost" 
-                  size="icon" 
-                  className="size-12 rounded-full bg-white text-slate-900 hover:bg-slate-50 shadow-lg"
-                >
-                  <Camera className="size-6" />
-                </Button>
+                <Button onClick={() => avatarInputRef.current?.click()} disabled={saving} variant="ghost" size="icon" className="size-12 rounded-full bg-white text-slate-900 shadow-lg"><Camera className="size-6" /></Button>
               </div>
             </div>
-
-            <div className="pb-2 text-center md:text-left space-y-2 bg-white/80 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none p-4 rounded-3xl md:p-0">
+            <div className="pb-2 text-center md:text-left space-y-2 bg-white/80 md:bg-transparent backdrop-blur-sm p-4 rounded-3xl md:p-0">
               <div className="flex flex-col md:flex-row items-center gap-3">
-                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight drop-shadow-sm">
-                  {profile.companyName}
-                </h1>
-                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 px-3 py-1 font-black text-[10px] uppercase flex gap-1 shadow-sm">
-                  <ShieldCheck className="size-3" /> Verified Account
-                </Badge>
+                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">{profile.companyName}</h1>
+                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 px-3 py-1 font-black text-[10px] uppercase flex gap-1"><ShieldCheck className="size-3" /> Verified Account</Badge>
               </div>
-              <p className="text-lg font-bold text-slate-600 flex items-center justify-center md:justify-start gap-2">
-                <Building2 className="size-5 text-indigo-500" />
-                {profile.category}
-              </p>
+              <p className="text-lg font-bold text-slate-600 flex items-center justify-center md:justify-start gap-2"><Building2 className="size-5 text-indigo-500" /> {profile.category}</p>
             </div>
           </div>
         </div>
 
-        <div className="pt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 md:px-0">
-          
-          {/* Main Info Column */}
+        <div className="pt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-7 space-y-8">
-            <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden">
+            <Card className="border-slate-200 shadow-sm rounded-[2rem]">
               <CardHeader className="p-8 pb-4 border-b border-slate-50">
-                <CardTitle className="text-xl font-black flex items-center gap-2 text-slate-900">
-                  <Globe className="size-5 text-accent" />
-                  Identitas Bisnis Global
-                </CardTitle>
-                <CardDescription className="font-medium text-slate-500">Perbarui informasi inti bisnis Anda untuk direktori jaringan global.</CardDescription>
+                <CardTitle className="text-xl font-black flex items-center gap-2"><Globe className="size-5 text-accent" /> Identitas Bisnis Global</CardTitle>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="font-bold text-slate-700">Nama Organisasi</Label>
-                    <Input value={profile.companyName} onChange={(e) => setProfile({...profile, companyName: e.target.value})} className="rounded-xl border-slate-200 h-12 bg-slate-50/50" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="font-bold text-slate-700">Industri Utama</Label>
-                    <Input value={profile.category} onChange={(e) => setProfile({...profile, category: e.target.value})} className="rounded-xl border-slate-200 h-12 bg-slate-50/50" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="font-bold text-slate-700">Kantor Pusat</Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                      <Input value={profile.location} onChange={(e) => setProfile({...profile, location: e.target.value})} className="pl-10 rounded-xl border-slate-200 h-12 bg-slate-50/50" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="font-bold text-slate-700">Situs Web Resmi</Label>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                      <Input value={profile.website} onChange={(e) => setProfile({...profile, website: e.target.value})} className="pl-10 rounded-xl border-slate-200 h-12 bg-slate-50/50" />
-                    </div>
-                  </div>
+                  <div className="space-y-2"><Label className="font-bold text-slate-700">Nama Organisasi</Label><Input value={profile.companyName} onChange={(e) => setProfile({...profile, companyName: e.target.value})} className="rounded-xl" /></div>
+                  <div className="space-y-2"><Label className="font-bold text-slate-700">Industri Utama</Label><Input value={profile.category} onChange={(e) => setProfile({...profile, category: e.target.value})} className="rounded-xl" /></div>
+                  <div className="space-y-2"><Label className="font-bold text-slate-700">Kantor Pusat</Label><div className="relative"><MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" /><Input value={profile.location} onChange={(e) => setProfile({...profile, location: e.target.value})} className="pl-10 rounded-xl" /></div></div>
+                  <div className="space-y-2"><Label className="font-bold text-slate-700">Situs Web Resmi</Label><div className="relative"><Globe className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" /><Input value={profile.website} onChange={(e) => setProfile({...profile, website: e.target.value})} className="pl-10 rounded-xl" /></div></div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Gambaran Bisnis</Label>
-                  <Textarea value={profile.description} onChange={(e) => setProfile({...profile, description: e.target.value})} className="rounded-xl border-slate-200 min-h-[120px] bg-slate-50/50 font-medium leading-relaxed" />
-                </div>
+                <div className="space-y-2"><Label className="font-bold text-slate-700">Gambaran Bisnis</Label><Textarea value={profile.description} onChange={(e) => setProfile({...profile, description: e.target.value})} className="rounded-xl min-h-[120px]" /></div>
               </CardContent>
             </Card>
-
-            <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
-              <div className="relative z-10 space-y-6">
-                <div className="size-16 rounded-2xl bg-accent flex items-center justify-center shadow-lg rotate-3">
-                  <ShieldCheck className="size-8 text-white" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-black tracking-tight">Keamanan & Verifikasi</h3>
-                  <p className="text-slate-400 font-medium leading-relaxed">
-                    Verifikasi perusahaan Anda berlaku hingga <span className="text-white">Desember 2025</span>. Pertahankan kelengkapan profil untuk skor kecocokan tinggi.
-                  </p>
-                </div>
-                <Button variant="outline" className="rounded-xl border-white/20 text-white hover:bg-white/10 h-12 px-8 font-bold">
-                  Lihat Sertifikat
-                </Button>
-              </div>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -mr-32 -mt-32" />
-            </div>
           </div>
 
-          {/* Social Links Sidebar */}
           <div className="lg:col-span-5 space-y-8">
-            <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden">
+            <Card className="border-slate-200 shadow-sm rounded-[2rem]">
               <CardHeader className="p-8 pb-4">
-                <CardTitle className="text-xl font-black flex items-center gap-2">
-                  <LinkIcon className="size-5 text-accent" />
-                  On Link Here
-                </CardTitle>
-                <CardDescription className="font-medium">Hubungkan saluran penjualan dan jejak sosial Anda.</CardDescription>
+                <CardTitle className="text-xl font-black flex items-center gap-2"><LinkIcon className="size-5 text-accent" /> On Link Here</CardTitle>
               </CardHeader>
               <CardContent className="p-8 pt-0 space-y-6">
                 <div className="space-y-4">
-                  {socialPlatforms.map((platform) => (
-                    <div key={platform.key} className="space-y-1.5 group">
-                      <Label className="text-xs font-black uppercase tracking-widest text-slate-400 group-focus-within:text-accent transition-colors">
-                        {platform.label}
-                      </Label>
+                  {socialPlatforms.map((p) => (
+                    <div key={p.key} className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase text-slate-400">{p.label}</Label>
                       <div className="relative">
-                        <div className={cn("absolute left-4 top-1/2 -translate-y-1/2 transition-transform group-focus-within:scale-110", platform.color)}>
-                          <platform.icon />
-                        </div>
-                        <Input 
-                          value={socialLinks[platform.key as keyof typeof socialLinks]}
-                          onChange={(e) => setSocialLinks({...socialLinks, [platform.key]: e.target.value})}
-                          placeholder={`Username/ID ${platform.label}`}
-                          className="pl-12 rounded-xl border-slate-200 h-11 bg-slate-50/30 font-medium focus:bg-white transition-all"
-                        />
+                        <div className={cn("absolute left-4 top-1/2 -translate-y-1/2", p.color)}><p.icon /></div>
+                        <Input value={socialLinks[p.key as keyof typeof socialLinks]} onChange={(e) => setSocialLinks({...socialLinks, [p.key]: e.target.value})} placeholder={`Username/ID`} className="pl-12 rounded-xl" />
                       </div>
                     </div>
                   ))}
                 </div>
-
-                <div className="pt-6 border-t border-slate-100">
-                  <div className="flex flex-wrap gap-3">
-                    {socialPlatforms.map((platform) => {
-                      const val = socialLinks[platform.key as keyof typeof socialLinks];
-                      if (!val) return null;
-                      return (
-                        <a 
-                          key={platform.key} href={`${platform.prefix}${val}`} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-2 p-2 pr-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-accent hover:bg-white hover:shadow-lg transition-all active:scale-95 group"
-                        >
-                          <div className={cn("size-8 rounded-lg bg-white shadow-sm flex items-center justify-center", platform.color)}>
-                            <platform.icon />
-                          </div>
-                          <span className="text-xs font-bold text-slate-600 group-hover:text-accent truncate max-w-[120px]">{val}</span>
-                        </a>
-                      );
-                    })}
-                  </div>
+                <div className="pt-6 border-t border-slate-100 flex flex-wrap gap-3">
+                  {socialPlatforms.map((p) => {
+                    const val = socialLinks[p.key as keyof typeof socialLinks];
+                    if (!val) return null;
+                    return (
+                      <a key={p.key} href={`${p.prefix}${val}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 pr-3 rounded-xl bg-slate-50 border border-slate-100 hover:shadow-lg transition-all">
+                        <div className={cn("size-8 rounded-lg bg-white shadow-sm flex items-center justify-center", p.color)}><p.icon /></div>
+                        <span className="text-xs font-bold text-slate-600">{val}</span>
+                      </a>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
-
-            <Button 
-              onClick={handleSaveProfile} disabled={saving}
-              className="w-full h-16 rounded-[1.5rem] bg-accent hover:bg-indigo-600 text-white font-black text-xl shadow-2xl shadow-indigo-100 transition-all active:scale-[0.98] flex gap-3"
-            >
+            <Button onClick={handleSaveProfile} disabled={saving} className="w-full h-16 rounded-[1.5rem] bg-accent text-white font-black text-xl shadow-xl flex gap-3">
               {saving ? <><Loader2 className="size-6 animate-spin" /> Menyinkronkan...</> : <><Save className="size-6" /> Simpan Profil</>}
             </Button>
           </div>
         </div>
 
-        {/* Catalog Section */}
-        <div className="pt-10 space-y-8 px-4 md:px-0">
+        {/* Business Catalog Section */}
+        <div className="pt-10 space-y-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 bg-indigo-50 text-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest w-fit border border-indigo-100">
-                <ShoppingBag className="size-3" /> Marketplace Jaringan
-              </div>
+              <div className="flex items-center gap-2 bg-indigo-50 text-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest w-fit"><ShoppingBag className="size-3" /> Marketplace Jaringan</div>
               <h2 className="text-3xl font-black text-slate-900 tracking-tight">Katalog Bisnis</h2>
               <p className="text-slate-500 font-medium">Kelola produk dan layanan yang terlihat di jaringan global.</p>
             </div>
             
             <Dialog open={isProductModalOpen} onOpenChange={setIsProductModalOpen}>
               <DialogTrigger asChild>
-                <Button className="rounded-2xl bg-slate-900 hover:bg-black text-white h-14 px-8 font-black shadow-xl flex gap-2 transition-transform active:scale-95">
-                  <Plus className="size-5" /> Tambah Produk
-                </Button>
+                <Button className="rounded-2xl bg-slate-900 text-white h-14 px-8 font-black shadow-xl flex gap-2"><Plus className="size-5" /> Tambah Produk</Button>
               </DialogTrigger>
-              <DialogContent className="max-w-xl rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden">
+              <DialogContent className="max-w-xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
                 <DialogHeader className="p-8 pb-4 bg-slate-50">
                   <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">{editingProduct ? "Edit Produk" : "Entri Katalog Baru"}</DialogTitle>
                 </DialogHeader>
                 <div className="p-8 space-y-6">
                   <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2"><Label className="font-bold">Nama Produk</Label><Input value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} className="rounded-xl" /></div>
                     <div className="space-y-2">
-                      <Label className="font-bold text-slate-700">Nama Produk</Label>
-                      <Input value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} className="rounded-xl border-slate-200 h-12" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-bold text-slate-700">Kategori</Label>
+                      <Label className="font-bold">Kategori</Label>
                       <Select value={newProduct.category} onValueChange={(val) => setNewProduct({ ...newProduct, category: val })}>
-                        <SelectTrigger className="rounded-xl border-slate-200 h-12"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Software">Software</SelectItem>
                           <SelectItem value="Hardware">Hardware</SelectItem>
                           <SelectItem value="Service">Professional Service</SelectItem>
-                          <SelectItem value="Logistics">Logistics</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="space-y-2 col-span-2">
-                      <Label className="font-bold text-slate-700">Harga (IDR)</Label>
-                      <Input type="number" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })} className="rounded-xl border-slate-200 h-12" />
-                    </div>
-                    <div className="space-y-2 col-span-2">
-                      <Label className="font-bold text-slate-700">Deskripsi</Label>
-                      <Textarea value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })} className="rounded-xl border-slate-200 min-h-[100px]" />
-                    </div>
+                    <div className="space-y-2 col-span-2"><Label className="font-bold">Harga (IDR)</Label><Input type="number" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })} className="rounded-xl" /></div>
+                    <div className="space-y-2 col-span-2"><Label className="font-bold">Deskripsi</Label><Textarea value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })} className="rounded-xl" /></div>
                   </div>
                 </div>
                 <DialogFooter className="p-8 pt-0 flex gap-3">
-                  <Button variant="ghost" onClick={() => { setIsProductModalOpen(false); setEditingProduct(null); }} className="rounded-xl h-12 px-6 font-bold">Batal</Button>
-                  <Button onClick={handleAddOrEditProduct} className="rounded-xl bg-accent hover:bg-indigo-600 text-white h-12 px-10 font-black shadow-lg">Simpan</Button>
+                  <Button variant="ghost" onClick={() => setIsProductModalOpen(false)} className="rounded-xl font-bold">Batal</Button>
+                  <Button onClick={handleAddOrEditProduct} className="rounded-xl bg-accent text-white px-10 font-black">Simpan</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-10">
-            {products.map((product) => (
-              <Card key={product.id} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-300 rounded-[2rem] bg-white">
-                <div className="aspect-[4/3] w-full relative overflow-hidden">
-                  <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute top-4 left-4"><Badge className="bg-white/90 text-slate-900 border-none font-black text-[10px] px-3 py-1 shadow-md">{product.category}</Badge></div>
-                </div>
-                <CardHeader className="p-6">
-                  <CardTitle className="text-xl font-black text-slate-900 truncate">{product.name}</CardTitle>
-                  <div className="text-lg font-black text-indigo-600">Rp {product.price.toLocaleString("id-ID")}</div>
-                </CardHeader>
-                <CardContent className="px-6 pb-6">
-                  <p className="text-sm text-slate-500 font-medium line-clamp-2 h-10">{product.description}</p>
-                </CardContent>
-                <CardFooter className="px-4 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-                  <Button variant="ghost" size="sm" onClick={() => openEditModal(product)} className="font-bold text-slate-500 hover:text-accent gap-2"><Pencil className="size-3.5" /> Edit</Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteProduct(product.id)} className="font-bold text-rose-500 hover:text-rose-600 gap-2"><Trash2 className="size-3.5" /> Hapus</Button>
-                </CardFooter>
-              </Card>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {productsLoading ? (
+              [1, 2, 3].map(i => <Skeleton key={i} className="h-80 rounded-[2rem]" />)
+            ) : products.length === 0 ? (
+              <div className="col-span-full p-20 text-center border-2 border-dashed rounded-[2.5rem] bg-slate-50/50">
+                <ShoppingBag className="size-12 text-slate-300 mx-auto mb-4" />
+                <p className="font-bold text-slate-400">Belum ada produk dalam katalog Anda.</p>
+              </div>
+            ) : (
+              products.map((p) => (
+                <Card key={p.id} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all rounded-[2rem] bg-white">
+                  <div className="aspect-[4/3] w-full relative overflow-hidden">
+                    <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute top-4 left-4"><Badge className="bg-white/90 text-slate-900 border-none font-black text-[10px] px-3 py-1 shadow-md">{p.category}</Badge></div>
+                  </div>
+                  <CardHeader className="p-6">
+                    <CardTitle className="text-xl font-black text-slate-900 truncate">{p.name}</CardTitle>
+                    <div className="text-lg font-black text-indigo-600">Rp {p.price.toLocaleString("id-ID")}</div>
+                  </CardHeader>
+                  <CardContent className="px-6 pb-6">
+                    <p className="text-sm text-slate-500 font-medium line-clamp-2 h-10">{p.description}</p>
+                  </CardContent>
+                  <CardFooter className="px-4 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                    <Button variant="ghost" size="sm" onClick={() => openEditModal(p)} className="font-bold text-slate-500 hover:text-accent gap-2"><Pencil className="size-3.5" /> Edit</Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDeleteProduct(p.id)} className="font-bold text-rose-500 hover:text-rose-600 gap-2"><Trash2 className="size-3.5" /> Hapus</Button>
+                  </CardFooter>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </div>
