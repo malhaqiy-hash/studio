@@ -5,7 +5,7 @@ import * as React from "react";
 import { useEffect, useState, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useAuth, useFirestore, useStorage, useCollection } from "@/firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, collection, query, where, addDoc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
@@ -85,8 +85,10 @@ export default function ProfilePage() {
   const [bio, setBio] = useState("A leading provider of enterprise AI solutions.");
   const [category, setCategory] = useState("SaaS & AI Infrastructure");
   const [location, setLocation] = useState("Jakarta, Indonesia");
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const [coverUrl, setCoverUrl] = useState("");
+  
+  // Use null instead of "" for images to avoid console warnings
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
   
   const [links, setLinks] = useState({
     whatsapp: "",
@@ -317,6 +319,17 @@ export default function ProfilePage() {
     );
   }
 
+  // Helper to ensure src is never an empty string
+  const getCoverSrc = () => {
+    const src = coverPreview || coverUrl;
+    return src && src !== "" ? src : null;
+  };
+
+  const getAvatarSrc = () => {
+    const src = avatarPreview || avatarUrl;
+    return src && src !== "" ? src : null;
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8 pb-20">
@@ -337,11 +350,13 @@ export default function ProfilePage() {
           {/* Visual Header */}
           <div className="relative">
             <div className="h-64 md:h-80 w-full rounded-[2.5rem] bg-slate-200 overflow-hidden relative shadow-lg">
-              <img 
-                src={coverPreview || coverUrl} 
-                alt="Cover" 
-                className={cn("w-full h-full object-cover transition-opacity duration-300", saving && coverFile ? "opacity-50" : "opacity-100")}
-              />
+              {getCoverSrc() && (
+                <img 
+                  src={getCoverSrc() as string} 
+                  alt="Cover" 
+                  className={cn("w-full h-full object-cover transition-opacity duration-300", saving && coverFile ? "opacity-50" : "opacity-100")}
+                />
+              )}
               <Button 
                 type="button"
                 onClick={() => coverInputRef.current?.click()}
@@ -355,7 +370,12 @@ export default function ProfilePage() {
             <div className="flex flex-col md:flex-row items-center md:items-end gap-6 px-6 md:px-12 -mt-20 md:-mt-24 relative z-20">
               <div className="relative group/avatar">
                 <Avatar className="size-40 md:size-48 border-[6px] border-white shadow-2xl">
-                  <AvatarImage src={avatarPreview || avatarUrl} className={cn("object-cover", saving && avatarFile && "opacity-50")} />
+                  {getAvatarSrc() && (
+                    <AvatarImage 
+                      src={getAvatarSrc() as string} 
+                      className={cn("object-cover", saving && avatarFile && "opacity-50")} 
+                    />
+                  )}
                   <AvatarFallback className="text-4xl font-black bg-indigo-50 text-accent">
                     <UserIcon size={48} />
                   </AvatarFallback>
@@ -527,7 +547,7 @@ export default function ProfilePage() {
               products?.map((p) => (
                 <Card key={p.id} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all rounded-[2.5rem] bg-white">
                   <div className="aspect-[4/3] w-full relative overflow-hidden">
-                    <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={p.imageUrl || undefined} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div className="absolute top-4 left-4">
                       <Badge className="bg-white/90 backdrop-blur-sm text-slate-900 border-none font-black text-[10px] px-3 py-1 shadow-md uppercase tracking-tight">
                         {p.category}
