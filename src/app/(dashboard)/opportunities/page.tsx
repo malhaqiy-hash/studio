@@ -96,7 +96,7 @@ export default function OpportunitiesPage() {
   const { data: opportunities, loading: isLoading } = useCollection(opportunitiesQuery);
 
   const filteredOpportunities = React.useMemo(() => {
-    return opportunities.filter(opp => {
+    return (opportunities || []).filter(opp => {
       const matchesSearch = 
         opp.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         opp.whatsapp?.includes(searchTerm);
@@ -172,9 +172,9 @@ export default function OpportunitiesPage() {
     
     if (currentOpp) {
       const docRef = doc(db, "opportunities", currentOpp.id);
-      updateDoc(docRef, formData);
+      updateDoc(docRef, formData).catch(e => console.error("Update error", e));
     } else {
-      addDoc(oppsRef, formData);
+      addDoc(oppsRef, formData).catch(e => console.error("Add error", e));
     }
     setIsDialogOpen(false);
   };
@@ -182,7 +182,7 @@ export default function OpportunitiesPage() {
   const handleDelete = () => {
     if (!db || !currentOpp) return;
     const docRef = doc(db, "opportunities", currentOpp.id);
-    deleteDoc(docRef);
+    deleteDoc(docRef).catch(e => console.error("Delete error", e));
     setIsDeleteDialogOpen(false);
   };
 
