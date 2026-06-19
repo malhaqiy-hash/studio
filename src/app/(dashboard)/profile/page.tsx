@@ -11,10 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { 
   Building2, 
-  Mail, 
   MapPin, 
   Globe, 
-  Calendar, 
   ShieldCheck, 
   Camera,
   Instagram,
@@ -25,14 +23,11 @@ import {
   ExternalLink,
   Save,
   Loader2,
-  CheckCircle2,
   Trash2,
   Plus,
   Package,
   Pencil,
-  Tag,
-  ShoppingBag,
-  Briefcase
+  ShoppingBag
 } from "lucide-react";
 import { useUser, useFirestore, useStorage } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -57,7 +52,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Custom Brand Icons (SVGs) for missing Lucide icons
+// Custom Brand Icons (SVGs)
 const TikTokIcon = () => (
   <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
     <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.06-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.9-.32-1.89-.39-2.82-.2-.79.14-1.53.53-2.08 1.11-.53.54-.86 1.25-.97 2.01-.13.71-.08 1.45.15 2.13.26.78.78 1.48 1.48 1.92.83.5 1.81.65 2.76.43 1.12-.22 2.13-.96 2.66-1.98.31-.58.46-1.23.47-1.89l.01-10.32Z"/>
@@ -98,20 +93,14 @@ export default function ProfilePage() {
   const { toast } = useToast();
 
   const [saving, setSaving] = React.useState(false);
-  
-  // File states
   const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
   const [coverFile, setCoverFile] = React.useState<File | null>(null);
-  
-  // Preview states
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
   const [coverPreview, setCoverPreview] = React.useState<string | null>(null);
 
-  // Input refs
   const avatarInputRef = React.useRef<HTMLInputElement>(null);
   const coverInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Form State
   const [profile, setProfile] = React.useState({
     companyName: "Alpha Tech Solutions",
     category: "SaaS & AI Infrastructure",
@@ -190,53 +179,29 @@ export default function ProfilePage() {
   const handleSaveProfile = async () => {
     if (!user || !db || !storage) return;
     setSaving(true);
-    
     try {
       let finalAvatarUrl = profile.avatarUrl;
       let finalCoverUrl = profile.coverUrl;
-
-      // Upload photos if selected
-      if (avatarFile) {
-        finalAvatarUrl = await uploadFile(avatarFile, `profiles/${user.uid}/avatar`);
-      }
-      if (coverFile) {
-        finalCoverUrl = await uploadFile(coverFile, `profiles/${user.uid}/cover`);
-      }
-
+      if (avatarFile) finalAvatarUrl = await uploadFile(avatarFile, `profiles/${user.uid}/avatar`);
+      if (coverFile) finalCoverUrl = await uploadFile(coverFile, `profiles/${user.uid}/cover`);
       const userRef = doc(db, "users", user.uid);
       await setDoc(userRef, { 
-        profile: {
-          ...profile,
-          avatarUrl: finalAvatarUrl,
-          coverUrl: finalCoverUrl,
-        }, 
+        profile: { ...profile, avatarUrl: finalAvatarUrl, coverUrl: finalCoverUrl }, 
         socialLinks, 
         products,
         updatedAt: new Date().toISOString() 
       }, { merge: true });
-      
-      // Cleanup previews and files
       if (avatarPreview) URL.revokeObjectURL(avatarPreview);
       if (coverPreview) URL.revokeObjectURL(coverPreview);
       setAvatarFile(null);
       setCoverFile(null);
       setAvatarPreview(null);
       setCoverPreview(null);
-      
-      // Update local state with new URLs
       setProfile(prev => ({ ...prev, avatarUrl: finalAvatarUrl, coverUrl: finalCoverUrl }));
-
-      toast({
-        title: "Profile Synchronized",
-        description: "Your business ecosystem profile and assets have been successfully secured.",
-      });
+      toast({ title: "Profile Synchronized", description: "Your business ecosystem profile and assets have been successfully secured." });
     } catch (err: any) {
       console.error(err);
-      toast({
-        variant: "destructive",
-        title: "Synchronization Failed",
-        description: err.message || "An error occurred while saving your profile.",
-      });
+      toast({ variant: "destructive", title: "Synchronization Failed", description: err.message || "An error occurred while saving your profile." });
     } finally {
       setSaving(false);
     }
@@ -247,22 +212,13 @@ export default function ProfilePage() {
       setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...newProduct, id: p.id } : p));
       toast({ title: "Product Updated", description: `${newProduct.name} has been updated in your catalog.` });
     } else {
-      const productToAdd: Product = {
-        ...newProduct,
-        id: Math.random().toString(36).substr(2, 9)
-      };
+      const productToAdd: Product = { ...newProduct, id: Math.random().toString(36).substr(2, 9) };
       setProducts(prev => [...prev, productToAdd]);
       toast({ title: "Product Added", description: `${newProduct.name} is now live in your catalog.` });
     }
     setIsProductModalOpen(false);
     setEditingProduct(null);
-    setNewProduct({
-      name: "",
-      category: "Software",
-      price: 0,
-      description: "",
-      imageUrl: `https://picsum.photos/seed/${Math.random()}/400/300`
-    });
+    setNewProduct({ name: "", category: "Software", price: 0, description: "", imageUrl: `https://picsum.photos/seed/${Math.random()}/400/300` });
   };
 
   const handleDeleteProduct = (id: string) => {
@@ -272,13 +228,7 @@ export default function ProfilePage() {
 
   const openEditModal = (product: Product) => {
     setEditingProduct(product);
-    setNewProduct({
-      name: product.name,
-      category: product.category,
-      price: product.price,
-      description: product.description,
-      imageUrl: product.imageUrl
-    });
+    setNewProduct({ name: product.name, category: product.category, price: product.price, description: product.description, imageUrl: product.imageUrl });
     setIsProductModalOpen(true);
   };
 
@@ -295,69 +245,45 @@ export default function ProfilePage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto space-y-10 pb-20">
+      <div className="max-w-6xl mx-auto space-y-8 pb-20">
         
         {/* File Inputs (Hidden) */}
-        <input 
-          type="file" 
-          ref={avatarInputRef} 
-          className="hidden" 
-          accept="image/*" 
-          onChange={handleAvatarChange} 
-        />
-        <input 
-          type="file" 
-          ref={coverInputRef} 
-          className="hidden" 
-          accept="image/*" 
-          onChange={handleCoverChange} 
-        />
+        <input type="file" ref={avatarInputRef} className="hidden" accept="image/*" onChange={handleAvatarChange} />
+        <input type="file" ref={coverInputRef} className="hidden" accept="image/*" onChange={handleCoverChange} />
 
-        {/* Header Section */}
-        <div className="relative group">
-          <div className="h-64 md:h-80 w-full rounded-[2.5rem] bg-slate-200 overflow-hidden relative shadow-2xl">
+        {/* Header Section: Foto Sampul */}
+        <div className="relative">
+          <div className="h-64 md:h-80 w-full rounded-[2.5rem] bg-slate-200 overflow-hidden relative shadow-lg">
             <img 
               src={coverPreview || profile.coverUrl} 
               alt="Cover" 
-              className={cn(
-                "w-full h-full object-cover transition-opacity duration-300",
-                saving && coverFile ? "opacity-50" : "opacity-100"
-              )}
+              className={cn("w-full h-full object-cover transition-opacity duration-300", saving && coverFile ? "opacity-50" : "opacity-100")}
             />
-            {saving && coverFile && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                <Loader2 className="size-10 text-white animate-spin" />
-              </div>
-            )}
-            <div className="absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/20" />
+            <div className="absolute inset-0 bg-black/10 transition-colors hover:bg-black/20" />
+            
+            {/* Tombol Edit Sampul dipastikan di pojok kanan atas dan tidak tertutup */}
             <Button 
               onClick={() => coverInputRef.current?.click()}
               disabled={saving}
               variant="secondary" 
-              className="absolute top-6 right-6 rounded-2xl bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md h-11 px-6 font-bold shadow-xl"
+              className="absolute top-4 right-4 z-10 rounded-xl bg-white/30 hover:bg-white/50 text-white border-white/20 backdrop-blur-md h-10 px-4 font-bold shadow-xl"
             >
               <Camera className="size-4 mr-2" />
-              Edit Cover Photo
+              Edit Sampul
             </Button>
           </div>
 
-          <div className="absolute -bottom-16 left-10 md:left-20 flex flex-col md:flex-row items-end gap-6">
+          {/* Container Foto Profil dan Info Akun di bawah Sampul */}
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 px-6 md:px-12 -mt-20 md:-mt-24 relative z-20">
+            {/* Foto Profil */}
             <div className="relative group/avatar">
-              <Avatar className="size-40 md:size-48 border-8 border-white shadow-2xl ring-4 ring-slate-100/50">
+              <Avatar className="size-40 md:size-48 border-[6px] border-white shadow-2xl ring-2 ring-slate-100/50">
                 <AvatarImage 
                   src={avatarPreview || profile.avatarUrl} 
-                  className={cn(
-                    "object-cover transition-opacity duration-300",
-                    saving && avatarFile ? "opacity-50" : "opacity-100"
-                  )} 
+                  className={cn("object-cover transition-opacity duration-300", saving && avatarFile ? "opacity-50" : "opacity-100")} 
                 />
                 <AvatarFallback className="text-4xl font-black bg-indigo-50 text-accent">AT</AvatarFallback>
               </Avatar>
-              {saving && avatarFile && (
-                <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/20">
-                  <Loader2 className="size-8 text-white animate-spin" />
-                </div>
-              )}
               <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center">
                 <Button 
                   onClick={() => avatarInputRef.current?.click()}
@@ -370,81 +296,66 @@ export default function ProfilePage() {
                 </Button>
               </div>
             </div>
-            <div className="pb-4 space-y-1 text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-3">
-                <h1 className="text-4xl font-black text-slate-900 tracking-tight">{profile.companyName}</h1>
-                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 px-3 py-1 font-black text-[10px] uppercase flex gap-1">
+
+            {/* Nama Akun dan Keterangan: Diperjelas dan ditempatkan dengan baik */}
+            <div className="pb-2 text-center md:text-left space-y-2 bg-white/80 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none p-4 rounded-3xl md:p-0">
+              <div className="flex flex-col md:flex-row items-center gap-3">
+                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight drop-shadow-sm">
+                  {profile.companyName}
+                </h1>
+                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 px-3 py-1 font-black text-[10px] uppercase flex gap-1 shadow-sm">
                   <ShieldCheck className="size-3" /> Verified Account
                 </Badge>
               </div>
-              <p className="text-lg font-bold text-slate-500 flex items-center justify-center md:justify-start gap-2">
-                <Building2 className="size-5 text-indigo-400" />
+              <p className="text-lg font-bold text-slate-600 flex items-center justify-center md:justify-start gap-2">
+                <Building2 className="size-5 text-indigo-500" />
                 {profile.category}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="pt-20 grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Form Fields dan Detail Lainnya */}
+        <div className="pt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 md:px-0">
           
           {/* Main Info Column */}
           <div className="lg:col-span-7 space-y-8">
             <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden">
-              <CardHeader className="p-8 pb-4">
-                <CardTitle className="text-xl font-black flex items-center gap-2">
+              <CardHeader className="p-8 pb-4 border-b border-slate-50">
+                <CardTitle className="text-xl font-black flex items-center gap-2 text-slate-900">
                   <Globe className="size-5 text-accent" />
-                  General Business Identity
+                  Identitas Bisnis Global
                 </CardTitle>
-                <CardDescription className="font-medium">Update your core business information for the global directory.</CardDescription>
+                <CardDescription className="font-medium text-slate-500">Perbarui informasi inti bisnis Anda untuk direktori jaringan global.</CardDescription>
               </CardHeader>
-              <CardContent className="p-8 pt-0 space-y-6">
+              <CardContent className="p-8 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="font-bold text-slate-700">Organization Name</Label>
-                    <Input 
-                      value={profile.companyName} 
-                      onChange={(e) => setProfile({...profile, companyName: e.target.value})}
-                      className="rounded-xl border-slate-200 h-12 bg-slate-50/50"
-                    />
+                    <Label className="font-bold text-slate-700">Nama Organisasi</Label>
+                    <Input value={profile.companyName} onChange={(e) => setProfile({...profile, companyName: e.target.value})} className="rounded-xl border-slate-200 h-12 bg-slate-50/50" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="font-bold text-slate-700">Primary Industry</Label>
-                    <Input 
-                      value={profile.category} 
-                      onChange={(e) => setProfile({...profile, category: e.target.value})}
-                      className="rounded-xl border-slate-200 h-12 bg-slate-50/50"
-                    />
+                    <Label className="font-bold text-slate-700">Industri Utama</Label>
+                    <Input value={profile.category} onChange={(e) => setProfile({...profile, category: e.target.value})} className="rounded-xl border-slate-200 h-12 bg-slate-50/50" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="font-bold text-slate-700">Global Headquarters</Label>
+                    <Label className="font-bold text-slate-700">Kantor Pusat</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                      <Input 
-                        value={profile.location} 
-                        onChange={(e) => setProfile({...profile, location: e.target.value})}
-                        className="pl-10 rounded-xl border-slate-200 h-12 bg-slate-50/50"
-                      />
+                      <Input value={profile.location} onChange={(e) => setProfile({...profile, location: e.target.value})} className="pl-10 rounded-xl border-slate-200 h-12 bg-slate-50/50" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="font-bold text-slate-700">Official Website</Label>
+                    <Label className="font-bold text-slate-700">Situs Web Resmi</Label>
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                      <Input 
-                        value={profile.website} 
-                        onChange={(e) => setProfile({...profile, website: e.target.value})}
-                        className="pl-10 rounded-xl border-slate-200 h-12 bg-slate-50/50"
-                      />
+                      <Input value={profile.website} onChange={(e) => setProfile({...profile, website: e.target.value})} className="pl-10 rounded-xl border-slate-200 h-12 bg-slate-50/50" />
                     </div>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Business Overview</Label>
-                  <Textarea 
-                    value={profile.description}
-                    onChange={(e) => setProfile({...profile, description: e.target.value})}
-                    className="rounded-xl border-slate-200 min-h-[120px] bg-slate-50/50 font-medium leading-relaxed"
-                  />
+                  <Label className="font-bold text-slate-700">Gambaran Bisnis</Label>
+                  <Textarea value={profile.description} onChange={(e) => setProfile({...profile, description: e.target.value})} className="rounded-xl border-slate-200 min-h-[120px] bg-slate-50/50 font-medium leading-relaxed" />
                 </div>
               </CardContent>
             </Card>
@@ -455,13 +366,13 @@ export default function ProfilePage() {
                   <ShieldCheck className="size-8 text-white" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-black tracking-tight">Security & Verification</h3>
+                  <h3 className="text-2xl font-black tracking-tight">Keamanan & Verifikasi</h3>
                   <p className="text-slate-400 font-medium leading-relaxed">
-                    Your enterprise verification is valid until <span className="text-white">December 2025</span>. Maintain complete profile details to ensure a high match score in the global search engine.
+                    Verifikasi perusahaan Anda berlaku hingga <span className="text-white">Desember 2025</span>. Pertahankan kelengkapan profil untuk skor kecocokan tinggi.
                   </p>
                 </div>
                 <Button variant="outline" className="rounded-xl border-white/20 text-white hover:bg-white/10 h-12 px-8 font-bold">
-                  View Certificates
+                  Lihat Sertifikat
                 </Button>
               </div>
               <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -mr-32 -mt-32" />
@@ -476,17 +387,15 @@ export default function ProfilePage() {
                   <Plus className="size-5 text-accent" />
                   E-Commerce & Social Hub
                 </CardTitle>
-                <CardDescription className="font-medium">Connect your sales channels and social footprints.</CardDescription>
+                <CardDescription className="font-medium">Hubungkan saluran penjualan dan jejak sosial Anda.</CardDescription>
               </CardHeader>
               <CardContent className="p-8 pt-0 space-y-6">
                 <div className="space-y-4">
                   {socialPlatforms.map((platform) => (
                     <div key={platform.key} className="space-y-1.5 group">
-                      <div className="flex justify-between items-center px-1">
-                        <Label className="text-xs font-black uppercase tracking-widest text-slate-400 group-focus-within:text-accent transition-colors">
-                          {platform.label} Handle/UID
-                        </Label>
-                      </div>
+                      <Label className="text-xs font-black uppercase tracking-widest text-slate-400 group-focus-within:text-accent transition-colors">
+                        {platform.label}
+                      </Label>
                       <div className="relative">
                         <div className={cn("absolute left-4 top-1/2 -translate-y-1/2 transition-transform group-focus-within:scale-110", platform.color)}>
                           <platform.icon />
@@ -494,8 +403,8 @@ export default function ProfilePage() {
                         <Input 
                           value={socialLinks[platform.key as keyof typeof socialLinks]}
                           onChange={(e) => setSocialLinks({...socialLinks, [platform.key]: e.target.value})}
-                          placeholder={`Enter your ${platform.label} link...`}
-                          className="pl-12 rounded-xl border-slate-200 h-11 bg-slate-50/30 font-medium focus:bg-white"
+                          placeholder={`Username/ID ${platform.label}`}
+                          className="pl-12 rounded-xl border-slate-200 h-11 bg-slate-50/30 font-medium focus:bg-white transition-all"
                         />
                       </div>
                     </div>
@@ -503,17 +412,14 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="pt-6 border-t border-slate-100">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Live Discovery Preview</h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Pratinjau Link Aktif</h4>
                   <div className="flex flex-wrap gap-3">
                     {socialPlatforms.map((platform) => {
                       const val = socialLinks[platform.key as keyof typeof socialLinks];
                       if (!val) return null;
                       return (
                         <a 
-                          key={platform.key}
-                          href={`${platform.prefix}${val}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          key={platform.key} href={`${platform.prefix}${val}`} target="_blank" rel="noopener noreferrer"
                           className="flex items-center gap-2 p-2 pr-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-accent hover:bg-white hover:shadow-lg transition-all active:scale-95 group"
                         >
                           <div className={cn("size-8 rounded-lg bg-white shadow-sm flex items-center justify-center", platform.color)}>
@@ -530,73 +436,45 @@ export default function ProfilePage() {
             </Card>
 
             <Button 
-              onClick={handleSaveProfile}
-              disabled={saving}
+              onClick={handleSaveProfile} disabled={saving}
               className="w-full h-16 rounded-[1.5rem] bg-accent hover:bg-indigo-600 text-white font-black text-xl shadow-2xl shadow-indigo-100 transition-all active:scale-[0.98] flex gap-3"
             >
-              {saving ? (
-                <>
-                  <Loader2 className="size-6 animate-spin" />
-                  Uploading Assets...
-                </>
-              ) : (
-                <>
-                  <Save className="size-6" />
-                  Synchronize Profile
-                </>
-              )}
+              {saving ? <><Loader2 className="size-6 animate-spin" /> Menyinkronkan...</> : <><Save className="size-6" /> Simpan Profil</>}
             </Button>
           </div>
         </div>
 
-        {/* Business Catalog / Product Management Section */}
-        <div className="pt-10 space-y-8">
+        {/* Catalog Section */}
+        <div className="pt-10 space-y-8 px-4 md:px-0">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2 bg-indigo-50 text-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest w-fit border border-indigo-100">
-                <ShoppingBag className="size-3" />
-                Network Marketplace
+                <ShoppingBag className="size-3" /> Marketplace Jaringan
               </div>
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight">Business Catalog</h2>
-              <p className="text-slate-500 font-medium">Manage your products and services visible to the global network.</p>
+              <h2 className="text-3xl font-black text-slate-900 tracking-tight">Katalog Bisnis</h2>
+              <p className="text-slate-500 font-medium">Kelola produk dan layanan yang terlihat di jaringan global.</p>
             </div>
             
             <Dialog open={isProductModalOpen} onOpenChange={setIsProductModalOpen}>
               <DialogTrigger asChild>
-                <Button className="rounded-2xl bg-slate-900 hover:bg-black text-white h-14 px-8 font-black shadow-xl flex gap-2">
-                  <Plus className="size-5" />
-                  Add Product/Service
+                <Button className="rounded-2xl bg-slate-900 hover:bg-black text-white h-14 px-8 font-black shadow-xl flex gap-2 transition-transform active:scale-95">
+                  <Plus className="size-5" /> Tambah Produk
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-xl rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden">
                 <DialogHeader className="p-8 pb-4 bg-slate-50">
-                  <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">
-                    {editingProduct ? "Edit Product" : "New Catalog Entry"}
-                  </DialogTitle>
-                  <DialogDescription className="font-medium">
-                    Showcase your value proposition to potential strategic partners.
-                  </DialogDescription>
+                  <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">{editingProduct ? "Edit Produk" : "Entri Katalog Baru"}</DialogTitle>
                 </DialogHeader>
                 <div className="p-8 space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label className="font-bold text-slate-700">Product Name</Label>
-                      <Input 
-                        value={newProduct.name}
-                        onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                        placeholder="e.g. AI Controller v2"
-                        className="rounded-xl border-slate-200 h-12"
-                      />
+                      <Label className="font-bold text-slate-700">Nama Produk</Label>
+                      <Input value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} className="rounded-xl border-slate-200 h-12" />
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-bold text-slate-700">Category</Label>
-                      <Select 
-                        value={newProduct.category}
-                        onValueChange={(val) => setNewProduct({ ...newProduct, category: val })}
-                      >
-                        <SelectTrigger className="rounded-xl border-slate-200 h-12">
-                          <SelectValue />
-                        </SelectTrigger>
+                      <Label className="font-bold text-slate-700">Kategori</Label>
+                      <Select value={newProduct.category} onValueChange={(val) => setNewProduct({ ...newProduct, category: val })}>
+                        <SelectTrigger className="rounded-xl border-slate-200 h-12"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Software">Software</SelectItem>
                           <SelectItem value="Hardware">Hardware</SelectItem>
@@ -606,109 +484,43 @@ export default function ProfilePage() {
                       </Select>
                     </div>
                     <div className="space-y-2 col-span-2">
-                      <Label className="font-bold text-slate-700">Price (IDR)</Label>
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">Rp</span>
-                        <Input 
-                          type="number"
-                          value={newProduct.price}
-                          onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
-                          className="pl-12 rounded-xl border-slate-200 h-12"
-                        />
-                      </div>
+                      <Label className="font-bold text-slate-700">Harga (IDR)</Label>
+                      <Input type="number" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })} className="rounded-xl border-slate-200 h-12" />
                     </div>
                     <div className="space-y-2 col-span-2">
-                      <Label className="font-bold text-slate-700">Description</Label>
-                      <Textarea 
-                        value={newProduct.description}
-                        onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                        placeholder="Describe key features and B2B benefits..."
-                        className="rounded-xl border-slate-200 min-h-[100px]"
-                      />
+                      <Label className="font-bold text-slate-700">Deskripsi</Label>
+                      <Textarea value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })} className="rounded-xl border-slate-200 min-h-[100px]" />
                     </div>
                   </div>
                 </div>
                 <DialogFooter className="p-8 pt-0 flex gap-3">
-                  <Button variant="ghost" onClick={() => { setIsProductModalOpen(false); setEditingProduct(null); }} className="rounded-xl h-12 px-6 font-bold">Cancel</Button>
-                  <Button onClick={handleAddOrEditProduct} className="rounded-xl bg-accent hover:bg-indigo-600 text-white h-12 px-10 font-black shadow-lg">
-                    {editingProduct ? "Update Item" : "Publish to Catalog"}
-                  </Button>
+                  <Button variant="ghost" onClick={() => { setIsProductModalOpen(false); setEditingProduct(null); }} className="rounded-xl h-12 px-6 font-bold">Batal</Button>
+                  <Button onClick={handleAddOrEditProduct} className="rounded-xl bg-accent hover:bg-indigo-600 text-white h-12 px-10 font-black shadow-lg">Simpan</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-10">
             {products.map((product) => (
               <Card key={product.id} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-300 rounded-[2rem] bg-white">
                 <div className="aspect-[4/3] w-full relative overflow-hidden">
-                  <img 
-                    src={product.imageUrl} 
-                    alt={product.name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-white/90 backdrop-blur-md text-slate-900 border-none font-black text-[10px] uppercase px-3 py-1 shadow-md">
-                      {product.category}
-                    </Badge>
-                  </div>
+                  <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute top-4 left-4"><Badge className="bg-white/90 text-slate-900 border-none font-black text-[10px] px-3 py-1 shadow-md">{product.category}</Badge></div>
                 </div>
                 <CardHeader className="p-6">
-                  <CardTitle className="text-xl font-black text-slate-900 tracking-tight leading-none truncate">
-                    {product.name}
-                  </CardTitle>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-lg font-black text-indigo-600">
-                      Rp {product.price.toLocaleString("id-ID")}
-                    </span>
-                  </div>
+                  <CardTitle className="text-xl font-black text-slate-900 truncate">{product.name}</CardTitle>
+                  <div className="text-lg font-black text-indigo-600">Rp {product.price.toLocaleString("id-ID")}</div>
                 </CardHeader>
                 <CardContent className="px-6 pb-6">
-                  <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed h-10">
-                    {product.description}
-                  </p>
+                  <p className="text-sm text-slate-500 font-medium line-clamp-2 h-10">{product.description}</p>
                 </CardContent>
                 <CardFooter className="px-4 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => openEditModal(product)}
-                    className="rounded-lg h-9 font-bold text-slate-500 hover:text-accent hover:bg-indigo-50 gap-2"
-                  >
-                    <Pencil className="size-3.5" />
-                    Edit
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => handleDeleteProduct(product.id)}
-                    className="rounded-lg h-9 font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-50 gap-2"
-                  >
-                    <Trash2 className="size-3.5" />
-                    Remove
-                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => openEditModal(product)} className="font-bold text-slate-500 hover:text-accent gap-2"><Pencil className="size-3.5" /> Edit</Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteProduct(product.id)} className="font-bold text-rose-500 hover:text-rose-600 gap-2"><Trash2 className="size-3.5" /> Hapus</Button>
                 </CardFooter>
               </Card>
             ))}
-            
-            {products.length === 0 && (
-              <div className="col-span-full py-20 border-2 border-dashed border-slate-100 rounded-[3rem] flex flex-col items-center justify-center text-center space-y-6">
-                <div className="size-20 bg-slate-50 text-slate-300 rounded-[2rem] flex items-center justify-center">
-                  <Package className="size-10" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-xl font-black text-slate-900">Your Catalog is Empty</h4>
-                  <p className="text-slate-400 font-medium max-w-xs mx-auto">Add your products or services to increase your visibility in the OnTapp global marketplace.</p>
-                </div>
-                <Button 
-                  onClick={() => setIsProductModalOpen(true)}
-                  variant="outline" 
-                  className="rounded-xl border-slate-200 font-bold hover:bg-slate-50"
-                >
-                  Create First Entry
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       </div>
