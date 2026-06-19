@@ -1,7 +1,6 @@
-
 /**
- * Firebase client configuration.
- * All values are pulled from environment variables with NEXT_PUBLIC_ prefix.
+ * Firebase configuration object.
+ * Environment variables must be prefixed with NEXT_PUBLIC_ for client-side access.
  */
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
@@ -12,17 +11,11 @@ export const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
 };
 
-// Runtime debug logs to verify environment variable loading
-if (typeof window !== "undefined") {
-  if (!firebaseConfig.projectId || firebaseConfig.projectId === "undefined") {
-    console.error("❌ ERROR: Firebase Project ID is missing. Check your .env file.");
-  } else {
-    console.log("🔥 Firebase initialized for project:", firebaseConfig.projectId);
-  }
-}
-
-export const isConfigValid = 
-  !!firebaseConfig.apiKey && 
-  firebaseConfig.apiKey !== "undefined" &&
-  !!firebaseConfig.projectId &&
-  firebaseConfig.projectId !== "undefined";
+/**
+ * Validates if the minimal required Firebase configuration is present.
+ */
+export const isConfigValid = Boolean(
+  firebaseConfig.apiKey && 
+  firebaseConfig.projectId && 
+  firebaseConfig.appId
+);
