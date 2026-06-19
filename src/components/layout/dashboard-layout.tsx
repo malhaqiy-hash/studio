@@ -55,7 +55,8 @@ import { AIAssistant } from "@/components/chat/ai-assistant";
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: Rss, label: "Feed", href: "/feed" },
-  { icon: Search, label: "AI Discovery", href: "/discover" },
+  { icon: Search, label: "AI Search Hub", href: "/search" },
+  { icon: Globe, label: "AI Discovery", href: "/discover" },
   { icon: Target, label: "Intelligent Matches", href: "/matches" },
   { icon: Users, label: "Matchmaker", href: "/matchmaker" },
   { icon: Briefcase, label: "Opportunities", href: "/opportunities" },
