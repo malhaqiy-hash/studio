@@ -17,7 +17,6 @@ import {
   Settings,
   User,
   Sliders,
-  Sparkles,
   Target,
   Menu,
   ChevronRight,
@@ -228,18 +227,23 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
           {/* TAB 3: Menu Utama / Lainnya (≡) */}
           <div className="relative w-full h-full flex flex-col items-center justify-center">
-            {/* AI Advisor Chat Icon (Positioned cleanly above the Lainnya button) */}
-            <div className="absolute -top-10 bg-indigo-600 p-2 rounded-full shadow-lg text-white ring-2 ring-white">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            {/* 🤖 TOMBOL AI ADVISOR (Sekarang melayang pas di atas garis tiga) */}
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
+              className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-50"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
               </svg>
-            </div>
+            </button>
 
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild>
-                {/* Tombol Pemicu Menu Lainnya */}
-                <button className="flex flex-col items-center gap-1 hover:text-indigo-600 w-full pt-4 pb-2 outline-none">
-                  <Menu className="size-6" />
+                {/* Tombol Pemicu Menu Lainnya (Garis Tiga - Bersih Tanpa Tertutup) */}
+                <button className="flex flex-col items-center gap-1 hover:text-indigo-600 w-full py-2 outline-none">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
                   <span>Lainnya</span>
                 </button>
               </SheetTrigger>
