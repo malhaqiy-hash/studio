@@ -64,7 +64,6 @@ export default function ProfilePage() {
   const [isLinksModalOpen, setIsLinksModalOpen] = React.useState(false);
   const [isContentModalOpen, setIsContentModalOpen] = React.useState(false);
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
-  const [isGooglePhotosOpen, setIsGooglePhotosOpen] = React.useState(false);
 
   // Form States
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
@@ -118,7 +117,7 @@ export default function ProfilePage() {
     toast({ title: 'Konten dihapus' });
   };
 
-  // Synchronized File Handler
+  // Unified File Handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -132,14 +131,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Synchronized Cloud Handler
-  const selectGooglePhoto = (url: string) => {
-    setNewItem(prev => ({ ...prev, image: url }));
-    setIsGooglePhotosOpen(false);
-    setIsSourcePickerOpen(false);
-    toast({ title: 'Foto terpilih dari Cloud' });
-  };
-
   const getLinkIcon = (url: string) => {
     const lowerUrl = url.toLowerCase();
     if (lowerUrl.includes('instagram.com')) return <Instagram className="size-4" />;
@@ -150,17 +141,6 @@ export default function ProfilePage() {
   };
 
   const isPostEmpty = !newItem.description?.trim() && !newItem.image;
-
-  const GOOGLE_PHOTOS_MOCK = [
-    "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1553028826-f4804a6dba3b?w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1522071823991-b96c7357c48f?w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&auto=format&fit=crop",
-  ];
 
   return (
     <DashboardLayout>
@@ -700,6 +680,7 @@ export default function ProfilePage() {
             <DialogTitle className="text-lg font-black tracking-tight text-center">Pilih Sumber Media</DialogTitle>
           </DialogHeader>
           <div className="p-4 space-y-2">
+            {/* All options trigger the same native file input */}
             <Button 
               variant="ghost" 
               className="w-full h-14 rounded-2xl justify-start gap-4 px-6 hover:bg-slate-50 hover:text-accent font-bold group"
@@ -711,10 +692,7 @@ export default function ProfilePage() {
             <Button 
               variant="ghost" 
               className="w-full h-14 rounded-2xl justify-start gap-4 px-6 hover:bg-slate-50 hover:text-accent font-bold group"
-              onClick={() => {
-                setIsSourcePickerOpen(false);
-                setIsGooglePhotosOpen(true);
-              }}
+              onClick={() => fileBrowserRef.current?.click()}
             >
               <Cloud className="size-5 text-blue-500 group-hover:scale-110 transition-transform" />
               Google Photos
@@ -736,37 +714,6 @@ export default function ProfilePage() {
             accept="image/*"
             onChange={handleFileChange}
           />
-        </DialogContent>
-      </Dialog>
-
-      {/* Google Photos Mock Modal */}
-      <Dialog open={isGooglePhotosOpen} onOpenChange={setIsGooglePhotosOpen}>
-        <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white">
-          <DialogHeader className="p-6 pb-4 border-b bg-slate-50">
-            <div className="flex items-center gap-3">
-              <Cloud className="size-6 text-blue-500" />
-              <DialogTitle className="text-lg font-black tracking-tight">Google Photos - Pilih dari Awan</DialogTitle>
-            </div>
-          </DialogHeader>
-          <ScrollArea className="h-[400px] p-4">
-            <div className="grid grid-cols-2 gap-3">
-              {GOOGLE_PHOTOS_MOCK.map((url, i) => (
-                <button 
-                  key={i}
-                  onClick={() => selectGooglePhoto(url)}
-                  className="aspect-video rounded-xl overflow-hidden border border-slate-100 hover:ring-4 hover:ring-accent/20 transition-all relative group shadow-sm"
-                >
-                  <img src={url} className="w-full h-full object-cover" alt={`Cloud Photo ${i}`} />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                    <Check className="size-6 text-white" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </ScrollArea>
-          <DialogFooter className="p-4 border-t bg-slate-50 flex justify-center">
-            <Button variant="ghost" onClick={() => setIsGooglePhotosOpen(false)} className="rounded-xl font-bold">Tutup</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
