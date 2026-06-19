@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -22,9 +21,11 @@ import {
   ArrowRight,
   ShieldCheck,
   Zap,
-  MapPin
+  MapPin,
+  CheckCircle2,
+  Cpu
 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SEARCH_SCOPES = [
   { id: "products", label: "Product Search", icon: Package, color: "text-indigo-500", bg: "bg-indigo-50" },
@@ -44,8 +45,34 @@ const RECENT_SEARCHES = [
 export default function SearchHubPage() {
   const [activeTab, setActiveTab] = React.useState("products");
   const [query, setQuery] = React.useState("");
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [extractedData, setExtractedData] = React.useState<null | {
+    industry: string;
+    certification: string;
+    market: string;
+    location: string;
+  }>(null);
 
   const activeScope = SEARCH_SCOPES.find(s => s.id === activeTab);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    setIsAnalyzing(true);
+    setExtractedData(null);
+
+    // Simulate AI Intent Extraction
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      setExtractedData({
+        industry: "Packaging",
+        certification: "Halal",
+        market: "Japan",
+        location: "Indonesia"
+      });
+    }, 2000);
+  };
 
   return (
     <DashboardLayout>
@@ -67,24 +94,81 @@ export default function SearchHubPage() {
 
           <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white">
             <CardContent className="p-8 space-y-8">
-              {/* Search Bar */}
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                  <Search className="size-6 text-slate-400 group-focus-within:text-accent transition-colors" />
-                </div>
-                <Input 
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={`Search for ${activeScope?.label.toLowerCase().split(' ')[0]}s...`}
-                  className="h-20 pl-16 pr-40 rounded-[2rem] border-slate-200 bg-slate-50/50 text-xl font-medium focus:bg-white focus:ring-accent/10 transition-all"
-                />
-                <Button className="absolute right-3 top-3 bottom-3 rounded-full px-10 bg-accent hover:bg-indigo-600 text-white font-black text-lg shadow-lg">
-                  Search
-                </Button>
+              {/* Premium Search Bar */}
+              <div className="space-y-6">
+                <form onSubmit={handleSearch} className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                    <Search className="size-6 text-slate-400 group-focus-within:text-accent transition-colors" />
+                  </div>
+                  <Input 
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="e.g., Looking for halal food packaging suppliers for export to Japan."
+                    className="h-24 pl-16 pr-40 rounded-[2rem] border-slate-200 bg-slate-50/50 text-xl font-medium focus:bg-white focus:ring-accent/10 transition-all shadow-inner"
+                  />
+                  <Button 
+                    type="submit"
+                    disabled={isAnalyzing}
+                    className="absolute right-4 top-4 bottom-4 rounded-2xl px-10 bg-accent hover:bg-indigo-600 text-white font-black text-lg shadow-lg active:scale-95 transition-all"
+                  >
+                    {isAnalyzing ? (
+                      <div className="flex items-center gap-2">
+                        <Cpu className="size-5 animate-spin" />
+                        Analyzing...
+                      </div>
+                    ) : "Search"}
+                  </Button>
+                </form>
+
+                {/* Loading State: AI Analysis */}
+                {isAnalyzing && (
+                  <div className="p-8 rounded-[2rem] bg-indigo-50/50 border border-indigo-100 space-y-4 animate-in fade-in duration-300">
+                    <div className="flex items-center gap-3">
+                      <Sparkles className="size-5 text-accent animate-pulse" />
+                      <span className="text-sm font-black text-indigo-900 uppercase tracking-widest">
+                        AI is analyzing market intent and extraction...
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <Skeleton className="h-10 w-full rounded-xl bg-indigo-100" />
+                      <Skeleton className="h-10 w-full rounded-xl bg-indigo-100" />
+                      <Skeleton className="h-10 w-full rounded-xl bg-indigo-100" />
+                      <Skeleton className="h-10 w-full rounded-xl bg-indigo-100" />
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Extracted Intent Chips */}
+                {extractedData && !isAnalyzing && (
+                  <div className="p-6 rounded-[2rem] bg-emerald-50/30 border border-emerald-100 space-y-3 animate-in slide-in-from-top-4 duration-500">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest px-1">
+                      <CheckCircle2 className="size-3" />
+                      Intent Parameters Extracted
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <Badge className="bg-white text-slate-700 border-slate-200 shadow-sm py-2 px-4 rounded-xl font-bold flex gap-2 items-center">
+                        <span className="text-[10px] text-slate-400 uppercase">Industry:</span>
+                        {extractedData.industry}
+                      </Badge>
+                      <Badge className="bg-white text-slate-700 border-slate-200 shadow-sm py-2 px-4 rounded-xl font-bold flex gap-2 items-center">
+                        <span className="text-[10px] text-slate-400 uppercase">Certification:</span>
+                        {extractedData.certification}
+                      </Badge>
+                      <Badge className="bg-white text-slate-700 border-slate-200 shadow-sm py-2 px-4 rounded-xl font-bold flex gap-2 items-center">
+                        <span className="text-[10px] text-slate-400 uppercase">Market:</span>
+                        {extractedData.market}
+                      </Badge>
+                      <Badge className="bg-white text-slate-700 border-slate-200 shadow-sm py-2 px-4 rounded-xl font-bold flex gap-2 items-center">
+                        <span className="text-[10px] text-slate-400 uppercase">Location:</span>
+                        {extractedData.location}
+                      </Badge>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Scope Navigation */}
-              <Tabs defaultValue="products" className="w-full" onValueChange={setActiveTab}>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="bg-slate-50 p-1.5 rounded-2xl h-auto flex flex-wrap gap-2 border border-slate-100">
                   {SEARCH_SCOPES.map((scope) => (
                     <TabsTrigger 
@@ -99,30 +183,58 @@ export default function SearchHubPage() {
                 </TabsList>
 
                 {SEARCH_SCOPES.map((scope) => (
-                  <TabsContent key={scope.id} value={scope.id} className="mt-8 space-y-6">
+                  <TabsContent key={scope.id} value={scope.id} className="mt-8 space-y-6 outline-none">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
                         <scope.icon className={`size-5 ${scope.color}`} />
                         {scope.label}
                       </h3>
-                      <Button variant="ghost" className="text-xs font-black uppercase text-slate-400 hover:text-accent tracking-widest">
-                        Clear Filters
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => { setQuery(""); setExtractedData(null); }}
+                        className="text-xs font-black uppercase text-slate-400 hover:text-accent tracking-widest"
+                      >
+                        Reset Hub
                       </Button>
                     </div>
 
                     <div className="grid gap-4">
                       {/* Empty State / Initial Suggestions */}
-                      <div className="p-10 border-2 border-dashed border-slate-100 rounded-[2rem] flex flex-col items-center justify-center text-center space-y-4">
-                        <div className={`size-16 rounded-3xl ${scope.bg} flex items-center justify-center`}>
-                          <scope.icon className={`size-8 ${scope.color}`} />
+                      {!extractedData && (
+                        <div className="p-10 border-2 border-dashed border-slate-100 rounded-[2rem] flex flex-col items-center justify-center text-center space-y-4">
+                          <div className={`size-16 rounded-3xl ${scope.bg} flex items-center justify-center`}>
+                            <scope.icon className={`size-8 ${scope.color}`} />
+                          </div>
+                          <div className="space-y-1">
+                            <h4 className="font-bold text-slate-900">Ready to Discover {scope.label.split(' ')[0]}s</h4>
+                            <p className="text-sm text-slate-400 font-medium max-w-xs">
+                              Type your requirements above to see real-time matches from the OnTapp network.
+                            </p>
+                          </div>
                         </div>
-                        <div className="space-y-1">
-                          <h4 className="font-bold text-slate-900">Ready to Discover {scope.label.split(' ')[0]}s</h4>
-                          <p className="text-sm text-slate-400 font-medium max-w-xs">
-                            Type your requirements above to see real-time matches from the OnTapp network.
-                          </p>
+                      )}
+
+                      {/* Results Placeholder when data is extracted */}
+                      {extractedData && (
+                        <div className="space-y-4">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-between group hover:border-accent transition-all">
+                              <div className="flex items-center gap-4">
+                                <div className="size-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
+                                   <scope.icon className={`size-5 ${scope.color}`} />
+                                </div>
+                                <div>
+                                  <h5 className="font-bold text-slate-900">Verified {scope.label.split(' ')[0]} {i}</h5>
+                                  <p className="text-xs text-slate-500 font-medium">Matching intent: {extractedData.industry} / {extractedData.certification}</p>
+                                </div>
+                              </div>
+                              <Button variant="ghost" className="rounded-xl font-bold text-accent group-hover:bg-indigo-50">
+                                View Profile
+                              </Button>
+                            </div>
+                          ))}
                         </div>
-                      </div>
+                      )}
                     </div>
                   </TabsContent>
                 ))}
@@ -155,7 +267,7 @@ export default function SearchHubPage() {
           </div>
         </div>
 
-        {/* Sidebar Sidebar Placeholder */}
+        {/* Sidebar */}
         <div className="lg:col-span-4 space-y-8">
           <Card className="rounded-[2.5rem] border-slate-200 shadow-sm overflow-hidden">
             <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
@@ -169,7 +281,8 @@ export default function SearchHubPage() {
                 {RECENT_SEARCHES.map((search, i) => (
                   <button 
                     key={i}
-                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-white hover:shadow-md border border-transparent hover:border-slate-100 transition-all group"
+                    onClick={() => setQuery(search)}
+                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-white hover:shadow-md border border-transparent hover:border-slate-100 transition-all group text-left"
                   >
                     <span className="text-sm font-bold text-slate-600 group-hover:text-accent truncate">{search}</span>
                     <ArrowRight className="size-4 text-slate-300 group-hover:text-accent group-hover:translate-x-1 transition-all" />
