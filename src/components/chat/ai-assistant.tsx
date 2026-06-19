@@ -8,8 +8,8 @@ import {
   Sparkles, 
   Bot, 
   User, 
-  Minimize2, 
-  Maximize2 
+  Globe,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,14 +17,20 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { businessAssistant } from '@/ai/flows/business-assistant-flow';
+import { translateText } from '@/ai/flows/translate-flow';
+import { useLanguage } from '@/context/language-context';
 import { cn } from '@/lib/utils';
 
 type Message = {
   role: 'user' | 'model' | 'system';
   content: string;
+  translatedContent?: string;
+  isTranslating?: boolean;
+  showTranslated?: boolean;
 };
 
 export function AIAssistant() {
+  const { language } = useLanguage();
   const [isOpen, setIsOpen] = React.useState(false);
   const [input, setInput] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -53,7 +59,7 @@ export function AIAssistant() {
     try {
       const { response } = await businessAssistant({
         message: input,
-        history: messages.slice(-5) // Send last few messages for context
+        history: messages.slice(-5).map(m => ({ role: m.role, content: m.content }))
       });
 
       setMessages((prev) => [...prev, { role: 'model', content: response }]);
@@ -65,6 +71,33 @@ export function AIAssistant() {
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTranslateMessage = async (index: number) => {
+    const msg = messages[index];
+    if (msg.translatedContent) {
+      setMessages(prev => prev.map((m, i) => i === index ? { ...m, showTranslated: !m.showTranslated } : m));
+      return;
+    }
+
+    setMessages(prev => prev.map((m, i) => i === index ? { ...m, isTranslating: true } : m));
+
+    try {
+      const { translatedText } = await translateText({
+        text: msg.content,
+        targetLanguage: language
+      });
+      
+      setMessages(prev => prev.map((m, i) => i === index ? { 
+        ...m, 
+        translatedContent: translatedText, 
+        showTranslated: true, 
+        isTranslating: false 
+      } : m));
+    } catch (err) {
+      console.error("Translation failed", err);
+      setMessages(prev => prev.map((m, i) => i === index ? { ...m, isTranslating: false } : m));
     }
   };
 
@@ -106,7 +139,7 @@ export function AIAssistant() {
                       msg.role === 'user' ? "flex-row-reverse" : "flex-row"
                     )}
                   >
-                    <Avatar className="size-8 border">
+                    <Avatar className="size-8 border shrink-0">
                       {msg.role === 'user' ? (
                         <>
                           <AvatarImage src="https://picsum.photos/seed/user/100" />
@@ -118,13 +151,31 @@ export function AIAssistant() {
                         </>
                       )}
                     </Avatar>
-                    <div className={cn(
-                      "max-w-[80%] p-3 rounded-2xl text-sm font-medium shadow-sm",
-                      msg.role === 'user' 
-                        ? "bg-accent text-white rounded-tr-none" 
-                        : "bg-white text-slate-700 border border-slate-100 rounded-tl-none"
-                    )}>
-                      {msg.content}
+                    <div className="flex flex-col gap-1 max-w-[80%]">
+                      <div className={cn(
+                        "p-3 rounded-2xl text-sm font-medium shadow-sm",
+                        msg.role === 'user' 
+                          ? "bg-accent text-white rounded-tr-none" 
+                          : "bg-white text-slate-700 border border-slate-100 rounded-tl-none"
+                      )}>
+                        {msg.showTranslated ? msg.translatedContent : msg.content}
+                      </div>
+                      
+                      {/* Translation Controls */}
+                      <div className={cn("flex", msg.role === 'user' ? "justify-end" : "justify-start")}>
+                        <button 
+                          onClick={() => handleTranslateMessage(i)}
+                          disabled={msg.isTranslating}
+                          className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-accent transition-colors disabled:opacity-50"
+                        >
+                          {msg.isTranslating ? (
+                            <RefreshCw className="size-2.5 animate-spin" />
+                          ) : (
+                            <Globe className="size-2.5" />
+                          )}
+                          {msg.showTranslated ? "Show Original" : (msg.translatedContent ? "Show Translation" : "Translate")}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

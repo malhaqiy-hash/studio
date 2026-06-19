@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -16,9 +15,12 @@ import {
   Image as ImageIcon,
   Link as LinkIcon,
   ShoppingBag,
-  Target
+  Target,
+  Globe,
+  RefreshCw
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { translateText } from "@/ai/flows/translate-flow";
+import { useLanguage } from "@/context/language-context";
 
 const MOCK_POSTS = [
   {
@@ -58,6 +60,42 @@ const MOCK_POSTS = [
 ];
 
 export default function FeedPage() {
+  const { language } = useLanguage();
+  const [translations, setTranslations] = React.useState<Record<number, { text: string, show: boolean, loading: boolean }>>({});
+
+  const handleTranslatePost = async (postId: number, content: string) => {
+    const existing = translations[postId];
+    if (existing?.text) {
+      setTranslations(prev => ({
+        ...prev,
+        [postId]: { ...existing, show: !existing.show }
+      }));
+      return;
+    }
+
+    setTranslations(prev => ({
+      ...prev,
+      [postId]: { text: "", show: false, loading: true }
+    }));
+
+    try {
+      const { translatedText } = await translateText({
+        text: content,
+        targetLanguage: language
+      });
+      setTranslations(prev => ({
+        ...prev,
+        [postId]: { text: translatedText, show: true, loading: false }
+      }));
+    } catch (err) {
+      console.error("Post translation failed", err);
+      setTranslations(prev => ({
+        ...prev,
+        [postId]: { text: "", show: false, loading: false }
+      }));
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -98,65 +136,95 @@ export default function FeedPage() {
           </Card>
 
           {/* Social Feed */}
-          {MOCK_POSTS.map((post) => (
-            <Card key={post.id} className="shadow-sm border-slate-200 group transition-all hover:shadow-md">
-              <CardHeader className="p-6 pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="size-11 border shadow-sm ring-2 ring-white">
-                      <AvatarImage src={post.avatar} />
-                      <AvatarFallback>{post.company[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-slate-900 hover:text-accent cursor-pointer transition-colors">{post.company}</h3>
-                        <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-tight py-0 px-2 bg-slate-100 text-slate-600">
-                          {post.role}
-                        </Badge>
+          {MOCK_POSTS.map((post) => {
+            const translation = translations[post.id];
+            return (
+              <Card key={post.id} className="shadow-sm border-slate-200 group transition-all hover:shadow-md">
+                <CardHeader className="p-6 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="size-11 border shadow-sm ring-2 ring-white">
+                        <AvatarImage src={post.avatar} />
+                        <AvatarFallback>{post.company[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-slate-900 hover:text-accent cursor-pointer transition-colors">{post.company}</h3>
+                          <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-tight py-0 px-2 bg-slate-100 text-slate-600">
+                            {post.role}
+                          </Badge>
+                        </div>
+                        <span className="text-xs text-muted-foreground">{post.time} • Global</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">{post.time} • Global</span>
                     </div>
+                    <Button variant="ghost" size="icon" className="rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                      <MoreHorizontal className="size-5 text-slate-400" />
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="icon" className="rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreHorizontal className="size-5 text-slate-400" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="px-6 pb-4 space-y-4">
-                <Badge className={`
-                  ${post.type === 'Product' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : ''}
-                  ${post.type === 'Service' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : ''}
-                  ${post.type === 'Opportunity' ? 'bg-orange-50 text-orange-600 border-orange-100' : ''}
-                  text-[10px] font-bold uppercase px-2
-                `} variant="outline">
-                  {post.type}
-                </Badge>
-                <p className="text-slate-700 leading-relaxed font-medium">
-                  {post.content}
-                </p>
-                {post.image && (
-                  <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
-                    <img src={post.image} alt="Post content" className="w-full h-auto object-cover max-h-[400px]" />
+                </CardHeader>
+                <CardContent className="px-6 pb-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Badge className={`
+                      ${post.type === 'Product' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : ''}
+                      ${post.type === 'Service' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : ''}
+                      ${post.type === 'Opportunity' ? 'bg-orange-50 text-orange-600 border-orange-100' : ''}
+                      text-[10px] font-bold uppercase px-2
+                    `} variant="outline">
+                      {post.type}
+                    </Badge>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleTranslatePost(post.id, post.content)}
+                      className="h-7 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-accent"
+                      disabled={translation?.loading}
+                    >
+                      {translation?.loading ? (
+                        <RefreshCw className="size-3 mr-1.5 animate-spin" />
+                      ) : (
+                        <Globe className="size-3 mr-1.5" />
+                      )}
+                      {translation?.show ? "Show Original" : (translation?.text ? "Show Translation" : "AI Translate")}
+                    </Button>
                   </div>
-                )}
-              </CardContent>
-              <CardFooter className="px-6 py-4 border-t border-slate-50 flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                  <button className="flex items-center gap-2 text-slate-500 hover:text-pink-500 transition-colors">
-                    <Heart className="size-5" />
-                    <span className="text-sm font-bold">{post.likes}</span>
+                  
+                  <div className="relative">
+                    <p className="text-slate-700 leading-relaxed font-medium">
+                      {translation?.show ? translation.text : post.content}
+                    </p>
+                    {translation?.show && (
+                      <div className="mt-2 text-[10px] font-bold text-accent uppercase tracking-widest flex items-center gap-1.5">
+                        <Sparkles className="size-3" />
+                        AI Translated to {language.toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+
+                  {post.image && (
+                    <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
+                      <img src={post.image} alt="Post content" className="w-full h-auto object-cover max-h-[400px]" />
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter className="px-6 py-4 border-t border-slate-50 flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <button className="flex items-center gap-2 text-slate-500 hover:text-pink-500 transition-colors">
+                      <Heart className="size-5" />
+                      <span className="text-sm font-bold">{post.likes}</span>
+                    </button>
+                    <button className="flex items-center gap-2 text-slate-500 hover:text-accent transition-colors">
+                      <MessageCircle className="size-5" />
+                      <span className="text-sm font-bold">{post.comments}</span>
+                    </button>
+                  </div>
+                  <button className="flex items-center gap-2 text-slate-400 hover:text-slate-600 transition-colors">
+                    <Share2 className="size-5" />
                   </button>
-                  <button className="flex items-center gap-2 text-slate-500 hover:text-accent transition-colors">
-                    <MessageCircle className="size-5" />
-                    <span className="text-sm font-bold">{post.comments}</span>
-                  </button>
-                </div>
-                <button className="flex items-center gap-2 text-slate-400 hover:text-slate-600 transition-colors">
-                  <Share2 className="size-5" />
-                </button>
-              </CardFooter>
-            </Card>
-          ))}
+                </CardFooter>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Sidebar widgets */}
