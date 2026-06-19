@@ -15,7 +15,6 @@ import {
   Briefcase, 
   Zap, 
   Check, 
-  ArrowUpRight,
   Package,
   Headphones,
   Truck,
@@ -25,13 +24,11 @@ import {
   Globe,
   ChevronDown,
   Building2,
-  ExternalLink,
-  UserPlus,
+  Filter,
   CheckCircle2,
-  Filter
+  ExternalLink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAccount } from '@/context/account-context';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
 import { translateText } from "@/ai/flows/translate-flow";
 import { useLanguage } from "@/context/language-context";
@@ -55,10 +52,6 @@ const ENTITY_CATEGORIES = [
   { id: 'partners', label: 'Mitra Bisnis', icon: Users },
 ];
 
-const LOCATIONS = [
-  "Global", "Jakarta", "Surabaya", "Medan", "Bandung", "Bali", "Singapore", "Malaysia", "Japan"
-];
-
 export default function CariPage() {
   const { language } = useLanguage();
   const [query, setQuery] = React.useState("");
@@ -67,7 +60,7 @@ export default function CariPage() {
   
   // Filters
   const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
-  const [selectedLocation, setSelectedLocation] = React.useState("Global");
+  const [locationInput, setLocationInput] = React.useState("");
   
   // Translation state
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean, detected: string }>>({});
@@ -83,7 +76,7 @@ export default function CariPage() {
         query: query || (activeCategory ? `Cari ${activeCategory}` : ""), 
         filters: {
           category: activeCategory || undefined,
-          location: selectedLocation === "Global" ? undefined : selectedLocation
+          location: locationInput || undefined
         } 
       });
       setResults(output);
@@ -168,81 +161,79 @@ export default function CariPage() {
           </p>
         </div>
 
-        {/* Search & Filters */}
-        <div className="space-y-8">
-          <form onSubmit={handleSearch} className="relative group max-w-3xl mx-auto">
-            <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-              <Search className="size-6 text-slate-400 group-focus-within:text-accent transition-colors" />
+        {/* Search & Filters Area */}
+        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl space-y-6">
+          <form onSubmit={handleSearch} className="space-y-4">
+            <div className="relative group w-full">
+              <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                <Search className="size-6 text-slate-400 group-focus-within:text-accent transition-colors" />
+              </div>
+              <Input 
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Cari apa saja dengan AI... (cth: Supplier kopi organik)"
+                className="h-16 pl-16 pr-4 rounded-2xl border-slate-200 bg-slate-50/50 shadow-inner text-lg font-medium focus:bg-white transition-all focus:border-accent"
+              />
             </div>
-            <Input 
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Cari apa saja dengan AI... (cth: Supplier kopi di Medan)"
-              className="h-16 pl-16 pr-40 rounded-[1.5rem] border-slate-200 bg-white shadow-xl text-lg font-medium focus:ring-accent/10 transition-all focus:border-accent"
-            />
-            <Button 
-              type="submit"
-              disabled={loading}
-              className="absolute right-2 top-2 bottom-2 rounded-xl px-8 bg-accent hover:bg-indigo-600 text-white font-black transition-all active:scale-95 shadow-md flex gap-2"
-            >
-              {loading ? <RefreshCw className="size-5 animate-spin" /> : <><Sparkles className="size-4" /> Tanya AI</>}
-            </Button>
-          </form>
 
-          {/* Categories Grid */}
-          <div className="space-y-6">
-             <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between px-2">
-                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Pilih Kategori</h3>
-                   <div className="flex items-center gap-2">
-                      <MapPin className="size-3 text-slate-400" />
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-7 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-accent">
-                            Lokasi: {selectedLocation} <ChevronDown className="size-3 ml-1" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-xl">
-                          {LOCATIONS.map(loc => (
-                            <DropdownMenuItem 
-                              key={loc} 
-                              onClick={() => setSelectedLocation(loc)}
-                              className="font-bold text-xs"
-                            >
-                              {loc}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                   </div>
-                </div>
-                
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  {ENTITY_CATEGORIES.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => {
-                        setActiveCategory(activeCategory === cat.label ? null : cat.label);
-                        // Trigger search automatically on category click
-                        if (activeCategory !== cat.label) {
-                          setQuery("");
-                          setTimeout(() => handleSearch(), 0);
-                        }
-                      }}
-                      className={cn(
-                        "px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 shadow-sm",
-                        activeCategory === cat.label 
-                          ? "bg-slate-900 text-white border-slate-900 scale-105" 
-                          : "bg-white text-slate-500 border-slate-100 hover:border-slate-300 hover:bg-slate-50"
-                      )}
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Category Dropdown */}
+              <div className="flex-1">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full h-14 justify-between rounded-2xl border-slate-200 text-slate-600 font-bold hover:bg-slate-50 px-6"
                     >
-                      <cat.icon className="size-3.5" />
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
-             </div>
-          </div>
+                      <div className="flex items-center gap-3">
+                        <Filter className="size-4 text-slate-400" />
+                        {activeCategory ? activeCategory : "Pilih Kategori"}
+                      </div>
+                      <ChevronDown className="size-4 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-[300px] rounded-2xl p-2 shadow-2xl border-slate-100">
+                    <DropdownMenuItem 
+                      onClick={() => setActiveCategory(null)}
+                      className="font-bold text-slate-400 hover:text-accent"
+                    >
+                      Semua Kategori
+                    </DropdownMenuItem>
+                    {ENTITY_CATEGORIES.map((cat) => (
+                      <DropdownMenuItem 
+                        key={cat.id} 
+                        onClick={() => setActiveCategory(cat.label)}
+                        className="flex items-center gap-3 py-3 rounded-xl font-bold cursor-pointer"
+                      >
+                        <cat.icon className="size-4 text-slate-400" />
+                        {cat.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Location Input */}
+              <div className="flex-1 relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <Input 
+                  value={locationInput}
+                  onChange={(e) => setLocationInput(e.target.value)}
+                  placeholder="Ketik lokasi (cth: Jakarta, Medan, Global)"
+                  className="h-14 pl-12 rounded-2xl border-slate-200 bg-white font-bold text-slate-600 focus:ring-accent/10"
+                />
+              </div>
+
+              {/* Search Button */}
+              <Button 
+                onClick={handleSearch}
+                disabled={loading}
+                className="h-14 px-10 rounded-2xl bg-slate-900 hover:bg-black text-white font-black shadow-lg transition-all active:scale-95 flex gap-2"
+              >
+                {loading ? <RefreshCw className="size-5 animate-spin" /> : <><Sparkles className="size-4" /> Temukan Sekarang</>}
+              </Button>
+            </div>
+          </form>
         </div>
 
         {/* Results Section */}
@@ -269,7 +260,7 @@ export default function CariPage() {
             <div className="space-y-8">
               <div className="flex items-center justify-between border-b border-slate-100 pb-4 px-2">
                 <div className="flex items-center gap-3">
-                  <h3 className="font-black text-slate-900 text-lg">Hasil Penemuan</h3>
+                  <h3 className="font-black text-slate-900 text-lg">Hasil Penemuan AI</h3>
                   <Badge className="bg-slate-100 text-slate-500 font-bold px-2 rounded-md">{results.results.length}</Badge>
                 </div>
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">Prioritas Member OnTapp Aktif</p>
@@ -281,13 +272,13 @@ export default function CariPage() {
                   const trans = translations[resId];
                   return (
                     <Card key={idx} className={cn(
-                      "group overflow-hidden border shadow-sm hover:shadow-xl transition-all duration-300 bg-white relative rounded-[2rem]",
+                      "group overflow-hidden border shadow-sm hover:shadow-xl transition-all duration-300 bg-white relative rounded-[2.5rem]",
                       result.source !== 'external' ? "border-indigo-100" : "border-slate-100"
                     )}>
                       <CardContent className="p-0">
                         <div className="flex flex-col md:flex-row">
                           <div className={cn(
-                            "w-1.5 shrink-0",
+                            "w-2 shrink-0",
                             result.source === 'ontapp_verified' ? 'bg-emerald-500' : 
                             result.source === 'ontapp_member' ? 'bg-accent' : 'bg-slate-200'
                           )} />
@@ -363,7 +354,7 @@ export default function CariPage() {
                                   
                                   {result.source === 'external' ? (
                                     <Button variant="outline" className="w-full rounded-xl h-10 border-slate-200 text-xs font-black hover:bg-indigo-50 hover:text-accent transition-all">
-                                      Undang Member
+                                      Hubungkan AI
                                     </Button>
                                   ) : (
                                     <Button className="w-full rounded-xl h-10 bg-accent hover:bg-indigo-600 text-white text-xs font-black shadow-lg shadow-indigo-100 transition-all active:scale-95">
@@ -387,9 +378,9 @@ export default function CariPage() {
               {[
                 { title: "Prioritas OnTapp", desc: "Anggota internal diprioritaskan untuk menjamin kepercayaan.", icon: Zap, color: "text-accent", bg: "bg-indigo-50" },
                 { title: "Web Hibrida", desc: "AI mensintesis data dari seluruh web untuk hasil maksimal.", icon: Globe, color: "text-emerald-500", bg: "bg-emerald-50" },
-                { title: "Verifikasi AI", desc: "Algoritma kami memvalidasi reputasi dan sertifikasi.", icon: ShieldCheck, color: "text-amber-500", bg: "bg-amber-50" }
+                { title: "Lokasi Bebas", desc: "Cari mitra di mana pun dengan mengetikkan lokasi impian Anda.", icon: MapPin, color: "text-rose-500", bg: "bg-rose-50" }
               ].map((feature, i) => (
-                <div key={i} className="p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm text-center space-y-4 hover:shadow-md transition-all group">
+                <div key={i} className="p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm text-center space-y-4 hover:shadow-md transition-all group">
                   <div className={cn("size-14 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform", feature.bg, feature.color)}>
                     <feature.icon className="size-7" />
                   </div>
@@ -406,3 +397,4 @@ export default function CariPage() {
     </DashboardLayout>
   );
 }
+
