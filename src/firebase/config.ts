@@ -12,6 +12,14 @@ export const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
 };
 
+// Debugging logs to verify keys are loaded in the browser
+if (typeof window !== "undefined") {
+  console.log("🔥 Project ID termuat:", firebaseConfig.projectId);
+  if (!firebaseConfig.projectId || firebaseConfig.projectId === "undefined") {
+    console.error("❌ ERROR: Kunci Firebase tidak terbaca oleh Next.js! Periksa file .env Anda.");
+  }
+}
+
 // A more robust check for valid configuration
 export const isConfigValid = 
   !!firebaseConfig.apiKey && 

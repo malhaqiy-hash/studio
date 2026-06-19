@@ -1,6 +1,5 @@
-
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { initializeFirestore, getFirestore, Firestore } from 'firebase/firestore';
 import { getAuth, Auth } from 'firebase/auth';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { firebaseConfig, isConfigValid } from './config';
@@ -12,7 +11,7 @@ let storage: FirebaseStorage;
 
 /**
  * Initializes Firebase services safely using the singleton pattern.
- * This prevents multi-initialization errors during Turbopack Hot Reloads.
+ * This version implements experimentalForceLongPolling to prevent connectivity issues.
  */
 export function initializeFirebase() {
   if (!isConfigValid) {
@@ -21,11 +20,15 @@ export function initializeFirebase() {
 
   if (getApps().length === 0) {
     app = initializeApp(firebaseConfig);
+    // JURUS PAMUNGKAS: Paksa Firestore menggunakan Long Polling agar anti-blokir jaringan
+    firestore = initializeFirestore(app, {
+      experimentalForceLongPolling: true,
+    });
   } else {
     app = getApp();
+    firestore = getFirestore(app);
   }
 
-  firestore = getFirestore(app);
   auth = getAuth(app);
   storage = getStorage(app);
 
