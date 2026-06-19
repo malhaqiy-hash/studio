@@ -18,13 +18,52 @@ import {
   Link as LinkIcon,
   Twitter,
   Linkedin,
-  User
+  User,
+  RefreshCw,
+  Sparkles
 } from "lucide-react";
 import { useUser } from "@/firebase";
+import { translateText } from "@/ai/flows/translate-flow";
+import { useLanguage } from "@/context/language-context";
 
 export default function ProfilePage() {
   const { user } = useUser();
+  const { language } = useLanguage();
   const userInitial = user?.email ? user.email[0].toUpperCase() : "U";
+
+  const [overviewTrans, setOverviewTrans] = React.useState({
+    text: "",
+    show: false,
+    loading: false,
+    detected: ""
+  });
+
+  const originalOverview = "We are an active participant in the OnTapp Global Discovery Network. Our focus is on accelerating industrial efficiency through strategic partnerships and real-time data integration.";
+
+  const handleTranslateOverview = async () => {
+    if (overviewTrans.text) {
+      setOverviewTrans(prev => ({ ...prev, show: !prev.show }));
+      return;
+    }
+
+    setOverviewTrans(prev => ({ ...prev, loading: true }));
+
+    try {
+      const { translatedText, detectedLanguage } = await translateText({
+        text: originalOverview,
+        targetLanguage: language
+      });
+      setOverviewTrans({
+        text: translatedText,
+        show: true,
+        loading: false,
+        detected: detectedLanguage
+      });
+    } catch (err) {
+      console.error("Overview translation failed", err);
+      setOverviewTrans(prev => ({ ...prev, loading: false }));
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -125,14 +164,36 @@ export default function ProfilePage() {
           {/* About & Details */}
           <div className="md:col-span-2 space-y-6">
             <Card className="border-slate-200 shadow-sm rounded-[1.5rem]">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg font-bold">Business Overview</CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleTranslateOverview}
+                  className="h-8 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-accent gap-2"
+                  disabled={overviewTrans.loading}
+                >
+                  {overviewTrans.loading ? (
+                    <RefreshCw className="size-3 animate-spin" />
+                  ) : (
+                    <Globe className="size-3" />
+                  )}
+                  {overviewTrans.show ? "Original" : "Translate"}
+                </Button>
               </CardHeader>
               <CardContent className="space-y-6">
-                <p className="text-slate-600 leading-relaxed font-medium">
-                  We are an active participant in the OnTapp Global Discovery Network. Our focus is on accelerating industrial efficiency through strategic partnerships and real-time data integration.
-                </p>
-                <div className="space-y-3">
+                <div className="relative">
+                  <p className="text-slate-600 leading-relaxed font-medium">
+                    {overviewTrans.show ? overviewTrans.text : originalOverview}
+                  </p>
+                  {overviewTrans.show && (
+                    <div className="mt-3 text-[10px] font-black text-accent uppercase tracking-widest flex items-center gap-1.5 bg-indigo-50/50 w-fit px-3 py-1.5 rounded-lg border border-indigo-100/50">
+                      <Sparkles className="size-3" />
+                      AI Translated to {language.toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-3 pt-4 border-t border-slate-100">
                   <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">Core Expertise</h4>
                   <div className="flex flex-wrap gap-2">
                     {["Digital Strategy", "Network Scaling", "B2B Analytics", "Scalable Systems"].map(tag => (

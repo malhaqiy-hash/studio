@@ -23,7 +23,9 @@ import {
   ChevronDown,
   Clock,
   ExternalLink,
-  Target
+  Target,
+  Globe,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCollection, useFirestore } from "@/firebase";
@@ -34,6 +36,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { translateText } from "@/ai/flows/translate-flow";
+import { useLanguage } from "@/context/language-context";
 
 const MOCK_FEED_ITEMS = [
   {
@@ -70,10 +74,46 @@ const MOCK_FEED_ITEMS = [
 ];
 
 export default function DashboardPage() {
+  const { language } = useLanguage();
   const db = useFirestore();
   const { data: opportunities, loading: opportunitiesLoading } = useCollection(
     db ? collection(db, "opportunities") : null
   );
+
+  const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean, detected: string }>>({});
+
+  const handleTranslateItem = async (itemId: string, content: string) => {
+    const existing = translations[itemId];
+    if (existing?.text) {
+      setTranslations(prev => ({
+        ...prev,
+        [itemId]: { ...existing, show: !existing.show }
+      }));
+      return;
+    }
+
+    setTranslations(prev => ({
+      ...prev,
+      [itemId]: { text: "", show: false, loading: true, detected: "" }
+    }));
+
+    try {
+      const { translatedText, detectedLanguage } = await translateText({
+        text: content,
+        targetLanguage: language
+      });
+      setTranslations(prev => ({
+        ...prev,
+        [itemId]: { text: translatedText, show: true, loading: false, detected: detectedLanguage }
+      }));
+    } catch (err) {
+      console.error("Dashboard item translation failed", err);
+      setTranslations(prev => ({
+        ...prev,
+        [itemId]: { text: "", show: false, loading: false, detected: "" }
+      }));
+    }
+  };
 
   const stats = [
     { label: "Total Opportunities", value: opportunities?.length || 0, icon: Briefcase, color: "text-indigo-600", trend: "+14%" },
@@ -179,73 +219,100 @@ export default function DashboardPage() {
 
             {/* Activity Stream */}
             <div className="space-y-6">
-              {MOCK_FEED_ITEMS.map((item) => (
-                <Card key={item.id} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 bg-white rounded-3xl">
-                  <CardHeader className="p-6 pb-2">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-3">
-                        {item.type === 'post' ? (
-                          <Avatar className="size-10 border shadow-sm ring-2 ring-white">
-                            <AvatarImage src={item.avatar} />
-                            <AvatarFallback>{item.author?.[0]}</AvatarFallback>
-                          </Avatar>
-                        ) : (
-                          <div className={`size-10 rounded-xl flex items-center justify-center ${
-                            item.type === 'insight' ? 'bg-indigo-50 text-accent' : 'bg-orange-50 text-orange-500'
-                          }`}>
-                            {item.type === 'insight' ? <TrendingUp className="size-5" /> : <Target className="size-5" />}
-                          </div>
-                        )}
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-slate-900">{item.author || item.title}</h3>
-                            {item.verified && <ShieldCheck className="size-4 text-emerald-500 fill-emerald-50" />}
-                          </div>
-                          <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                            <Clock className="size-3" />
-                            {item.time}
+              {MOCK_FEED_ITEMS.map((item) => {
+                const trans = translations[item.id];
+                return (
+                  <Card key={item.id} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 bg-white rounded-3xl">
+                    <CardHeader className="p-6 pb-2">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3">
+                          {item.type === 'post' || item.type === 'insight' ? (
+                            <Avatar className="size-10 border shadow-sm ring-2 ring-white">
+                              <AvatarImage src={item.avatar} />
+                              <AvatarFallback>{(item.author || item.source)?.[0]}</AvatarFallback>
+                            </Avatar>
+                          ) : (
+                            <div className={`size-10 rounded-xl flex items-center justify-center ${
+                              item.type === 'insight' ? 'bg-indigo-50 text-accent' : 'bg-orange-50 text-orange-500'
+                            }`}>
+                              {item.type === 'insight' ? <TrendingUp className="size-5" /> : <Target className="size-5" />}
+                            </div>
+                          )}
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-bold text-slate-900">{item.author || item.title}</h3>
+                              {item.verified && <ShieldCheck className="size-4 text-emerald-500 fill-emerald-50" />}
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                              <Clock className="size-3" />
+                              {item.time}
+                            </div>
                           </div>
                         </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <Badge variant="secondary" className="bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-tight py-0.5 px-3">
+                            {item.category}
+                          </Badge>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleTranslateItem(item.id, item.content)}
+                            className="h-6 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-accent"
+                            disabled={trans?.loading}
+                          >
+                            {trans?.loading ? (
+                              <RefreshCw className="size-2.5 mr-1 animate-spin" />
+                            ) : (
+                              <Globe className="size-2.5 mr-1" />
+                            )}
+                            {trans?.show ? "Original" : "Translate"}
+                          </Button>
+                        </div>
                       </div>
-                      <Badge variant="secondary" className="bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-tight py-0.5 px-3">
-                        {item.category}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-6 pt-2 space-y-4">
-                    {item.type === 'opportunity' && item.urgent && (
-                      <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[10px] uppercase flex gap-1 w-fit">
-                        <Zap className="size-3 fill-rose-600" />
-                        Urgent Discovery
-                      </Badge>
-                    )}
-                    <p className="text-slate-600 font-medium leading-relaxed">
-                      {item.content}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="p-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                      <button className="flex items-center gap-2 text-slate-400 hover:text-pink-500 transition-colors font-bold text-sm">
-                        <Heart className="size-4" />
-                        {item.interactions.likes}
-                      </button>
-                      <button className="flex items-center gap-2 text-slate-400 hover:text-accent transition-colors font-bold text-sm">
-                        <MessageSquare className="size-4" />
-                        {item.interactions.comments}
-                      </button>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                        <Share2 className="size-4" />
-                      </button>
-                      <Button variant="ghost" size="sm" className="font-bold text-accent hover:bg-indigo-50 rounded-lg">
-                        {item.type === 'opportunity' ? 'View Details' : 'Learn More'}
-                        <ArrowUpRight className="size-3.5 ml-1" />
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))}
+                    </CardHeader>
+                    <CardContent className="p-6 pt-2 space-y-4">
+                      {item.type === 'opportunity' && item.urgent && (
+                        <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[10px] uppercase flex gap-1 w-fit">
+                          <Zap className="size-3 fill-rose-600" />
+                          Urgent Discovery
+                        </Badge>
+                      )}
+                      <div className="relative">
+                        <p className="text-slate-600 font-medium leading-relaxed">
+                          {trans?.show ? trans.text : item.content}
+                        </p>
+                        {trans?.show && (
+                          <div className="mt-2 text-[9px] font-black text-accent uppercase tracking-[0.1em] flex items-center gap-1.5 bg-indigo-50/50 w-fit px-2 py-1 rounded-md">
+                            <Sparkles className="size-3" />
+                            Automatically translated from {trans.detected?.toUpperCase() || "GLOBAL"}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                    <CardFooter className="p-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                      <div className="flex items-center gap-6">
+                        <button className="flex items-center gap-2 text-slate-400 hover:text-pink-500 transition-colors font-bold text-sm">
+                          <Heart className="size-4" />
+                          {item.interactions.likes}
+                        </button>
+                        <button className="flex items-center gap-2 text-slate-400 hover:text-accent transition-colors font-bold text-sm">
+                          <MessageSquare className="size-4" />
+                          {item.interactions.comments}
+                        </button>
+                      </div>
+                      <div className="flex gap-2">
+                        <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+                          <Share2 className="size-4" />
+                        </button>
+                        <Button variant="ghost" size="sm" className="font-bold text-accent hover:bg-indigo-50 rounded-lg">
+                          {item.type === 'opportunity' ? 'View Details' : 'Learn More'}
+                          <ArrowUpRight className="size-3.5 ml-1" />
+                        </Button>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                );
+              })}
             </div>
           </div>
 

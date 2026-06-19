@@ -23,7 +23,10 @@ import {
   Phone, 
   Calendar as CalendarIcon,
   Tag,
-  DollarSign
+  DollarSign,
+  Globe,
+  RefreshCw,
+  Sparkles
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -56,15 +59,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { translateText } from "@/ai/flows/translate-flow";
+import { useLanguage } from "@/context/language-context";
 
 const CATEGORIES = ["Retail", "Service", "Tech", "F&B", "Others"];
 const STATUSES = ["Lead", "Proposal", "Negotiation", "Won", "Lost"];
 
 export default function OpportunitiesPage() {
+  const { language } = useLanguage();
   const db = useFirestore();
   const [searchTerm, setSearchTerm] = React.useState("");
   const [categoryFilter, setCategoryFilter] = React.useState("All");
   
+  // Translation state
+  const [translations, setTranslations] = React.useState<Record<string, { description: string, show: boolean, loading: boolean, detected: string }>>({});
+
   // Form State
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
@@ -95,6 +104,39 @@ export default function OpportunitiesPage() {
       return matchesSearch && matchesCategory;
     });
   }, [opportunities, searchTerm, categoryFilter]);
+
+  const handleTranslateOpp = async (oppId: string, content: string) => {
+    const existing = translations[oppId];
+    if (existing?.description) {
+      setTranslations(prev => ({
+        ...prev,
+        [oppId]: { ...existing, show: !existing.show }
+      }));
+      return;
+    }
+
+    setTranslations(prev => ({
+      ...prev,
+      [oppId]: { description: "", show: false, loading: true, detected: "" }
+    }));
+
+    try {
+      const { translatedText, detectedLanguage } = await translateText({
+        text: content,
+        targetLanguage: language
+      });
+      setTranslations(prev => ({
+        ...prev,
+        [oppId]: { description: translatedText, show: true, loading: false, detected: detectedLanguage }
+      }));
+    } catch (err) {
+      console.error("Opportunity translation failed", err);
+      setTranslations(prev => ({
+        ...prev,
+        [oppId]: { description: "", show: false, loading: false, detected: "" }
+      }));
+    }
+  };
 
   const handleOpenAdd = () => {
     setCurrentOpp(null);
@@ -231,56 +273,90 @@ export default function OpportunitiesPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredOpportunities.map((opp) => (
-                  <TableRow key={opp.id} className="border-slate-50 hover:bg-slate-50/50 transition-colors group">
-                    <TableCell className="py-6 px-8">
-                      <div className="flex flex-col">
-                        <span className="font-black text-slate-900 text-lg leading-none group-hover:text-accent transition-colors">{opp.companyName}</span>
-                        <div className="flex items-center gap-3 mt-2">
-                           <Badge variant="outline" className="text-[10px] font-bold text-slate-400 border-slate-100 bg-slate-50">
-                             {opp.category}
-                           </Badge>
-                           {opp.whatsapp && (
-                             <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
-                               <Phone className="size-3" /> {opp.whatsapp}
-                             </span>
-                           )}
+                filteredOpportunities.map((opp) => {
+                  const trans = translations[opp.id];
+                  return (
+                    <TableRow key={opp.id} className="border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                      <TableCell className="py-6 px-8">
+                        <div className="flex flex-col max-w-md">
+                          <span className="font-black text-slate-900 text-lg leading-none group-hover:text-accent transition-colors">{opp.companyName}</span>
+                          <div className="flex items-center gap-3 mt-2">
+                             <Badge variant="outline" className="text-[10px] font-bold text-slate-400 border-slate-100 bg-slate-50">
+                               {opp.category}
+                             </Badge>
+                             {opp.whatsapp && (
+                               <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                                 <Phone className="size-3" /> {opp.whatsapp}
+                               </span>
+                             )}
+                          </div>
+                          {opp.description && (
+                            <div className="mt-3 space-y-2">
+                              <div className="flex items-center gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleTranslateOpp(opp.id, opp.description)}
+                                  className="h-6 px-2 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-accent"
+                                  disabled={trans?.loading}
+                                >
+                                  {trans?.loading ? (
+                                    <RefreshCw className="size-2.5 mr-1 animate-spin" />
+                                  ) : (
+                                    <Globe className="size-2.5 mr-1" />
+                                  )}
+                                  {trans?.show ? "Original" : "Translate Description"}
+                                </Button>
+                              </div>
+                              <div className="relative">
+                                <p className="text-xs text-slate-500 font-medium line-clamp-2 leading-relaxed italic border-l border-slate-200 pl-3">
+                                  {trans?.show ? trans.description : opp.description}
+                                </p>
+                                {trans?.show && (
+                                  <div className="mt-1.5 text-[8px] font-black text-accent uppercase tracking-widest flex items-center gap-1">
+                                    <Sparkles className="size-2" />
+                                    Translated from {trans.detected?.toUpperCase() || "INTL"}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-black text-slate-700">
-                      ${Number(opp.value || 0).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={`rounded-lg px-3 py-1 font-bold text-[10px] uppercase border-none ${getStatusColor(opp.status)}`}>
-                        {opp.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-bold text-slate-400 text-sm">
-                      {opp.date ? new Date(opp.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}
-                    </TableCell>
-                    <TableCell className="text-right px-8">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleOpenEdit(opp)}
-                          className="rounded-xl h-10 w-10 text-indigo-400 hover:text-accent hover:bg-indigo-50"
-                        >
-                          <Edit2 className="size-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => { setCurrentOpp(opp); setIsDeleteDialogOpen(true); }}
-                          className="rounded-xl h-10 w-10 text-rose-400 hover:text-rose-600 hover:bg-rose-50"
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                      </TableCell>
+                      <TableCell className="font-black text-slate-700">
+                        ${Number(opp.value || 0).toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={`rounded-lg px-3 py-1 font-bold text-[10px] uppercase border-none ${getStatusColor(opp.status)}`}>
+                          {opp.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-bold text-slate-400 text-sm">
+                        {opp.date ? new Date(opp.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}
+                      </TableCell>
+                      <TableCell className="text-right px-8">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleOpenEdit(opp)}
+                            className="rounded-xl h-10 w-10 text-indigo-400 hover:text-accent hover:bg-indigo-50"
+                          >
+                            <Edit2 className="size-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => { setCurrentOpp(opp); setIsDeleteDialogOpen(true); }}
+                            className="rounded-xl h-10 w-10 text-rose-400 hover:text-rose-600 hover:bg-rose-50"
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

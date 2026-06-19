@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -19,9 +20,12 @@ import {
   ExternalLink, 
   ShieldCheck,
   Zap,
-  ChevronDown
+  ChevronDown,
+  RefreshCw
 } from "lucide-react";
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
+import { translateText } from "@/ai/flows/translate-flow";
+import { useLanguage } from "@/context/language-context";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -34,10 +38,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function DiscoverPage() {
+  const { language } = useLanguage();
   const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
   
+  // Translation state for discovery results
+  const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean, detected: string }>>({});
+
   // Advanced Filters State
   const [filters, setFilters] = React.useState({
     verifiedOnly: false,
@@ -50,6 +58,7 @@ export default function DiscoverPage() {
     if (!query) return;
     
     setLoading(true);
+    setTranslations({}); // Reset translations on new search
     try {
       const output = await aiIntentSearch({ query, filters });
       setResults(output);
@@ -57,6 +66,39 @@ export default function DiscoverPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTranslateResult = async (resId: string, content: string) => {
+    const existing = translations[resId];
+    if (existing?.text) {
+      setTranslations(prev => ({
+        ...prev,
+        [resId]: { ...existing, show: !existing.show }
+      }));
+      return;
+    }
+
+    setTranslations(prev => ({
+      ...prev,
+      [resId]: { text: "", show: false, loading: true, detected: "" }
+    }));
+
+    try {
+      const { translatedText, detectedLanguage } = await translateText({
+        text: content,
+        targetLanguage: language
+      });
+      setTranslations(prev => ({
+        ...prev,
+        [resId]: { text: translatedText, show: true, loading: false, detected: detectedLanguage }
+      }));
+    } catch (err) {
+      console.error("Result translation failed", err);
+      setTranslations(prev => ({
+        ...prev,
+        [resId]: { text: "", show: false, loading: false, detected: "" }
+      }));
     }
   };
 
@@ -199,88 +241,116 @@ export default function DiscoverPage() {
               </div>
 
               <div className="grid gap-6">
-                {results.results.map((result, idx) => (
-                  <Card key={idx} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-white relative">
-                    {result.matchScore >= 90 && (
-                      <div className="absolute top-0 right-0 p-3">
-                        <Badge className="bg-amber-500 text-white border-none font-black text-[10px] uppercase shadow-md flex gap-1">
-                          <Zap className="size-3 fill-white" /> Top Match
-                        </Badge>
-                      </div>
-                    )}
-                    <CardContent className="p-0">
-                      <div className="flex flex-col md:flex-row">
-                        <div className={`w-2 shrink-0 ${result.source === 'external' ? 'bg-slate-200' : 'bg-accent'}`} />
-                        <div className="p-8 flex-1 flex flex-col md:flex-row gap-8 items-start">
-                          <div className={`size-16 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform ${result.source === 'external' ? 'bg-slate-50 text-slate-400' : 'bg-indigo-50 text-accent'}`}>
-                            {getTypeIcon(result.type)}
-                          </div>
-                          
-                          <div className="flex-1 space-y-4">
-                            <div className="space-y-2">
-                              <div className="flex flex-wrap items-center gap-3">
-                                <h4 className="text-2xl font-black text-slate-900 leading-tight">{result.name}</h4>
-                                {getSourceBadge(result.source)}
+                {results.results.map((result, idx) => {
+                  const resId = `res-${idx}`;
+                  const trans = translations[resId];
+                  return (
+                    <Card key={idx} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-white relative">
+                      {result.matchScore >= 90 && (
+                        <div className="absolute top-0 right-0 p-3">
+                          <Badge className="bg-amber-500 text-white border-none font-black text-[10px] uppercase shadow-md flex gap-1">
+                            <Zap className="size-3 fill-white" /> Top Match
+                          </Badge>
+                        </div>
+                      )}
+                      <CardContent className="p-0">
+                        <div className="flex flex-col md:flex-row">
+                          <div className={`w-2 shrink-0 ${result.source === 'external' ? 'bg-slate-200' : 'bg-accent'}`} />
+                          <div className="p-8 flex-1 flex flex-col md:flex-row gap-8 items-start">
+                            <div className={`size-16 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform ${result.source === 'external' ? 'bg-slate-50 text-slate-400' : 'bg-indigo-50 text-accent'}`}>
+                              {getTypeIcon(result.type)}
+                            </div>
+                            
+                            <div className="flex-1 space-y-4">
+                              <div className="space-y-2">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                  <div className="flex flex-wrap items-center gap-3">
+                                    <h4 className="text-2xl font-black text-slate-900 leading-tight">{result.name}</h4>
+                                    {getSourceBadge(result.source)}
+                                  </div>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    onClick={() => handleTranslateResult(resId, result.description)}
+                                    className="h-7 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-accent"
+                                    disabled={trans?.loading}
+                                  >
+                                    {trans?.loading ? (
+                                      <RefreshCw className="size-3 mr-1 animate-spin" />
+                                    ) : (
+                                      <Globe className="size-3 mr-1" />
+                                    )}
+                                    {trans?.show ? "Original" : "Translate"}
+                                  </Button>
+                                </div>
+                                <div className="relative">
+                                  <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-3xl">
+                                    {trans?.show ? trans.text : result.description}
+                                  </p>
+                                  {trans?.show && (
+                                    <div className="mt-2 text-[10px] font-black text-accent uppercase tracking-[0.1em] flex items-center gap-1.5 bg-indigo-50/50 w-fit px-3 py-1.5 rounded-lg">
+                                      <Sparkles className="size-3" />
+                                      Translated from {trans.detected?.toUpperCase() || "INTL"}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                              <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-3xl">
-                                {result.description}
-                              </p>
+
+                              <div className="flex flex-wrap items-center gap-6 pt-2">
+                                {result.location && (
+                                  <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
+                                    <MapPin className="size-3.5" />
+                                    {result.location}
+                                  </div>
+                                )}
+                                {result.industry && (
+                                  <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
+                                    <Filter className="size-3.5" />
+                                    {result.industry}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Match Reasons */}
+                              <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-100">
+                                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <CheckCircle2 className="size-3 text-emerald-500" />
+                                    AI Match Confidence
+                                 </div>
+                                 <div className="flex flex-wrap gap-2">
+                                    {result.matchReasons.map((reason, rIdx) => (
+                                      <span key={rIdx} className="text-xs font-bold text-slate-600 bg-white border px-2 py-1 rounded-md shadow-sm">
+                                        • {reason}
+                                      </span>
+                                    ))}
+                                 </div>
+                              </div>
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-6 pt-2">
-                              {result.location && (
-                                <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
-                                  <MapPin className="size-3.5" />
-                                  {result.location}
-                                </div>
-                              )}
-                              {result.industry && (
-                                <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
-                                  <Filter className="size-3.5" />
-                                  {result.industry}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Match Reasons */}
-                            <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-100">
-                               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                  <CheckCircle2 className="size-3 text-emerald-500" />
-                                  AI Match Confidence
+                            <div className="md:w-48 shrink-0 flex flex-col items-center justify-center gap-4 border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-8">
+                               <div className="text-center space-y-1">
+                                  <div className="text-4xl font-black text-indigo-600 leading-none">{result.matchScore}%</div>
+                                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Match Score</div>
                                </div>
-                               <div className="flex flex-wrap gap-2">
-                                  {result.matchReasons.map((reason, rIdx) => (
-                                    <span key={rIdx} className="text-xs font-bold text-slate-600 bg-white border px-2 py-1 rounded-md shadow-sm">
-                                      • {reason}
-                                    </span>
-                                  ))}
-                               </div>
+                               
+                               {result.source === 'external' ? (
+                                 <Button variant="outline" className="w-full rounded-xl h-11 border-slate-200 hover:bg-indigo-50 hover:text-accent font-bold group/btn flex gap-2">
+                                   <UserPlus className="size-4" />
+                                   Invite to OnTapp
+                                 </Button>
+                               ) : (
+                                 <Button className="w-full rounded-xl h-11 bg-accent hover:bg-indigo-600 text-white font-black shadow-lg shadow-indigo-100 flex gap-2">
+                                   <ExternalLink className="size-4" />
+                                   View Profile
+                                 </Button>
+                               )}
                             </div>
-                          </div>
-
-                          <div className="md:w-48 shrink-0 flex flex-col items-center justify-center gap-4 border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-8">
-                             <div className="text-center space-y-1">
-                                <div className="text-4xl font-black text-indigo-600 leading-none">{result.matchScore}%</div>
-                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Match Score</div>
-                             </div>
-                             
-                             {result.source === 'external' ? (
-                               <Button variant="outline" className="w-full rounded-xl h-11 border-slate-200 hover:bg-indigo-50 hover:text-accent font-bold group/btn flex gap-2">
-                                 <UserPlus className="size-4" />
-                                 Invite to OnTapp
-                               </Button>
-                             ) : (
-                               <Button className="w-full rounded-xl h-11 bg-accent hover:bg-indigo-600 text-white font-black shadow-lg shadow-indigo-100 flex gap-2">
-                                 <ExternalLink className="size-4" />
-                                 View Profile
-                               </Button>
-                             )}
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           )}
