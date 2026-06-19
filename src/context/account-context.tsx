@@ -13,6 +13,7 @@ export interface Account {
   bio?: string;
   contact?: string;
   extra?: string; // Keahlian for Professional, Kategori for Bisnis
+  links?: string[];
 }
 
 interface AccountContextProps {
@@ -20,6 +21,7 @@ interface AccountContextProps {
   availableAccounts: Account[];
   switchAccount: (id: string) => void;
   registerAccount: (data: Omit<Account, 'id' | 'avatar'>) => void;
+  updateActiveAccount: (data: Partial<Account>) => void;
 }
 
 const DEFAULT_PRIBADI: Account = { 
@@ -28,7 +30,8 @@ const DEFAULT_PRIBADI: Account = {
   type: 'pribadi', 
   avatar: 'https://picsum.photos/seed/user1/100',
   bio: 'Networking enthusiast and business connector.',
-  contact: '+62 812 3456 7890'
+  contact: '+62 812 3456 7890',
+  links: ['https://instagram.com/johndoe', 'https://linkedin.com/in/johndoe']
 };
 
 const AccountContext = createContext<AccountContextProps | undefined>(undefined);
@@ -65,6 +68,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
         : data.type === 'professional' 
           ? `https://picsum.photos/seed/pro${Date.now()}/100` 
           : `https://picsum.photos/seed/user${Date.now()}/100`,
+      links: []
     };
 
     const updatedAccounts = [...accounts, newAccount];
@@ -73,10 +77,18 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     switchAccount(newAccount.id);
   };
 
+  const updateActiveAccount = (data: Partial<Account>) => {
+    const updatedAccounts = accounts.map(acc => 
+      acc.id === activeAccountId ? { ...acc, ...data } : acc
+    );
+    setAccounts(updatedAccounts);
+    localStorage.setItem('ontapp_user_accounts', JSON.stringify(updatedAccounts));
+  };
+
   const activeAccount = accounts.find(a => a.id === activeAccountId) || accounts[0];
 
   return (
-    <AccountContext.Provider value={{ activeAccount, availableAccounts: accounts, switchAccount, registerAccount }}>
+    <AccountContext.Provider value={{ activeAccount, availableAccounts: accounts, switchAccount, registerAccount, updateActiveAccount }}>
       {children}
     </AccountContext.Provider>
   );
