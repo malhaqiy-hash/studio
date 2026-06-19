@@ -27,7 +27,8 @@ import {
   Plus,
   Package,
   Pencil,
-  ShoppingBag
+  ShoppingBag,
+  Link as LinkIcon
 } from "lucide-react";
 import { useUser, useFirestore, useStorage } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -261,7 +262,6 @@ export default function ProfilePage() {
             />
             <div className="absolute inset-0 bg-black/10 transition-colors hover:bg-black/20" />
             
-            {/* Tombol Edit Sampul dipastikan di pojok kanan atas dan tidak tertutup */}
             <Button 
               onClick={() => coverInputRef.current?.click()}
               disabled={saving}
@@ -273,9 +273,7 @@ export default function ProfilePage() {
             </Button>
           </div>
 
-          {/* Container Foto Profil dan Info Akun di bawah Sampul */}
           <div className="flex flex-col md:flex-row items-center md:items-end gap-6 px-6 md:px-12 -mt-20 md:-mt-24 relative z-20">
-            {/* Foto Profil */}
             <div className="relative group/avatar">
               <Avatar className="size-40 md:size-48 border-[6px] border-white shadow-2xl ring-2 ring-slate-100/50">
                 <AvatarImage 
@@ -297,7 +295,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Nama Akun dan Keterangan: Diperjelas dan ditempatkan dengan baik */}
             <div className="pb-2 text-center md:text-left space-y-2 bg-white/80 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none p-4 rounded-3xl md:p-0">
               <div className="flex flex-col md:flex-row items-center gap-3">
                 <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight drop-shadow-sm">
@@ -315,7 +312,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Form Fields dan Detail Lainnya */}
         <div className="pt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 md:px-0">
           
           {/* Main Info Column */}
@@ -384,8 +380,8 @@ export default function ProfilePage() {
             <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden">
               <CardHeader className="p-8 pb-4">
                 <CardTitle className="text-xl font-black flex items-center gap-2">
-                  <Plus className="size-5 text-accent" />
-                  E-Commerce & Social Hub
+                  <LinkIcon className="size-5 text-accent" />
+                  On Link Here
                 </CardTitle>
                 <CardDescription className="font-medium">Hubungkan saluran penjualan dan jejak sosial Anda.</CardDescription>
               </CardHeader>
@@ -412,7 +408,6 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="pt-6 border-t border-slate-100">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Pratinjau Link Aktif</h4>
                   <div className="flex flex-wrap gap-3">
                     {socialPlatforms.map((platform) => {
                       const val = socialLinks[platform.key as keyof typeof socialLinks];
@@ -420,13 +415,12 @@ export default function ProfilePage() {
                       return (
                         <a 
                           key={platform.key} href={`${platform.prefix}${val}`} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-2 p-2 pr-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-accent hover:bg-white hover:shadow-lg transition-all active:scale-95 group"
+                          className="flex items-center gap-2 p-2 pr-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-accent hover:bg-white hover:shadow-lg transition-all active:scale-95 group"
                         >
                           <div className={cn("size-8 rounded-lg bg-white shadow-sm flex items-center justify-center", platform.color)}>
                             <platform.icon />
                           </div>
-                          <span className="text-xs font-bold text-slate-600 group-hover:text-accent truncate max-w-[100px]">{val}</span>
-                          <ExternalLink className="size-3 text-slate-300 group-hover:text-accent" />
+                          <span className="text-xs font-bold text-slate-600 group-hover:text-accent truncate max-w-[120px]">{val}</span>
                         </a>
                       );
                     })}
