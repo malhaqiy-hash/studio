@@ -34,7 +34,8 @@ import {
   MoreHorizontal,
   Cloud,
   FolderOpen,
-  Check
+  Check,
+  TrendingUp
 } from 'lucide-react';
 import {
   Dialog,
@@ -144,6 +145,18 @@ export default function ProfilePage() {
   };
 
   const isPostEmpty = !newItem.description?.trim() && !newItem.image;
+
+  // Mock Google Photos from Unsplash
+  const GOOGLE_PHOTOS_MOCK = [
+    "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1553028826-f4804a6dba3b?w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1522071823991-b96c7357c48f?w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&auto=format&fit=crop",
+  ];
 
   return (
     <DashboardLayout>
@@ -377,6 +390,39 @@ export default function ProfilePage() {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {activeAccount.type === 'bisnis' && (
+            <div className="pt-10 space-y-8">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Conversion Intelligence</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <Card className="p-8 rounded-[2.5rem] bg-indigo-600 text-white flex flex-col justify-between h-64">
+                  <TrendingUp className="size-10 opacity-50" />
+                  <div>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-200">Total Leads</h4>
+                    <p className="text-4xl font-black">452</p>
+                  </div>
+                </Card>
+                <Card className="p-8 rounded-[2.5rem] bg-white border border-slate-100 flex flex-col justify-between h-64">
+                  <div className="size-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <DollarSign className="size-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Est. Pipeline</h4>
+                    <p className="text-4xl font-black text-slate-900">$12.4k</p>
+                  </div>
+                </Card>
+                <Card className="p-8 rounded-[2.5rem] bg-slate-900 text-white flex flex-col justify-between h-64">
+                  <div className="size-10 rounded-xl bg-accent flex items-center justify-center">
+                    <ShieldCheck className="size-6 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Network Reach</h4>
+                    <p className="text-4xl font-black">8.2k</p>
+                  </div>
+                </Card>
+              </div>
             </div>
           )}
         </section>
@@ -691,18 +737,18 @@ export default function ProfilePage() {
           <DialogHeader className="p-6 pb-4 border-b bg-slate-50">
             <div className="flex items-center gap-3">
               <Cloud className="size-6 text-blue-500" />
-              <DialogTitle className="text-lg font-black tracking-tight">Cloud Library</DialogTitle>
+              <DialogTitle className="text-lg font-black tracking-tight">Google Photos - Pilih dari Awan</DialogTitle>
             </div>
           </DialogHeader>
           <ScrollArea className="h-[400px] p-4">
-            <div className="grid grid-cols-3 gap-2">
-              {[...Array(12)].map((_, i) => (
+            <div className="grid grid-cols-2 gap-3">
+              {GOOGLE_PHOTOS_MOCK.map((url, i) => (
                 <button 
                   key={i}
-                  onClick={() => selectGooglePhoto(`https://picsum.photos/seed/gp${i}/600/600`)}
-                  className="aspect-square rounded-xl overflow-hidden border border-slate-100 hover:ring-4 hover:ring-accent/20 transition-all relative group"
+                  onClick={() => selectGooglePhoto(url)}
+                  className="aspect-video rounded-xl overflow-hidden border border-slate-100 hover:ring-4 hover:ring-accent/20 transition-all relative group shadow-sm"
                 >
-                  <img src={`https://picsum.photos/seed/gp${i}/200/200`} className="w-full h-full object-cover" alt="Mock Cloud" />
+                  <img src={url} className="w-full h-full object-cover" alt={`Cloud Photo ${i}`} />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
                     <Check className="size-6 text-white" />
                   </div>
