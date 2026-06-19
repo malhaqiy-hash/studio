@@ -29,7 +29,10 @@ import {
   Check,
   Plus,
   Camera,
-  X
+  X,
+  Radar,
+  Magnet,
+  BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -102,6 +105,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const drawerItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
     { icon: Globe, label: t('discovery'), href: "/cari" },
+    { icon: Radar, label: t('scout'), href: "/scout" },
+    { icon: Magnet, label: t('reverse_discovery'), href: "/reverse-discovery" },
+    { icon: BookOpen, label: t('knowledge'), href: "/knowledge" },
     { icon: Users, label: t('matchmaker'), href: "/matchmaker" },
     { icon: Target, label: t('matches'), href: "/matches" },
     { icon: Briefcase, label: t('opportunities'), href: "/opportunities" },

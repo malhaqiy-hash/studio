@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -64,6 +65,15 @@ export const translations = {
   },
   payment: {
     en: 'Payment', id: 'Pembayaran', ja: '支払い', zh: '支付', ko: '결제', ar: 'دفع', es: 'Pago', fr: 'Paiement', all: 'Payment'
+  },
+  scout: {
+    en: 'AI Scout', id: 'Pemandu AI', ja: 'AIスカウト', zh: 'AI 侦察', ko: 'AI 스카우트', ar: 'مستطلع AI', es: 'Explorador AI', fr: 'Scout AI', all: 'AI Scout'
+  },
+  reverse_discovery: {
+    en: 'Reverse Discovery', id: 'Penemuan Terbalik', ja: 'リバースディスカバリー', zh: '反向发现', ko: '리버스 디스커버리', ar: 'اكتشاف عكسي', es: 'Descubrimiento Inverso', fr: 'Découverte inversée', all: 'Reverse Discovery'
+  },
+  knowledge: {
+    en: 'Business Academy', id: 'Akademi Bisnis', ja: 'ビジネスアカデミー', zh: '商业学院', ko: '비즈니스 아카데미', ar: 'أكاديمية الأعمال', es: 'Academia de Negocios', fr: 'Académie des affaires', all: 'Business Academy'
   }
 };
 
@@ -76,7 +86,7 @@ interface LanguageContextProps {
 const LanguageContext = createContext<LanguageContextProps | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setInternalLanguage] = useState<Language>('en');
+  const [language, setInternalLanguage] = useState<Language>('id');
 
   useEffect(() => {
     const savedLang = localStorage.getItem('ontapp_system_lang') as Language;

@@ -39,6 +39,45 @@
         }
       },
       "required": ["companyName", "category", "status"]
+    },
+    "Demand": {
+      "title": "Demand",
+      "description": "Detected market demand or buyer intent.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "location": { "type": "string" },
+        "urgency": { "type": "string", "enum": ["Low", "Medium", "High"] },
+        "buyerType": { "type": "string" },
+        "volume": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ScoutReport": {
+      "title": "Scout Report",
+      "description": "AI generated business scout report on market gaps.",
+      "type": "object",
+      "properties": {
+        "marketGap": { "type": "string" },
+        "reasoning": { "type": "string" },
+        "suggestedAction": { "type": "string" },
+        "potentialValue": { "type": "string" },
+        "confidenceScore": { "type": "number" }
+      }
+    },
+    "KnowledgeArticle": {
+      "title": "Knowledge Article",
+      "description": "Educational content for business growth.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "type": { "type": "string", "enum": ["Guide", "Analysis", "Insight"] },
+        "author": { "type": "string" }
+      }
     }
   },
   "auth": {
@@ -48,6 +87,18 @@
     "/opportunities/{opportunityId}": {
       "schema": "#/backend/entities/Opportunity",
       "description": "A global collection of business opportunities."
+    },
+    "/demands/{demandId}": {
+      "schema": "#/backend/entities/Demand",
+      "description": "Aggregated market demands and buyer signals."
+    },
+    "/scout_reports/{reportId}": {
+      "schema": "#/backend/entities/ScoutReport",
+      "description": "AI Generated market intelligence reports."
+    },
+    "/knowledge_articles/{articleId}": {
+      "schema": "#/backend/entities/KnowledgeArticle",
+      "description": "Educational business content."
     }
   }
 }
