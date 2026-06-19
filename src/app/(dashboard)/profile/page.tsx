@@ -130,7 +130,6 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!isMounted) return;
 
-    // Secure Auth Listener to prevent offline fetch racing
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUserId(user.uid);
@@ -300,7 +299,7 @@ export default function ProfilePage() {
   }
 
   const currentCover = coverPreview || coverUrl || `https://picsum.photos/seed/cover/1200/400`;
-  const currentAvatar = avatarPreview || avatarUrl || "";
+  const currentAvatar = avatarPreview || avatarUrl || null;
 
   return (
     <DashboardLayout>
@@ -435,7 +434,6 @@ export default function ProfilePage() {
           </div>
         </form>
 
-        {/* Catalog Section */}
         <div className="pt-10 space-y-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-2">
