@@ -426,7 +426,7 @@ export default function CariPage() {
                               <div className="space-y-1">
                                 <div className="flex flex-wrap items-center gap-2">
                                   <h4 className="text-lg font-black text-slate-900 group-hover:text-accent transition-colors tracking-tight">{result.name}</h4>
-                                  {getSourceBadge(source)}
+                                  {getSourceBadge(result.source)}
                                 </div>
                                 <div className="relative">
                                   <p className="text-slate-500 font-medium text-xs leading-relaxed line-clamp-2">
