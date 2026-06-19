@@ -72,7 +72,8 @@ export default function ProfilePage() {
     visibility: 'public'
   });
 
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  // Native File Ref
+  const fileBrowserRef = React.useRef<HTMLInputElement>(null);
 
   const handleSaveBio = () => {
     updateActiveAccount(tempAccount);
@@ -117,22 +118,26 @@ export default function ProfilePage() {
     toast({ title: 'Konten dihapus' });
   };
 
+  // Synchronized File Handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setNewItem({ ...newItem, image: reader.result as string });
+        setNewItem(prev => ({ ...prev, image: reader.result as string }));
         setIsSourcePickerOpen(false);
+        toast({ title: 'Foto terlampir' });
       };
       reader.readAsDataURL(file);
     }
   };
 
+  // Synchronized Cloud Handler
   const selectGooglePhoto = (url: string) => {
-    setNewItem({ ...newItem, image: url });
+    setNewItem(prev => ({ ...prev, image: url }));
     setIsGooglePhotosOpen(false);
     setIsSourcePickerOpen(false);
+    toast({ title: 'Foto terpilih dari Cloud' });
   };
 
   const getLinkIcon = (url: string) => {
@@ -146,7 +151,6 @@ export default function ProfilePage() {
 
   const isPostEmpty = !newItem.description?.trim() && !newItem.image;
 
-  // Mock Google Photos from Unsplash
   const GOOGLE_PHOTOS_MOCK = [
     "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop",
@@ -689,7 +693,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Media Source Picker Modal */}
+      {/* Multi-Source Media Picker Modal */}
       <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
         <DialogContent className="max-w-sm rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white">
           <DialogHeader className="p-6 pb-2 border-b bg-slate-50">
@@ -699,7 +703,7 @@ export default function ProfilePage() {
             <Button 
               variant="ghost" 
               className="w-full h-14 rounded-2xl justify-start gap-4 px-6 hover:bg-slate-50 hover:text-accent font-bold group"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => fileBrowserRef.current?.click()}
             >
               <ImageIcon className="size-5 text-indigo-500 group-hover:scale-110 transition-transform" />
               Galeri Foto
@@ -707,7 +711,10 @@ export default function ProfilePage() {
             <Button 
               variant="ghost" 
               className="w-full h-14 rounded-2xl justify-start gap-4 px-6 hover:bg-slate-50 hover:text-accent font-bold group"
-              onClick={() => setIsGooglePhotosOpen(true)}
+              onClick={() => {
+                setIsSourcePickerOpen(false);
+                setIsGooglePhotosOpen(true);
+              }}
             >
               <Cloud className="size-5 text-blue-500 group-hover:scale-110 transition-transform" />
               Google Photos
@@ -715,15 +722,16 @@ export default function ProfilePage() {
             <Button 
               variant="ghost" 
               className="w-full h-14 rounded-2xl justify-start gap-4 px-6 hover:bg-slate-50 hover:text-accent font-bold group"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => fileBrowserRef.current?.click()}
             >
               <FolderOpen className="size-5 text-emerald-500 group-hover:scale-110 transition-transform" />
               File Browser
             </Button>
           </div>
+          {/* Hidden Native Input */}
           <input 
             type="file" 
-            ref={fileInputRef} 
+            ref={fileBrowserRef} 
             className="hidden" 
             accept="image/*"
             onChange={handleFileChange}
