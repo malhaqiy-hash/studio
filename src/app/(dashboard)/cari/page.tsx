@@ -221,20 +221,6 @@ export default function CariPage() {
     loc.toLowerCase().includes(locationSearch.toLowerCase())
   );
 
-  const handleFeatureClick = (type: string) => {
-    switch(type) {
-      case 'voice':
-        toggleVoiceSearch();
-        break;
-      case 'priority':
-        handleSearch(undefined, "Tampilkan anggota OnTapp terverifikasi");
-        break;
-      case 'hybrid':
-        handleSearch(undefined, "Cari data bisnis global di seluruh web");
-        break;
-    }
-  };
-
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-6 py-2">
@@ -497,23 +483,22 @@ export default function CariPage() {
           {!loading && !results && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
               {[
-                { id: 'priority', title: "Prioritas OnTapp", desc: "Internal member diprioritaskan.", icon: Zap, color: "text-accent", bg: "bg-indigo-50" },
-                { id: 'hybrid', title: "Web Hibrida", desc: "Data global dari seluruh web.", icon: Globe, color: "text-emerald-500", bg: "bg-emerald-50" },
-                { id: 'voice', title: "Voice AI", desc: "Cari hanya dengan berbicara.", icon: Mic, color: "text-rose-500", bg: "bg-rose-50" }
+                { title: "Prioritas OnTapp", desc: "Internal member diprioritaskan.", icon: Zap, color: "text-accent", bg: "bg-indigo-50" },
+                { title: "Web Hibrida", desc: "Data global dari seluruh web.", icon: Globe, color: "text-emerald-500", bg: "bg-emerald-50" },
+                { title: "Voice AI", desc: "Cari hanya dengan berbicara.", icon: Mic, color: "text-rose-500", bg: "bg-rose-50" }
               ].map((feature, i) => (
-                <button 
+                <div 
                   key={i} 
-                  onClick={() => handleFeatureClick(feature.id)}
-                  className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm text-center space-y-3 hover:shadow-md transition-all group active:scale-95 cursor-pointer outline-none focus:ring-2 focus:ring-accent/10"
+                  className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm text-center space-y-3"
                 >
-                  <div className={cn("size-10 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform", feature.bg, feature.color)}>
+                  <div className={cn("size-10 rounded-2xl flex items-center justify-center mx-auto", feature.bg, feature.color)}>
                     <feature.icon className="size-5" />
                   </div>
                   <div className="space-y-1">
                     <h4 className="text-sm font-black text-slate-900">{feature.title}</h4>
                     <p className="text-slate-400 text-[9px] font-medium leading-relaxed">{feature.desc}</p>
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           )}
