@@ -68,6 +68,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { activeAccount, availableAccounts, switchAccount, activateAccountType } = useAccount();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
 
+  // Strictly controlled list for "Lainnya" menu
   const drawerItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
     { icon: Globe, label: t('discovery'), href: "/discover" },
@@ -77,7 +78,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { icon: MessageSquare, label: t('messages'), href: "/messages" },
     { icon: CreditCard, label: t('payment'), href: "/payment" },
     { icon: Sliders, label: t('settings'), href: "/settings" },
-    { icon: User, label: t('profile'), href: "/profile" },
   ];
 
   React.useEffect(() => {
@@ -95,6 +95,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleSwitchAccount = (id: string) => {
+    switchAccount(id);
+    router.push("/profile");
+  };
+
+  const handleActivate = (type: AccountType) => {
+    activateAccountType(type);
+    router.push("/profile");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8FAFC]">
@@ -110,9 +120,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-body">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-body relative">
       
-      <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm">
+      {/* High priority header with z-index to ensure clickability */}
+      <header className="sticky top-0 z-[100] w-full border-b bg-white/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm pointer-events-auto">
         <div className="flex items-center gap-2">
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="size-8 rounded-lg bg-accent flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-100">
@@ -131,16 +142,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </Button>
           </Link>
 
+          {/* Profile Dropdown Hub */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center rounded-full border-2 border-indigo-100 hover:border-accent transition p-0.5 outline-none">
+              <button className="flex items-center rounded-full border-2 border-indigo-100 hover:border-accent transition p-0.5 outline-none pointer-events-auto">
                 <Avatar className="h-7 w-7 rounded-full shadow-sm">
                   <AvatarImage src={activeAccount.avatar} />
                   <AvatarFallback className="bg-accent text-white font-bold text-[10px]">{activeAccount.name[0]}</AvatarFallback>
                 </Avatar>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-72 rounded-2xl p-2 shadow-2xl border-slate-100">
+            <DropdownMenuContent align="end" className="w-72 rounded-2xl p-2 shadow-2xl border-slate-100 bg-white pointer-events-auto">
               <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b mb-2">
                 Ganti Akun
               </DropdownMenuLabel>
@@ -149,9 +161,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 {availableAccounts.map((acc) => (
                   <DropdownMenuItem 
                     key={acc.id}
-                    onSelect={() => switchAccount(acc.id)}
+                    onSelect={() => handleSwitchAccount(acc.id)}
                     className={cn(
-                      "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1",
+                      "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1 pointer-events-auto",
                       activeAccount.id === acc.id 
                         ? "bg-indigo-50 text-accent" 
                         : "text-slate-600 focus:bg-slate-50"
@@ -175,27 +187,27 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuSeparator className="my-2" />
 
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer">
+                <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer pointer-events-auto">
                   <UserPlus className="size-4" />
                   Tambahkan Akun
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="rounded-xl border-slate-100 shadow-xl p-1 min-w-[160px]">
+                  <DropdownMenuSubContent className="rounded-xl border-slate-100 shadow-xl p-1 min-w-[160px] bg-white pointer-events-auto">
                     <DropdownMenuItem 
-                      onSelect={() => activateAccountType('pribadi')}
-                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
+                      onSelect={() => handleActivate('pribadi')}
+                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3 pointer-events-auto"
                     >
                       <User className="size-4 text-slate-400" /> Pribadi
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      onSelect={() => activateAccountType('professional')}
-                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
+                      onSelect={() => handleActivate('professional')}
+                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3 pointer-events-auto"
                     >
                       <ShieldCheck className="size-4 text-emerald-400" /> Professional
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      onSelect={() => activateAccountType('bisnis')}
-                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
+                      onSelect={() => handleActivate('bisnis')}
+                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3 pointer-events-auto"
                     >
                       <Briefcase className="size-4 text-indigo-400" /> Bisnis
                     </DropdownMenuItem>
@@ -207,13 +219,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 pb-28 pt-4 px-4 w-full overflow-x-hidden">
+      <main className="flex-1 pb-28 pt-4 px-4 w-full overflow-x-hidden relative">
         <div className="max-w-4xl mx-auto">
           {children}
         </div>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-md pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t bg-white/95 backdrop-blur-md pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.03)] pointer-events-auto">
         <div className="grid grid-cols-3 h-16 items-center justify-items-center text-[10px] font-black uppercase tracking-widest text-slate-400 relative">
           
           <Link 
@@ -238,10 +251,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <span>Cari</span>
           </Link>
 
+          {/* AI Advisor Trigger & More Menu Hub */}
           <div className="relative w-full h-full flex flex-col items-center justify-center">
+            {/* AI ADVISOR BUTTON (Cleanly above Lainnya) */}
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
-              className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-50 ring-4 ring-white"
+              className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-[95] ring-4 ring-white"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -255,7 +270,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <span>Lainnya</span>
                 </button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 overflow-hidden h-[90vh]">
+              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 overflow-hidden h-[90vh] bg-white">
                 <SheetHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100">
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
@@ -305,7 +320,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
                     <button 
                       onClick={handleLogout}
-                      className="flex items-center px-8 py-6 bg-rose-50 hover:bg-rose-100 transition-colors gap-6 group text-rose-600"
+                      className="flex items-center px-8 py-6 bg-rose-50 hover:bg-rose-100 transition-colors gap-6 group text-rose-600 w-full text-left"
                     >
                       <div className="size-10 rounded-xl bg-white border border-rose-100 flex items-center justify-center shadow-sm">
                         <LogOut className="size-5" />
