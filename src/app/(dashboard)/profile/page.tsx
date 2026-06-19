@@ -35,7 +35,8 @@ import {
   Star,
   Users,
   ExternalLink,
-  Code
+  Code,
+  TrendingUp
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
