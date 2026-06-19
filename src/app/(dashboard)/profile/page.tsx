@@ -30,7 +30,10 @@ import {
   Globe,
   Lock,
   Image as ImageIcon,
-  MoreHorizontal
+  MoreHorizontal,
+  Cloud,
+  FolderOpen,
+  Check
 } from 'lucide-react';
 import {
   Dialog,
@@ -58,12 +61,16 @@ export default function ProfilePage() {
   const [isBioModalOpen, setIsBioModalOpen] = React.useState(false);
   const [isLinksModalOpen, setIsLinksModalOpen] = React.useState(false);
   const [isContentModalOpen, setIsContentModalOpen] = React.useState(false);
+  const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
+  const [isGooglePhotosOpen, setIsGooglePhotosOpen] = React.useState(false);
 
   // Form States
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
   const [newItem, setNewItem] = React.useState<Partial<ContentItem>>({
     visibility: 'public'
   });
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSaveBio = () => {
     updateActiveAccount(tempAccount);
@@ -106,6 +113,24 @@ export default function ProfilePage() {
       items: (activeAccount.items || []).filter(item => item.id !== id)
     });
     toast({ title: 'Konten dihapus' });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewItem({ ...newItem, image: reader.result as string });
+        setIsSourcePickerOpen(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const selectGooglePhoto = (url: string) => {
+    setNewItem({ ...newItem, image: url });
+    setIsGooglePhotosOpen(false);
+    setIsSourcePickerOpen(false);
   };
 
   const getLinkIcon = (url: string) => {
@@ -294,14 +319,18 @@ export default function ProfilePage() {
                             <MoreHorizontal className="size-4" />
                           </button>
                         </div>
-                        <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                          {item.description}
-                        </p>
-                        {item.image && (
-                          <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm max-w-sm">
-                            <img src={item.image} className="w-full h-auto object-cover" alt="Post" />
-                          </div>
-                        )}
+                        <div className="space-y-3">
+                          {item.description && (
+                            <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                              {item.description}
+                            </p>
+                          )}
+                          {item.image && (
+                            <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm max-w-sm">
+                              <img src={item.image} className="w-full h-auto object-cover" alt="Post" />
+                            </div>
+                          )}
+                        </div>
                         <div className="flex items-center gap-4 pt-1">
                           <button onClick={() => handleRemoveItem(item.id)} className="text-xs text-rose-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity">Hapus</button>
                         </div>
@@ -509,7 +538,7 @@ export default function ProfilePage() {
               </DialogHeader>
               <div className="px-6 py-4 space-y-4">
                 <div className="flex gap-4">
-                  <Avatar className="size-10 border border-slate-100">
+                  <Avatar className="size-10 shrink-0 border border-slate-100">
                     <AvatarImage src={activeAccount.avatar} />
                     <AvatarFallback>{activeAccount.name[0]}</AvatarFallback>
                   </Avatar>
@@ -523,7 +552,7 @@ export default function ProfilePage() {
 
                 {newItem.image && (
                   <div className="relative group/thumb w-fit mx-auto">
-                    <img src={newItem.image} className="h-32 w-auto rounded-2xl object-cover border shadow-sm" alt="Preview" />
+                    <img src={newItem.image} className="h-48 w-auto rounded-2xl object-cover border shadow-sm" alt="Preview" />
                     <button 
                       onClick={() => setNewItem({ ...newItem, image: undefined })}
                       className="absolute -top-2 -right-2 bg-slate-900 text-white rounded-full p-1 shadow-lg group-hover/thumb:scale-110 transition-transform"
@@ -537,7 +566,7 @@ export default function ProfilePage() {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => setNewItem({ ...newItem, image: `https://picsum.photos/seed/${Date.now()}/800/600` })}
+                  onClick={() => setIsSourcePickerOpen(true)}
                   className="text-slate-500 hover:text-accent font-bold gap-2 rounded-full"
                 >
                   <ImageIcon className="size-4" />
@@ -610,6 +639,79 @@ export default function ProfilePage() {
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Media Source Picker Modal */}
+      <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
+        <DialogContent className="max-w-sm rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white">
+          <DialogHeader className="p-6 pb-2 border-b bg-slate-50">
+            <DialogTitle className="text-lg font-black tracking-tight text-center">Pilih Sumber Media</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 space-y-2">
+            <Button 
+              variant="ghost" 
+              className="w-full h-14 rounded-2xl justify-start gap-4 px-6 hover:bg-slate-50 hover:text-accent font-bold group"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <ImageIcon className="size-5 text-indigo-500 group-hover:scale-110 transition-transform" />
+              Galeri Foto
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full h-14 rounded-2xl justify-start gap-4 px-6 hover:bg-slate-50 hover:text-accent font-bold group"
+              onClick={() => setIsGooglePhotosOpen(true)}
+            >
+              <Cloud className="size-5 text-blue-500 group-hover:scale-110 transition-transform" />
+              Google Photos
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full h-14 rounded-2xl justify-start gap-4 px-6 hover:bg-slate-50 hover:text-accent font-bold group"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <FolderOpen className="size-5 text-emerald-500 group-hover:scale-110 transition-transform" />
+              File Browser
+            </Button>
+          </div>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            className="hidden" 
+            accept="image/*"
+            onChange={handleFileChange}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Google Photos Mock Modal */}
+      <Dialog open={isGooglePhotosOpen} onOpenChange={setIsGooglePhotosOpen}>
+        <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white">
+          <DialogHeader className="p-6 pb-4 border-b bg-slate-50">
+            <div className="flex items-center gap-3">
+              <Cloud className="size-6 text-blue-500" />
+              <DialogTitle className="text-lg font-black tracking-tight">Cloud Library</DialogTitle>
+            </div>
+          </DialogHeader>
+          <ScrollArea className="h-[400px] p-4">
+            <div className="grid grid-cols-3 gap-2">
+              {[...Array(12)].map((_, i) => (
+                <button 
+                  key={i}
+                  onClick={() => selectGooglePhoto(`https://picsum.photos/seed/gp${i}/600/600`)}
+                  className="aspect-square rounded-xl overflow-hidden border border-slate-100 hover:ring-4 hover:ring-accent/20 transition-all relative group"
+                >
+                  <img src={`https://picsum.photos/seed/gp${i}/200/200`} className="w-full h-full object-cover" alt="Mock Cloud" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                    <Check className="size-6 text-white" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
+          <DialogFooter className="p-4 border-t bg-slate-50 flex justify-center">
+            <Button variant="ghost" onClick={() => setIsGooglePhotosOpen(false)} className="rounded-xl font-bold">Tutup</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
