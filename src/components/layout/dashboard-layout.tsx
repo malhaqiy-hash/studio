@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -49,6 +48,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
+import { AIAssistant } from "@/components/chat/ai-assistant";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -127,7 +127,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex min-h-screen w-full bg-background relative">
         <Sidebar className="border-r border-border">
           <SidebarHeader className="h-16 flex items-center px-6 border-b border-border">
             <Link href="/" className="flex items-center gap-2">
@@ -252,6 +252,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </div>
           </main>
         </SidebarInset>
+
+        {/* Global AI Assistant FAB */}
+        <AIAssistant />
       </div>
     </SidebarProvider>
   );
