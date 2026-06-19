@@ -1,12 +1,13 @@
-
 "use client";
 
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Building2, 
   Mail, 
@@ -14,221 +15,356 @@ import {
   Globe, 
   Calendar, 
   ShieldCheck, 
-  Edit3,
-  Link as LinkIcon,
-  Twitter,
+  Camera,
+  Instagram,
+  Facebook,
+  Youtube,
   Linkedin,
-  User,
-  RefreshCw,
-  Sparkles
+  Twitter,
+  ExternalLink,
+  Save,
+  Loader2,
+  CheckCircle2,
+  Trash2,
+  Plus
 } from "lucide-react";
-import { useUser } from "@/firebase";
-import { translateText } from "@/ai/flows/translate-flow";
-import { useLanguage } from "@/context/language-context";
+import { useUser, useFirestore } from "@/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
+// Custom Brand Icons (SVGs) for missing Lucide icons
+const TikTokIcon = () => (
+  <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.06-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.9-.32-1.89-.39-2.82-.2-.79.14-1.53.53-2.08 1.11-.53.54-.86 1.25-.97 2.01-.13.71-.08 1.45.15 2.13.26.78.78 1.48 1.48 1.92.83.5 1.81.65 2.76.43 1.12-.22 2.13-.96 2.66-1.98.31-.58.46-1.23.47-1.89l.01-10.32Z"/>
+  </svg>
+);
+
+const WhatsAppIcon = () => (
+  <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.435 5.623 1.436h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+  </svg>
+);
+
+const ShopeeIcon = () => (
+  <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.43 5.42l-.57-.57c-.12-.12-.31-.12-.43 0l-.57.57c-.12.12-.12.31 0 .43l.57.57c.12.12.31.12.43 0l.57-.57c.12-.12.12-.31 0-.43zm-3.07-2.64l-.57-.57c-.12-.12-.31-.12-.43 0l-.57.57c-.12.12-.12.31 0 .43l.57.57c.12.12.31.12.43 0l.57-.57c.12-.12.12-.31 0-.43zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.41 12.37c-.33 1.14-1.04 2.1-1.99 2.72-.94.62-2.07.94-3.23.94-1.16 0-2.29-.32-3.23-.94-.95-.62-1.66-1.58-1.99-2.72-.34-1.14-.34-2.35 0-3.49.33-1.14 1.04-2.1 1.99-2.72.94-.62 2.07-.94 3.23-.94 1.16 0 2.29.32 3.23.94.95.62 1.66 1.58 1.99 2.72.34 1.14.34 2.35 0 3.49z"/>
+  </svg>
+);
+
+const TokopediaIcon = () => (
+  <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-11h2v2h-2zm0 4h2v5h-2z"/>
+  </svg>
+);
 
 export default function ProfilePage() {
   const { user } = useUser();
-  const { language } = useLanguage();
-  const userInitial = user?.email ? user.email[0].toUpperCase() : "U";
+  const db = useFirestore();
+  const { toast } = useToast();
 
-  const [overviewTrans, setOverviewTrans] = React.useState({
-    text: "",
-    show: false,
-    loading: false,
-    detected: ""
+  const [saving, setSaving] = React.useState(false);
+  const [updatingCover, setUpdatingCover] = React.useState(false);
+  const [updatingAvatar, setUpdatingAvatar] = React.useState(false);
+
+  // Form State
+  const [profile, setProfile] = React.useState({
+    companyName: "Alpha Tech Solutions",
+    category: "SaaS & AI Infrastructure",
+    description: "A leading provider of enterprise AI solutions and cloud infrastructure for the manufacturing sector. Focused on industrial efficiency and global networking.",
+    location: "Jakarta, Indonesia",
+    website: "https://alphatech.example.com",
+    email: user?.email || "",
   });
 
-  const originalOverview = "We are an active participant in the OnTapp Global Discovery Network. Our focus is on accelerating industrial efficiency through strategic partnerships and real-time data integration.";
+  const [socialLinks, setSocialLinks] = React.useState({
+    whatsapp: "+628123456789",
+    instagram: "alphatech_official",
+    facebook: "AlphaTechEnterprise",
+    tiktok: "alphatech.biz",
+    youtube: "AlphaTechMedia",
+    shopee: "alphatech_store",
+    tokopedia: "alphatech-solutions",
+    linkedin: "alpha-tech-solutions",
+  });
 
-  const handleTranslateOverview = async () => {
-    if (overviewTrans.text) {
-      setOverviewTrans(prev => ({ ...prev, show: !prev.show }));
-      return;
-    }
-
-    setOverviewTrans(prev => ({ ...prev, loading: true }));
-
+  const handleSaveProfile = async () => {
+    if (!user || !db) return;
+    setSaving(true);
+    
+    // Simulate API delay
+    await new Promise(r => setTimeout(r, 1500));
+    
     try {
-      const { translatedText, detectedLanguage } = await translateText({
-        text: originalOverview,
-        targetLanguage: language
-      });
-      setOverviewTrans({
-        text: translatedText,
-        show: true,
-        loading: false,
-        detected: detectedLanguage
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(userRef, { 
+        profile, 
+        socialLinks, 
+        updatedAt: new Date().toISOString() 
+      }, { merge: true });
+      
+      toast({
+        title: "Profile Synchronized",
+        description: "Your business ecosystem profile has been successfully updated in Firestore.",
       });
     } catch (err) {
-      console.error("Overview translation failed", err);
-      setOverviewTrans(prev => ({ ...prev, loading: false }));
+      console.error(err);
+      toast({
+        variant: "destructive",
+        title: "Synchronization Failed",
+        description: "An error occurred while saving your profile.",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
+  const handleUpdateCover = () => {
+    setUpdatingCover(true);
+    setTimeout(() => {
+      setUpdatingCover(false);
+      toast({ title: "Cover Photo Updated", description: "New branding assets applied to your profile header." });
+    }, 1200);
+  };
+
+  const handleUpdateAvatar = () => {
+    setUpdatingAvatar(true);
+    setTimeout(() => {
+      setUpdatingAvatar(false);
+      toast({ title: "Avatar Updated", description: "Your profile identification photo has been refreshed." });
+    }, 1000);
+  };
+
+  const socialPlatforms = [
+    { key: "whatsapp", label: "WhatsApp", icon: WhatsAppIcon, color: "text-emerald-500", prefix: "https://wa.me/" },
+    { key: "instagram", label: "Instagram", icon: Instagram, color: "text-pink-500", prefix: "https://instagram.com/" },
+    { key: "facebook", label: "Facebook", icon: Facebook, color: "text-blue-600", prefix: "https://facebook.com/" },
+    { key: "tiktok", label: "TikTok", icon: TikTokIcon, color: "text-slate-900", prefix: "https://tiktok.com/@" },
+    { key: "youtube", label: "YouTube", icon: Youtube, color: "text-red-600", prefix: "https://youtube.com/@" },
+    { key: "shopee", label: "Shopee", icon: ShopeeIcon, color: "text-orange-500", prefix: "https://shopee.co.id/" },
+    { key: "tokopedia", label: "Tokopedia", icon: TokopediaIcon, color: "text-emerald-600", prefix: "https://tokopedia.com/" },
+    { key: "linkedin", label: "LinkedIn", icon: Linkedin, color: "text-indigo-700", prefix: "https://linkedin.com/in/" },
+  ] as const;
+
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-8 pb-20">
-        {/* Profile Header Card */}
-        <Card className="border-slate-200 shadow-sm overflow-hidden rounded-[2rem]">
-          <div className="h-48 bg-gradient-to-r from-indigo-500 via-accent to-indigo-700 relative">
-            <div className="absolute top-6 right-6 flex gap-2">
-              <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md font-bold rounded-xl h-10 px-6">
-                <Edit3 className="size-4 mr-2" />
-                Edit Profile
-              </Button>
-            </div>
+      <div className="max-w-6xl mx-auto space-y-10 pb-20">
+        
+        {/* Header Section */}
+        <div className="relative group">
+          <div className="h-64 md:h-80 w-full rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-accent to-indigo-900 overflow-hidden relative shadow-2xl">
+            <img 
+              src="https://picsum.photos/seed/cover88/1600/800" 
+              alt="Cover" 
+              className="w-full h-full object-cover opacity-60 mix-blend-overlay"
+            />
+            <div className="absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/20" />
+            <Button 
+              onClick={handleUpdateCover}
+              disabled={updatingCover}
+              variant="secondary" 
+              className="absolute top-6 right-6 rounded-2xl bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md h-11 px-6 font-bold shadow-xl"
+            >
+              {updatingCover ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Camera className="size-4 mr-2" />}
+              Edit Cover Photo
+            </Button>
           </div>
-          <CardContent className="px-8 pb-8">
-            <div className="relative flex flex-col md:flex-row items-end gap-6 -mt-12 md:-mt-16">
-              <Avatar className="size-32 md:size-40 border-4 border-white shadow-xl ring-2 ring-slate-100">
-                <AvatarImage src={`https://picsum.photos/seed/${user?.uid}/400`} />
-                <AvatarFallback className="text-3xl font-black bg-indigo-50 text-accent">{userInitial}</AvatarFallback>
+
+          <div className="absolute -bottom-16 left-10 md:left-20 flex flex-col md:flex-row items-end gap-6">
+            <div className="relative group/avatar">
+              <Avatar className="size-40 md:size-48 border-8 border-white shadow-2xl ring-4 ring-slate-100/50">
+                <AvatarImage src={`https://picsum.photos/seed/${user?.uid || '123'}/400`} className="object-cover" />
+                <AvatarFallback className="text-4xl font-black bg-indigo-50 text-accent">AT</AvatarFallback>
               </Avatar>
-              <div className="flex-1 space-y-2 pb-2">
-                <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="text-3xl font-black text-slate-900 tracking-tight">{user?.displayName || "Member Organization"}</h1>
-                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 flex gap-1 items-center px-3 py-1 font-bold">
-                    <ShieldCheck className="size-3" /> Verified Account
-                  </Badge>
-                </div>
-                <div className="flex flex-wrap items-center gap-4 text-slate-500 font-medium text-sm">
-                  <span className="flex items-center gap-1.5"><Building2 className="size-4" /> SaaS & AI Infrastructure</span>
-                  <span className="flex items-center gap-1.5"><MapPin className="size-4" /> Global Headquarters</span>
-                  <span className="flex items-center gap-1.5"><Calendar className="size-4" /> Active on OnTapp</span>
-                </div>
+              <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center">
+                <Button 
+                  onClick={handleUpdateAvatar}
+                  disabled={updatingAvatar}
+                  variant="ghost" 
+                  size="icon" 
+                  className="size-12 rounded-full bg-white text-slate-900 hover:bg-slate-50 shadow-lg"
+                >
+                  {updatingAvatar ? <Loader2 className="size-5 animate-spin" /> : <Camera className="size-6" />}
+                </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="pb-4 space-y-1 text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-3">
+                <h1 className="text-4xl font-black text-slate-900 tracking-tight">{profile.companyName}</h1>
+                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 px-3 py-1 font-black text-[10px] uppercase flex gap-1">
+                  <ShieldCheck className="size-3" /> Verified Account
+                </Badge>
+              </div>
+              <p className="text-lg font-bold text-slate-500 flex items-center justify-center md:justify-start gap-2">
+                <Building2 className="size-5 text-indigo-400" />
+                {profile.category}
+              </p>
+            </div>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Contact & Links */}
-          <div className="space-y-6">
-            <Card className="border-slate-200 shadow-sm rounded-[1.5rem]">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold">Account Info</CardTitle>
+        <div className="pt-20 grid grid-cols-1 lg:grid-cols-12 gap-10">
+          
+          {/* Main Info Column */}
+          <div className="lg:col-span-7 space-y-8">
+            <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden">
+              <CardHeader className="p-8 pb-4">
+                <CardTitle className="text-xl font-black flex items-center gap-2">
+                  <Globe className="size-5 text-accent" />
+                  General Business Identity
+                </CardTitle>
+                <CardDescription className="font-medium">Update your core business information for the global directory.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Login ID</span>
-                  <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                    <User className="size-4 text-slate-300" />
-                    {user?.uid.substring(0, 12)}...
+              <CardContent className="p-8 pt-0 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="font-bold text-slate-700">Organization Name</Label>
+                    <Input 
+                      value={profile.companyName} 
+                      onChange={(e) => setProfile({...profile, companyName: e.target.value})}
+                      className="rounded-xl border-slate-200 h-12 bg-slate-50/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-bold text-slate-700">Primary Industry</Label>
+                    <Input 
+                      value={profile.category} 
+                      onChange={(e) => setProfile({...profile, category: e.target.value})}
+                      className="rounded-xl border-slate-200 h-12 bg-slate-50/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-bold text-slate-700">Global Headquarters</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                      <Input 
+                        value={profile.location} 
+                        onChange={(e) => setProfile({...profile, location: e.target.value})}
+                        className="pl-10 rounded-xl border-slate-200 h-12 bg-slate-50/50"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-bold text-slate-700">Official Website</Label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                      <Input 
+                        value={profile.website} 
+                        onChange={(e) => setProfile({...profile, website: e.target.value})}
+                        className="pl-10 rounded-xl border-slate-200 h-12 bg-slate-50/50"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Business Email</span>
-                  <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                    <Mail className="size-4 text-slate-300" />
-                    {user?.email}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Status</span>
-                  <div className="flex items-center gap-2 text-sm font-bold text-accent">
-                    <ShieldCheck className="size-4" />
-                    Active Enterprise
-                  </div>
-                </div>
-                <div className="pt-4 flex gap-3">
-                  <Button variant="outline" size="icon" className="rounded-xl border-slate-200 hover:bg-slate-50">
-                    <Linkedin className="size-4 text-slate-600" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="rounded-xl border-slate-200 hover:bg-slate-50">
-                    <Twitter className="size-4 text-slate-600" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="rounded-xl border-slate-200 hover:bg-slate-50">
-                    <LinkIcon className="size-4 text-slate-600" />
-                  </Button>
+                <div className="space-y-2">
+                  <Label className="font-bold text-slate-700">Business Overview</Label>
+                  <Textarea 
+                    value={profile.description}
+                    onChange={(e) => setProfile({...profile, description: e.target.value})}
+                    className="rounded-xl border-slate-200 min-h-[120px] bg-slate-50/50 font-medium leading-relaxed"
+                  />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200 shadow-sm bg-slate-900 text-white rounded-[1.5rem]">
-              <CardContent className="p-6 space-y-4">
-                <h3 className="font-bold text-lg">Network Influence</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                    <span className="block text-2xl font-black">1.2K</span>
-                    <span className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest">Followers</span>
-                  </div>
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                    <span className="block text-2xl font-black">452</span>
-                    <span className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest">Posts</span>
-                  </div>
+            <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
+              <div className="relative z-10 space-y-6">
+                <div className="size-16 rounded-2xl bg-accent flex items-center justify-center shadow-lg rotate-3">
+                  <ShieldCheck className="size-8 text-white" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black tracking-tight">Security & Verification</h3>
+                  <p className="text-slate-400 font-medium leading-relaxed">
+                    Your enterprise verification is valid until <span className="text-white">December 2025</span>. Maintain complete profile details to ensure a high match score in the global search engine.
+                  </p>
+                </div>
+                <Button variant="outline" className="rounded-xl border-white/20 text-white hover:bg-white/10 h-12 px-8 font-bold">
+                  View Certificates
+                </Button>
+              </div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-[80px] -mr-32 -mt-32" />
+            </div>
           </div>
 
-          {/* About & Details */}
-          <div className="md:col-span-2 space-y-6">
-            <Card className="border-slate-200 shadow-sm rounded-[1.5rem]">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg font-bold">Business Overview</CardTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleTranslateOverview}
-                  className="h-8 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-accent gap-2"
-                  disabled={overviewTrans.loading}
-                >
-                  {overviewTrans.loading ? (
-                    <RefreshCw className="size-3 animate-spin" />
-                  ) : (
-                    <Globe className="size-3" />
-                  )}
-                  {overviewTrans.show ? "Original" : "Translate"}
-                </Button>
+          {/* Social Links Sidebar */}
+          <div className="lg:col-span-5 space-y-8">
+            <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden">
+              <CardHeader className="p-8 pb-4">
+                <CardTitle className="text-xl font-black flex items-center gap-2">
+                  <Plus className="size-5 text-accent" />
+                  E-Commerce & Social Hub
+                </CardTitle>
+                <CardDescription className="font-medium">Connect your sales channels and social footprints.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="relative">
-                  <p className="text-slate-600 leading-relaxed font-medium">
-                    {overviewTrans.show ? overviewTrans.text : originalOverview}
-                  </p>
-                  {overviewTrans.show && (
-                    <div className="mt-3 text-[10px] font-black text-accent uppercase tracking-widest flex items-center gap-1.5 bg-indigo-50/50 w-fit px-3 py-1.5 rounded-lg border border-indigo-100/50">
-                      <Sparkles className="size-3" />
-                      AI Translated to {language.toUpperCase()}
+              <CardContent className="p-8 pt-0 space-y-6">
+                <div className="space-y-4">
+                  {socialPlatforms.map((platform) => (
+                    <div key={platform.key} className="space-y-1.5 group">
+                      <div className="flex justify-between items-center px-1">
+                        <Label className="text-xs font-black uppercase tracking-widest text-slate-400 group-focus-within:text-accent transition-colors">
+                          {platform.label} Handle/UID
+                        </Label>
+                      </div>
+                      <div className="relative">
+                        <div className={cn("absolute left-4 top-1/2 -translate-y-1/2 transition-transform group-focus-within:scale-110", platform.color)}>
+                          <platform.icon />
+                        </div>
+                        <Input 
+                          value={socialLinks[platform.key as keyof typeof socialLinks]}
+                          onChange={(e) => setSocialLinks({...socialLinks, [platform.key]: e.target.value})}
+                          placeholder={`Enter your ${platform.label} link...`}
+                          className="pl-12 rounded-xl border-slate-200 h-11 bg-slate-50/30 font-medium focus:bg-white"
+                        />
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-                <div className="space-y-3 pt-4 border-t border-slate-100">
-                  <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">Core Expertise</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {["Digital Strategy", "Network Scaling", "B2B Analytics", "Scalable Systems"].map(tag => (
-                      <Badge key={tag} variant="secondary" className="bg-slate-100 text-slate-600 border-none px-3 py-1 font-bold">
-                        {tag}
-                      </Badge>
-                    ))}
+
+                <div className="pt-6 border-t border-slate-100">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Live Discovery Preview</h4>
+                  <div className="flex flex-wrap gap-3">
+                    {socialPlatforms.map((platform) => {
+                      const val = socialLinks[platform.key as keyof typeof socialLinks];
+                      if (!val) return null;
+                      return (
+                        <a 
+                          key={platform.key}
+                          href={`${platform.prefix}${val}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 p-2 pr-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-accent hover:bg-white hover:shadow-lg transition-all active:scale-95 group"
+                        >
+                          <div className={cn("size-8 rounded-lg bg-white shadow-sm flex items-center justify-center", platform.color)}>
+                            <platform.icon />
+                          </div>
+                          <span className="text-xs font-bold text-slate-600 group-hover:text-accent truncate max-w-[100px]">{val}</span>
+                          <ExternalLink className="size-3 text-slate-300 group-hover:text-accent" />
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200 shadow-sm rounded-[1.5rem]">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold">Recent Network Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y divide-slate-100">
-                  <div className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer">
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-slate-900">Authored New Listing</h4>
-                      <p className="text-sm text-slate-500 font-medium">Updated sourcing requirements for tech hardware.</p>
-                    </div>
-                    <Badge className="bg-indigo-50 text-accent font-bold">Activity</Badge>
-                  </div>
-                  <div className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer">
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-slate-900">Joined Strategic Matchmaker</h4>
-                      <p className="text-sm text-slate-500 font-medium">Now participating in AI-driven partner alignment.</p>
-                    </div>
-                    <Badge className="bg-emerald-50 text-emerald-600 font-bold">Network</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <Button 
+              onClick={handleSaveProfile}
+              disabled={saving}
+              className="w-full h-16 rounded-[1.5rem] bg-accent hover:bg-indigo-600 text-white font-black text-xl shadow-2xl shadow-indigo-100 transition-all active:scale-[0.98] flex gap-3"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="size-6 animate-spin" />
+                  Saving to Firestore...
+                </>
+              ) : (
+                <>
+                  <Save className="size-6" />
+                  Synchronize Profile
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </div>
