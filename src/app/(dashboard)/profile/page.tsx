@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -33,8 +34,9 @@ import {
   ShoppingBag,
   Briefcase
 } from "lucide-react";
-import { useUser, useFirestore } from "@/firebase";
+import { useUser, useFirestore, useStorage } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
+import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -92,11 +94,22 @@ interface Product {
 export default function ProfilePage() {
   const { user } = useUser();
   const db = useFirestore();
+  const storage = useStorage();
   const { toast } = useToast();
 
   const [saving, setSaving] = React.useState(false);
-  const [updatingCover, setUpdatingCover] = React.useState(false);
-  const [updatingAvatar, setUpdatingAvatar] = React.useState(false);
+  
+  // File states
+  const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
+  const [coverFile, setCoverFile] = React.useState<File | null>(null);
+  
+  // Preview states
+  const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
+  const [coverPreview, setCoverPreview] = React.useState<string | null>(null);
+
+  // Input refs
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
+  const coverInputRef = React.useRef<HTMLInputElement>(null);
 
   // Form State
   const [profile, setProfile] = React.useState({
@@ -106,6 +119,8 @@ export default function ProfilePage() {
     location: "Jakarta, Indonesia",
     website: "https://alphatech.example.com",
     email: user?.email || "",
+    avatarUrl: `https://picsum.photos/seed/${user?.uid || '123'}/400`,
+    coverUrl: "https://picsum.photos/seed/cover88/1600/800",
   });
 
   const [socialLinks, setSocialLinks] = React.useState({
@@ -119,7 +134,6 @@ export default function ProfilePage() {
     linkedin: "alpha-tech-solutions",
   });
 
-  // Business Catalog State
   const [products, setProducts] = React.useState<Product[]>([
     {
       id: "1",
@@ -149,52 +163,83 @@ export default function ProfilePage() {
     imageUrl: `https://picsum.photos/seed/${Math.random()}/400/300`
   });
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const url = URL.createObjectURL(file);
+      setAvatarPreview(url);
+    }
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverFile(file);
+      const url = URL.createObjectURL(file);
+      setCoverPreview(url);
+    }
+  };
+
+  const uploadFile = async (file: File, path: string) => {
+    const fileRef = storageRef(storage, path);
+    await uploadBytes(fileRef, file);
+    return getDownloadURL(fileRef);
+  };
+
   const handleSaveProfile = async () => {
-    if (!user || !db) return;
+    if (!user || !db || !storage) return;
     setSaving(true);
     
-    // Simulate API delay
-    await new Promise(r => setTimeout(r, 1500));
-    
     try {
+      let finalAvatarUrl = profile.avatarUrl;
+      let finalCoverUrl = profile.coverUrl;
+
+      // Upload photos if selected
+      if (avatarFile) {
+        finalAvatarUrl = await uploadFile(avatarFile, `profiles/${user.uid}/avatar`);
+      }
+      if (coverFile) {
+        finalCoverUrl = await uploadFile(coverFile, `profiles/${user.uid}/cover`);
+      }
+
       const userRef = doc(db, "users", user.uid);
       await setDoc(userRef, { 
-        profile, 
+        profile: {
+          ...profile,
+          avatarUrl: finalAvatarUrl,
+          coverUrl: finalCoverUrl,
+        }, 
         socialLinks, 
         products,
         updatedAt: new Date().toISOString() 
       }, { merge: true });
       
+      // Cleanup previews and files
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+      if (coverPreview) URL.revokeObjectURL(coverPreview);
+      setAvatarFile(null);
+      setCoverFile(null);
+      setAvatarPreview(null);
+      setCoverPreview(null);
+      
+      // Update local state with new URLs
+      setProfile(prev => ({ ...prev, avatarUrl: finalAvatarUrl, coverUrl: finalCoverUrl }));
+
       toast({
         title: "Profile Synchronized",
-        description: "Your business ecosystem profile has been successfully updated in Firestore.",
+        description: "Your business ecosystem profile and assets have been successfully secured.",
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       toast({
         variant: "destructive",
         title: "Synchronization Failed",
-        description: "An error occurred while saving your profile.",
+        description: err.message || "An error occurred while saving your profile.",
       });
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleUpdateCover = () => {
-    setUpdatingCover(true);
-    setTimeout(() => {
-      setUpdatingCover(false);
-      toast({ title: "Cover Photo Updated", description: "New branding assets applied to your profile header." });
-    }, 1200);
-  };
-
-  const handleUpdateAvatar = () => {
-    setUpdatingAvatar(true);
-    setTimeout(() => {
-      setUpdatingAvatar(false);
-      toast({ title: "Avatar Updated", description: "Your profile identification photo has been refreshed." });
-    }, 1000);
   };
 
   const handleAddOrEditProduct = () => {
@@ -252,22 +297,46 @@ export default function ProfilePage() {
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-10 pb-20">
         
+        {/* File Inputs (Hidden) */}
+        <input 
+          type="file" 
+          ref={avatarInputRef} 
+          className="hidden" 
+          accept="image/*" 
+          onChange={handleAvatarChange} 
+        />
+        <input 
+          type="file" 
+          ref={coverInputRef} 
+          className="hidden" 
+          accept="image/*" 
+          onChange={handleCoverChange} 
+        />
+
         {/* Header Section */}
         <div className="relative group">
-          <div className="h-64 md:h-80 w-full rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-accent to-indigo-900 overflow-hidden relative shadow-2xl">
+          <div className="h-64 md:h-80 w-full rounded-[2.5rem] bg-slate-200 overflow-hidden relative shadow-2xl">
             <img 
-              src="https://picsum.photos/seed/cover88/1600/800" 
+              src={coverPreview || profile.coverUrl} 
               alt="Cover" 
-              className="w-full h-full object-cover opacity-60 mix-blend-overlay"
+              className={cn(
+                "w-full h-full object-cover transition-opacity duration-300",
+                saving && coverFile ? "opacity-50" : "opacity-100"
+              )}
             />
+            {saving && coverFile && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                <Loader2 className="size-10 text-white animate-spin" />
+              </div>
+            )}
             <div className="absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/20" />
             <Button 
-              onClick={handleUpdateCover}
-              disabled={updatingCover}
+              onClick={() => coverInputRef.current?.click()}
+              disabled={saving}
               variant="secondary" 
               className="absolute top-6 right-6 rounded-2xl bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md h-11 px-6 font-bold shadow-xl"
             >
-              {updatingCover ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Camera className="size-4 mr-2" />}
+              <Camera className="size-4 mr-2" />
               Edit Cover Photo
             </Button>
           </div>
@@ -275,18 +344,29 @@ export default function ProfilePage() {
           <div className="absolute -bottom-16 left-10 md:left-20 flex flex-col md:flex-row items-end gap-6">
             <div className="relative group/avatar">
               <Avatar className="size-40 md:size-48 border-8 border-white shadow-2xl ring-4 ring-slate-100/50">
-                <AvatarImage src={`https://picsum.photos/seed/${user?.uid || '123'}/400`} className="object-cover" />
+                <AvatarImage 
+                  src={avatarPreview || profile.avatarUrl} 
+                  className={cn(
+                    "object-cover transition-opacity duration-300",
+                    saving && avatarFile ? "opacity-50" : "opacity-100"
+                  )} 
+                />
                 <AvatarFallback className="text-4xl font-black bg-indigo-50 text-accent">AT</AvatarFallback>
               </Avatar>
+              {saving && avatarFile && (
+                <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/20">
+                  <Loader2 className="size-8 text-white animate-spin" />
+                </div>
+              )}
               <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center">
                 <Button 
-                  onClick={handleUpdateAvatar}
-                  disabled={updatingAvatar}
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={saving}
                   variant="ghost" 
                   size="icon" 
                   className="size-12 rounded-full bg-white text-slate-900 hover:bg-slate-50 shadow-lg"
                 >
-                  {updatingAvatar ? <Loader2 className="size-5 animate-spin" /> : <Camera className="size-6" />}
+                  <Camera className="size-6" />
                 </Button>
               </div>
             </div>
@@ -457,7 +537,7 @@ export default function ProfilePage() {
               {saving ? (
                 <>
                   <Loader2 className="size-6 animate-spin" />
-                  Saving to Firestore...
+                  Uploading Assets...
                 </>
               ) : (
                 <>
