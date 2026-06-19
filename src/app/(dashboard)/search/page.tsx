@@ -26,10 +26,21 @@ import {
   Cpu,
   Star,
   ExternalLink,
-  Info
+  Info,
+  Globe,
+  Building2,
+  ChevronDown,
+  LayoutGrid
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const SEARCH_SCOPES = [
   { id: "products", label: "Product Search", icon: Package, color: "text-indigo-500", bg: "bg-indigo-50" },
@@ -46,7 +57,11 @@ const RECENT_SEARCHES = [
   "Logistics tech startups Series A"
 ];
 
-// Mock Result Type
+const SIMILAR_MATCHES = [
+  { name: "EcoPack Global", match: "94%", location: "Bandung", industry: "Packaging" },
+  { name: "BioSolutions Ltd", match: "89%", location: "Singapore", industry: "Logistics" }
+];
+
 interface SearchResult {
   id: string;
   name: string;
@@ -115,7 +130,6 @@ export default function SearchHubPage() {
     setIsAnalyzing(true);
     setExtractedData(null);
 
-    // Simulate AI Intent Extraction
     setTimeout(() => {
       setIsAnalyzing(false);
       setExtractedData({
@@ -173,7 +187,6 @@ export default function SearchHubPage() {
                   </Button>
                 </form>
 
-                {/* Loading State: AI Analysis */}
                 {isAnalyzing && (
                   <div className="p-8 rounded-[2rem] bg-indigo-50/50 border border-indigo-100 space-y-4 animate-in fade-in duration-300">
                     <div className="flex items-center gap-3">
@@ -191,7 +204,6 @@ export default function SearchHubPage() {
                   </div>
                 )}
 
-                {/* AI Extracted Intent Chips */}
                 {extractedData && !isAnalyzing && (
                   <div className="p-6 rounded-[2rem] bg-emerald-50/30 border border-emerald-100 space-y-3 animate-in slide-in-from-top-4 duration-500">
                     <div className="flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest px-1">
@@ -220,7 +232,6 @@ export default function SearchHubPage() {
                 )}
               </div>
 
-              {/* Scope Navigation */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="bg-slate-50 p-1.5 rounded-2xl h-auto flex flex-wrap gap-2 border border-slate-100">
                   {SEARCH_SCOPES.map((scope) => (
@@ -252,7 +263,6 @@ export default function SearchHubPage() {
                     </div>
 
                     <div className="grid gap-6">
-                      {/* Empty State / Initial Suggestions */}
                       {!extractedData && !isAnalyzing && (
                         <div className="p-20 border-2 border-dashed border-slate-100 rounded-[3rem] flex flex-col items-center justify-center text-center space-y-6">
                           <div className={`size-24 rounded-[2rem] ${scope.bg} flex items-center justify-center rotate-3`}>
@@ -267,12 +277,10 @@ export default function SearchHubPage() {
                         </div>
                       )}
 
-                      {/* Ranked Search Results Grid */}
                       {extractedData && !isAnalyzing && (
                         <div className="grid gap-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
                           {MOCK_RESULTS.map((result) => (
                             <Card key={result.id} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-white relative">
-                              {/* Match Score Badge with Gradient */}
                               <div className="absolute top-4 right-4">
                                 <Badge className={cn(
                                   "border-none font-black text-xs uppercase px-4 py-1.5 shadow-lg flex gap-1.5",
@@ -286,7 +294,6 @@ export default function SearchHubPage() {
                               </div>
 
                               <CardContent className="p-8 flex flex-col md:flex-row gap-8 items-start">
-                                {/* Visual Avatar/Icon */}
                                 <div className={cn(
                                   "size-20 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:rotate-6 transition-all duration-300",
                                   result.matchScore >= 95 ? "bg-indigo-50 text-accent" : "bg-slate-50 text-slate-400"
@@ -296,7 +303,6 @@ export default function SearchHubPage() {
                                   {result.type === 'distributor' && <Network className="size-10" />}
                                 </div>
 
-                                {/* Content Details */}
                                 <div className="flex-1 space-y-4">
                                   <div className="space-y-2">
                                     <div className="flex flex-wrap items-center gap-3">
@@ -327,7 +333,6 @@ export default function SearchHubPage() {
                                     </div>
                                   </div>
 
-                                  {/* Criteria Chips */}
                                   <div className="flex flex-wrap gap-2 pt-2">
                                     {result.tags.map((tag, tIdx) => (
                                       <span key={tIdx} className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
@@ -337,7 +342,6 @@ export default function SearchHubPage() {
                                   </div>
                                 </div>
 
-                                {/* Action Side Column */}
                                 <div className="md:w-48 shrink-0 flex flex-col gap-3 pt-4 md:pt-0">
                                   <Button className="w-full rounded-xl h-12 bg-accent hover:bg-indigo-600 text-white font-black shadow-lg shadow-indigo-100 flex gap-2">
                                     <ExternalLink className="size-4" />
@@ -359,42 +363,104 @@ export default function SearchHubPage() {
               </Tabs>
             </CardContent>
           </Card>
-
-          {/* Featured Sections */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="rounded-[2rem] border-slate-200 shadow-sm p-6 space-y-4">
-              <div className="size-10 rounded-xl bg-indigo-50 text-accent flex items-center justify-center">
-                <Zap className="size-5 fill-accent" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-bold text-slate-900">Proximity Intelligence</h4>
-                <p className="text-sm text-slate-500 font-medium">Find partners within your region to optimize logistics and speed.</p>
-              </div>
-              <Button variant="outline" className="w-full rounded-xl font-bold text-xs">Explore Local Index</Button>
-            </Card>
-            <Card className="rounded-[2rem] border-slate-200 shadow-sm p-6 space-y-4">
-              <div className="size-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <ShieldCheck className="size-5" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-bold text-slate-900">Verification Engine</h4>
-                <p className="text-sm text-slate-500 font-medium">Filter for businesses with active certifications and AI-vetted reputation scores.</p>
-              </div>
-              <Button variant="outline" className="w-full rounded-xl font-bold text-xs">Apply Verification Filter</Button>
-            </Card>
-          </div>
         </div>
 
-        {/* Sidebar */}
+        {/* Advanced Discovery Sidebar */}
         <div className="lg:col-span-4 space-y-8">
           <Card className="rounded-[2.5rem] border-slate-200 shadow-sm overflow-hidden">
-            <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-8">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl bg-indigo-100 text-accent flex items-center justify-center">
+                  <Filter className="size-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-black text-slate-900">Advanced Filters</CardTitle>
+                  <CardDescription className="text-xs font-medium">Fine-tune your network indexing.</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-8 space-y-8">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <Globe className="size-3.5" />
+                    Global Proximity
+                  </div>
+                  <Select defaultValue="all">
+                    <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-200 font-bold">
+                      <SelectValue placeholder="Select Location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Global (All Regions)</SelectItem>
+                      <SelectItem value="asia">Southeast Asia</SelectItem>
+                      <SelectItem value="eu">European Union</SelectItem>
+                      <SelectItem value="na">North America</SelectItem>
+                      <SelectItem value="jp">Japan / East Asia</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <Building2 className="size-3.5" />
+                    Market Sector
+                  </div>
+                  <Select defaultValue="all">
+                    <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-200 font-bold">
+                      <SelectValue placeholder="Select Sector" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Industries</SelectItem>
+                      <SelectItem value="packaging">Eco-Packaging</SelectItem>
+                      <SelectItem value="logistics">Smart Logistics</SelectItem>
+                      <SelectItem value="saas">SaaS & Infrastructure</SelectItem>
+                      <SelectItem value="retail">Retail & E-commerce</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-slate-100">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <LayoutGrid className="size-3.5" />
+                    Lookalike Recommendations
+                  </div>
+                  <Badge variant="outline" className="text-[9px] font-black uppercase text-accent border-accent/20">AI Recommended</Badge>
+                </div>
+                <div className="space-y-4">
+                  {SIMILAR_MATCHES.map((match, i) => (
+                    <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-white border border-transparent hover:border-slate-200 hover:shadow-lg transition-all group cursor-pointer">
+                      <div className="size-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center font-black text-accent text-xs">
+                        {match.name[0]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center mb-0.5">
+                          <h4 className="font-black text-sm text-slate-900 truncate group-hover:text-accent transition-colors">{match.name}</h4>
+                          <span className="text-[10px] font-black text-emerald-500">{match.match} Match</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                          <span>{match.location}</span>
+                          <span className="size-1 bg-slate-200 rounded-full" />
+                          <span>{match.industry}</span>
+                        </div>
+                      </div>
+                      <ArrowRight className="size-3.5 text-slate-300 group-hover:text-accent group-hover:translate-x-1 transition-all" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[2.5rem] border-slate-200 shadow-sm overflow-hidden">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-8">
               <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
                 <History className="size-4" />
-                Recent Queries
+                History & Trends
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-8 space-y-6">
               <div className="space-y-3">
                 {RECENT_SEARCHES.map((search, i) => (
                   <button 
@@ -407,50 +473,32 @@ export default function SearchHubPage() {
                   </button>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-[2.5rem] border-slate-200 shadow-sm overflow-hidden">
-            <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
-              <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <TrendingUp className="size-4" />
-                Market Trends
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div className="space-y-4">
+              
+              <div className="pt-6 border-t border-slate-100">
                 <div className="flex items-start gap-4 p-4 rounded-2xl bg-indigo-50/30 border border-indigo-100">
                   <Badge className="bg-indigo-500 text-white border-none mt-1">HOT</Badge>
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-indigo-900 leading-tight">Demand for "Renewable Packaging" is up 42% this week.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                  <Badge className="bg-slate-400 text-white border-none mt-1">NEW</Badge>
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-slate-700 leading-tight">12 New verified suppliers joined in "Jakarta Area".</p>
-                  </div>
+                  <p className="text-xs font-bold text-indigo-900 leading-tight">Demand for "Renewable Packaging" is up 42% this week.</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
-            <div className="relative z-10 space-y-4">
-              <div className="size-12 rounded-2xl bg-accent flex items-center justify-center">
-                <Sparkles className="size-6 text-white" />
+          <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
+            <div className="relative z-10 space-y-6">
+              <div className="size-14 rounded-2xl bg-accent flex items-center justify-center shadow-lg rotate-3">
+                <Sparkles className="size-7 text-white" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-black">AI Power-Search</h3>
+                <h3 className="text-2xl font-black tracking-tight">AI Power-Search</h3>
                 <p className="text-slate-400 text-sm font-medium leading-relaxed">
-                  Looking for something complex? Ask the AI Assistant to synthesize a custom list for you.
+                  Looking for something highly specific? Ask the AI Assistant to synthesize a custom list and cross-reference multiple registries.
                 </p>
               </div>
-              <Button className="w-full bg-white text-slate-900 hover:bg-slate-100 font-black rounded-xl h-12 shadow-lg">
+              <Button className="w-full bg-white text-slate-900 hover:bg-slate-100 font-black rounded-xl h-14 shadow-xl active:scale-95 transition-all">
                 Ask AI Assistant
               </Button>
             </div>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/20 rounded-full blur-2xl -mr-16 -mt-16" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-accent/20 rounded-full blur-[60px] -mr-24 -mt-24" />
           </div>
         </div>
       </div>
