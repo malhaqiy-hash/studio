@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -19,8 +20,12 @@ import {
   Linkedin,
   User
 } from "lucide-react";
+import { useUser } from "@/firebase";
 
 export default function ProfilePage() {
+  const { user } = useUser();
+  const userInitial = user?.email ? user.email[0].toUpperCase() : "U";
+
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-8 pb-20">
@@ -37,20 +42,20 @@ export default function ProfilePage() {
           <CardContent className="px-8 pb-8">
             <div className="relative flex flex-col md:flex-row items-end gap-6 -mt-12 md:-mt-16">
               <Avatar className="size-32 md:size-40 border-4 border-white shadow-xl ring-2 ring-slate-100">
-                <AvatarImage src="https://picsum.photos/seed/user/400" />
-                <AvatarFallback className="text-3xl font-black bg-indigo-50 text-accent">AT</AvatarFallback>
+                <AvatarImage src={`https://picsum.photos/seed/${user?.uid}/400`} />
+                <AvatarFallback className="text-3xl font-black bg-indigo-50 text-accent">{userInitial}</AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-2 pb-2">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="text-3xl font-black text-slate-900 tracking-tight">Alpha Tech Solutions</h1>
+                  <h1 className="text-3xl font-black text-slate-900 tracking-tight">{user?.displayName || "Member Organization"}</h1>
                   <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 flex gap-1 items-center px-3 py-1 font-bold">
-                    <ShieldCheck className="size-3" /> Verified Enterprise
+                    <ShieldCheck className="size-3" /> Verified Account
                   </Badge>
                 </div>
                 <div className="flex flex-wrap items-center gap-4 text-slate-500 font-medium text-sm">
                   <span className="flex items-center gap-1.5"><Building2 className="size-4" /> SaaS & AI Infrastructure</span>
-                  <span className="flex items-center gap-1.5"><MapPin className="size-4" /> San Francisco, CA</span>
-                  <span className="flex items-center gap-1.5"><Calendar className="size-4" /> Joined Oct 2023</span>
+                  <span className="flex items-center gap-1.5"><MapPin className="size-4" /> Global Headquarters</span>
+                  <span className="flex items-center gap-1.5"><Calendar className="size-4" /> Active on OnTapp</span>
                 </div>
               </div>
             </div>
@@ -66,24 +71,24 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Admin Name</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Login ID</span>
                   <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
                     <User className="size-4 text-slate-300" />
-                    Jane Cooper
+                    {user?.uid.substring(0, 12)}...
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email Address</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Business Email</span>
                   <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
                     <Mail className="size-4 text-slate-300" />
-                    admin@alphatech.solutions
+                    {user?.email}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Type</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Status</span>
                   <div className="flex items-center gap-2 text-sm font-bold text-accent">
                     <ShieldCheck className="size-4" />
-                    Enterprise Member
+                    Active Enterprise
                   </div>
                 </div>
                 <div className="pt-4 flex gap-3">
@@ -125,12 +130,12 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <p className="text-slate-600 leading-relaxed font-medium">
-                  We are a leading provider of enterprise AI solutions and cloud infrastructure, specializing in the manufacturing and industrial sectors. Our mission is to accelerate global industrial efficiency through predictive maintenance and real-time data analytics.
+                  We are an active participant in the OnTapp Global Discovery Network. Our focus is on accelerating industrial efficiency through strategic partnerships and real-time data integration.
                 </p>
                 <div className="space-y-3">
                   <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">Core Expertise</h4>
                   <div className="flex flex-wrap gap-2">
-                    {["Predictive AI", "Cloud Infrastructure", "Industrial IoT", "B2B Analytics", "Scalable Systems"].map(tag => (
+                    {["Digital Strategy", "Network Scaling", "B2B Analytics", "Scalable Systems"].map(tag => (
                       <Badge key={tag} variant="secondary" className="bg-slate-100 text-slate-600 border-none px-3 py-1 font-bold">
                         {tag}
                       </Badge>
@@ -142,23 +147,23 @@ export default function ProfilePage() {
 
             <Card className="border-slate-200 shadow-sm rounded-[1.5rem]">
               <CardHeader>
-                <CardTitle className="text-lg font-bold">Active Engagements</CardTitle>
+                <CardTitle className="text-lg font-bold">Recent Network Activity</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-slate-100">
                   <div className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer">
                     <div className="space-y-1">
-                      <h4 className="font-bold text-slate-900">EU Hardware Partnership</h4>
-                      <p className="text-sm text-slate-500 font-medium">Seeking IoT sensor manufacturers for Q4 expansion.</p>
+                      <h4 className="font-bold text-slate-900">Authored New Listing</h4>
+                      <p className="text-sm text-slate-500 font-medium">Updated sourcing requirements for tech hardware.</p>
                     </div>
-                    <Badge className="bg-indigo-50 text-accent font-bold">Strategic</Badge>
+                    <Badge className="bg-indigo-50 text-accent font-bold">Activity</Badge>
                   </div>
                   <div className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer">
                     <div className="space-y-1">
-                      <h4 className="font-bold text-slate-900">API Documentation Support</h4>
-                      <p className="text-sm text-slate-500 font-medium">Open tender for technical writing services.</p>
+                      <h4 className="font-bold text-slate-900">Joined Strategic Matchmaker</h4>
+                      <p className="text-sm text-slate-500 font-medium">Now participating in AI-driven partner alignment.</p>
                     </div>
-                    <Badge className="bg-emerald-50 text-emerald-600 font-bold">Sourcing</Badge>
+                    <Badge className="bg-emerald-50 text-emerald-600 font-bold">Network</Badge>
                   </div>
                 </div>
               </CardContent>
