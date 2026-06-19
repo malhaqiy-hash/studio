@@ -28,6 +28,7 @@ import { useLanguage } from "@/context/language-context";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/firebase";
 
 const MOCK_GOOGLE_PHOTOS = [
   'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=400&h=400&auto=format&fit=crop',
@@ -81,6 +82,7 @@ const INITIAL_MOCK_POSTS = [
 export default function FeedPage() {
   const { language } = useLanguage();
   const { toast } = useToast();
+  const { user } = useUser();
   
   // Feed State
   const [posts, setPosts] = React.useState(INITIAL_MOCK_POSTS);
@@ -167,8 +169,8 @@ export default function FeedPage() {
     setTimeout(() => {
       const newEntry = {
         id: Date.now(),
-        company: "Alpha Tech Solutions", // Assuming logged in user
-        avatar: "https://picsum.photos/seed/alpha/100",
+        company: user?.displayName || "Alpha Tech Solutions",
+        avatar: user?.photoURL || "https://picsum.photos/seed/alpha/100",
         role: "Enterprise",
         type: "Opportunity",
         content: newPostContent,
@@ -195,8 +197,8 @@ export default function FeedPage() {
             <CardContent className="p-6">
               <div className="flex gap-4">
                 <Avatar className="size-10 border shadow-sm">
-                  <AvatarImage src="https://picsum.photos/seed/alpha/100" />
-                  <AvatarFallback>AT</AvatarFallback>
+                  <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/alpha/100"} />
+                  <AvatarFallback>{(user?.displayName || "A")[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-4">
                   <textarea 
@@ -224,23 +226,21 @@ export default function FeedPage() {
 
                   <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                     <div className="flex gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <button 
                         onClick={() => setIsSourcePickerOpen(true)}
-                        className="text-slate-500 rounded-full h-9 px-4 hover:bg-slate-100"
+                        className="inline-flex items-center gap-2 px-4 py-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors text-sm font-bold"
                       >
-                        <ImageIcon className="size-4 mr-2 text-indigo-500" />
+                        <ImageIcon className="size-4 text-indigo-500" />
                         Media
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-slate-500 rounded-full h-9 px-4 hover:bg-slate-100 hidden sm:flex">
-                        <ShoppingBag className="size-4 mr-2 text-emerald-500" />
+                      </button>
+                      <button className="inline-flex items-center gap-2 px-4 py-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors text-sm font-bold hidden sm:flex">
+                        <ShoppingBag className="size-4 text-emerald-500" />
                         Product
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-slate-500 rounded-full h-9 px-4 hover:bg-slate-100 hidden sm:flex">
-                        <Target className="size-4 mr-2 text-orange-500" />
+                      </button>
+                      <button className="inline-flex items-center gap-2 px-4 py-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors text-sm font-bold hidden sm:flex">
+                        <Target className="size-4 text-orange-500" />
                         Opportunity
-                      </Button>
+                      </button>
                     </div>
                     <Button 
                       onClick={handlePost}
@@ -316,7 +316,9 @@ export default function FeedPage() {
                       </p>
                       {translation?.show && (
                         <div className="mt-2 text-[10px] font-black text-accent uppercase tracking-[0.1em] flex items-center gap-1.5 bg-indigo-50/50 w-fit px-2 py-1 rounded-md">
-                          <Sparkles className="size-3" />
+                          <span className="size-3 flex items-center justify-center">
+                            <Sparkles className="size-full" />
+                          </span>
                           AI Translated
                         </div>
                       )}
@@ -355,11 +357,11 @@ export default function FeedPage() {
             <div className="h-24 bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-800" />
             <div className="px-6 pb-8 text-center -mt-12">
               <Avatar className="size-24 mx-auto border-[6px] border-white shadow-xl">
-                <AvatarImage src="https://picsum.photos/seed/alpha/200" />
-                <AvatarFallback>AT</AvatarFallback>
+                <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/alpha/200"} />
+                <AvatarFallback>{(user?.displayName || "A")[0]}</AvatarFallback>
               </Avatar>
               <div className="mt-4 space-y-1">
-                <h3 className="font-black text-xl tracking-tight text-slate-900">Alpha Tech Solutions</h3>
+                <h3 className="font-black text-xl tracking-tight text-slate-900">{user?.displayName || "Alpha Tech Solutions"}</h3>
                 <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 border-none px-3">Enterprise Member</Badge>
               </div>
               <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-slate-100">
@@ -376,31 +378,6 @@ export default function FeedPage() {
                 View My Profile
               </Button>
             </div>
-          </Card>
-
-          <Card className="shadow-sm border-slate-200 rounded-[2rem] bg-white">
-            <CardHeader className="p-8 pb-4">
-              <h3 className="font-black text-slate-900 text-sm uppercase tracking-widest">Recommended Partners</h3>
-            </CardHeader>
-            <CardContent className="p-8 pt-0 space-y-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between gap-3 group cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="size-10 border-slate-100 rounded-xl">
-                      <AvatarImage src={`https://picsum.photos/seed/rec${i}/100`} />
-                      <AvatarFallback>P</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-black text-slate-900 group-hover:text-accent transition-colors leading-none">Partner {i} Corp.</span>
-                      <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1">95% AI Match</span>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" className="rounded-full h-8 px-4 text-[10px] font-black uppercase tracking-widest border-slate-200 hover:bg-indigo-50 hover:text-accent">
-                    Follow
-                  </Button>
-                </div>
-              ))}
-            </CardContent>
           </Card>
         </div>
       </div>
@@ -504,10 +481,23 @@ export default function FeedPage() {
               </div>
               <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Google Photos</DialogTitle>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="size-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">J</div>
+            <div className="flex items-center gap-3">
+              <div className="text-right hidden sm:block">
+                <p className="text-[10px] font-black text-slate-900 leading-none uppercase">{user?.displayName || 'Alpha Tech'}</p>
+                <p className="text-[9px] font-bold text-slate-400 truncate max-w-[120px]">{user?.email || 'user@ontapp.network'}</p>
+              </div>
+              <div className="size-10 rounded-full bg-blue-100 border-2 border-white shadow-sm flex items-center justify-center text-blue-600 font-black text-sm">
+                {(user?.displayName || 'A')[0]}
+              </div>
             </div>
           </DialogHeader>
+          <div className="bg-blue-50/50 px-8 py-2 border-b border-blue-100 flex items-center justify-between">
+             <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                <RefreshCw className="size-3 animate-spin" />
+                Sinkronisasi Cloud Aktif
+             </div>
+             <span className="text-[9px] font-bold text-slate-400 italic">Mendapatkan foto terbaru...</span>
+          </div>
           <ScrollArea className="h-[450px] p-6">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {MOCK_GOOGLE_PHOTOS.map((url, idx) => (
@@ -526,10 +516,15 @@ export default function FeedPage() {
                 </button>
               ))}
             </div>
+            <div className="mt-8 text-center pb-6">
+              <Button variant="ghost" className="text-slate-400 font-bold text-xs uppercase tracking-widest gap-2">
+                <RefreshCw className="size-3" /> Muat Lebih Banyak
+              </Button>
+            </div>
           </ScrollArea>
           <DialogFooter className="p-6 bg-slate-50 border-t flex items-center justify-center">
              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <Sparkles className="size-3 text-amber-500" /> Disinkronkan dengan Google Photos
+                <Sparkles className="size-3 text-amber-500" /> Disinkronkan dengan Akun Cloud Anda
              </p>
           </DialogFooter>
         </DialogContent>

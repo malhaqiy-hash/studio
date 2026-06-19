@@ -56,6 +56,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useUser } from '@/firebase';
 
 // Mock Cloud Data for Google Photos simulation
 const MOCK_GOOGLE_PHOTOS = [
@@ -72,6 +73,7 @@ const MOCK_GOOGLE_PHOTOS = [
 
 export default function ProfilePage() {
   const { activeAccount, updateActiveAccount } = useAccount();
+  const { user } = useUser();
   const { toast } = useToast();
 
   // Modal States
@@ -807,10 +809,23 @@ export default function ProfilePage() {
               </div>
               <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Google Photos</DialogTitle>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="size-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">J</div>
+            <div className="flex items-center gap-3">
+               <div className="text-right hidden sm:block">
+                 <p className="text-[10px] font-black text-slate-900 leading-none uppercase">{user?.displayName || activeAccount.name}</p>
+                 <p className="text-[9px] font-bold text-slate-400 truncate max-w-[120px]">{user?.email || 'user@ontapp.network'}</p>
+               </div>
+              <div className="size-10 rounded-full bg-blue-100 border-2 border-white shadow-sm flex items-center justify-center text-blue-600 font-black text-sm">
+                {(user?.displayName || activeAccount.name)[0]}
+              </div>
             </div>
           </DialogHeader>
+          <div className="bg-blue-50/50 px-8 py-2 border-b border-blue-100 flex items-center justify-between">
+             <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                <RefreshCw className="size-3 animate-spin" />
+                Sinkronisasi Aktif...
+             </div>
+             <span className="text-[9px] font-bold text-slate-400 italic">Terakhir diperbarui: Baru saja</span>
+          </div>
           <ScrollArea className="h-[450px] p-6">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {MOCK_GOOGLE_PHOTOS.map((url, idx) => (
@@ -837,7 +852,7 @@ export default function ProfilePage() {
           </ScrollArea>
           <DialogFooter className="p-6 bg-slate-50 border-t flex items-center justify-center">
              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <Sparkles className="size-3 text-amber-500" /> Disinkronkan dengan Google Photos Anda
+                <Sparkles className="size-3 text-amber-500" /> Terhubung dengan Google Photos Anda
              </p>
           </DialogFooter>
         </DialogContent>
