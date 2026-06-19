@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -22,7 +21,9 @@ import {
   ChevronRight,
   ShieldCheck,
   LayoutGrid,
-  Languages
+  Languages,
+  CreditCard,
+  UserPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +33,11 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel
+  DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
@@ -57,14 +62,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { t } = useLanguage();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
 
-  const extendedNavItems = [
+  // Vertical list order for drawer
+  const drawerItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
     { icon: Globe, label: t('discovery'), href: "/discover" },
-    { icon: Target, label: t('matches'), href: "/matches" },
     { icon: Users, label: t('matchmaker'), href: "/matchmaker" },
+    { icon: Target, label: t('matches'), href: "/matches" },
     { icon: Briefcase, label: t('opportunities'), href: "/opportunities" },
     { icon: MessageSquare, label: t('messages'), href: "/messages" },
-    { icon: Bell, label: t('notifications'), href: "/notifications" },
+    { icon: CreditCard, label: t('payment'), href: "/payment" },
     { icon: Sliders, label: t('settings'), href: "/settings" },
     { icon: User, label: t('profile'), href: "/profile" },
   ];
@@ -137,7 +143,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </Link>
         
         <div className="flex items-center gap-3">
-          {/* Notifications in Header (Relocated from Lainnya) */}
           <Link href="/notifications">
             <Button variant="ghost" size="icon" className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition">
               <Bell className="size-5" />
@@ -168,20 +173,28 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-slate-50" />
+              
               <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer" asChild>
                 <Link href="/profile">
                   <User className="size-4" />
                   {t('profile')}
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-slate-50" />
-              <DropdownMenuItem 
-                onClick={handleLogout}
-                className="gap-3 px-3 py-2.5 rounded-xl font-bold text-rose-600 focus:bg-rose-50 focus:text-rose-700 cursor-pointer"
-              >
-                <LogOut className="size-4" />
-                {t('logout')}
-              </DropdownMenuItem>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer">
+                  <UserPlus className="size-4" />
+                  Tambahkan Akun
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className="rounded-xl border-slate-100 shadow-xl">
+                    <DropdownMenuItem className="font-bold px-4 py-2 cursor-pointer">Pribadi</DropdownMenuItem>
+                    <DropdownMenuItem className="font-bold px-4 py-2 cursor-pointer">Professional</DropdownMenuItem>
+                    <DropdownMenuItem className="font-bold px-4 py-2 cursor-pointer">Bisnis</DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -198,7 +211,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-md pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
         <div className="grid grid-cols-3 h-16 items-center justify-items-center text-[10px] font-black uppercase tracking-widest text-slate-400 relative">
           
-          {/* TAB 1: Beranda */}
           <Link 
             href="/feed" 
             className={cn(
@@ -210,7 +222,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <span>Beranda</span>
           </Link>
 
-          {/* TAB 2: Cari */}
           <Link 
             href="/search" 
             className={cn(
@@ -222,9 +233,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <span>Cari</span>
           </Link>
 
-          {/* TAB 3: Menu Utama / Lainnya (≡) */}
           <div className="relative w-full h-full flex flex-col items-center justify-center">
-            {/* 🤖 AI ADVISOR BUTTON (Floating above the menu) */}
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
               className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-50"
@@ -237,13 +246,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild>
                 <button className="flex flex-col items-center gap-1 hover:text-indigo-600 w-full py-2 outline-none">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
+                  <Menu className="size-6" />
                   <span>Lainnya</span>
                 </button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 overflow-hidden h-[85vh]">
+              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 overflow-hidden h-[90vh]">
                 <SheetHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100">
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
@@ -255,48 +262,53 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </Badge>
                   </div>
                 </SheetHeader>
-                <div className="p-4 grid grid-cols-2 gap-4 overflow-y-auto max-h-full pb-20">
-                  {extendedNavItems.map((item) => (
-                    <Link 
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsMoreMenuOpen(false)}
-                      className={cn(
-                        "flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 gap-3 group",
-                        pathname === item.href 
-                          ? "bg-indigo-50 border-accent/20 text-accent" 
-                          : "bg-white border-slate-100 hover:border-accent/20 hover:bg-slate-50"
-                      )}
-                    >
-                      <div className={cn(
-                        "size-12 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110",
-                        pathname === item.href ? "bg-accent text-white" : "bg-slate-50 text-slate-400"
-                      )}>
-                        <item.icon className="size-6" />
-                      </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-center">{item.label}</span>
-                    </Link>
-                  ))}
-                  
-                  {/* Language Settings (Relocated from Top Header) */}
-                  <div className="col-span-2 p-6 rounded-3xl border border-slate-100 bg-white space-y-3">
-                    <div className="flex items-center gap-3 text-slate-900">
-                      <Languages className="size-5 text-accent" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Setelan Bahasa</span>
-                    </div>
-                    <LanguagePicker />
-                  </div>
+                
+                <div className="overflow-y-auto max-h-full pb-32">
+                  <div className="flex flex-col">
+                    {drawerItems.map((item) => (
+                      <Link 
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMoreMenuOpen(false)}
+                        className={cn(
+                          "flex items-center px-8 py-5 border-b border-slate-50 transition-colors gap-6 group",
+                          pathname === item.href 
+                            ? "bg-indigo-50/50 text-accent" 
+                            : "bg-white hover:bg-slate-50"
+                        )}
+                      >
+                        <div className={cn(
+                          "size-10 rounded-xl flex items-center justify-center transition-all group-hover:scale-110",
+                          pathname === item.href ? "bg-accent text-white" : "bg-slate-100 text-slate-400"
+                        )}>
+                          <item.icon className="size-5" />
+                        </div>
+                        <span className="text-sm font-black uppercase tracking-widest">{item.label}</span>
+                        <ChevronRight className="ml-auto size-4 text-slate-300 group-hover:text-accent transition-colors" />
+                      </Link>
+                    ))}
 
-                  <button 
-                    onClick={handleLogout}
-                    className="col-span-2 flex items-center justify-between p-6 rounded-3xl bg-rose-50 border border-rose-100 text-rose-600 font-black uppercase tracking-widest text-[11px]"
-                  >
-                    <div className="flex items-center gap-3">
-                      <LogOut className="size-5" />
-                      Logout Session
+                    <div className="px-8 py-6 bg-white border-b border-slate-50">
+                      <div className="flex items-center gap-6 mb-4">
+                        <div className="size-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center">
+                          <Languages className="size-5" />
+                        </div>
+                        <span className="text-sm font-black uppercase tracking-widest">Setting Bahasa</span>
+                      </div>
+                      <LanguagePicker />
                     </div>
-                    <ChevronRight className="size-4" />
-                  </button>
+
+                    <button 
+                      onClick={handleLogout}
+                      className="flex items-center px-8 py-6 bg-rose-50 hover:bg-rose-100 transition-colors gap-6 group text-rose-600"
+                    >
+                      <div className="size-10 rounded-xl bg-white border border-rose-100 flex items-center justify-center shadow-sm">
+                        <LogOut className="size-5" />
+                      </div>
+                      <span className="text-sm font-black uppercase tracking-widest">Logout Session</span>
+                      <ChevronRight className="ml-auto size-4 opacity-50" />
+                    </button>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>

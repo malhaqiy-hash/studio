@@ -61,6 +61,9 @@ export const translations = {
   },
   profile: {
     en: 'Profile', id: 'Profil', ja: 'プロフィール', zh: '个人资料', ko: '프로필', ar: 'الملف الشخصي', es: 'Perfil', fr: 'Profil', all: 'Profile'
+  },
+  payment: {
+    en: 'Payment', id: 'Pembayaran', ja: '支払い', zh: '支付', ko: '결제', ar: 'دفع', es: 'Pago', fr: 'Paiement', all: 'Payment'
   }
 };
 
