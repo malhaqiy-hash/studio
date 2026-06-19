@@ -137,7 +137,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </Link>
         
         <div className="flex items-center gap-3">
-          {/* Notifications in Header */}
+          {/* Notifications in Header (Relocated from Lainnya) */}
           <Link href="/notifications">
             <Button variant="ghost" size="icon" className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition">
               <Bell className="size-5" />
@@ -174,7 +174,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   {t('profile')}
                 </Link>
               </DropdownMenuItem>
-              {/* Settings removed from here per requirement */}
               <DropdownMenuSeparator className="bg-slate-50" />
               <DropdownMenuItem 
                 onClick={handleLogout}
@@ -199,7 +198,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-md pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
         <div className="grid grid-cols-3 h-16 items-center justify-items-center text-[10px] font-black uppercase tracking-widest text-slate-400 relative">
           
-          {/* TAB 1: Beranda (Feed) */}
+          {/* TAB 1: Beranda */}
           <Link 
             href="/feed" 
             className={cn(
@@ -225,7 +224,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
           {/* TAB 3: Menu Utama / Lainnya (≡) */}
           <div className="relative w-full h-full flex flex-col items-center justify-center">
-            {/* 🤖 TOMBOL AI ADVISOR (Floating Chat Button) */}
+            {/* 🤖 AI ADVISOR BUTTON (Floating above the menu) */}
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
               className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-50"
@@ -279,7 +278,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </Link>
                   ))}
                   
-                  {/* Language Settings moved here */}
+                  {/* Language Settings (Relocated from Top Header) */}
                   <div className="col-span-2 p-6 rounded-3xl border border-slate-100 bg-white space-y-3">
                     <div className="flex items-center gap-3 text-slate-900">
                       <Languages className="size-5 text-accent" />
