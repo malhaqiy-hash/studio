@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,13 +26,34 @@ import {
   Loader2,
   CheckCircle2,
   Trash2,
-  Plus
+  Plus,
+  Package,
+  Pencil,
+  Tag,
+  ShoppingBag,
+  Briefcase
 } from "lucide-react";
 import { useUser, useFirestore } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Custom Brand Icons (SVGs) for missing Lucide icons
 const TikTokIcon = () => (
@@ -58,6 +79,15 @@ const TokopediaIcon = () => (
     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-11h2v2h-2zm0 4h2v5h-2z"/>
   </svg>
 );
+
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  description: string;
+  imageUrl: string;
+}
 
 export default function ProfilePage() {
   const { user } = useUser();
@@ -89,6 +119,36 @@ export default function ProfilePage() {
     linkedin: "alpha-tech-solutions",
   });
 
+  // Business Catalog State
+  const [products, setProducts] = React.useState<Product[]>([
+    {
+      id: "1",
+      name: "Enterprise AI Dashboard",
+      category: "Software",
+      price: 15000000,
+      description: "Full-scale analytics and predictive maintenance dashboard for industrial facilities.",
+      imageUrl: "https://picsum.photos/seed/p1/400/300"
+    },
+    {
+      id: "2",
+      name: "Cloud Node Cluster",
+      category: "Hardware",
+      price: 45000000,
+      description: "High-performance edge computing cluster for real-time manufacturing data processing.",
+      imageUrl: "https://picsum.photos/seed/p2/400/300"
+    }
+  ]);
+
+  const [isProductModalOpen, setIsProductModalOpen] = React.useState(false);
+  const [editingProduct, setEditingProduct] = React.useState<Product | null>(null);
+  const [newProduct, setNewProduct] = React.useState<Omit<Product, "id">>({
+    name: "",
+    category: "Software",
+    price: 0,
+    description: "",
+    imageUrl: `https://picsum.photos/seed/${Math.random()}/400/300`
+  });
+
   const handleSaveProfile = async () => {
     if (!user || !db) return;
     setSaving(true);
@@ -101,6 +161,7 @@ export default function ProfilePage() {
       await setDoc(userRef, { 
         profile, 
         socialLinks, 
+        products,
         updatedAt: new Date().toISOString() 
       }, { merge: true });
       
@@ -134,6 +195,46 @@ export default function ProfilePage() {
       setUpdatingAvatar(false);
       toast({ title: "Avatar Updated", description: "Your profile identification photo has been refreshed." });
     }, 1000);
+  };
+
+  const handleAddOrEditProduct = () => {
+    if (editingProduct) {
+      setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...newProduct, id: p.id } : p));
+      toast({ title: "Product Updated", description: `${newProduct.name} has been updated in your catalog.` });
+    } else {
+      const productToAdd: Product = {
+        ...newProduct,
+        id: Math.random().toString(36).substr(2, 9)
+      };
+      setProducts(prev => [...prev, productToAdd]);
+      toast({ title: "Product Added", description: `${newProduct.name} is now live in your catalog.` });
+    }
+    setIsProductModalOpen(false);
+    setEditingProduct(null);
+    setNewProduct({
+      name: "",
+      category: "Software",
+      price: 0,
+      description: "",
+      imageUrl: `https://picsum.photos/seed/${Math.random()}/400/300`
+    });
+  };
+
+  const handleDeleteProduct = (id: string) => {
+    setProducts(prev => prev.filter(p => p.id !== id));
+    toast({ title: "Product Removed", description: "Item has been removed from your catalog." });
+  };
+
+  const openEditModal = (product: Product) => {
+    setEditingProduct(product);
+    setNewProduct({
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      description: product.description,
+      imageUrl: product.imageUrl
+    });
+    setIsProductModalOpen(true);
   };
 
   const socialPlatforms = [
@@ -365,6 +466,169 @@ export default function ProfilePage() {
                 </>
               )}
             </Button>
+          </div>
+        </div>
+
+        {/* Business Catalog / Product Management Section */}
+        <div className="pt-10 space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 bg-indigo-50 text-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest w-fit border border-indigo-100">
+                <ShoppingBag className="size-3" />
+                Network Marketplace
+              </div>
+              <h2 className="text-3xl font-black text-slate-900 tracking-tight">Business Catalog</h2>
+              <p className="text-slate-500 font-medium">Manage your products and services visible to the global network.</p>
+            </div>
+            
+            <Dialog open={isProductModalOpen} onOpenChange={setIsProductModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="rounded-2xl bg-slate-900 hover:bg-black text-white h-14 px-8 font-black shadow-xl flex gap-2">
+                  <Plus className="size-5" />
+                  Add Product/Service
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-xl rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden">
+                <DialogHeader className="p-8 pb-4 bg-slate-50">
+                  <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">
+                    {editingProduct ? "Edit Product" : "New Catalog Entry"}
+                  </DialogTitle>
+                  <DialogDescription className="font-medium">
+                    Showcase your value proposition to potential strategic partners.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="p-8 space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="font-bold text-slate-700">Product Name</Label>
+                      <Input 
+                        value={newProduct.name}
+                        onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                        placeholder="e.g. AI Controller v2"
+                        className="rounded-xl border-slate-200 h-12"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-bold text-slate-700">Category</Label>
+                      <Select 
+                        value={newProduct.category}
+                        onValueChange={(val) => setNewProduct({ ...newProduct, category: val })}
+                      >
+                        <SelectTrigger className="rounded-xl border-slate-200 h-12">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Software">Software</SelectItem>
+                          <SelectItem value="Hardware">Hardware</SelectItem>
+                          <SelectItem value="Service">Professional Service</SelectItem>
+                          <SelectItem value="Logistics">Logistics</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2 col-span-2">
+                      <Label className="font-bold text-slate-700">Price (IDR)</Label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">Rp</span>
+                        <Input 
+                          type="number"
+                          value={newProduct.price}
+                          onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
+                          className="pl-12 rounded-xl border-slate-200 h-12"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2 col-span-2">
+                      <Label className="font-bold text-slate-700">Description</Label>
+                      <Textarea 
+                        value={newProduct.description}
+                        onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                        placeholder="Describe key features and B2B benefits..."
+                        className="rounded-xl border-slate-200 min-h-[100px]"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter className="p-8 pt-0 flex gap-3">
+                  <Button variant="ghost" onClick={() => { setIsProductModalOpen(false); setEditingProduct(null); }} className="rounded-xl h-12 px-6 font-bold">Cancel</Button>
+                  <Button onClick={handleAddOrEditProduct} className="rounded-xl bg-accent hover:bg-indigo-600 text-white h-12 px-10 font-black shadow-lg">
+                    {editingProduct ? "Update Item" : "Publish to Catalog"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {products.map((product) => (
+              <Card key={product.id} className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-300 rounded-[2rem] bg-white">
+                <div className="aspect-[4/3] w-full relative overflow-hidden">
+                  <img 
+                    src={product.imageUrl} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute top-4 left-4">
+                    <Badge className="bg-white/90 backdrop-blur-md text-slate-900 border-none font-black text-[10px] uppercase px-3 py-1 shadow-md">
+                      {product.category}
+                    </Badge>
+                  </div>
+                </div>
+                <CardHeader className="p-6">
+                  <CardTitle className="text-xl font-black text-slate-900 tracking-tight leading-none truncate">
+                    {product.name}
+                  </CardTitle>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-lg font-black text-indigo-600">
+                      Rp {product.price.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-6 pb-6">
+                  <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed h-10">
+                    {product.description}
+                  </p>
+                </CardContent>
+                <CardFooter className="px-4 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => openEditModal(product)}
+                    className="rounded-lg h-9 font-bold text-slate-500 hover:text-accent hover:bg-indigo-50 gap-2"
+                  >
+                    <Pencil className="size-3.5" />
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleDeleteProduct(product.id)}
+                    className="rounded-lg h-9 font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-50 gap-2"
+                  >
+                    <Trash2 className="size-3.5" />
+                    Remove
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+            
+            {products.length === 0 && (
+              <div className="col-span-full py-20 border-2 border-dashed border-slate-100 rounded-[3rem] flex flex-col items-center justify-center text-center space-y-6">
+                <div className="size-20 bg-slate-50 text-slate-300 rounded-[2rem] flex items-center justify-center">
+                  <Package className="size-10" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-xl font-black text-slate-900">Your Catalog is Empty</h4>
+                  <p className="text-slate-400 font-medium max-w-xs mx-auto">Add your products or services to increase your visibility in the OnTapp global marketplace.</p>
+                </div>
+                <Button 
+                  onClick={() => setIsProductModalOpen(true)}
+                  variant="outline" 
+                  className="rounded-xl border-slate-200 font-bold hover:bg-slate-50"
+                >
+                  Create First Entry
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
