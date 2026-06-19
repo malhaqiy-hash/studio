@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -10,7 +9,8 @@ import {
   Bot, 
   User, 
   Globe,
-  RefreshCw
+  RefreshCw,
+  Mic
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +21,7 @@ import { businessAssistant } from '@/ai/flows/business-assistant-flow';
 import { translateText } from '@/ai/flows/translate-flow';
 import { useLanguage } from '@/context/language-context';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 type Message = {
   role: 'user' | 'model' | 'system';
@@ -32,13 +33,15 @@ type Message = {
 
 export function AIAssistant() {
   const { language } = useLanguage();
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = React.useState(false);
   const [input, setInput] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [isListening, setIsListening] = React.useState(false);
   const [messages, setMessages] = React.useState<Message[]>([
     { 
       role: 'model', 
-      content: 'Hello! I am your OnTapp Strategic Assistant. How can I help you optimize your business network today?' 
+      content: 'Halo! Saya OnTapp assistant Anda. Bagaimana saya bisa membantu mengoptimalkan jaringan bisnis Anda hari ini?' 
     }
   ]);
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -75,11 +78,54 @@ export function AIAssistant() {
       console.error('AI Error:', error);
       setMessages((prev) => [
         ...prev, 
-        { role: 'model', content: 'I apologize, but I encountered an error. Please try again shortly.' }
+        { role: 'model', content: 'Mohon maaf, saya mengalami kendala teknis. Silakan coba lagi sebentar lagi.' }
       ]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleVoice = () => {
+    if (typeof window !== 'undefined' && !('webkitSpeechRecognition' in window) && !('speechRecognition' in window)) {
+      toast({
+        variant: "destructive",
+        title: "Browser Tidak Mendukung",
+        description: "Fitur suara tidak tersedia di browser ini."
+      });
+      return;
+    }
+
+    if (isListening) {
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).speechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = language === 'id' ? 'id-ID' : 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
   };
 
   const handleTranslateMessage = async (index: number) => {
@@ -120,10 +166,10 @@ export function AIAssistant() {
               <Sparkles className="size-4 text-white" />
             </div>
             <div>
-              <CardTitle className="text-sm font-black tracking-tight">OnTapp AI Advisor</CardTitle>
+              <CardTitle className="text-sm font-black tracking-tight">OnTapp assistant</CardTitle>
               <div className="flex items-center gap-1.5">
                 <div className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Consultant</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aktif</span>
               </div>
             </div>
           </div>
@@ -182,7 +228,7 @@ export function AIAssistant() {
                         ) : (
                           <Globe className="size-2.5" />
                         )}
-                        {msg.showTranslated ? "Show Original" : (msg.translatedContent ? "Show Translation" : "Translate")}
+                        {msg.showTranslated ? "Tampilkan Asli" : (msg.translatedContent ? "Tampilkan Terjemahan" : "Terjemahkan")}
                       </button>
                     </div>
                   </div>
@@ -212,9 +258,21 @@ export function AIAssistant() {
             <Input 
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about strategy..." 
+              placeholder="Tanya strategi..." 
               className="border-none bg-transparent focus-visible:ring-0 shadow-none font-medium text-sm"
             />
+            <Button 
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={toggleVoice}
+              className={cn(
+                "rounded-xl shrink-0 transition-all",
+                isListening ? "text-rose-500 animate-pulse bg-rose-50" : "text-slate-400 hover:text-accent hover:bg-slate-100"
+              )}
+            >
+              <Mic className="size-4" />
+            </Button>
             <Button 
               type="submit" 
               size="icon" 
