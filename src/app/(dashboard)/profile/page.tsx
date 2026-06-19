@@ -37,7 +37,8 @@ import {
   Check,
   TrendingUp,
   Monitor,
-  Sparkles
+  Sparkles,
+  RefreshCw
 } from 'lucide-react';
 import {
   Dialog,
@@ -845,4 +846,3 @@ export default function ProfilePage() {
     </DashboardLayout>
   );
 }
-
