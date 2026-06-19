@@ -226,19 +226,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <span>Cari</span>
           </Link>
 
-          {/* TAB 3: Lainnya */}
+          {/* TAB 3: Menu Utama / Lainnya (≡) */}
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             
-            {/* AI Agent Banner */}
-            <div className="absolute bottom-20 flex flex-col items-center animate-bounce pointer-events-none">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[9px] font-black px-3 py-1.5 rounded-2xl shadow-xl whitespace-nowrap flex items-center gap-1.5 border border-indigo-400">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                AI Agent Aktif
+            {/* ✨ INDIKATOR AI ADVISOR (Floating high and clean) */}
+            <div className="absolute bottom-24 flex flex-col items-center pointer-events-none">
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg border border-indigo-400/50">
+                <span className="text-sm">✨</span>
+                <span className="absolute inline-flex h-full w-full rounded-full bg-indigo-500 opacity-40 animate-ping -z-10"></span>
               </div>
-              <div className="w-3 h-3 bg-indigo-600 rotate-45 -mt-1.5 shadow-md"></div>
+              <div className="w-2 h-2 bg-indigo-600 rotate-45 -mt-1 shadow-sm"></div>
             </div>
 
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
