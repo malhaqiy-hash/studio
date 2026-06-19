@@ -25,7 +25,11 @@ import {
   Mic,
   CheckCircle2,
   Sparkles,
-  Plus
+  Plus,
+  Store,
+  Hotel,
+  User,
+  MoreHorizontal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -46,15 +50,16 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const ENTITY_CATEGORIES = [
-  { id: 'products', label: 'Produk', icon: Package },
-  { id: 'services', label: 'Layanan', icon: Headphones },
-  { id: 'suppliers', label: 'Supplier', icon: Truck },
-  { id: 'distributors', label: 'Distributor', icon: Layers },
-  { id: 'freelancers', label: 'Freelancer', icon: Users },
-  { id: 'communities', label: 'Komunitas', icon: Users },
-  { id: 'transporters', label: 'Transporter', icon: Truck },
-  { id: 'opportunities', label: 'Peluang Bisnis', icon: Briefcase },
-  { id: 'partners', label: 'Mitra Bisnis', icon: Users },
+  { id: 'toko', label: 'Toko', icon: Store },
+  { id: 'produk', label: 'Produk', icon: Package },
+  { id: 'service', label: 'Service', icon: Headphones },
+  { id: 'hotel', label: 'Hotel', icon: Hotel },
+  { id: 'transportasi', label: 'Transportasi', icon: Truck },
+  { id: 'supplier', label: 'Supplier', icon: Truck },
+  { id: 'distributor', label: 'Distributor', icon: Layers },
+  { id: 'freelancer', label: 'Freelancer', icon: User },
+  { id: 'communities', label: 'Communities', icon: Users },
+  { id: 'others', label: 'Lainnya', icon: MoreHorizontal },
 ];
 
 const POPULAR_LOCATIONS = [
@@ -133,7 +138,6 @@ export default function CariPage() {
       setQuery(transcript);
       setIsListening(false);
       toast({ title: "Suara Terdeteksi", description: `Mencari: "${transcript}"` });
-      // Trigger search automatically
       setTimeout(() => handleSearch(), 500);
     };
 
@@ -206,6 +210,8 @@ export default function CariPage() {
       case 'supplier': return <Truck className="size-5" />;
       case 'transporter': return <Truck className="size-5" />;
       case 'opportunity': return <Briefcase className="size-5" />;
+      case 'shop': return <Store className="size-5" />;
+      case 'hotel': return <Hotel className="size-5" />;
       default: return <Building2 className="size-5" />;
     }
   };
@@ -432,7 +438,6 @@ export default function CariPage() {
                                 </div>
                               </div>
 
-                              {/* Match Reasons */}
                               <div className="flex flex-wrap gap-2">
                                 {result.matchReasons.map((reason, rIdx) => (
                                   <span key={rIdx} className="text-[8px] font-bold text-slate-500 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-md">
