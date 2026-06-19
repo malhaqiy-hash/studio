@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -19,7 +20,8 @@ import {
   ChevronsUpDown,
   User,
   Sliders,
-  Sparkles
+  Sparkles,
+  Target
 } from "lucide-react";
 import { 
   Sidebar, 
@@ -54,6 +56,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: Rss, label: "Feed", href: "/feed" },
   { icon: Search, label: "AI Discovery", href: "/discover" },
+  { icon: Target, label: "Intelligent Matches", href: "/matches" },
   { icon: Users, label: "Matchmaker", href: "/matchmaker" },
   { icon: Briefcase, label: "Opportunities", href: "/opportunities" },
   { icon: MessageSquare, label: "Messages", href: "/messages" },
