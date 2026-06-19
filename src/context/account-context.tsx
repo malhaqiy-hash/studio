@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -7,10 +6,12 @@ export type AccountType = 'pribadi' | 'professional' | 'bisnis';
 
 export interface ContentItem {
   id: string;
-  image: string;
+  image?: string;
   title?: string;
   description?: string;
   price?: string;
+  visibility?: 'public' | 'private';
+  timestamp?: string;
 }
 
 export interface Account {
@@ -42,8 +43,8 @@ const DEFAULT_PRIBADI: Account = {
   contact: '+62 812 3456 7890',
   links: ['https://instagram.com/johndoe', 'https://linkedin.com/in/johndoe'],
   items: [
-    { id: 'item-1', image: 'https://picsum.photos/seed/post1/600/600', description: 'Checking out the new office today!' },
-    { id: 'item-2', image: 'https://picsum.photos/seed/post2/600/600', description: 'Great meeting with the OnTapp team.' }
+    { id: 'item-1', image: 'https://picsum.photos/seed/post1/600/600', description: 'Checking out the new office today!', visibility: 'public', timestamp: '2h ago' },
+    { id: 'item-2', description: 'Thinking about the future of B2B networking. It is all about meaningful connections.', visibility: 'public', timestamp: '5h ago' }
   ]
 };
 

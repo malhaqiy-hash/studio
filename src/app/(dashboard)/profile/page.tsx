@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -28,7 +27,10 @@ import {
   PlusCircle,
   DollarSign,
   X,
-  Globe
+  Globe,
+  Lock,
+  Image as ImageIcon,
+  MoreHorizontal
 } from 'lucide-react';
 import {
   Dialog,
@@ -37,7 +39,15 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 export default function ProfilePage() {
   const { activeAccount, updateActiveAccount } = useAccount();
@@ -52,7 +62,7 @@ export default function ProfilePage() {
   // Form States
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
   const [newItem, setNewItem] = React.useState<Partial<ContentItem>>({
-    image: `https://picsum.photos/seed/${Date.now()}/600/400`
+    visibility: 'public'
   });
 
   const handleSaveBio = () => {
@@ -76,17 +86,19 @@ export default function ProfilePage() {
   const handleAddContent = () => {
     const item: ContentItem = {
       id: `item-${Date.now()}`,
-      image: newItem.image || `https://picsum.photos/seed/${Date.now()}/600/400`,
+      image: newItem.image,
       title: newItem.title,
       description: newItem.description,
-      price: newItem.price
+      price: newItem.price,
+      visibility: newItem.visibility || 'public',
+      timestamp: 'Just now'
     };
     updateActiveAccount({
-      items: [...(activeAccount.items || []), item]
+      items: [item, ...(activeAccount.items || [])]
     });
     setIsContentModalOpen(false);
-    setNewItem({ image: `https://picsum.photos/seed/${Date.now() + 1}/600/400` });
-    toast({ title: 'Konten ditambahkan' });
+    setNewItem({ visibility: 'public' });
+    toast({ title: activeAccount.type === 'pribadi' ? 'Postingan berhasil dibagikan' : 'Konten ditambahkan' });
   };
 
   const handleRemoveItem = (id: string) => {
@@ -105,17 +117,20 @@ export default function ProfilePage() {
     return <Link2 className="size-4" />;
   };
 
+  const isPostEmpty = !newItem.description?.trim() && !newItem.image;
+
   return (
     <DashboardLayout>
       <div className="max-w-3xl mx-auto space-y-12 pb-24">
         
-        {/* Header Section (Independent Photo Editor) */}
+        {/* Header Section */}
         <section className="relative group">
           <div className="h-48 md:h-64 w-full bg-slate-50 border-b border-slate-100 relative overflow-hidden rounded-3xl">
             <img 
               src={`https://picsum.photos/seed/${activeAccount.id}_cover/1200/400`} 
               alt="Cover" 
               className="w-full h-full object-cover opacity-80"
+              data-ai-hint="business office"
             />
             <Button 
               size="sm"
@@ -161,7 +176,7 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* Bio Section (Independent Bio Editor) */}
+        {/* Bio Section */}
         <section className="px-6 md:px-8 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 text-xs font-medium text-slate-500 tracking-tight">
@@ -186,7 +201,7 @@ export default function ProfilePage() {
           </p>
         </section>
 
-        {/* Links Hub Section (Independent Links Editor) */}
+        {/* Links Hub Section */}
         <section className="px-6 md:px-8 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Links Hub</h3>
@@ -224,19 +239,22 @@ export default function ProfilePage() {
 
         <hr className="border-slate-100 mx-6 md:px-8" />
 
-        {/* Content Section (Independent Media Creator) */}
-        <section className="px-6 md:px-8 space-y-6">
+        {/* Content Section */}
+        <section className="px-6 md:px-8 space-y-6 pb-20">
           <div className="flex items-center justify-between">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-              {activeAccount.type === 'pribadi' ? 'Social Feed' : activeAccount.type === 'professional' ? 'Portfolio Gallery' : 'Product Catalog'}
+              {activeAccount.type === 'pribadi' ? 'Threads & Moments' : activeAccount.type === 'professional' ? 'Portfolio Gallery' : 'Product Catalog'}
             </h3>
             <Button 
               size="sm" 
-              onClick={() => setIsContentModalOpen(true)}
+              onClick={() => {
+                setNewItem({ visibility: 'public' });
+                setIsContentModalOpen(true);
+              }}
               className="rounded-xl h-9 bg-accent hover:bg-indigo-600 gap-2 font-bold px-4 shadow-sm"
             >
               <PlusCircle className="size-4" />
-              Tambah Baru
+              {activeAccount.type === 'pribadi' ? 'Buat Post' : 'Tambah Baru'}
             </Button>
           </div>
 
@@ -248,17 +266,57 @@ export default function ProfilePage() {
               <p className="text-slate-400 text-sm font-medium italic">Belum ada konten untuk ditampilkan.</p>
             </div>
           ) : (
-            <div className={activeAccount.type === 'pribadi' ? "grid grid-cols-3 gap-2" : "grid grid-cols-1 md:grid-cols-2 gap-6"}>
+            <div className={cn(
+              activeAccount.type === 'pribadi' ? "space-y-6" : "grid grid-cols-1 md:grid-cols-2 gap-6"
+            )}>
               {activeAccount.items.map((item) => (
                 <div key={item.id} className="relative group">
                   {activeAccount.type === 'pribadi' ? (
-                    <div className="aspect-square rounded-xl overflow-hidden bg-slate-100 border border-slate-50 shadow-sm">
-                      <img src={item.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Feed" />
+                    <div className="flex gap-4 p-4 hover:bg-slate-50/50 rounded-2xl transition-colors">
+                      <Avatar className="size-10 shrink-0 border border-slate-100">
+                        <AvatarImage src={activeAccount.avatar} />
+                        <AvatarFallback>{activeAccount.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-slate-900">{activeAccount.name}</span>
+                            <span className="text-[10px] text-slate-400 font-medium tracking-tight">
+                              {item.timestamp || 'Just now'}
+                            </span>
+                            {item.visibility === 'private' ? (
+                              <Lock className="size-2.5 text-slate-300" />
+                            ) : (
+                              <Globe className="size-2.5 text-slate-300" />
+                            )}
+                          </div>
+                          <button className="text-slate-300 hover:text-slate-600">
+                            <MoreHorizontal className="size-4" />
+                          </button>
+                        </div>
+                        <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                          {item.description}
+                        </p>
+                        {item.image && (
+                          <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm max-w-sm">
+                            <img src={item.image} className="w-full h-auto object-cover" alt="Post" />
+                          </div>
+                        )}
+                        <div className="flex items-center gap-4 pt-1">
+                          <button onClick={() => handleRemoveItem(item.id)} className="text-xs text-rose-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity">Hapus</button>
+                        </div>
+                      </div>
                     </div>
                   ) : activeAccount.type === 'professional' ? (
                     <div className="space-y-3">
-                      <div className="aspect-[4/3] rounded-3xl overflow-hidden border border-slate-100 bg-slate-50 shadow-sm">
+                      <div className="aspect-[4/3] rounded-3xl overflow-hidden border border-slate-100 bg-slate-50 shadow-sm relative">
                         <img src={item.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={item.title} />
+                        <button 
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="absolute top-2 right-2 size-8 bg-rose-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
                       </div>
                       <div>
                         <h4 className="font-bold text-slate-900">{item.title}</h4>
@@ -266,7 +324,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   ) : (
-                    <Card className="rounded-3xl border-slate-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow">
+                    <Card className="rounded-3xl border-slate-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow relative">
                       <div className="aspect-video relative overflow-hidden">
                         <img src={item.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={item.title} />
                         {item.price && (
@@ -274,6 +332,12 @@ export default function ProfilePage() {
                             ${item.price}
                           </div>
                         )}
+                        <button 
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="absolute top-2 right-2 size-8 bg-rose-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
                       </div>
                       <CardContent className="p-4 space-y-1">
                         <h4 className="font-bold text-slate-900">{item.title}</h4>
@@ -281,12 +345,6 @@ export default function ProfilePage() {
                       </CardContent>
                     </Card>
                   )}
-                  <button 
-                    onClick={() => handleRemoveItem(item.id)}
-                    className="absolute top-2 right-2 size-8 bg-rose-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                  >
-                    <Trash2 className="size-4" />
-                  </button>
                 </div>
               ))}
             </div>
@@ -294,7 +352,7 @@ export default function ProfilePage() {
         </section>
       </div>
 
-      {/* 1. Independent Photo Modal */}
+      {/* Independent Photo Modal */}
       <Dialog open={isPhotoModalOpen} onOpenChange={setIsPhotoModalOpen}>
         <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-8 bg-white">
           <DialogHeader>
@@ -322,7 +380,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* 2. Independent Bio Modal */}
+      {/* Independent Bio Modal */}
       <Dialog open={isBioModalOpen} onOpenChange={setIsBioModalOpen}>
         <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-8 bg-white">
           <DialogHeader>
@@ -365,7 +423,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* 3. Independent Links Modal */}
+      {/* Independent Links Modal */}
       <Dialog open={isLinksModalOpen} onOpenChange={setIsLinksModalOpen}>
         <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-8 bg-white">
           <DialogHeader>
@@ -414,69 +472,147 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* 4. Independent Media Content Modal */}
+      {/* Independent Media Content Modal */}
       <Dialog open={isContentModalOpen} onOpenChange={setIsContentModalOpen}>
-        <DialogContent className="max-w-lg rounded-[2.5rem] border-none shadow-2xl p-8 bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">
-              {activeAccount.type === 'pribadi' ? 'Buat Postingan Baru' : activeAccount.type === 'professional' ? 'Tambah Portfolio Baru' : 'Tambah Produk Baru'}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 pt-4">
-            <div className="aspect-video rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-100 overflow-hidden flex items-center justify-center relative group">
-              <img src={newItem.image} className="w-full h-full object-cover" alt="Preview" />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4">
-                <Camera className="size-8 mb-2" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Ganti Media</span>
-              </div>
-            </div>
-
-            {activeAccount.type !== 'pribadi' && (
-              <div className="flex gap-4">
-                <div className="flex-1 space-y-2">
-                  <Label className="font-bold text-slate-700">{activeAccount.type === 'bisnis' ? 'Nama Produk' : 'Judul Proyek'}</Label>
-                  <Input 
-                    value={newItem.title}
-                    onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
-                    className="rounded-xl border-slate-200"
-                    placeholder="Masukkan judul..."
+        <DialogContent className={cn(
+          "max-w-lg rounded-[2.5rem] border-none shadow-2xl p-0 bg-white overflow-hidden",
+          activeAccount.type === 'pribadi' && "max-w-md"
+        )}>
+          {activeAccount.type === 'pribadi' ? (
+            <div className="flex flex-col">
+              <DialogHeader className="p-6 pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <DialogTitle className="text-lg font-black tracking-tight">Buat Post Baru</DialogTitle>
+                  </div>
+                  <Select 
+                    value={newItem.visibility} 
+                    onValueChange={(v: any) => setNewItem({ ...newItem, visibility: v })}
+                  >
+                    <SelectTrigger className="w-[110px] h-8 rounded-full border-slate-100 text-[10px] font-black uppercase tracking-wider">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="public">
+                        <div className="flex items-center gap-2">
+                          <Globe className="size-3" /> Publik
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="private">
+                        <div className="flex items-center gap-2">
+                          <Lock className="size-3" /> Pribadi
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </DialogHeader>
+              <div className="px-6 py-4 space-y-4">
+                <div className="flex gap-4">
+                  <Avatar className="size-10 border border-slate-100">
+                    <AvatarImage src={activeAccount.avatar} />
+                    <AvatarFallback>{activeAccount.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <Textarea 
+                    value={newItem.description}
+                    onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+                    placeholder="Apa yang Anda pikirkan?"
+                    className="flex-1 border-none focus-visible:ring-0 text-sm font-medium placeholder:text-slate-400 bg-transparent resize-none min-h-[120px] p-0 pt-2"
                   />
                 </div>
-                {activeAccount.type === 'bisnis' && (
-                  <div className="w-32 space-y-2">
-                    <Label className="font-bold text-slate-700">Harga</Label>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-slate-400" />
-                      <Input 
-                        value={newItem.price}
-                        onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-                        className="rounded-xl border-slate-200 pl-8"
-                        placeholder="0.00"
-                      />
-                    </div>
+
+                {newItem.image && (
+                  <div className="relative group/thumb w-fit mx-auto">
+                    <img src={newItem.image} className="h-32 w-auto rounded-2xl object-cover border shadow-sm" alt="Preview" />
+                    <button 
+                      onClick={() => setNewItem({ ...newItem, image: undefined })}
+                      className="absolute -top-2 -right-2 bg-slate-900 text-white rounded-full p-1 shadow-lg group-hover/thumb:scale-110 transition-transform"
+                    >
+                      <X className="size-3" />
+                    </button>
                   </div>
                 )}
               </div>
-            )}
-
-            <div className="space-y-2">
-              <Label className="font-bold text-slate-700">{activeAccount.type === 'pribadi' ? 'Keterangan' : 'Deskripsi Detail'}</Label>
-              <Textarea 
-                value={newItem.description}
-                onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                className="rounded-xl border-slate-200 min-h-[100px]"
-                placeholder="Tulis detail di sini..."
-              />
+              <DialogFooter className="p-4 border-t bg-slate-50/50 flex items-center justify-between">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setNewItem({ ...newItem, image: `https://picsum.photos/seed/${Date.now()}/800/600` })}
+                  className="text-slate-500 hover:text-accent font-bold gap-2 rounded-full"
+                >
+                  <ImageIcon className="size-4" />
+                  Lampirkan Foto
+                </Button>
+                <Button 
+                  onClick={handleAddContent}
+                  disabled={isPostEmpty}
+                  className="rounded-full bg-accent hover:bg-indigo-600 font-black px-8 shadow-lg shadow-indigo-100 disabled:opacity-50"
+                >
+                  Post
+                </Button>
+              </DialogFooter>
             </div>
-          </div>
-          <DialogFooter className="mt-8 flex gap-2">
-            <Button variant="ghost" onClick={() => setIsContentModalOpen(false)} className="rounded-xl font-bold">Batal</Button>
-            <Button onClick={handleAddContent} className="rounded-xl bg-accent hover:bg-indigo-600 font-black px-10">Publikasikan</Button>
-          </DialogFooter>
+          ) : (
+            <>
+              <DialogHeader className="p-8 pb-4 bg-slate-50 border-b">
+                <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">
+                  {activeAccount.type === 'professional' ? 'Tambah Portfolio Baru' : 'Tambah Produk Baru'}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="p-8 space-y-6">
+                <div className="aspect-video rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-100 overflow-hidden flex items-center justify-center relative group">
+                  <img src={newItem.image || `https://picsum.photos/seed/${Date.now()}/800/600`} className="w-full h-full object-cover" alt="Preview" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4">
+                    <Camera className="size-8 mb-2" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Ganti Media</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex-1 space-y-2">
+                    <Label className="font-bold text-slate-700">{activeAccount.type === 'bisnis' ? 'Nama Produk' : 'Judul Proyek'}</Label>
+                    <Input 
+                      value={newItem.title}
+                      onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
+                      className="rounded-xl border-slate-200"
+                      placeholder="Masukkan judul..."
+                    />
+                  </div>
+                  {activeAccount.type === 'bisnis' && (
+                    <div className="w-32 space-y-2">
+                      <Label className="font-bold text-slate-700">Harga</Label>
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-slate-400" />
+                        <Input 
+                          value={newItem.price}
+                          onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+                          className="rounded-xl border-slate-200 pl-8"
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="font-bold text-slate-700">Deskripsi Detail</Label>
+                  <Textarea 
+                    value={newItem.description}
+                    onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+                    className="rounded-xl border-slate-200 min-h-[100px]"
+                    placeholder="Tulis detail di sini..."
+                  />
+                </div>
+              </div>
+              <DialogFooter className="p-8 pt-0 flex gap-2">
+                <Button variant="ghost" onClick={() => setIsContentModalOpen(false)} className="rounded-xl font-bold">Batal</Button>
+                <Button onClick={handleAddContent} className="rounded-xl bg-accent hover:bg-indigo-600 font-black px-10">Publikasikan</Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
     </DashboardLayout>
   );
 }
-
