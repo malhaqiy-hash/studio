@@ -23,11 +23,14 @@ import {
   Languages,
   Monitor,
   Globe,
-  Lock
+  Lock,
+  Zap,
+  MessageSquare
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage, LANGUAGES } from "@/context/language-context";
+import { useNotifications } from "@/hooks/use-notifications";
 
 const SETTINGS_KEY = "ontapp_system_settings_v2";
 
@@ -38,6 +41,7 @@ interface SettingsState {
   networkActivity: boolean;
   apiEndpoint: string;
   twoFactorAuth: boolean;
+  pushNotifications: boolean;
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -47,11 +51,13 @@ const DEFAULT_SETTINGS: SettingsState = {
   networkActivity: false,
   apiEndpoint: "https://api.ontapp.network/v1/discover",
   twoFactorAuth: false,
+  pushNotifications: false,
 };
 
 export default function SettingsPage() {
   const { toast } = useToast();
   const { language, setLanguage, t } = useLanguage();
+  const { requestPermission, loading: notificationLoading } = useNotifications();
   const [loading, setLoading] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
   const [settings, setSettings] = React.useState<SettingsState>(DEFAULT_SETTINGS);
@@ -106,6 +112,13 @@ export default function SettingsPage() {
 
   const updateSetting = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const togglePushNotifications = async (val: boolean) => {
+    if (val) {
+      await requestPermission();
+    }
+    updateSetting("pushNotifications", val);
   };
 
   if (!mounted) {
@@ -223,6 +236,17 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <div className="flex items-center justify-between p-4 rounded-2xl border border-slate-50 bg-slate-50/30">
+                  <div className="space-y-0.5">
+                    <Label className="font-bold text-slate-700">Push Notifications</Label>
+                    <p className="text-[10px] text-slate-400">Get alerts on your browser/device.</p>
+                  </div>
+                  <Switch 
+                    checked={settings.pushNotifications} 
+                    onCheckedChange={togglePushNotifications}
+                    disabled={notificationLoading}
+                  />
+                </div>
                 <div className="flex items-center justify-between p-4 rounded-2xl border border-slate-50 bg-slate-50/30">
                   <Label className="font-bold text-slate-700">Email Digest</Label>
                   <Switch 
