@@ -3,6 +3,7 @@ import './globals.css';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { LanguageProvider } from '@/context/language-context';
+import { AccountProvider } from '@/context/account-context';
 
 export const metadata: Metadata = {
   title: 'OnTapp - Business Discovery Network',
@@ -23,10 +24,12 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased selection:bg-accent/20 selection:text-accent">
         <LanguageProvider>
-          <FirebaseClientProvider>
-            {children}
-            <Toaster />
-          </FirebaseClientProvider>
+          <AccountProvider>
+            <FirebaseClientProvider>
+              {children}
+              <Toaster />
+            </FirebaseClientProvider>
+          </AccountProvider>
         </LanguageProvider>
       </body>
     </html>

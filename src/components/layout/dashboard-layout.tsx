@@ -24,7 +24,8 @@ import {
   Languages,
   CreditCard,
   UserPlus,
-  Sparkles
+  Sparkles,
+  Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +39,8 @@ import {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
-  DropdownMenuPortal
+  DropdownMenuPortal,
+  DropdownMenuGroup
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
@@ -53,6 +55,7 @@ import { signOut } from "firebase/auth";
 import { AIAssistant } from "@/components/chat/ai-assistant";
 import { LanguagePicker } from "@/components/language-picker";
 import { useLanguage } from "@/context/language-context";
+import { useAccount, AccountType } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -61,9 +64,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
   const auth = useAuth();
   const { t } = useLanguage();
+  const { activeAccount, availableAccounts, switchAccount, activateAccountType } = useAccount();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
 
-  // Vertical list order for drawer (Requirement #4)
   const drawerItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
     { icon: Globe, label: t('discovery'), href: "/discover" },
@@ -76,35 +79,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { icon: User, label: t('profile'), href: "/profile" },
   ];
 
-  // Route Protection
   React.useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
     }
   }, [user, loading, router]);
-
-  // Apply theme from localStorage
-  React.useEffect(() => {
-    const applyStoredTheme = () => {
-      const saved = localStorage.getItem("ontapp_system_settings_v2");
-      if (saved) {
-        try {
-          const { theme } = JSON.parse(saved);
-          if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-          } else if (theme === 'light') {
-            document.documentElement.classList.remove('dark');
-          } else if (theme === 'system') {
-            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.classList.toggle('dark', isDark);
-          }
-        } catch (e) {
-          console.error("Theme application failed", e);
-        }
-      }
-    };
-    applyStoredTheme();
-  }, [pathname]);
 
   const handleLogout = async () => {
     try {
@@ -129,12 +108,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   if (!user) return null;
 
-  const userInitial = user.email ? user.email[0].toUpperCase() : "U";
-
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-body">
       
-      {/* ==================== 1. TOP HEADER (Refactored Requirement #1) ==================== */}
       <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <Link href="/dashboard" className="flex items-center gap-2">
@@ -147,7 +123,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
         
         <div className="flex items-center gap-3">
-          {/* Notification Icon moved here (Requirement #1) */}
           <Link href="/notifications">
             <Button variant="ghost" size="icon" className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition">
               <Bell className="size-5" />
@@ -155,30 +130,90 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </Button>
           </Link>
 
-          {/* Profile Avatar (Requirement #1) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center rounded-full border-2 border-indigo-100 hover:border-accent transition p-0.5 outline-none">
                 <Avatar className="h-7 w-7 rounded-full shadow-sm">
-                  <AvatarImage src={`https://picsum.photos/seed/${user.uid}/100`} />
-                  <AvatarFallback className="bg-accent text-white font-bold text-[10px]">{userInitial}</AvatarFallback>
+                  <AvatarImage src={activeAccount.avatar} />
+                  <AvatarFallback className="bg-accent text-white font-bold text-[10px]">{activeAccount.name[0]}</AvatarFallback>
                 </Avatar>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 rounded-2xl p-2 shadow-2xl border-slate-100">
-              <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-3 px-2 py-3">
-                  <Avatar className="h-9 w-9 rounded-xl">
-                    <AvatarImage src={`https://picsum.photos/seed/${user.uid}/100`} />
-                    <AvatarFallback className="rounded-xl bg-indigo-50 text-accent font-bold">{userInitial}</AvatarFallback>
+            <DropdownMenuContent align="end" className="w-72 rounded-2xl p-2 shadow-2xl border-slate-100">
+              <DropdownMenuLabel className="p-2 font-normal">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 rounded-xl">
+                    <AvatarImage src={activeAccount.avatar} />
+                    <AvatarFallback className="rounded-xl bg-indigo-50 text-accent font-bold">{activeAccount.name[0]}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-black text-slate-900 leading-none mb-1">Business Account</span>
-                    <span className="truncate text-[10px] font-medium text-slate-400">{user.email}</span>
+                    <span className="truncate font-black text-slate-900 leading-none mb-1">{activeAccount.name}</span>
+                    <Badge className={cn(
+                      "w-fit text-[9px] font-black uppercase tracking-widest px-1.5 py-0",
+                      activeAccount.type === 'bisnis' ? "bg-indigo-600" : activeAccount.type === 'professional' ? "bg-emerald-600" : "bg-slate-500"
+                    )}>
+                      {activeAccount.type}
+                    </Badge>
                   </div>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-slate-50" />
+              
+              <DropdownMenuSeparator className="my-2" />
+              
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="px-3 py-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Beralih Akun
+                </DropdownMenuLabel>
+                {availableAccounts.map((acc) => (
+                  <DropdownMenuItem 
+                    key={acc.id}
+                    onClick={() => switchAccount(acc.id)}
+                    className="flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="size-6 rounded-md">
+                        <AvatarImage src={acc.avatar} />
+                        <AvatarFallback className="text-[8px]">{acc.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm">{acc.name}</span>
+                    </div>
+                    {activeAccount.id === acc.id && <Check className="size-4 text-accent" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+
+              <DropdownMenuSeparator className="my-2" />
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer">
+                  <UserPlus className="size-4" />
+                  Tambahkan Akun
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className="rounded-xl border-slate-100 shadow-xl p-1 min-w-[160px]">
+                    <DropdownMenuItem 
+                      onClick={() => activateAccountType('pribadi')}
+                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
+                    >
+                      <User className="size-4 text-slate-400" /> Pribadi
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => activateAccountType('professional')}
+                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
+                    >
+                      <ShieldCheck className="size-4 text-emerald-400" /> Professional
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => activateAccountType('bisnis')}
+                      className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
+                    >
+                      <Briefcase className="size-4 text-indigo-400" /> Bisnis
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
+              <DropdownMenuSeparator className="my-2" />
               
               <DropdownMenuItem className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer" asChild>
                 <Link href="/profile">
@@ -186,40 +221,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   {t('profile')}
                 </Link>
               </DropdownMenuItem>
-
-              {/* Multi-Account Management (Requirement #5) */}
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer">
-                  <UserPlus className="size-4" />
-                  Tambahkan Akun
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="rounded-xl border-slate-100 shadow-xl p-1">
-                    <DropdownMenuItem className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3">
-                      <User className="size-4 text-slate-400" /> Pribadi
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3">
-                      <ShieldCheck className="size-4 text-emerald-400" /> Professional
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3">
-                      <Briefcase className="size-4 text-indigo-400" /> Bisnis
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
 
-      {/* ==================== 2. MAIN CONTENT AREA ==================== */}
       <main className="flex-1 pb-28 pt-4 px-4 w-full overflow-x-hidden">
         <div className="max-w-4xl mx-auto">
           {children}
         </div>
       </main>
 
-      {/* ==================== 3. MOBILE BOTTOM NAVIGATION (3 TABS) (Requirement #2) ==================== */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-md pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
         <div className="grid grid-cols-3 h-16 items-center justify-items-center text-[10px] font-black uppercase tracking-widest text-slate-400 relative">
           
@@ -235,10 +247,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </Link>
 
           <Link 
-            href="/search" 
+            href="/discover" 
             className={cn(
               "flex flex-col items-center gap-1 w-full py-2 transition-colors",
-              pathname === "/search" || pathname === "/discover" ? "text-accent" : "hover:text-slate-600"
+              pathname === "/discover" || pathname === "/search" ? "text-accent" : "hover:text-slate-600"
             )}
           >
             <Search className="size-6" />
@@ -246,7 +258,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </Link>
 
           <div className="relative w-full h-full flex flex-col items-center justify-center">
-            {/* 🤖 AI ADVISOR FLOATING BUTTON (Requirement #3) */}
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
               className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-50 ring-4 ring-white"
@@ -263,7 +274,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <span>Lainnya</span>
                 </button>
               </SheetTrigger>
-              {/* LAINNYA (NETWORK HUB) DRAWER (Requirement #4) */}
               <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 overflow-hidden h-[90vh]">
                 <SheetHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100">
                   <div className="flex items-center justify-between">
