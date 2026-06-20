@@ -70,6 +70,17 @@ export const translations = {
   scout: { en: 'AI Scout', id: 'Pemandu AI' },
   scout_desc: { en: 'Detecting unmet demand and market gaps.', id: 'Deteksi permintaan tak terpenuhi & celah pasar.' },
   
+  // Scout Detailed
+  scout_market_intel: { en: 'Market Intelligence', id: 'Intelijen Pasar' },
+  scout_start: { en: 'Start Scouting', id: 'Mulai Memandu' },
+  scout_scanning: { en: 'Scanning Network...', id: 'Memindai Jaringan...' },
+  scout_analyzing: { en: 'Analyzing Unmet Demand', id: 'Menganalisis Permintaan' },
+  scout_processing: { en: 'Processing signals to find your next pivot...', id: 'Memproses sinyal untuk menemukan peluang Anda...' },
+  scout_confidence: { en: 'Confidence', id: 'Kepercayaan' },
+  scout_signal: { en: 'Analysis Signal', id: 'Sinyal Analisis' },
+  scout_pivot: { en: 'Suggested Pivot', id: 'Saran Pivot' },
+  scout_create_opp: { en: 'Create Opportunity from Gap', id: 'Buat Peluang dari Celah' },
+
   // Specific Actions & Labels
   claim_profile: { en: 'Claim Profile', id: 'Klaim Profil' },
   view_profile: { en: 'View Profile', id: 'Lihat Profil' },
@@ -95,7 +106,9 @@ export const translations = {
   ai_greet: { en: 'Hello! I am your OnTapp assistant. How can I help you today?', id: 'Halo! Saya asisten OnTapp Anda. Bagaimana saya bisa membantu Anda hari ini?' },
   ai_ask_strategy: { en: 'Ask strategy...', id: 'Tanya strategi...' },
   ai_translating: { en: 'Translating...', id: 'Menerjemahkan...' },
-  ai_original: { en: 'Show Original', id: 'Lihat Asli' }
+  ai_original: { en: 'Show Original', id: 'Lihat Asli' },
+  ai_active: { en: 'Active', id: 'Aktif' },
+  ai_error: { en: 'AI Error. Please try again later.', id: 'Gangguan AI. Silakan coba lagi nanti.' }
 };
 
 interface LanguageContextProps {

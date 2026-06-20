@@ -46,10 +46,13 @@ export function AIAssistant() {
     setInput('');
     setLoading(true);
     try {
-      const { response } = await businessAssistant({ message: input, history: messages.slice(-5).map(m => ({ role: m.role, content: m.content })) });
+      const { response } = await businessAssistant({ 
+        message: input, 
+        history: messages.slice(-5).map(m => ({ role: m.role, content: m.content })) 
+      });
       setMessages((prev) => [...prev, { role: 'model', content: response }]);
     } catch (error) {
-      setMessages((prev) => [...prev, { role: 'model', content: 'AI Error. Please try again later.' }]);
+      setMessages((prev) => [...prev, { role: 'model', content: t('ai_error') }]);
     } finally {
       setLoading(false);
     }
@@ -76,18 +79,84 @@ export function AIAssistant() {
     <div className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-4 animate-in slide-in-from-bottom-5">
       <Card className="w-80 md:w-96 h-[500px] shadow-2xl rounded-3xl border-slate-200 flex flex-col overflow-hidden">
         <CardHeader className="bg-slate-900 text-white p-4 flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2"><div className="size-8 rounded-lg bg-accent flex items-center justify-center"><Sparkles className="size-4 text-white" /></div><div><CardTitle className="text-sm font-black">OnTapp Assistant</CardTitle><div className="flex items-center gap-1.5"><div className="size-1.5 rounded-full bg-emerald-400 animate-pulse" /><span className="text-[10px] font-bold text-slate-400 uppercase">Active</span></div></div></div>
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white"><X className="size-4" /></Button>
+          <div className="flex items-center gap-2">
+            <div className="size-8 rounded-lg bg-accent flex items-center justify-center">
+              <Sparkles className="size-4 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-sm font-black">OnTapp Assistant</CardTitle>
+              <div className="flex items-center gap-1.5">
+                <div className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-bold text-slate-400 uppercase">{t('ai_active')}</span>
+              </div>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white">
+            <X className="size-4" />
+          </Button>
         </CardHeader>
         <CardContent className="flex-1 overflow-hidden p-0 bg-slate-50/50">
-          <ScrollArea className="h-full p-4"><div className="space-y-4">{messages.map((msg, i) => (
-            <div key={i} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}>
-              <Avatar className="size-8 border shrink-0"><AvatarFallback className={cn("text-[10px] font-bold", msg.role === 'user' ? "bg-slate-100" : "bg-indigo-50 text-accent")}>{msg.role === 'user' ? 'U' : 'AI'}</AvatarFallback></Avatar>
-              <div className="flex flex-col gap-1 max-w-[85%]"><div className={cn("p-3 rounded-2xl text-xs font-medium shadow-sm", msg.role === 'user' ? "bg-accent text-white rounded-tr-none" : "bg-white text-slate-700 border rounded-tl-none")}>{msg.showTranslated ? msg.translatedContent : msg.content}</div><button onClick={() => handleTranslateMessage(i)} disabled={msg.isTranslating} className="flex items-center gap-1 text-[8px] font-black uppercase text-slate-400 hover:text-accent">{msg.isTranslating ? <RefreshCw className="size-2 animate-spin" /> : <Globe className="size-2" />}{msg.showTranslated ? t('ai_original') : t('ai_translating')}</button></div>
+          <ScrollArea className="h-full p-4">
+            <div className="space-y-4">
+              {messages.map((msg, i) => (
+                <div key={i} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}>
+                  <Avatar className="size-8 border shrink-0">
+                    <AvatarFallback className={cn("text-[10px] font-bold", msg.role === 'user' ? "bg-slate-100" : "bg-indigo-50 text-accent")}>
+                      {msg.role === 'user' ? 'U' : 'AI'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col gap-1 max-w-[85%]">
+                    <div className={cn("p-3 rounded-2xl text-xs font-medium shadow-sm", msg.role === 'user' ? "bg-accent text-white rounded-tr-none" : "bg-white text-slate-700 border rounded-tl-none")}>
+                      {msg.showTranslated ? msg.translatedContent : msg.content}
+                    </div>
+                    <button 
+                      onClick={() => handleTranslateMessage(i)} 
+                      disabled={msg.isTranslating} 
+                      className="flex items-center gap-1 text-[8px] font-black uppercase text-slate-400 hover:text-accent"
+                    >
+                      {msg.isTranslating ? <RefreshCw className="size-2 animate-spin" /> : <Globe className="size-2" />}
+                      {msg.showTranslated ? t('ai_original') : t('ai_translating')}
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {loading && (
+                <div className="flex gap-3">
+                  <Avatar className="size-8 border">
+                    <AvatarFallback className="bg-indigo-50 text-accent">
+                      <Bot className="size-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="bg-white border p-3 rounded-2xl flex gap-1">
+                    <div className="size-1 bg-slate-300 rounded-full animate-bounce" />
+                    <div className="size-1 bg-slate-300 rounded-full animate-bounce delay-100" />
+                  </div>
+                </div>
+              )}
             </div>
-          ))}{loading && <div className="flex gap-3"><Avatar className="size-8 border"><AvatarFallback className="bg-indigo-50 text-accent"><Bot className="size-4" /></AvatarFallback></Avatar><div className="bg-white border p-3 rounded-2xl flex gap-1"><div className="size-1 bg-slate-300 rounded-full animate-bounce" /><div className="size-1 bg-slate-300 rounded-full animate-bounce delay-100" /></div></div>}</div></ScrollArea>
+          </ScrollArea>
         </CardContent>
-        <CardFooter className="p-4 bg-white border-t"><form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex w-full gap-2 bg-slate-50 p-1 rounded-2xl border"><Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={t('ai_ask_strategy')} className="border-none bg-transparent focus-visible:ring-0 text-xs" /><Button type="submit" size="icon" disabled={loading || !input.trim()} className="rounded-xl bg-slate-900 text-white shrink-0"><Send className="size-4" /></Button></form></CardFooter>
+        <CardFooter className="p-4 bg-white border-t">
+          <form 
+            onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
+            className="flex w-full gap-2 bg-slate-50 p-1 rounded-2xl border"
+          >
+            <Input 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              placeholder={t('ai_ask_strategy')} 
+              className="border-none bg-transparent focus-visible:ring-0 text-xs" 
+            />
+            <Button 
+              type="submit" 
+              size="icon" 
+              disabled={loading || !input.trim()} 
+              className="rounded-xl bg-slate-900 text-white shrink-0"
+            >
+              <Send className="size-4" />
+            </Button>
+          </form>
+        </CardFooter>
       </Card>
     </div>
   );

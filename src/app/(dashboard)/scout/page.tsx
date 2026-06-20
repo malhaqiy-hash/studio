@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
@@ -8,29 +7,25 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   Radar, 
-  Sparkles, 
-  TrendingUp, 
-  ArrowUpRight, 
-  ShieldCheck, 
   Zap, 
   BarChart3,
   RefreshCw,
   Lightbulb,
   Target,
-  ArrowRight
+  ArrowRight,
+  TrendingUp
 } from "lucide-react";
 import { businessScout, type BusinessScoutOutput } from "@/ai/flows/business-scout-flow";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/language-context";
 
 export default function ScoutPage() {
+  const { t } = useLanguage();
   const [loading, setLoading] = React.useState(false);
   const [reports, setReports] = React.useState<BusinessScoutOutput | null>(null);
 
   const runScout = async () => {
     setLoading(true);
     try {
-      // In a real app, context would be fetched from Firestore analytics
       const result = await businessScout({
         context: "High frequency of searches for 'Sustainable Logistics in Southeast Asia'. 40% of B2B packaging deals are pending due to lack of certified recycled suppliers. Increased activity in Tokyo-Jakarta trade route for IoT hardware."
       });
@@ -48,13 +43,13 @@ export default function ScoutPage() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-slate-900 text-white p-10 rounded-[3rem] shadow-2xl overflow-hidden relative">
           <div className="relative z-10 space-y-2">
             <div className="flex items-center gap-2 mb-2">
-              <Badge className="bg-emerald-500 text-white border-none px-3 py-1 font-black text-[10px] uppercase tracking-widest">Market Intelligence</Badge>
-              <Badge variant="outline" className="text-white border-white/20 text-[10px] uppercase font-bold">Scout V 1.0</Badge>
+              <Badge className="bg-emerald-500 text-white border-none px-3 py-1 font-black text-[10px] uppercase tracking-widest">{t('scout_market_intel')}</Badge>
+              <Badge variant="outline" className="text-white border-white/20 text-[10px] uppercase font-bold">V 1.0</Badge>
             </div>
             <h1 className="text-4xl font-black tracking-tight leading-none flex items-center gap-3">
-              AI Business Scout
+              {t('scout')}
             </h1>
-            <p className="text-slate-400 max-w-lg font-medium">Detecting unmet demand and hidden market gaps across the global network signals.</p>
+            <p className="text-slate-400 max-w-lg font-medium">{t('scout_desc')}</p>
           </div>
           <div className="relative z-10">
             <Button 
@@ -64,7 +59,7 @@ export default function ScoutPage() {
               className="bg-white hover:bg-slate-100 text-slate-900 font-black rounded-2xl h-14 px-10 shadow-2xl active:scale-95 transition-all flex gap-3"
             >
               {loading ? <RefreshCw className="size-5 animate-spin" /> : <Radar className="size-5" />}
-              {loading ? "Scanning Network..." : "Start Scouting"}
+              {loading ? t('scout_scanning') : t('scout_start')}
             </Button>
           </div>
           <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] -mr-40 -mt-40" />
@@ -81,9 +76,9 @@ export default function ScoutPage() {
                  </div>
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-black text-slate-900">Analyzing Unmet Demand</h3>
+                <h3 className="text-2xl font-black text-slate-900">{t('scout_analyzing')}</h3>
                 <p className="text-slate-500 font-medium max-w-sm mx-auto">
-                  Processing search logs, failed deals, and industry trends to find your next pivot...
+                  {t('scout_processing')}
                 </p>
               </div>
             </CardContent>
@@ -101,7 +96,7 @@ export default function ScoutPage() {
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-black text-emerald-600">{report.confidenceScore}%</div>
-                      <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Confidence</div>
+                      <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('scout_confidence')}</div>
                     </div>
                   </div>
                   <CardTitle className="text-2xl font-black text-slate-900 leading-tight">
@@ -110,7 +105,7 @@ export default function ScoutPage() {
                 </CardHeader>
                 <CardContent className="p-8 pt-2 flex-1 space-y-6">
                    <div className="space-y-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Analysis Signal</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('scout_signal')}</span>
                       <p className="text-slate-600 font-medium leading-relaxed italic border-l-2 border-emerald-100 pl-4">
                         "{report.reasoning}"
                       </p>
@@ -118,13 +113,13 @@ export default function ScoutPage() {
 
                    <div className="p-4 bg-slate-50 rounded-2xl space-y-3">
                       <div className="flex items-center justify-between">
-                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Potential Value</span>
+                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('potential_vol')}</span>
                          <Badge className="bg-emerald-500 text-white font-black">{report.potentialValue}</Badge>
                       </div>
                       <div className="space-y-1">
                          <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
                             <Zap className="size-3 text-amber-500" />
-                            Suggested Pivot:
+                            {t('scout_pivot')}:
                          </div>
                          <p className="text-sm font-medium text-slate-500">{report.suggestedAction}</p>
                       </div>
@@ -132,7 +127,7 @@ export default function ScoutPage() {
                 </CardContent>
                 <div className="p-6 bg-emerald-50/30 border-t border-emerald-50">
                   <Button className="w-full rounded-xl bg-slate-900 text-white hover:bg-black font-black flex gap-2">
-                    Create Opportunity from Gap
+                    {t('scout_create_opp')}
                     <ArrowRight className="size-4" />
                   </Button>
                 </div>
@@ -144,9 +139,9 @@ export default function ScoutPage() {
         {!reports && !loading && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6">
             {[
-              { icon: TrendingUp, title: "Detect Gaps", desc: "Find what users are searching for that doesn't exist yet." },
-              { icon: Target, title: "Lead Generation", desc: "AI creates custom opportunities based on market shortages." },
-              { icon: BarChart3, title: "Trend Analysis", desc: "Visualizing the next big B2B trade movements." }
+              { icon: TrendingUp, title: t('market_radar'), desc: t('market_radar_desc') },
+              { icon: Target, title: t('matchmaker'), desc: t('matchmaker_desc') },
+              { icon: BarChart3, title: t('network_perf'), desc: t('dashboard_desc') }
             ].map((f, i) => (
               <Card key={i} className="p-8 rounded-[2.5rem] border-slate-100 shadow-sm space-y-4 hover:shadow-md transition-shadow">
                 <div className="size-12 rounded-2xl bg-indigo-50 text-accent flex items-center justify-center">
