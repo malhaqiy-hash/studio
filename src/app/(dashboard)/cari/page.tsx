@@ -97,8 +97,6 @@ export default function CariPage() {
   
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
-  
-  const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean, detected: string }>>({});
 
   const generateCacheId = (q: string, loc: string, cat: string | null) => {
     return btoa(`${q.toLowerCase()}-${loc.toLowerCase()}-${cat || 'all'}`).replace(/[/+=]/g, '_').substring(0, 50);
@@ -106,40 +104,42 @@ export default function CariPage() {
 
   const checkThrottling = async (userId: string) => {
     if (!db) return true;
-    const rateRef = doc(db, 'user_rate_limits', userId);
-    const snap = await getDoc(rateRef);
-    const now = Date.now();
-    const today = new Date().toISOString().split('T')[0];
-    const oneMinuteAgo = now - 60000;
+    try {
+      const rateRef = doc(db, 'user_rate_limits', userId);
+      const snap = await getDoc(rateRef);
+      const now = Date.now();
+      const today = new Date().toISOString().split('T')[0];
+      const oneMinuteAgo = now - 60000;
 
-    let data = snap.exists() ? snap.data() : { requestTimestamps: [], dailyCount: 0, lastResetDate: today };
-    
-    // Reset daily if date changed
-    if (data.lastResetDate !== today) {
-      data.dailyCount = 0;
-      data.lastResetDate = today;
-    }
+      let data = snap.exists() ? snap.data() : { requestTimestamps: [], dailyCount: 0, lastResetDate: today };
+      
+      if (data.lastResetDate !== today) {
+        data.dailyCount = 0;
+        data.lastResetDate = today;
+      }
 
-    // Check Daily Limit (30)
-    if (data.dailyCount >= 30) {
-      toast({ variant: "destructive", title: "Limit Harian Habis", description: "Batas 30 akses AI per hari tercapai. Silakan coba lagi besok." });
-      return false;
-    }
+      if (data.dailyCount >= 30) {
+        toast({ variant: "destructive", title: "Limit Harian Habis", description: "Batas 30 akses AI per hari tercapai. Silakan coba lagi besok." });
+        return false;
+      }
 
-    // Check Minute Throttling (5)
-    const recent = (data.requestTimestamps || []).map((t: string) => new Date(t).getTime()).filter((t: number) => t > oneMinuteAgo);
-    if (recent.length >= 5) {
-      toast({ variant: "destructive", title: "Terlalu Cepat", description: "Batas 5 pencarian per menit tercapai. Mohon tunggu sejenak." });
-      return false;
+      const recent = (data.requestTimestamps || []).map((t: string) => new Date(t).getTime()).filter((t: number) => t > oneMinuteAgo);
+      if (recent.length >= 5) {
+        toast({ variant: "destructive", title: "Terlalu Cepat", description: "Batas 5 pencarian per menit tercapai. Mohon tunggu sejenak." });
+        return false;
+      }
+      
+      await setDoc(rateRef, {
+        requestTimestamps: [...recent.map(t => new Date(t).toISOString()), new Date().toISOString()],
+        dailyCount: (data.dailyCount || 0) + 1,
+        lastResetDate: today
+      }, { merge: true });
+      
+      return true;
+    } catch (e) {
+      console.warn("Throttling check failed, bypassing to ensure availability", e);
+      return true;
     }
-    
-    await setDoc(rateRef, {
-      requestTimestamps: [...recent.map(t => new Date(t).toISOString()), new Date().toISOString()],
-      dailyCount: (data.dailyCount || 0) + 1,
-      lastResetDate: today
-    }, { merge: true });
-    
-    return true;
   };
 
   const handleSearch = async (e?: React.FormEvent, overrideQuery?: string) => {
@@ -152,10 +152,9 @@ export default function CariPage() {
     
     setLoading(true);
     setResults(null);
-    setTranslations({});
 
     try {
-      // 1. Global Throttling & Daily Limit
+      // 1. Throttling (Graceful failure)
       if (user && db) {
         const canProceed = await checkThrottling(user.uid);
         if (!canProceed) {
@@ -164,29 +163,33 @@ export default function CariPage() {
         }
       }
 
-      // 2. Search Caching (24h)
+      // 2. Search Caching (Graceful failure)
       const cacheId = generateCacheId(finalQuery || (activeCategory || ''), activeLocation, activeCategory);
       if (db) {
-        const cacheRef = doc(db, 'search_cache', cacheId);
-        const cacheSnap = await getDoc(cacheRef);
-        if (cacheSnap.exists()) {
-          const cacheData = cacheSnap.data();
-          const cacheTime = new Date(cacheData.timestamp).getTime();
-          const isExpired = Date.now() - cacheTime > 86400000; // 24 hours
+        try {
+          const cacheRef = doc(db, 'search_cache', cacheId);
+          const cacheSnap = await getDoc(cacheRef);
+          if (cacheSnap.exists()) {
+            const cacheData = cacheSnap.data();
+            const cacheTime = new Date(cacheData.timestamp).getTime();
+            const isExpired = Date.now() - cacheTime > 86400000; 
 
-          if (!isExpired) {
-            const parsedResults = JSON.parse(cacheData.results);
-            setResults(parsedResults);
-            setLoading(false);
-            toast({ title: "Optimasi Biaya", description: "Mengambil data dari cache pintar (24 jam)." });
-            return;
+            if (!isExpired) {
+              const parsedResults = JSON.parse(cacheData.results);
+              setResults(parsedResults);
+              setLoading(false);
+              toast({ title: "Optimasi Biaya Aktif", description: "Menyajikan data dari cache pintar (24 jam)." });
+              return;
+            }
           }
+        } catch (cacheErr) {
+          console.warn("Cache access failed, proceeding to AI", cacheErr);
         }
       }
 
       // 3. AI Execution
       const output = await aiIntentSearch({ 
-        query: finalQuery || (activeCategory ? `Cari ${activeCategory}` : "Analisis Gambar Bisnis"), 
+        query: finalQuery || (activeCategory ? `Cari ${activeCategory}` : "Analisis Gambar"), 
         filters: {
           category: activeCategory || undefined,
           location: activeLocation !== "Pilih Lokasi" ? activeLocation : undefined,
@@ -195,19 +198,22 @@ export default function CariPage() {
         } 
       });
 
-      // 4. Save to Cache
-      if (db) {
-        const cacheRef = doc(db, 'search_cache', cacheId);
-        await setDoc(cacheRef, {
-          results: JSON.stringify(output),
-          timestamp: new Date().toISOString()
-        });
+      // 4. Save to Cache (Graceful failure)
+      if (db && output) {
+        try {
+          const cacheRef = doc(db, 'search_cache', cacheId);
+          await setDoc(cacheRef, {
+            results: JSON.stringify(output),
+            timestamp: new Date().toISOString()
+          });
+        } catch (saveErr) {
+          console.warn("Failed to save to cache", saveErr);
+        }
       }
 
       setResults(output);
       
-      // 5. Local Backup History
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && output) {
         const history = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
         const newItems = output.results.map(r => ({
           ...r,
@@ -218,7 +224,12 @@ export default function CariPage() {
       }
       
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Pencarian Terganggu", description: err.message || "Terjadi gangguan sistem." });
+      const errMsg = err.message || "Terjadi gangguan pada koneksi server atau AI.";
+      toast({ 
+        variant: "destructive", 
+        title: "Pencarian Terganggu", 
+        description: errMsg.includes('quota') ? "Batas harian AI Anda telah tercapai." : errMsg 
+      });
     } finally {
       setLoading(false);
     }
@@ -254,7 +265,7 @@ export default function CariPage() {
       handleSearch();
     }, () => {
       setLoading(false);
-      toast({ variant: "destructive", title: "Gagal GPS", description: "Izinkan akses lokasi." });
+      toast({ variant: "destructive", title: "Gagal GPS", description: "Mohon izinkan akses lokasi di browser Anda." });
     });
   };
 
