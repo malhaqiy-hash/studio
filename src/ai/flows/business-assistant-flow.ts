@@ -59,7 +59,21 @@ const businessAssistantFlow = ai.defineFlow(
     outputSchema: BusinessAssistantOutputSchema,
   },
   async (input) => {
-    const { output } = await businessAssistantPrompt(input);
-    return { response: output! };
+    let lastError;
+    const maxRetries = 2;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const { output } = await businessAssistantPrompt(input);
+        if (output) return { response: output! };
+      } catch (err: any) {
+        lastError = err;
+        if (i < maxRetries - 1) {
+          await new Promise(r => setTimeout(r, 1500));
+          continue;
+        }
+      }
+    }
+    console.error('Assistant flow failed:', lastError);
+    throw new Error('Gagal merespon. AI sedang sibuk.');
   }
 );

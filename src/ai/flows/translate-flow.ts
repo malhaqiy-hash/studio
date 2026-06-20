@@ -46,7 +46,23 @@ const translateFlow = ai.defineFlow(
     outputSchema: TranslateOutputSchema,
   },
   async (input) => {
-    const { output } = await translatePrompt(input);
-    return output!;
+    let lastError;
+    const maxRetries = 2;
+    
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const { output } = await translatePrompt(input);
+        if (output) return output;
+      } catch (err: any) {
+        lastError = err;
+        if (i < maxRetries - 1) {
+          await new Promise(r => setTimeout(r, 1500));
+          continue;
+        }
+      }
+    }
+    
+    console.error('Translation flow failed:', lastError);
+    throw new Error('Gagal menerjemahkan teks. Layanan sedang sibuk.');
   }
 );

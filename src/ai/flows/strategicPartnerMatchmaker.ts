@@ -93,8 +93,22 @@ const strategicPartnerMatchmakerFlow = ai.defineFlow(
     outputSchema: StrategicPartnerMatchmakerOutputSchema
   },
   async (input) => {
-    const { output } = await strategicPartnerMatchmakerPrompt(input);
-    return output!;
+    let lastError;
+    const maxRetries = 2;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const { output } = await strategicPartnerMatchmakerPrompt(input);
+        if (output) return output;
+      } catch (err: any) {
+        lastError = err;
+        if (i < maxRetries - 1) {
+          await new Promise(r => setTimeout(r, 2000));
+          continue;
+        }
+      }
+    }
+    console.error('Matchmaker flow failed:', lastError);
+    throw new Error('Gagal mencocokkan mitra. Layanan AI sedang sibuk.');
   }
 );
 

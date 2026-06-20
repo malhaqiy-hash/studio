@@ -89,7 +89,7 @@ const aiIntentSearchFlow = ai.defineFlow(
       : 'None';
 
     let lastError;
-    const maxRetries = 6;
+    const maxRetries = 3; // Reduced for faster response
     
     for (let i = 0; i < maxRetries; i++) {
       try {
@@ -103,21 +103,17 @@ const aiIntentSearchFlow = ai.defineFlow(
         lastError = err;
         const errMsg = String(err).toLowerCase();
         
-        // Handle rate limiting (429), transient server errors (503), and unexpected response issues
-        const isQuotaError = errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('exhausted');
-        const isTransient = isQuotaError || 
+        // Retry logic for common transient API errors
+        const isRetryable = errMsg.includes('429') || 
+                            errMsg.includes('quota') || 
                             errMsg.includes('503') || 
-                            errMsg.includes('demand') || 
                             errMsg.includes('overloaded') ||
-                            errMsg.includes('unavailable') ||
                             errMsg.includes('unexpected response') ||
                             errMsg.includes('network');
                             
-        if (isTransient && i < maxRetries - 1) {
-          // Exponential backoff with longer delay for quota errors
-          const baseDelay = isQuotaError ? 3000 : 1500;
-          const delay = Math.pow(2, i) * baseDelay; 
-          console.warn(`AI Engine busy/unexpected response (Attempt ${i + 1}/${maxRetries}). Retrying in ${delay}ms...`);
+        if (isRetryable && i < maxRetries - 1) {
+          const delay = Math.pow(2, i) * 2000; 
+          console.warn(`Search engine attempt ${i + 1} failed. Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
@@ -125,8 +121,7 @@ const aiIntentSearchFlow = ai.defineFlow(
       }
     }
     
-    console.error('AI Intent Search failed after multiple retries:', lastError);
-    // Return a graceful error message that the client can show in the UI
-    throw new Error('Mesin AI sedang sangat sibuk atau mengalami gangguan teknis sementara. Silakan coba kembali dalam 30 detik.');
+    console.error('AI Intent Search failed:', lastError);
+    throw new Error('Gagal memproses pencarian. AI sedang sangat sibuk atau terjadi gangguan jaringan. Silakan coba lagi dalam 10 detik.');
   }
 );
