@@ -94,7 +94,6 @@ export default function CariPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Helper untuk membersihkan teks prefiks sistem
   const cleanTitle = (text: string) => text.replace(/^Informasi Terkait:\s*/i, '').trim();
 
   React.useEffect(() => {
@@ -124,7 +123,6 @@ export default function CariPage() {
 
     const currentHistory = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
     
-    // Siapkan entri baru dengan format yang konsisten dan bersih
     const newItems = newResults.map(r => ({
       ...r,
       name: cleanTitle(r.name),
@@ -132,16 +130,15 @@ export default function CariPage() {
       date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
     }));
 
-    // LOGIKA ANTI-DUPLIKASI KETAT
-    // Filter riwayat lama: Hapus item yang memiliki nama dan lokasi yang sama persis (ignore case & trim)
+    // LOGIKA ANTI-DUPLIKASI KETAT (Nama + Lokasi + Kategori)
     const filteredHistory = currentHistory.filter((oldItem: any) => 
       !newItems.some(newItem => 
         newItem.name.toLowerCase().trim() === oldItem.name.toLowerCase().trim() && 
-        (newItem.location || '').toLowerCase().trim() === (oldItem.location || '').toLowerCase().trim()
+        (newItem.location || '').toLowerCase().trim() === (oldItem.location || '').toLowerCase().trim() &&
+        (newItem.category || '').toLowerCase().trim() === (oldItem.category || '').toLowerCase().trim()
       )
     );
 
-    // Gabungkan (entri baru di depan/kiri) dan batasi jumlah riwayat
     const updatedHistory = [...newItems, ...filteredHistory].slice(0, 50);
     localStorage.setItem('ontapp_discovery_history', JSON.stringify(updatedHistory));
     setHistory(updatedHistory);
@@ -189,17 +186,23 @@ export default function CariPage() {
     }
   };
 
-  const handleSearch = async (e?: React.FormEvent, overrideQuery?: string) => {
+  const handleSearch = async (
+    e?: React.FormEvent, 
+    overrideQuery?: string, 
+    overrideCategory?: string | null,
+    overrideLocation?: string
+  ) => {
     e?.preventDefault();
-    const finalQuery = cleanTitle(overrideQuery || query);
+    const finalQuery = cleanTitle(overrideQuery !== undefined ? overrideQuery : query);
+    const finalCategory = overrideCategory !== undefined ? overrideCategory : activeCategory;
+    const finalLocation = overrideLocation !== undefined ? overrideLocation : activeLocation;
     
-    if (!finalQuery && !activeCategory) {
+    if (!finalQuery && !finalCategory) {
       toast({ title: "Input Required", description: "Keyword or category is required.", variant: "destructive" });
       return;
     }
     
     setLoading(true);
-    // Kita biarkan hasil lama tampil sampai hasil baru siap jika ini dipicu dari riwayat
     if (!overrideQuery) setResults(null);
 
     try {
@@ -211,7 +214,7 @@ export default function CariPage() {
         }
       }
 
-      const cacheId = generateCacheId(finalQuery || (activeCategory || ''), activeLocation, activeCategory);
+      const cacheId = generateCacheId(finalQuery || (finalCategory || ''), finalLocation, finalCategory);
       let cacheDataFound = false;
 
       if (db) {
@@ -229,9 +232,8 @@ export default function CariPage() {
               parsedResults.results = parsedResults.results.map((r: any) => ({ ...r, name: cleanTitle(r.name) }));
               setResults(parsedResults);
               setLoading(false);
-              toast({ title: "Cache Optimization", description: "Loading from smart cache (24h)." });
+              toast({ title: "Smart Cache", description: "Loading synced results..." });
               cacheDataFound = true;
-              
               updateVisualHistory(parsedResults.results);
             }
           }
@@ -241,10 +243,10 @@ export default function CariPage() {
       if (cacheDataFound) return;
 
       const output = await aiIntentSearch({ 
-        query: finalQuery || (activeCategory ? `Cari ${activeCategory}` : "Analisis Gambar"), 
+        query: finalQuery || (finalCategory ? `Cari ${finalCategory}` : "Analisis Gambar"), 
         filters: {
-          category: activeCategory || undefined,
-          location: (activeLocation.includes('Lokasi') || activeLocation.includes('Location')) ? undefined : activeLocation,
+          category: finalCategory || undefined,
+          location: (finalLocation.includes('Lokasi') || finalLocation.includes('Location')) ? undefined : finalLocation,
           lat: coords?.lat,
           lng: coords?.lng
         } 
@@ -252,7 +254,6 @@ export default function CariPage() {
 
       if (output) {
         output.results = output.results.map(r => ({ ...r, name: cleanTitle(r.name) }));
-        
         if (db) {
           const cacheRef = doc(db, 'search_cache', cacheId);
           setDoc(cacheRef, {
@@ -260,7 +261,6 @@ export default function CariPage() {
             timestamp: new Date().toISOString()
           }).catch(() => {});
         }
-
         setResults(output);
         updateVisualHistory(output.results);
       }
@@ -286,14 +286,19 @@ export default function CariPage() {
 
   const handleHistoryClick = (item: any) => {
     const cleanedQuery = cleanTitle(item.name);
+    // Tentukan kategori dan lokasi yang benar dari item riwayat, atau reset jika tidak ada
+    const targetCategory = item.category || null;
+    const targetLocation = item.location || (language === 'id' ? "Pilih Lokasi" : "Choose Location");
+
+    // Sinkronkan state untuk UI feedback
     setQuery(cleanedQuery);
-    if (item.location && !item.location.toLowerCase().includes('global')) {
-      setActiveLocation(item.location);
-    } else {
-      setActiveLocation(language === 'id' ? "Pilih Lokasi" : "Choose Location");
-    }
-    if (item.category) setActiveCategory(item.category);
-    handleSearch(undefined, cleanedQuery);
+    setActiveCategory(targetCategory);
+    setActiveLocation(targetLocation);
+    
+    toast({ title: "Syncing Search", description: `Re-indexing ${cleanedQuery}...` });
+
+    // Jalankan pencarian dengan parameter eksplisit untuk menghindari stale state
+    handleSearch(undefined, cleanedQuery, targetCategory, targetLocation);
   };
 
   const openInGoogleMaps = (name: string, location?: string) => {
@@ -322,9 +327,10 @@ export default function CariPage() {
     setLoading(true);
     setIsLocationOpen(false);
     navigator.geolocation.getCurrentPosition((position) => {
+      const gpsLabel = language === 'id' ? "Lokasi GPS Aktif" : "GPS Active";
       setCoords({ lat: position.coords.latitude, lng: position.coords.longitude });
-      setActiveLocation(language === 'id' ? "Lokasi GPS Aktif" : "GPS Active");
-      handleSearch();
+      setActiveLocation(gpsLabel);
+      handleSearch(undefined, query, activeCategory, gpsLabel);
     }, () => {
       setLoading(false);
       toast({ variant: "destructive", title: "GPS Failed", description: "Please allow location access." });
@@ -466,7 +472,6 @@ export default function CariPage() {
           </form>
         </div>
 
-        {/* Section: Recent Searches (AI Backup) */}
         {history.length > 0 && (
           <div className="space-y-4 px-2">
             <div className="flex items-center justify-between">
@@ -507,9 +512,17 @@ export default function CariPage() {
                         <X className="size-3" />
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400">
-                      <MapPin className="size-2.5" />
-                      <span className="truncate">{item.location || 'Global'}</span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400">
+                        <MapPin className="size-2.5" />
+                        <span className="truncate">{item.location || 'Global'}</span>
+                      </div>
+                      {item.category && (
+                        <div className="flex items-center gap-2 text-[9px] font-bold text-teal-600">
+                          <Filter className="size-2.5" />
+                          <span className="truncate">{item.category}</span>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
