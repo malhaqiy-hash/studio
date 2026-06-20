@@ -10,13 +10,6 @@ import {
   Search, 
   ShieldCheck, 
   MapPin, 
-  Briefcase, 
-  Zap, 
-  Package,
-  Headphones,
-  Truck,
-  Layers,
-  Users,
   RefreshCw,
   Globe,
   ChevronDown,
@@ -33,12 +26,14 @@ import {
   Image as ImageIcon,
   Map as MapIcon,
   Sparkles,
-  Clock,
-  WifiOff
+  Package,
+  Headphones,
+  Truck,
+  Layers,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
-import { translateText } from "@/ai/flows/translate-flow";
 import { useLanguage } from "@/context/language-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFirestore, useUser } from "@/firebase";
@@ -78,7 +73,7 @@ const POPULAR_LOCATIONS = [
 ];
 
 export default function CariPage() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { toast } = useToast();
   const db = useFirestore();
   const { user } = useUser();
@@ -87,7 +82,7 @@ export default function CariPage() {
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
   
   const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
-  const [activeLocation, setActiveLocation] = React.useState("Pilih Lokasi");
+  const [activeLocation, setActiveLocation] = React.useState(language === 'id' ? "Pilih Lokasi" : "Choose Location");
   const [isLocationOpen, setIsLocationOpen] = React.useState(false);
   const [locationSearch, setLocationSearch] = React.useState("");
   const [coords, setCoords] = React.useState<{lat?: number, lng?: number}>({});
@@ -99,7 +94,6 @@ export default function CariPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Helper untuk melakukan timeout pada Promise (Default 3 detik untuk Firestore)
   const withTimeout = <T>(promise: Promise<T>, timeoutMs: number = 3000, fallbackValue: T): Promise<T> => {
     return Promise.race([
       promise,
@@ -115,14 +109,12 @@ export default function CariPage() {
     if (!db) return true;
     try {
       const rateRef = doc(db, 'user_rate_limits', userId);
-      // Timeout 3 detik untuk cek limit
       const snap = await withTimeout(getDoc(rateRef), 3000, null as any);
       
       const now = Date.now();
       const today = new Date().toISOString().split('T')[0];
       const oneMinuteAgo = now - 60000;
 
-      // Jika snap null (timeout), anggap saja boleh lewat untuk tidak menghambat UX
       if (!snap) return true;
 
       let data = snap.exists() ? snap.data() : { requestTimestamps: [], dailyCount: 0, lastResetDate: today };
@@ -133,17 +125,16 @@ export default function CariPage() {
       }
 
       if (data.dailyCount >= 30) {
-        toast({ variant: "destructive", title: "Limit Harian Habis", description: "Batas 30 akses AI per hari tercapai. Silakan coba lagi besok." });
+        toast({ variant: "destructive", title: t('logout'), description: t('daily_limit_msg') });
         return false;
       }
 
       const recent = (data.requestTimestamps || []).map((t: string) => new Date(t).getTime()).filter((t: number) => t > oneMinuteAgo);
       if (recent.length >= 5) {
-        toast({ variant: "destructive", title: "Terlalu Cepat", description: "Batas 5 pencarian per menit tercapai. Mohon tunggu sejenak." });
+        toast({ variant: "destructive", title: "Too Fast", description: "Rate limit reached. Please wait a minute." });
         return false;
       }
       
-      // Update async tanpa menunggu (fire and forget) agar tidak menghambat search
       setDoc(rateRef, {
         requestTimestamps: [...recent.map(t => new Date(t).toISOString()), new Date().toISOString()],
         dailyCount: (data.dailyCount || 0) + 1,
@@ -152,7 +143,6 @@ export default function CariPage() {
       
       return true;
     } catch (e) {
-      console.warn("Throttling check failed or timed out, bypassing to ensure availability", e);
       return true;
     }
   };
@@ -161,7 +151,7 @@ export default function CariPage() {
     e?.preventDefault();
     const finalQuery = overrideQuery || query;
     if (!finalQuery && !activeCategory && !previewImage) {
-      toast({ title: "Input diperlukan", description: "Silakan masukkan kata kunci atau pilih kategori.", variant: "destructive" });
+      toast({ title: "Input Required", description: "Keyword or category is required.", variant: "destructive" });
       return;
     }
     
@@ -169,7 +159,6 @@ export default function CariPage() {
     setResults(null);
 
     try {
-      // 1. Throttling dengan Timeout 3 detik (Bypass jika lambat)
       if (user && db) {
         const canProceed = await checkThrottling(user.uid);
         if (!canProceed) {
@@ -178,57 +167,48 @@ export default function CariPage() {
         }
       }
 
-      // 2. Search Caching dengan Timeout 3 detik
       const cacheId = generateCacheId(finalQuery || (activeCategory || ''), activeLocation, activeCategory);
       let cacheDataFound = false;
 
       if (db) {
         try {
           const cacheRef = doc(db, 'search_cache', cacheId);
-          // Tunggu maksimal 3 detik untuk respon cache Firestore
           const cacheSnap = await withTimeout(getDoc(cacheRef), 3000, null as any);
           
           if (cacheSnap && cacheSnap.exists()) {
             const cacheData = cacheSnap.data();
             const cacheTime = new Date(cacheData.timestamp).getTime();
-            const isExpired = Date.now() - cacheTime > 86400000; // 24 jam
+            const isExpired = Date.now() - cacheTime > 86400000; 
 
             if (!isExpired) {
               const parsedResults = JSON.parse(cacheData.results);
               setResults(parsedResults);
               setLoading(false);
-              toast({ title: "Optimasi Biaya Aktif", description: "Menyajikan data dari cache pintar (24 jam)." });
+              toast({ title: "Cache Optimization", description: "Loading from smart cache (24h)." });
               cacheDataFound = true;
             }
-          } else if (cacheSnap === null) {
-            console.warn("Firestore Cache timed out, jumping to AI API...");
-            // Tidak menghentikan proses, lanjut ke pemanggilan AI langsung
           }
-        } catch (cacheErr) {
-          console.warn("Cache access failed, proceeding directly to AI", cacheErr);
-        }
+        } catch (cacheErr) {}
       }
 
       if (cacheDataFound) return;
 
-      // 3. AI Execution (Jalur Cepat jika cache gagal/timeout)
       const output = await aiIntentSearch({ 
         query: finalQuery || (activeCategory ? `Cari ${activeCategory}` : "Analisis Gambar"), 
         filters: {
           category: activeCategory || undefined,
-          location: activeLocation !== "Pilih Lokasi" ? activeLocation : undefined,
+          location: (activeLocation.includes('Lokasi') || activeLocation.includes('Location')) ? undefined : activeLocation,
           lat: coords?.lat,
           lng: coords?.lng
         } 
       });
 
-      // 4. Save to Cache (Fire and Forget - Jangan tunggu ini selesai)
       if (db && output) {
         const cacheRef = doc(db, 'search_cache', cacheId);
         setDoc(cacheRef, {
           results: JSON.stringify(output),
           timestamp: new Date().toISOString()
-        }).catch(err => console.warn("Failed to background-save cache", err));
+        }).catch(() => {});
       }
 
       setResults(output);
@@ -244,12 +224,7 @@ export default function CariPage() {
       }
       
     } catch (err: any) {
-      const errMsg = err.message || "Terjadi gangguan pada koneksi server atau AI.";
-      toast({ 
-        variant: "destructive", 
-        title: "Pencarian Terganggu", 
-        description: errMsg.includes('quota') ? "Batas harian AI Anda telah tercapai." : errMsg 
-      });
+      toast({ variant: "destructive", title: "Search Error", description: "Connection issue or limit reached." });
     } finally {
       setLoading(false);
     }
@@ -275,17 +250,17 @@ export default function CariPage() {
 
   const handleNearbySearch = () => {
     if (!("geolocation" in navigator)) {
-      toast({ variant: "destructive", title: "GPS Tidak Tersedia", description: "Browser tidak mendukung geolokasi." });
+      toast({ variant: "destructive", title: "GPS Unavailable", description: "Browser does not support geolocation." });
       return;
     }
     setLoading(true);
     navigator.geolocation.getCurrentPosition((position) => {
       setCoords({ lat: position.coords.latitude, lng: position.coords.longitude });
-      setActiveLocation("Lokasi GPS Aktif");
+      setActiveLocation(language === 'id' ? "Lokasi GPS Aktif" : "GPS Active");
       handleSearch();
     }, () => {
       setLoading(false);
-      toast({ variant: "destructive", title: "Gagal GPS", description: "Mohon izinkan akses lokasi di browser Anda." });
+      toast({ variant: "destructive", title: "GPS Failed", description: "Please allow location access." });
     });
   };
 
@@ -312,7 +287,7 @@ export default function CariPage() {
               <Input 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Cari apa saja di OnTapp..."
+                placeholder={t('search_placeholder')}
                 className="h-16 pl-12 pr-32 rounded-2xl border-slate-100 bg-slate-50/50 shadow-inner text-base font-medium focus:bg-white transition-all focus:border-teal-500"
               />
               <div className="absolute inset-y-3 right-3 flex items-center gap-1.5">
@@ -327,12 +302,12 @@ export default function CariPage() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-full h-12 justify-between rounded-xl border-slate-100 bg-white text-slate-600 font-bold hover:bg-slate-50 px-4 text-xs">
-                    <div className="flex items-center gap-2"><Filter className="size-3.5 text-teal-600" />{activeCategory ? activeCategory : "Pilih Kategori"}</div>
+                    <div className="flex items-center gap-2"><Filter className="size-3.5 text-teal-600" />{activeCategory ? activeCategory : (language === 'id' ? "Pilih Kategori" : "Pick Category")}</div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-[280px] rounded-2xl p-2 shadow-2xl border-slate-100">
-                  <DropdownMenuItem onClick={() => setActiveCategory(null)} className="font-bold text-slate-400 hover:text-teal-600 p-2.5 rounded-lg text-xs">Semua Kategori</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveCategory(null)} className="font-bold text-slate-400 hover:text-teal-600 p-2.5 rounded-lg text-xs">{language === 'id' ? 'Semua Kategori' : 'All Categories'}</DropdownMenuItem>
                   {ENTITY_CATEGORIES.map((cat) => (
                     <DropdownMenuItem key={cat.id} onClick={() => setActiveCategory(cat.label)} className="flex items-center gap-3 py-2.5 rounded-lg font-bold cursor-pointer hover:bg-slate-50 text-xs">
                       <div className="size-7 bg-slate-100 rounded flex items-center justify-center text-slate-500"><cat.icon className="size-3.5" /></div>{cat.label}
@@ -347,21 +322,21 @@ export default function CariPage() {
                     <div className="flex items-center gap-2"><MapPin className="size-3.5 text-rose-500" />{activeLocation}</div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
-                </PopoverTrigger>
+                </DropdownMenuTrigger>
                 <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl border-slate-100 space-y-3">
-                  <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" /><Input placeholder="Cari lokasi..." value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} className="h-9 pl-9 rounded-xl border-slate-100 bg-slate-50 text-[11px] font-bold" /></div>
+                  <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" /><Input placeholder="Search location..." value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} className="h-9 pl-9 rounded-xl border-slate-100 bg-slate-50 text-[11px] font-bold" /></div>
                   <div className="space-y-1 max-h-[200px] overflow-y-auto">
-                    {locationSearch && (<button type="button" onClick={() => { setActiveLocation(locationSearch); setIsLocationOpen(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 flex items-center gap-2"><MapPin className="size-3" /> Gunakan "{locationSearch}"</button>)}
+                    {locationSearch && (<button type="button" onClick={() => { setActiveLocation(locationSearch); setIsLocationOpen(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 flex items-center gap-2"><MapPin className="size-3" /> {language === 'id' ? 'Gunakan' : 'Use'} "{locationSearch}"</button>)}
                     {POPULAR_LOCATIONS.filter(l => l.toLowerCase().includes(locationSearch.toLowerCase())).map((loc) => (<button key={loc} type="button" onClick={() => { setActiveLocation(loc); setIsLocationOpen(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50">{loc}</button>))}
                   </div>
                 </PopoverContent>
               </Popover>
 
-              <Button type="button" variant="outline" onClick={handleNearbySearch} className="w-full h-12 rounded-xl border-teal-100 bg-teal-50/30 text-teal-700 font-bold hover:bg-teal-50 text-xs gap-2"><LocateFixed className="size-4" />Cari Sekitar (GPS)</Button>
+              <Button type="button" variant="outline" onClick={handleNearbySearch} className="w-full h-12 rounded-xl border-teal-100 bg-teal-50/30 text-teal-700 font-bold hover:bg-teal-50 text-xs gap-2"><LocateFixed className="size-4" />{t('nearby')}</Button>
             </div>
 
             <Button type="submit" disabled={loading} className="w-full h-14 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-black text-sm shadow-md transition-all active:scale-95 flex gap-2">
-              {loading ? <RefreshCw className="size-4 animate-spin" /> : <><Search className="size-4" /> Cari Sekarang</>}
+              {loading ? <RefreshCw className="size-4 animate-spin" /> : <><Search className="size-4" /> {t('search_now')}</>}
             </Button>
           </form>
         </div>
@@ -376,7 +351,7 @@ export default function CariPage() {
           {results && (
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-2"><h3 className="font-black text-slate-900 text-base">Hasil Discovery</h3><Badge className="bg-teal-100 text-teal-700 font-bold">{results.results.length}</Badge></div>
+                <div className="flex items-center gap-2"><h3 className="font-black text-slate-900 text-base">{t('results')}</h3><Badge className="bg-teal-100 text-teal-700 font-bold">{results.results.length}</Badge></div>
                 <div className="flex items-center gap-1.5 text-[9px] font-black uppercase text-teal-600 bg-teal-50 px-3 py-1 rounded-full border border-teal-100"><Sparkles className="size-3" /> Cost-Optimized Search</div>
               </div>
               <div className="grid gap-4">
@@ -390,7 +365,7 @@ export default function CariPage() {
                           <div className="flex flex-wrap items-center gap-2">
                             <h4 className="text-lg font-black text-slate-900">{result.name}</h4>
                             <Badge className={cn("text-[10px] font-bold rounded-lg px-2", result.source === 'external' ? 'bg-amber-50 text-amber-600' : 'bg-teal-50 text-teal-600')}>
-                              {result.source === 'external' ? 'Media Eksternal' : 'Verified OnTapp'}
+                              {result.source === 'external' ? (language === 'id' ? 'Media Eksternal' : 'External Media') : 'Verified OnTapp'}
                             </Badge>
                           </div>
                           <p className="text-slate-500 font-medium text-xs leading-relaxed">{result.description}</p>
@@ -401,7 +376,7 @@ export default function CariPage() {
                         </div>
                         <div className="md:w-32 shrink-0 flex flex-col gap-2">
                           <Button variant="outline" size="sm" onClick={() => openInGoogleMaps(result.name, result.location)} className="w-full rounded-lg border-teal-100 text-teal-700 text-[9px] font-black"><MapIcon className="size-3" /> Maps</Button>
-                          <Button className="w-full rounded-lg h-9 bg-teal-600 hover:bg-teal-700 text-white text-[9px] font-black">Lihat Profil</Button>
+                          <Button className="w-full rounded-lg h-9 bg-teal-600 hover:bg-teal-700 text-white text-[9px] font-black">{language === 'id' ? 'Lihat Profil' : 'View Profile'}</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -414,8 +389,8 @@ export default function CariPage() {
           {!loading && !results && (
             <div className="py-20 text-center space-y-6 bg-white rounded-[2rem] border border-dashed border-slate-200">
                <div className="size-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto"><Search className="size-10 text-slate-200" /></div>
-               <h3 className="text-xl font-black text-slate-900">Mulai Pencarian Pintar</h3>
-               <p className="text-xs text-slate-400 max-w-sm mx-auto font-medium">Batas 30 akses harian untuk menjaga kualitas jaringan OnTapp.</p>
+               <h3 className="text-xl font-black text-slate-900">{t('start_search')}</h3>
+               <p className="text-xs text-slate-400 max-w-sm mx-auto font-medium">{t('daily_limit_msg')}</p>
             </div>
           )}
         </div>
@@ -424,10 +399,10 @@ export default function CariPage() {
       <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
         <DialogContent className="max-w-[320px] rounded-[2.5rem] bg-[#2d3035] text-white p-8">
           <div className="space-y-8">
-            <h2 className="text-xl font-bold">Cari dengan Visual</h2>
+            <h2 className="text-xl font-bold">{language === 'id' ? 'Cari dengan Visual' : 'Visual Search'}</h2>
             <div className="space-y-6">
-              <button onClick={() => cameraInputRef.current?.click()} className="w-full flex items-center justify-between"><div className="flex items-center gap-5"><div className="size-12 rounded-full bg-white/10 flex items-center justify-center"><Camera className="size-6" /></div><span className="font-bold">Ambil Foto</span></div></button>
-              <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center justify-between"><div className="flex items-center gap-5"><div className="size-12 rounded-full bg-white/10 flex items-center justify-center"><ImageIcon className="size-6" /></div><span className="font-bold">Galeri</span></div></button>
+              <button onClick={() => cameraInputRef.current?.click()} className="w-full flex items-center justify-between"><div className="flex items-center gap-5"><div className="size-12 rounded-full bg-white/10 flex items-center justify-center"><Camera className="size-6" /></div><span className="font-bold">{language === 'id' ? 'Ambil Foto' : 'Take Photo'}</span></div></button>
+              <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center justify-between"><div className="flex items-center gap-5"><div className="size-12 rounded-full bg-white/10 flex items-center justify-center"><ImageIcon className="size-6" /></div><span className="font-bold">{language === 'id' ? 'Galeri' : 'Gallery'}</span></div></button>
             </div>
           </div>
         </DialogContent>

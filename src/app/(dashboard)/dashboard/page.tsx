@@ -27,6 +27,7 @@ import {
 } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/language-context";
 
 const RECENT_ACTIVITY = [
   { id: 1, type: 'match', title: 'New Match Found', desc: 'EcoPack Solutions (98%)', time: '10m ago' },
@@ -51,17 +52,19 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function UserDashboardPage() {
+  const { t } = useLanguage();
+
   return (
     <DashboardLayout>
       <div className="space-y-8 py-6">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-1">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-none">Pusat Kendali</h1>
-            <p className="text-slate-500 font-medium text-lg">Ringkasan performa bisnis dan intelijen jaringan Anda.</p>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-none">{t('dashboard')}</h1>
+            <p className="text-slate-500 font-medium text-lg">{t('dashboard_desc')}</p>
           </div>
           <div className="flex gap-2">
             <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex gap-2">
-              <ShieldCheck className="size-3" /> Akun Terverifikasi
+              <ShieldCheck className="size-3" /> {t('verified_account')}
             </Badge>
           </div>
         </header>

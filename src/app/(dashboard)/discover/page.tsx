@@ -16,9 +16,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/context/language-context";
 
 export default function DiscoveryHistoryPage() {
   const { toast } = useToast();
+  const { language, t } = useLanguage();
   const [history, setHistory] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
 
@@ -33,7 +35,7 @@ export default function DiscoveryHistoryPage() {
   const handleClearHistory = () => {
     localStorage.removeItem('ontapp_discovery_history');
     setHistory([]);
-    toast({ title: "Riwayat Dihapus", description: "Seluruh penemuan AI telah dibersihkan." });
+    toast({ title: language === 'id' ? "Riwayat Dihapus" : "History Cleared" });
   };
 
   const handleRemoveItem = (id: string) => {
@@ -53,20 +55,20 @@ export default function DiscoveryHistoryPage() {
         <header className="space-y-4">
           <div className="flex items-center gap-2 bg-teal-50 text-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest w-fit border border-teal-100">
              <History className="size-3" />
-             Arsip Penemuan AI
+             {t('ai_backup')}
           </div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Penemuan Anda</h1>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">{language === 'id' ? 'Penemuan Anda' : 'Your Discoveries'}</h1>
           <p className="text-slate-500 font-medium text-lg max-w-2xl">
-            Hasil pencarian AI yang Anda temukan di halaman Cari dicadangkan di sini secara otomatis.
+            {t('ai_backup_desc')}
           </p>
         </header>
 
         {history.length > 0 ? (
           <div className="grid gap-6">
             <div className="flex items-center justify-between px-2">
-               <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total {history.length} Penemuan</h3>
+               <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total {history.length} {language === 'id' ? 'Penemuan' : 'Items'}</h3>
                <Button onClick={handleClearHistory} variant="ghost" size="sm" className="text-[10px] font-black uppercase text-rose-500 hover:bg-rose-50">
-                 Bersihkan Semua
+                 {language === 'id' ? 'Bersihkan Semua' : 'Clear All'}
                </Button>
             </div>
 
@@ -126,7 +128,7 @@ export default function DiscoveryHistoryPage() {
                              Maps
                            </Button>
                            <Button onClick={() => window.location.href = '/cari'} className="flex-1 md:flex-none rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase h-10 px-6">
-                             Cek Lagi
+                             {language === 'id' ? 'Cek Lagi' : 'Check Again'}
                            </Button>
                            <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id)} className="size-10 rounded-xl border border-slate-100 text-slate-300 hover:text-rose-500">
                              <Trash2 size={16} />
@@ -145,13 +147,13 @@ export default function DiscoveryHistoryPage() {
                 <Search className="size-10 text-slate-200" />
              </div>
              <div className="space-y-2">
-                <h3 className="text-2xl font-black text-slate-900">Belum Ada Backup</h3>
+                <h3 className="text-2xl font-black text-slate-900">{language === 'id' ? 'Belum Ada Backup' : 'No Backup Found'}</h3>
                 <p className="text-slate-400 max-w-xs mx-auto font-medium">
-                  Mulai mencari mitra di halaman Cari AI untuk melihat riwayat penemuan Anda di sini secara otomatis.
+                  {language === 'id' ? 'Mulai mencari mitra di halaman Cari AI untuk melihat riwayat penemuan Anda di sini secara otomatis.' : 'Start searching for partners on the AI Search page to see your history here.'}
                 </p>
              </div>
              <Button onClick={() => window.location.href = '/cari'} className="rounded-2xl bg-accent px-10 h-14 font-black shadow-lg shadow-accent/20">
-                Buka Pencarian AI
+                {t('search_now')}
              </Button>
           </div>
         )}
