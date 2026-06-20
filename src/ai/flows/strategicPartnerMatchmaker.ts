@@ -94,21 +94,26 @@ const strategicPartnerMatchmakerFlow = ai.defineFlow(
   },
   async (input) => {
     let lastError;
-    const maxRetries = 2;
+    const maxRetries = 3;
     for (let i = 0; i < maxRetries; i++) {
       try {
         const { output } = await strategicPartnerMatchmakerPrompt(input);
         if (output) return output;
       } catch (err: any) {
         lastError = err;
-        if (i < maxRetries - 1) {
-          await new Promise(r => setTimeout(r, 2000));
+        const errMsg = String(err).toLowerCase();
+        const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('busy') || errMsg.includes('quota');
+        
+        if (isRetryable && i < maxRetries - 1) {
+          const delay = Math.pow(2, i) * 3000;
+          await new Promise(r => setTimeout(r, delay));
           continue;
         }
+        break;
       }
     }
     console.error('Matchmaker flow failed:', lastError);
-    throw new Error('Gagal mencocokkan mitra. Layanan AI sedang sibuk.');
+    throw new Error('Gagal mencocokkan mitra. Layanan AI sedang sangat sibuk atau kuota tercapai.');
   }
 );
 

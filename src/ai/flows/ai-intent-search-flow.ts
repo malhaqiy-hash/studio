@@ -88,7 +88,7 @@ const aiIntentSearchFlow = ai.defineFlow(
       : 'None';
 
     let lastError;
-    const maxRetries = 4; // Increased for better stability
+    const maxRetries = 5; // Increased to cover a longer quota reset window
     
     for (let i = 0; i < maxRetries; i++) {
       try {
@@ -113,9 +113,9 @@ const aiIntentSearchFlow = ai.defineFlow(
                             errMsg.includes('busy');
                             
         if (isRetryable && i < maxRetries - 1) {
-          // Exponential backoff: 2s, 4s, 8s...
-          const delay = Math.pow(2, i) * 2000; 
-          console.warn(`Search engine attempt ${i + 1} failed. Retrying in ${delay}ms... Reason: ${errMsg.substring(0, 100)}`);
+          // Increased delay for exponential backoff: 3s, 6s, 12s, 24s...
+          const delay = Math.pow(2, i) * 3000; 
+          console.warn(`Attempt ${i + 1} for AI Search failed. Retrying in ${delay}ms... Reason: ${errMsg.substring(0, 50)}`);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
@@ -123,11 +123,10 @@ const aiIntentSearchFlow = ai.defineFlow(
       }
     }
     
-    console.error('AI Intent Search critically failed after retries:', lastError);
-    // Provide a more descriptive and user-friendly error message
+    console.error('AI Intent Search critically failed after all retries:', lastError);
     const errorDetail = String(lastError).includes('429') 
-      ? 'Batas penggunaan AI (kuota) tercapai. Harap tunggu 60 detik sebelum mencari lagi.' 
-      : 'AI sedang sangat sibuk atau terjadi gangguan jaringan global.';
+      ? 'Batas penggunaan AI tercapai karena trafik tinggi. Harap tunggu sekitar 60 detik sebelum mencari lagi.' 
+      : 'Layanan AI sedang sangat sibuk atau terjadi gangguan jaringan global.';
       
     throw new Error(`Pencarian Terganggu: ${errorDetail}`);
   }

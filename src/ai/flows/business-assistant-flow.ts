@@ -60,20 +60,25 @@ const businessAssistantFlow = ai.defineFlow(
   },
   async (input) => {
     let lastError;
-    const maxRetries = 2;
+    const maxRetries = 3;
     for (let i = 0; i < maxRetries; i++) {
       try {
         const { output } = await businessAssistantPrompt(input);
         if (output) return { response: output! };
       } catch (err: any) {
         lastError = err;
-        if (i < maxRetries - 1) {
-          await new Promise(r => setTimeout(r, 1500));
+        const errMsg = String(err).toLowerCase();
+        const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('busy') || errMsg.includes('quota');
+        
+        if (isRetryable && i < maxRetries - 1) {
+          const delay = Math.pow(2, i) * 2000;
+          await new Promise(r => setTimeout(r, delay));
           continue;
         }
+        break;
       }
     }
     console.error('Assistant flow failed:', lastError);
-    throw new Error('Gagal merespon. AI sedang sibuk.');
+    throw new Error('Gagal merespon. AI sedang sangat sibuk atau kuota tercapai.');
   }
 );
