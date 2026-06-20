@@ -11,7 +11,8 @@ import {
   Package,
   History,
   Trash2,
-  Search
+  Search,
+  Map as MapIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +40,11 @@ export default function DiscoveryHistoryPage() {
     const updated = history.filter(item => item.id !== id);
     setHistory(updated);
     localStorage.setItem('ontapp_discovery_history', JSON.stringify(updated));
+  };
+
+  const openInGoogleMaps = (name: string, location?: string) => {
+    const searchQuery = encodeURIComponent(`${name} ${location || ''}`);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${searchQuery}`, '_blank');
   };
 
   return (
@@ -77,7 +83,7 @@ export default function DiscoveryHistoryPage() {
                       <div className="p-8 flex-1 flex flex-col md:flex-row gap-8 items-center">
                         <div className={cn(
                           "size-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:rotate-6 transition-transform",
-                          item.source === 'external' ? 'bg-slate-50 text-slate-400' : 'bg-teal-50 text-accent'
+                          item.source === 'external' ? "bg-slate-50 text-slate-400" : "bg-teal-50 text-accent"
                         )}>
                           {item.type === 'supplier' ? <Package size={24} /> : <Building2 size={24} />}
                         </div>
@@ -88,7 +94,12 @@ export default function DiscoveryHistoryPage() {
                             {item.source === 'ontapp_verified' && <ShieldCheck className="size-4 text-emerald-500 fill-emerald-50" />}
                           </div>
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                            <div className="flex items-center gap-1"><MapPin className="size-3" /> {item.location || 'Global'}</div>
+                            <button 
+                              onClick={() => openInGoogleMaps(item.name, item.location)}
+                              className="flex items-center gap-1 hover:text-rose-500 transition-colors"
+                            >
+                              <MapPin className="size-3" /> {item.location || 'Global'}
+                            </button>
                             <div className="size-1 bg-slate-200 rounded-full" />
                             <div>{item.industry || item.type}</div>
                           </div>
@@ -106,6 +117,14 @@ export default function DiscoveryHistoryPage() {
                         </div>
 
                         <div className="flex gap-2 w-full md:w-auto">
+                           <Button 
+                             onClick={() => openInGoogleMaps(item.name, item.location)}
+                             variant="outline"
+                             className="flex-1 md:flex-none rounded-xl border-rose-100 text-rose-600 font-black text-[10px] uppercase h-10 px-4 gap-2"
+                           >
+                             <MapIcon className="size-3.5" />
+                             Maps
+                           </Button>
                            <Button onClick={() => window.location.href = '/cari'} className="flex-1 md:flex-none rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase h-10 px-6">
                              Cek Lagi
                            </Button>

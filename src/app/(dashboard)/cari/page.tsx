@@ -31,7 +31,8 @@ import {
   Camera,
   LocateFixed,
   X,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Map as MapIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -110,7 +111,6 @@ export default function CariPage() {
       });
       setResults(output);
       
-      // Backup logic: Save to localStorage for Discovery History page
       if (typeof window !== 'undefined') {
         const history = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
         const newItems = output.results.map(r => ({
@@ -127,6 +127,11 @@ export default function CariPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openInGoogleMaps = (name: string, location?: string) => {
+    const searchQuery = encodeURIComponent(`${name} ${location || ''}`);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${searchQuery}`, '_blank');
   };
 
   const toggleVoiceSearch = () => {
@@ -480,10 +485,13 @@ export default function CariPage() {
 
                               <div className="flex flex-wrap items-center gap-4">
                                 {result.location && (
-                                  <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                  <button 
+                                    onClick={() => openInGoogleMaps(result.name, result.location)}
+                                    className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-colors"
+                                  >
                                     <MapPin className="size-3 text-rose-400" />
                                     {result.location}
-                                  </div>
+                                  </button>
                                 )}
                                 <div className="flex items-center gap-1 text-[10px] font-black text-teal-600">
                                   {result.matchScore}% Synergy
@@ -509,6 +517,14 @@ export default function CariPage() {
                                 >
                                   {trans?.loading ? <RefreshCw className="size-2.5 animate-spin" /> : <Globe className="size-2.5" />}
                                   {trans?.show ? "Asli" : "Translate"}
+                                </Button>
+                                <Button 
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => openInGoogleMaps(result.name, result.location)}
+                                  className="w-full h-9 rounded-lg border-rose-100 bg-rose-50/30 text-rose-600 text-[9px] font-black hover:bg-rose-50 gap-1.5 shadow-sm"
+                                >
+                                  <MapIcon className="size-3" /> Buka Maps
                                 </Button>
                                 <Button className="w-full rounded-lg h-9 bg-accent hover:bg-teal-600 text-white text-[9px] font-black shadow-md transition-all active:scale-95">
                                   Lihat Profil
@@ -545,6 +561,16 @@ export default function CariPage() {
           )}
         </div>
       </div>
+
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
 
       <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
         <DialogContent className="max-w-[320px] rounded-[2.5rem] border-none shadow-2xl p-8 bg-[#2d3035] text-white overflow-hidden outline-none">
