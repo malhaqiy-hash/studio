@@ -431,7 +431,7 @@ export default function CariPage() {
               disabled={loading}
               className="w-full h-14 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-sm shadow-md transition-all active:scale-95 flex gap-2"
             >
-              {loading ? <RefreshCw className="size-4 animate-spin" /> : <><Sparkles className="size-4" /> Cari Sekarang</>}
+              {loading ? <RefreshCw className="size-4 animate-spin" /> : <><Search className="size-4" /> Cari Sekarang</>}
             </Button>
           </form>
         </div>
