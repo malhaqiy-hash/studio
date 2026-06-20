@@ -230,7 +230,6 @@ export default function CariPage() {
               toast({ title: "Cache Optimization", description: "Loading from smart cache (24h)." });
               cacheDataFound = true;
               
-              // Perbarui urutan riwayat visual meskipun dari cache
               updateVisualHistory(parsedResults.results);
             }
           }
@@ -368,7 +367,11 @@ export default function CariPage() {
               <input type="file" ref={cameraInputRef} onChange={handleImageInput} className="hidden" accept="image/*" capture="environment" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <Button type="submit" disabled={loading} className="w-full h-14 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-black text-sm shadow-md transition-all active:scale-95 flex gap-2">
+              {loading ? <RefreshCw className="size-4 animate-spin" /> : <><Search className="size-4" /> {t('search_now')}</>}
+            </Button>
+
+            <div className="grid grid-cols-2 gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-full h-12 justify-between rounded-xl border-slate-100 bg-white text-slate-600 font-bold hover:bg-slate-50 px-4 text-xs">
@@ -433,13 +436,9 @@ export default function CariPage() {
                   </div>
                 </PopoverContent>
               </Popover>
-
-              <Button type="button" variant="outline" onClick={handleNearbySearch} className="w-full h-12 rounded-xl border-teal-100 bg-teal-50/30 text-teal-700 font-bold hover:bg-teal-50 text-xs gap-2"><LocateFixed className="size-4" />{t('nearby')}</Button>
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full h-14 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-black text-sm shadow-md transition-all active:scale-95 flex gap-2">
-              {loading ? <RefreshCw className="size-4 animate-spin" /> : <><Search className="size-4" /> {t('search_now')}</>}
-            </Button>
+            <Button type="button" variant="outline" onClick={handleNearbySearch} className="w-full h-11 rounded-xl border-teal-100 bg-teal-50/10 text-teal-700 font-bold hover:bg-teal-50 text-xs gap-2"><LocateFixed className="size-4" />{t('nearby')}</Button>
           </form>
         </div>
 
