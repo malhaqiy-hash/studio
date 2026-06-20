@@ -25,12 +25,16 @@ import {
   Globe,
   Lock,
   Zap,
-  MessageSquare
+  MessageSquare,
+  Info,
+  ChevronRight,
+  Cpu
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage, LANGUAGES } from "@/context/language-context";
 import { useNotifications } from "@/hooks/use-notifications";
+import Link from "next/link";
 
 const SETTINGS_KEY = "ontapp_system_settings_v2";
 
@@ -140,7 +144,7 @@ export default function SettingsPage() {
           <Button 
             onClick={handleSave} 
             disabled={loading}
-            className="rounded-2xl bg-accent hover:bg-indigo-600 px-8 h-12 font-black shadow-lg flex gap-2"
+            className="rounded-2xl bg-teal-600 hover:bg-teal-700 px-8 h-12 font-black shadow-lg flex gap-2 text-white"
           >
             <Save className="size-4" />
             {loading ? "Saving..." : "Save Changes"}
@@ -152,7 +156,7 @@ export default function SettingsPage() {
             <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden group hover:shadow-md transition-shadow">
               <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-xl bg-indigo-100 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="size-10 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Palette className="size-5" />
                   </div>
                   <div>
@@ -187,7 +191,7 @@ export default function SettingsPage() {
             <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden group hover:shadow-md transition-shadow">
               <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="size-10 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Languages className="size-5" />
                   </div>
                   <div>
@@ -262,6 +266,36 @@ export default function SettingsPage() {
                   />
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200 shadow-sm rounded-[2rem] overflow-hidden group hover:shadow-md transition-shadow">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Cpu className="size-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">Sistem & Informasi</CardTitle>
+                  <CardDescription className="text-xs font-medium">Detail aplikasi dan transparansi fitur.</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-8 space-y-4">
+              <Link href="/settings/info">
+                <button className="w-full flex items-center justify-between p-5 rounded-2xl bg-slate-50 hover:bg-teal-50 border border-slate-100 hover:border-teal-200 transition-all group">
+                  <div className="flex items-center gap-4">
+                    <div className="size-10 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Info className="size-5 text-teal-600" />
+                    </div>
+                    <div className="text-left">
+                      <h4 className="font-bold text-slate-900">Info Aplikasi</h4>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Penjelasan Fitur & Kuota AI</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="size-5 text-slate-300 group-hover:text-teal-600 transition-colors" />
+                </button>
+              </Link>
             </CardContent>
           </Card>
         </div>
