@@ -32,7 +32,8 @@ import {
   MoreHorizontal,
   Camera,
   LocateFixed,
-  X
+  X,
+  Image as ImageIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -51,6 +52,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const ENTITY_CATEGORIES = [
   { id: 'toko', label: 'Toko', icon: Store },
@@ -85,7 +92,10 @@ export default function CariPage() {
   const [isListening, setIsListening] = React.useState(false);
   const [isAnalyzingImage, setIsAnalyzingImage] = React.useState(false);
   const [previewImage, setPreviewImage] = React.useState<string | null>(null);
+  const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
+  
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const cameraInputRef = React.useRef<HTMLInputElement>(null);
   
   // Translation state
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean, detected: string }>>({});
@@ -160,20 +170,21 @@ export default function CariPage() {
     recognition.start();
   };
 
-  const handleImageSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result as string);
         setIsAnalyzingImage(true);
-        toast({ title: "Menganalisis Gambar...", description: "AI sedang mengidentifikasi objek bisnis." });
+        setIsSourcePickerOpen(false);
+        toast({ title: "Menganalisis Gambar...", description: "AI sedang mengidentifikasi objek bisnis dari foto Anda." });
         
         // Simulasikan analisis AI
         setTimeout(() => {
           setIsAnalyzingImage(false);
-          setQuery("Produk serupa dari gambar");
-          handleSearch(undefined, "Produk serupa dari gambar");
+          setQuery("Produk/bisnis serupa dari gambar");
+          handleSearch(undefined, "Produk/bisnis serupa dari gambar");
         }, 2000);
       };
       reader.readAsDataURL(file);
@@ -297,7 +308,7 @@ export default function CariPage() {
               <div className="absolute inset-y-3 right-3 flex items-center gap-1.5">
                 <button 
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => setIsSourcePickerOpen(true)}
                   className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-accent border border-slate-100 shadow-sm transition-all active:scale-90"
                 >
                   <Camera className="size-5" />
@@ -313,12 +324,22 @@ export default function CariPage() {
                   <Mic className="size-5" />
                 </button>
               </div>
+              
+              {/* Hidden Inputs */}
               <input 
                 type="file" 
                 ref={fileInputRef} 
-                onChange={handleImageSearch} 
+                onChange={handleImageInput} 
                 className="hidden" 
                 accept="image/*" 
+              />
+              <input 
+                type="file" 
+                ref={cameraInputRef} 
+                onChange={handleImageInput} 
+                className="hidden" 
+                accept="image/*" 
+                capture="environment"
               />
             </div>
 
@@ -572,6 +593,58 @@ export default function CariPage() {
           )}
         </div>
       </div>
+
+      {/* Media Source Picker Dialog */}
+      <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
+        <DialogContent className="max-w-[320px] rounded-[2.5rem] border-none shadow-2xl p-8 bg-[#2d3035] text-white overflow-hidden outline-none animate-in zoom-in-95 duration-200">
+          <div className="space-y-8">
+            <h2 className="text-xl font-bold text-white/90 tracking-tight">Cari dengan Visual</h2>
+            
+            <div className="space-y-6">
+              <button 
+                onClick={() => cameraInputRef.current?.click()}
+                className="w-full flex items-center justify-between group text-left active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-5">
+                  <div className="size-12 rounded-full bg-white/10 flex items-center justify-center shadow-inner">
+                    <Camera className="size-6 text-gray-300" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-[16px]">Ambil Foto</span>
+                    <span className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5 opacity-60">Gunakan Kamera</span>
+                  </div>
+                </div>
+                <div className="size-5 rounded-full border-2 border-gray-500" />
+              </button>
+
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full flex items-center justify-between group text-left active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-5">
+                  <div className="size-12 rounded-full bg-white/10 flex items-center justify-center shadow-inner">
+                    <ImageIcon className="size-6 text-gray-300" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-[16px]">Galeri</span>
+                    <span className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5 opacity-60">Pilih dari Foto</span>
+                  </div>
+                </div>
+                <div className="size-5 rounded-full border-2 border-gray-500" />
+              </button>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <button 
+                onClick={() => setIsSourcePickerOpen(false)}
+                className="text-blue-400 font-black text-sm uppercase tracking-widest hover:text-blue-300 transition-colors"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

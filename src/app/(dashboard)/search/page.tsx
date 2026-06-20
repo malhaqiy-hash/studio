@@ -34,7 +34,8 @@ import {
   Camera,
   Mic,
   X,
-  RefreshCw
+  RefreshCw,
+  Image as ImageIcon
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 
 const SEARCH_SCOPES = [
   { id: "products", label: "Product Search", icon: Package, color: "text-indigo-500", bg: "bg-indigo-50" },
@@ -121,7 +126,10 @@ export default function SearchHubPage() {
   const [query, setQuery] = React.useState("");
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [previewImage, setPreviewImage] = React.useState<string | null>(null);
+  const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
+  
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const cameraInputRef = React.useRef<HTMLInputElement>(null);
   
   const [extractedData, setExtractedData] = React.useState<null | {
     industry: string;
@@ -150,12 +158,13 @@ export default function SearchHubPage() {
     }, 2000);
   };
 
-  const handleImageSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result as string);
+        setIsSourcePickerOpen(false);
         toast({ title: "Visual AI Aktif", description: "Menganalisis objek dalam gambar..." });
         handleSearch();
       };
@@ -199,7 +208,7 @@ export default function SearchHubPage() {
                   <div className="absolute inset-y-5 right-32 flex items-center gap-2">
                      <button 
                        type="button" 
-                       onClick={() => fileInputRef.current?.click()}
+                       onClick={() => setIsSourcePickerOpen(true)}
                        className="w-12 h-14 flex items-center justify-center rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-accent transition-all active:scale-90"
                      >
                         <Camera className="size-6" />
@@ -210,7 +219,9 @@ export default function SearchHubPage() {
                      >
                         <Mic className="size-6" />
                      </button>
-                     <input type="file" ref={fileInputRef} onChange={handleImageSearch} className="hidden" accept="image/*" />
+                     
+                     <input type="file" ref={fileInputRef} onChange={handleImageInput} className="hidden" accept="image/*" />
+                     <input type="file" ref={cameraInputRef} onChange={handleImageInput} className="hidden" accept="image/*" capture="environment" />
                   </div>
 
                   <Button 
@@ -557,6 +568,58 @@ export default function SearchHubPage() {
           </div>
         </div>
       </div>
+
+      {/* Media Source Picker Dialog */}
+      <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
+        <DialogContent className="max-w-[320px] rounded-[2.5rem] border-none shadow-2xl p-8 bg-[#2d3035] text-white overflow-hidden outline-none animate-in zoom-in-95 duration-200">
+          <div className="space-y-8">
+            <h2 className="text-xl font-bold text-white/90 tracking-tight">Visual Search Hub</h2>
+            
+            <div className="space-y-6">
+              <button 
+                onClick={() => cameraInputRef.current?.click()}
+                className="w-full flex items-center justify-between group text-left active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-5">
+                  <div className="size-12 rounded-full bg-white/10 flex items-center justify-center shadow-inner">
+                    <Camera className="size-6 text-gray-300" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-[16px]">Take Photo</span>
+                    <span className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5 opacity-60">Use Camera</span>
+                  </div>
+                </div>
+                <div className="size-5 rounded-full border-2 border-gray-500" />
+              </button>
+
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full flex items-center justify-between group text-left active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-5">
+                  <div className="size-12 rounded-full bg-white/10 flex items-center justify-center shadow-inner">
+                    <ImageIcon className="size-6 text-gray-300" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-[16px]">Gallery</span>
+                    <span className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5 opacity-60">Choose from Photos</span>
+                  </div>
+                </div>
+                <div className="size-5 rounded-full border-2 border-gray-500" />
+              </button>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <button 
+                onClick={() => setIsSourcePickerOpen(false)}
+                className="text-blue-400 font-black text-sm uppercase tracking-widest hover:text-blue-300 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
