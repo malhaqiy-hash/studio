@@ -81,7 +81,7 @@ export function AIAssistant() {
         <CardHeader className="bg-slate-900 text-white p-4 flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="size-8 rounded-lg bg-accent flex items-center justify-center">
-              <Sparkles className="size-4 text-white" />
+              <User className="size-4 text-white" />
             </div>
             <div>
               <CardTitle className="text-sm font-black">OnTapp Assistant</CardTitle>

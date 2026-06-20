@@ -25,6 +25,7 @@ import {
   CheckCircle2,
   Cpu,
   Star,
+  Award,
   ExternalLink,
   Info,
   Globe,
@@ -35,6 +36,7 @@ import {
   Mic,
   X,
   RefreshCw,
+  Brain,
   Image as ImageIcon
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -179,7 +181,7 @@ export default function SearchHubPage() {
         <div className="lg:col-span-8 space-y-8">
           <header className="space-y-4">
             <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-accent/20">
-              <Sparkles className="size-3 animate-pulse" />
+              <Brain className="size-3 animate-pulse" />
               Intelligence Index
             </div>
             <h1 className="text-4xl font-headline font-black text-slate-900 tracking-tight leading-none">
@@ -256,7 +258,7 @@ export default function SearchHubPage() {
                 {isAnalyzing && (
                   <div className="p-8 rounded-[2rem] bg-indigo-50/50 border border-indigo-100 space-y-4 animate-in fade-in duration-300">
                     <div className="flex items-center gap-3">
-                      <Sparkles className="size-5 text-accent animate-pulse" />
+                      <Brain className="size-5 text-accent animate-pulse" />
                       <span className="text-sm font-black text-indigo-900 uppercase tracking-widest">
                         AI is analyzing market intent and extraction...
                       </span>
@@ -354,7 +356,7 @@ export default function SearchHubPage() {
                                     ? "bg-gradient-to-r from-indigo-500 via-accent to-indigo-600 text-white"
                                     : "bg-slate-200 text-slate-600"
                                 )}>
-                                  <Sparkles className="size-3 text-white fill-white" />
+                                  <Target className="size-3 text-white fill-white" />
                                   {result.matchScore}% Match
                                 </Badge>
                               </div>
@@ -393,7 +395,7 @@ export default function SearchHubPage() {
                                       {result.location}
                                     </div>
                                     <div className="flex items-center gap-1.5 p-1 px-3 bg-slate-50 border border-slate-100 rounded-full">
-                                      <Star className="size-4 text-amber-500 fill-amber-500" />
+                                      <Award className="size-4 text-amber-500 fill-amber-500" />
                                       <span className="text-sm font-black text-slate-900 leading-none">{result.reputation}</span>
                                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">/ 5.0 Rating</span>
                                     </div>
@@ -552,7 +554,7 @@ export default function SearchHubPage() {
           <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
             <div className="relative z-10 space-y-6">
               <div className="size-14 rounded-2xl bg-accent flex items-center justify-center shadow-lg rotate-3">
-                <Sparkles className="size-7 text-white" />
+                <Brain className="size-7 text-white" />
               </div>
               <div className="space-y-2">
                 <h3 className="text-2xl font-black tracking-tight">AI Power-Search</h3>

@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, TrendingUp, Map, Ship, Briefcase, Search, Clock, Bookmark, ChevronRight, Zap, Sparkles, Star } from "lucide-react";
+import { BookOpen, TrendingUp, Map, Ship, Briefcase, Search, Clock, Bookmark, ChevronRight, Zap, Lightbulb, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/language-context";
 
@@ -66,7 +66,7 @@ export default function KnowledgePage() {
            </div>
            <div className="lg:col-span-4 space-y-8">
               <Card className="rounded-[2.5rem] bg-slate-900 text-white p-10 relative overflow-hidden shadow-2xl">
-                 <div className="relative z-10 space-y-8"><div className="size-14 rounded-2xl bg-accent flex items-center justify-center shadow-lg"><Sparkles className="size-8 text-white fill-white" /></div><div className="space-y-2"><h3 className="text-2xl font-black tracking-tight">Personalized Syllabus</h3><p className="text-slate-400 text-sm font-medium">Based on your activity, we recommend custom trade modules.</p></div><Button className="w-full bg-white text-slate-900 font-black rounded-2xl h-14">View My Academy</Button></div>
+                 <div className="relative z-10 space-y-8"><div className="size-14 rounded-2xl bg-accent flex items-center justify-center shadow-lg"><Lightbulb className="size-8 text-white fill-white" /></div><div className="space-y-2"><h3 className="text-2xl font-black tracking-tight">Personalized Syllabus</h3><p className="text-slate-400 text-sm font-medium">Based on your activity, we recommend custom trade modules.</p></div><Button className="w-full bg-white text-slate-900 font-black rounded-2xl h-14">View My Academy</Button></div>
                  <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-3xl -mr-32 -mt-32" />
               </Card>
            </div>

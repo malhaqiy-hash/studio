@@ -13,7 +13,7 @@ import {
   Heart, 
   MessageCircle, 
   ArrowUpRight,
-  Sparkles
+  Brain
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -101,7 +101,7 @@ export default function SavedPostsPage() {
                     <div className="space-y-4">
                       {post.type === 'insight' && (
                         <div className="inline-flex items-center gap-2 bg-indigo-50 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-indigo-100">
-                          <Sparkles className="size-2.5" />
+                          <Brain className="size-2.5" />
                           AI Analysis
                         </div>
                       )}

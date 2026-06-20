@@ -319,13 +319,13 @@ export default function CariPage() {
               />
               <div className="absolute inset-y-3 right-3 flex items-center gap-1.5">
                 {query && (
-                  <button 
-                    type="button" 
+                  <span 
+                    role="button" 
                     onClick={() => setQuery("")}
-                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-rose-500 border border-slate-100 shadow-sm transition-all active:scale-90"
+                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-rose-500 border border-slate-100 shadow-sm transition-all active:scale-90 cursor-pointer"
                   >
                     <X className="size-5" />
-                  </button>
+                  </span>
                 )}
                 <button type="button" onClick={() => setIsSourcePickerOpen(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-teal-600 border border-slate-100 shadow-sm transition-all active:scale-90"><Camera className="size-5" /></button>
                 <button type="button" className={cn("w-10 h-10 flex items-center justify-center rounded-xl transition-all active:scale-90 bg-white text-slate-400 hover:text-teal-600 shadow-sm border border-slate-100", isListening && "bg-rose-500 text-white animate-pulse")}><Mic className="size-5" /></button>
@@ -410,7 +410,7 @@ export default function CariPage() {
         </div>
 
         {/* Section: Recent Searches (AI Backup) */}
-        {history.length > 0 && !loading && (
+        {history.length > 0 && (
           <div className="space-y-4 px-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -472,7 +472,7 @@ export default function CariPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-2"><h3 className="font-black text-slate-900 text-base">{t('results')}</h3><Badge className="bg-teal-100 text-teal-700 font-bold">{results.results.length}</Badge></div>
-                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase text-teal-600 bg-teal-50 px-3 py-1 rounded-full border border-teal-100"><Sparkles className="size-3" /> Cost-Optimized Search</div>
+                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase text-teal-600 bg-teal-50 px-3 py-1 rounded-full border border-teal-100"><Zap className="size-3" /> Cost-Optimized Search</div>
               </div>
               <div className="grid gap-4">
                 {results.results.map((result, idx) => (

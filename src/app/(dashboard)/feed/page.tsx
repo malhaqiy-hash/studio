@@ -11,6 +11,7 @@ import {
   MapPin, 
   Zap, 
   Sparkles, 
+  Brain,
   Heart, 
   MessageCircle, 
   Share2, 
@@ -228,7 +229,7 @@ export default function FeedPage() {
                         <CardContent className="px-8 py-4 flex-1 space-y-4">
                           {post.type === 'insight' && (
                             <div className="inline-flex items-center gap-2 bg-indigo-50 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-indigo-100">
-                              <Sparkles className="size-2.5 animate-pulse" />
+                              <Brain className="size-2.5 animate-pulse" />
                               AI Analysis
                             </div>
                           )}
