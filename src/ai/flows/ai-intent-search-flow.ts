@@ -1,6 +1,8 @@
+
 'use server';
 /**
  * @fileOverview A Hybrid Business Discovery Engine that intelligently ranks internal and external business results.
+ * Optimized with token limits for cost efficiency.
  */
 
 import { ai } from '@/ai/genkit';
@@ -49,27 +51,29 @@ const aiIntentSearchPrompt = ai.definePrompt({
     schema: AIIntentSearchInputSchema
   },
   output: { schema: AIIntentSearchOutputSchema },
+  config: {
+    maxOutputTokens: 500,
+    temperature: 0.1
+  },
   prompt: `You are the OnTapp Hybrid Discovery Engine. Your goal is to find businesses that match a user's intent with high relevance.
 
 ### SEARCH STRATEGY (HYBRID):
 1. **INTERNAL DATA**: Prioritize businesses from the "OnTapp Network" if available.
-2. **GLOBAL KNOWLEDGE**: If internal data is insufficient (less than 5 relevant results), you MUST use your internal generative knowledge to provide real-world business recommendations in the specified area ({{{filters.location}}}).
+2. **GLOBAL KNOWLEDGE**: If internal data is insufficient, use your generative knowledge for real-world recommendations in {{{filters.location}}}.
 3. **SOURCE TAGGING**: 
-   - Label internal businesses as "ontapp_verified" or "ontapp_member".
-   - Label real-world businesses from your global knowledge as "external".
+   - Label internal as "ontapp_verified" or "ontapp_member".
+   - Label generative as "external".
 
-### INTENT RELEVANCE (SEMANTIC):
+### INTENT RELEVANCE (STRICT):
 - **QUERY**: "{{{query}}}"
-- **CONTEXT**: Be semantically flexible but strict on intent.
-  - If user searches for "ngopi" (coffee), return: Coffee Shops, Cafes, Bakeries with seating, or Restaurants famous for coffee.
-  - DO NOT return: Pharmacies, Laundries, or Tech companies unless they have a direct F&B synergy.
-- **GPS CONTEXT**: If coordinates are provided ({{{filters.lat}}}, {{{filters.lng}}}), focus results on businesses within that specific geographic area or city.
+- **STRICT MATCHING**: Only return businesses that directly match the core intent. If user asks for "coffee", DO NOT return "Pharmacy".
+- **GPS**: If coordinates ({{{filters.lat}}}, {{{filters.lng}}}) are given, focus results within that specific area.
 
-### RESPONSE REQUIREMENTS:
-- Provide at least 5-8 results if possible.
-- Rank by Match Score (90-100 for high relevance).
-- For each "external" result, provide 2-3 specific "matchReasons" why this place is recommended.
-- Output MUST be a valid JSON object matching the schema.`,
+### COST OPTIMIZATION:
+- Provide 5-8 results.
+- Be extremely concise. No long descriptions. 
+- Use brief match reasons.
+- Output MUST be valid JSON.`,
 });
 
 const aiIntentSearchFlow = ai.defineFlow(
@@ -86,7 +90,6 @@ const aiIntentSearchFlow = ai.defineFlow(
         const { output } = await aiIntentSearchPrompt(input);
         
         if (output) {
-          // Manual filtering to ensure we don't show absolute junk
           output.results = output.results.filter(r => r.matchScore >= 80);
           return output;
         }
@@ -103,18 +106,18 @@ const aiIntentSearchFlow = ai.defineFlow(
       }
     }
     
-    // Final UI Fallback if AI completely fails
+    // Final UI Fallback
     return {
       results: [
         {
           type: 'business',
-          name: `Pencarian Terbatas: ${input.query}`,
-          description: `AI saat ini mengalami trafik tinggi. Namun, kami merekomendasikan Anda untuk mengecek pusat bisnis di ${input.filters?.location || 'area sekitar Anda'} untuk kategori ${input.filters?.category || 'terkait'}.`,
-          matchScore: 90,
+          name: `Layanan AI Sedang Sibuk: ${input.query}`,
+          description: `Kami merekomendasikan pengecekan pusat bisnis lokal di area Anda secara manual sementara kami memulihkan layanan AI.`,
+          matchScore: 100,
           source: 'external',
           isVerified: false,
-          matchReasons: ['Kesesuaian lokasi terdeteksi', 'Kategori populer di wilayah ini'],
-          location: input.filters?.location || 'Lokasi Terdekat'
+          matchReasons: ['Limit kuota AI tercapai', 'Pencarian tertunda sementara'],
+          location: input.filters?.location || 'Area Terdekat'
         }
       ]
     };

@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -32,13 +33,16 @@ import {
   X,
   Image as ImageIcon,
   Map as MapIcon,
-  Sparkles
+  Sparkles,
+  Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
 import { translateText } from "@/ai/flows/translate-flow";
 import { useLanguage } from "@/context/language-context";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useFirestore, useUser } from "@/firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,6 +80,8 @@ const POPULAR_LOCATIONS = [
 export default function CariPage() {
   const { language } = useLanguage();
   const { toast } = useToast();
+  const db = useFirestore();
+  const { user } = useUser();
   const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
@@ -95,6 +101,34 @@ export default function CariPage() {
   
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean, detected: string }>>({});
 
+  const generateCacheId = (q: string, loc: string, cat: string | null) => {
+    return btoa(`${q.toLowerCase()}-${loc.toLowerCase()}-${cat || 'all'}`).replace(/[/+=]/g, '_').substring(0, 50);
+  };
+
+  const checkThrottling = async (userId: string) => {
+    if (!db) return true;
+    const rateRef = doc(db, 'user_rate_limits', userId);
+    const snap = await getDoc(rateRef);
+    const now = Date.now();
+    const oneMinuteAgo = now - 60000;
+
+    if (snap.exists()) {
+      const timestamps = (snap.data().requestTimestamps || []) as string[];
+      const recent = timestamps.map(t => new Date(t).getTime()).filter(t => t > oneMinuteAgo);
+      
+      if (recent.length >= 5) return false;
+      
+      await setDoc(rateRef, {
+        requestTimestamps: [...recent.map(t => new Date(t).toISOString()), new Date().toISOString()]
+      }, { merge: true });
+    } else {
+      await setDoc(rateRef, {
+        requestTimestamps: [new Date().toISOString()]
+      });
+    }
+    return true;
+  };
+
   const handleSearch = async (e?: React.FormEvent, overrideQuery?: string) => {
     e?.preventDefault();
     const finalQuery = overrideQuery || query;
@@ -106,7 +140,39 @@ export default function CariPage() {
     setLoading(true);
     setResults(null);
     setTranslations({});
+
     try {
+      // 1. Check Throttling
+      if (user && db) {
+        const canProceed = await checkThrottling(user.uid);
+        if (!canProceed) {
+          toast({ variant: "destructive", title: "Terlalu Cepat", description: "Batas 5 pencarian per menit tercapai. Mohon tunggu sejenak." });
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 2. Check Cache (24h)
+      const cacheId = generateCacheId(finalQuery || (activeCategory || ''), activeLocation, activeCategory);
+      if (db) {
+        const cacheRef = doc(db, 'search_cache', cacheId);
+        const cacheSnap = await getDoc(cacheRef);
+        if (cacheSnap.exists()) {
+          const cacheData = cacheSnap.data();
+          const cacheTime = new Date(cacheData.timestamp).getTime();
+          const isExpired = Date.now() - cacheTime > 86400000; // 24 hours
+
+          if (!isExpired) {
+            const parsedResults = JSON.parse(cacheData.results);
+            setResults(parsedResults);
+            setLoading(false);
+            toast({ title: "Optimasi Biaya", description: "Mengambil data dari cache pintar." });
+            return;
+          }
+        }
+      }
+
+      // 3. Call AI
       const output = await aiIntentSearch({ 
         query: finalQuery || (activeCategory ? `Cari ${activeCategory}` : "Analisis Gambar Bisnis"), 
         filters: {
@@ -116,9 +182,19 @@ export default function CariPage() {
           lng: coords?.lng
         } 
       });
+
+      // 4. Save to Cache
+      if (db) {
+        const cacheRef = doc(db, 'search_cache', cacheId);
+        await setDoc(cacheRef, {
+          results: JSON.stringify(output),
+          timestamp: new Date().toISOString()
+        });
+      }
+
       setResults(output);
       
-      // Sync to backup history
+      // 5. Sync to backup history
       if (typeof window !== 'undefined') {
         const history = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
         const newItems = output.results.map(r => ({

@@ -53,6 +53,23 @@
         "status": { "type": "string", "enum": ["Submitted", "Reviewing", "Approved", "Rejected"] },
         "timestamp": { "type": "string", "format": "date-time" }
       }
+    },
+    "SearchCache": {
+      "title": "Search Cache",
+      "description": "Cached AI search results to save costs.",
+      "type": "object",
+      "properties": {
+        "results": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "UserRateLimit": {
+      "title": "User Rate Limit",
+      "description": "Tracking user AI usage for throttling.",
+      "type": "object",
+      "properties": {
+        "requestTimestamps": { "type": "array", "items": { "type": "string", "format": "date-time" } }
+      }
     }
   },
   "auth": {
@@ -62,6 +79,8 @@
     "/opportunities/{opportunityId}": { "schema": "#/backend/entities/Opportunity", "description": "Business opportunities." },
     "/market_trends/{trendId}": { "schema": "#/backend/entities/MarketTrend", "description": "Global market intelligence." },
     "/business_registry/{businessId}": { "schema": "#/backend/entities/BusinessRegistry", "description": "Public business records." },
-    "/claim_requests/{requestId}": { "schema": "#/backend/entities/ClaimRequest", "description": "Ownership verification requests." }
+    "/claim_requests/{requestId}": { "schema": "#/backend/entities/ClaimRequest", "description": "Ownership verification requests." },
+    "/search_cache/{cacheId}": { "schema": "#/backend/entities/SearchCache", "description": "Global AI search cache." },
+    "/user_rate_limits/{userId}": { "schema": "#/backend/entities/UserRateLimit", "description": "AI usage rate limits per user." }
   }
 }
