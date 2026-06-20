@@ -132,7 +132,7 @@ export default function CariPage() {
       date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
     }));
 
-    // Dedukplikasi: Hapus entri lama yang memiliki nama dan lokasi yang sama dengan entri baru
+    // Dedukplikasi & Perbarui Urutan: Hapus entri lama yang memiliki nama dan lokasi yang sama
     const filteredHistory = currentHistory.filter((oldItem: any) => 
       !newItems.some(newItem => 
         newItem.name.toLowerCase() === oldItem.name.toLowerCase() && 
@@ -314,6 +314,7 @@ export default function CariPage() {
       return;
     }
     setLoading(true);
+    setIsLocationOpen(false);
     navigator.geolocation.getCurrentPosition((position) => {
       setCoords({ lat: position.coords.latitude, lng: position.coords.longitude });
       setActiveLocation(language === 'id' ? "Lokasi GPS Aktif" : "GPS Active");
@@ -429,7 +430,26 @@ export default function CariPage() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl border-slate-100 space-y-3">
-                  <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" /><Input placeholder="Search location..." value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} className="h-9 pl-9 rounded-xl border-slate-100 bg-slate-50 text-[11px] font-bold" /></div>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleNearbySearch} 
+                    className="w-full h-11 rounded-xl border-teal-100 bg-teal-50/50 text-teal-700 font-black hover:bg-teal-100 text-xs gap-2"
+                  >
+                    <LocateFixed className="size-4" />
+                    {t('nearby')}
+                  </Button>
+
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <Input 
+                      placeholder="Search location..." 
+                      value={locationSearch} 
+                      onChange={(e) => setLocationSearch(e.target.value)} 
+                      className="h-9 pl-9 rounded-xl border-slate-100 bg-slate-50 text-[11px] font-bold" 
+                    />
+                  </div>
+
                   <div className="space-y-1 max-h-[200px] overflow-y-auto">
                     {locationSearch && (<button type="button" onClick={() => { setActiveLocation(locationSearch); setIsLocationOpen(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 flex items-center gap-2"><MapPin className="size-3" /> {language === 'id' ? 'Gunakan' : 'Use'} "{locationSearch}"</button>)}
                     {POPULAR_LOCATIONS.filter(l => l.toLowerCase().includes(locationSearch.toLowerCase())).map((loc) => (<button key={loc} type="button" onClick={() => { setActiveLocation(loc); setIsLocationOpen(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50">{loc}</button>))}
@@ -437,8 +457,6 @@ export default function CariPage() {
                 </PopoverContent>
               </Popover>
             </div>
-
-            <Button type="button" variant="outline" onClick={handleNearbySearch} className="w-full h-11 rounded-xl border-teal-100 bg-teal-50/10 text-teal-700 font-bold hover:bg-teal-50 text-xs gap-2"><LocateFixed className="size-4" />{t('nearby')}</Button>
           </form>
         </div>
 
