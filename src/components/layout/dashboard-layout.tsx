@@ -104,9 +104,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   });
 
   const drawerItems = [
-    { icon: Rss, label: "Beranda Utama", href: "/feed" },
     { icon: LayoutDashboard, label: "Pusat Kendali", href: "/dashboard" },
-    { icon: Globe, label: "Mesin Cari AI", href: "/cari" },
     { icon: Bookmark, label: t('saved'), href: "/saved" },
     { icon: History, label: "Penemuan AI (Backup)", href: "/discover" },
     { icon: TrendingUp, label: "Market Radar", href: "/market-radar" },
@@ -163,7 +161,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     });
 
     setIsRegModalOpen(false);
-    // Setelah buat akun, langsung ke Beranda (Feed)
     router.push("/feed");
   };
 
