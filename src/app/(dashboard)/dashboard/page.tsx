@@ -30,6 +30,7 @@ import {
   Area
 } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
 
 const RECENT_ACTIVITY = [
   { id: 1, type: 'match', title: 'New Match Found', desc: 'EcoPack Solutions (98%)', time: '10m ago' },
