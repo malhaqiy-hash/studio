@@ -33,7 +33,8 @@ import {
   Image as ImageIcon,
   Map as MapIcon,
   Sparkles,
-  Clock
+  Clock,
+  WifiOff
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -98,6 +99,14 @@ export default function CariPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Helper untuk melakukan timeout pada Promise (Default 3 detik untuk Firestore)
+  const withTimeout = <T>(promise: Promise<T>, timeoutMs: number = 3000, fallbackValue: T): Promise<T> => {
+    return Promise.race([
+      promise,
+      new Promise<T>((resolve) => setTimeout(() => resolve(fallbackValue), timeoutMs))
+    ]);
+  };
+
   const generateCacheId = (q: string, loc: string, cat: string | null) => {
     return btoa(`${q.toLowerCase()}-${loc.toLowerCase()}-${cat || 'all'}`).replace(/[/+=]/g, '_').substring(0, 50);
   };
@@ -106,10 +115,15 @@ export default function CariPage() {
     if (!db) return true;
     try {
       const rateRef = doc(db, 'user_rate_limits', userId);
-      const snap = await getDoc(rateRef);
+      // Timeout 3 detik untuk cek limit
+      const snap = await withTimeout(getDoc(rateRef), 3000, null as any);
+      
       const now = Date.now();
       const today = new Date().toISOString().split('T')[0];
       const oneMinuteAgo = now - 60000;
+
+      // Jika snap null (timeout), anggap saja boleh lewat untuk tidak menghambat UX
+      if (!snap) return true;
 
       let data = snap.exists() ? snap.data() : { requestTimestamps: [], dailyCount: 0, lastResetDate: today };
       
@@ -129,7 +143,8 @@ export default function CariPage() {
         return false;
       }
       
-      await setDoc(rateRef, {
+      // Update async tanpa menunggu (fire and forget) agar tidak menghambat search
+      setDoc(rateRef, {
         requestTimestamps: [...recent.map(t => new Date(t).toISOString()), new Date().toISOString()],
         dailyCount: (data.dailyCount || 0) + 1,
         lastResetDate: today
@@ -137,7 +152,7 @@ export default function CariPage() {
       
       return true;
     } catch (e) {
-      console.warn("Throttling check failed, bypassing to ensure availability", e);
+      console.warn("Throttling check failed or timed out, bypassing to ensure availability", e);
       return true;
     }
   };
@@ -154,7 +169,7 @@ export default function CariPage() {
     setResults(null);
 
     try {
-      // 1. Throttling (Graceful failure)
+      // 1. Throttling dengan Timeout 3 detik (Bypass jika lambat)
       if (user && db) {
         const canProceed = await checkThrottling(user.uid);
         if (!canProceed) {
@@ -163,31 +178,40 @@ export default function CariPage() {
         }
       }
 
-      // 2. Search Caching (Graceful failure)
+      // 2. Search Caching dengan Timeout 3 detik
       const cacheId = generateCacheId(finalQuery || (activeCategory || ''), activeLocation, activeCategory);
+      let cacheDataFound = false;
+
       if (db) {
         try {
           const cacheRef = doc(db, 'search_cache', cacheId);
-          const cacheSnap = await getDoc(cacheRef);
-          if (cacheSnap.exists()) {
+          // Tunggu maksimal 3 detik untuk respon cache Firestore
+          const cacheSnap = await withTimeout(getDoc(cacheRef), 3000, null as any);
+          
+          if (cacheSnap && cacheSnap.exists()) {
             const cacheData = cacheSnap.data();
             const cacheTime = new Date(cacheData.timestamp).getTime();
-            const isExpired = Date.now() - cacheTime > 86400000; 
+            const isExpired = Date.now() - cacheTime > 86400000; // 24 jam
 
             if (!isExpired) {
               const parsedResults = JSON.parse(cacheData.results);
               setResults(parsedResults);
               setLoading(false);
               toast({ title: "Optimasi Biaya Aktif", description: "Menyajikan data dari cache pintar (24 jam)." });
-              return;
+              cacheDataFound = true;
             }
+          } else if (cacheSnap === null) {
+            console.warn("Firestore Cache timed out, jumping to AI API...");
+            // Tidak menghentikan proses, lanjut ke pemanggilan AI langsung
           }
         } catch (cacheErr) {
-          console.warn("Cache access failed, proceeding to AI", cacheErr);
+          console.warn("Cache access failed, proceeding directly to AI", cacheErr);
         }
       }
 
-      // 3. AI Execution
+      if (cacheDataFound) return;
+
+      // 3. AI Execution (Jalur Cepat jika cache gagal/timeout)
       const output = await aiIntentSearch({ 
         query: finalQuery || (activeCategory ? `Cari ${activeCategory}` : "Analisis Gambar"), 
         filters: {
@@ -198,17 +222,13 @@ export default function CariPage() {
         } 
       });
 
-      // 4. Save to Cache (Graceful failure)
+      // 4. Save to Cache (Fire and Forget - Jangan tunggu ini selesai)
       if (db && output) {
-        try {
-          const cacheRef = doc(db, 'search_cache', cacheId);
-          await setDoc(cacheRef, {
-            results: JSON.stringify(output),
-            timestamp: new Date().toISOString()
-          });
-        } catch (saveErr) {
-          console.warn("Failed to save to cache", saveErr);
-        }
+        const cacheRef = doc(db, 'search_cache', cacheId);
+        setDoc(cacheRef, {
+          results: JSON.stringify(output),
+          timestamp: new Date().toISOString()
+        }).catch(err => console.warn("Failed to background-save cache", err));
       }
 
       setResults(output);

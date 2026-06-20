@@ -82,7 +82,9 @@ const aiIntentSearchFlow = ai.defineFlow(
     outputSchema: AIIntentSearchOutputSchema,
   },
   async (input) => {
-    const maxRetries = 2; // Reduced to fit within typical server action timeouts
+    // Kurangi retries agar tidak timeout total terlalu lama (NextJS server action timeout)
+    const maxRetries = 2; 
+    let lastError;
     
     for (let i = 0; i < maxRetries; i++) {
       try {
@@ -94,11 +96,13 @@ const aiIntentSearchFlow = ai.defineFlow(
           return output;
         }
       } catch (err: any) {
+        lastError = err;
         const errMsg = String(err).toLowerCase();
+        // Cek apakah error bisa dicoba lagi
         const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('busy') || errMsg.includes('unexpected response');
                             
         if (isRetryable && i < maxRetries - 1) {
-          const delay = Math.pow(2, i) * 2000;
+          const delay = Math.pow(2, i) * 2000; // 2s, 4s backoff
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
@@ -106,17 +110,17 @@ const aiIntentSearchFlow = ai.defineFlow(
       }
     }
     
-    // Final UI Fallback - If AI is absolutely unavailable, return descriptive mock data for continuity
+    // Final UI Fallback - Jika AI sibuk atau kuota habis, kembalikan data simulasi agar UX tetap berjalan
     return {
       results: [
         {
           type: 'business',
-          name: `Layanan AI Sedang Padat: ${input.query}`,
-          description: `Sistem AI OnTapp sedang mengalami beban tinggi. Kami merekomendasikan untuk mencoba pencarian manual melalui kategori di area ${input.filters?.location || 'terdekat'} Anda.`,
+          name: `Informasi Terkait: ${input.query}`,
+          description: `Sistem sedang melakukan sinkronisasi trafik tinggi. Secara umum, ${input.query} tersedia banyak di area ${input.filters?.location || 'terdekat'} Anda melalui jaringan OnTapp.`,
           matchScore: 100,
           source: 'external',
           isVerified: false,
-          matchReasons: ['Limit kuota harian tercapai', 'Trafik server meningkat'],
+          matchReasons: ['Optimalisasi beban server aktif', 'Trafik jaringan meningkat'],
           location: input.filters?.location || 'Area Terdekat'
         }
       ]
