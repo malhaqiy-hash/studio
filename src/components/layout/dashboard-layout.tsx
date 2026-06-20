@@ -116,7 +116,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { icon: Users, label: t('matchmaker'), href: "/matchmaker" },
     { icon: Target, label: t('matches'), href: "/matches" },
     { icon: Briefcase, label: t('opportunities'), href: "/opportunities" },
-    { icon: MessageSquare, label: t('messages'), href: "/messages" },
     { icon: Sliders, label: t('settings'), href: "/settings" },
   ];
 
@@ -192,7 +191,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter px-1.5 py-0 border-accent/20 text-accent bg-accent/5">Beta</Badge>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Link href="/messages">
+            <Button variant="ghost" size="icon" className="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition">
+              <MessageSquare className="size-5" />
+            </Button>
+          </Link>
+
           <Link href="/notifications">
             <Button variant="ghost" size="icon" className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition">
               <Bell className="size-5" />
