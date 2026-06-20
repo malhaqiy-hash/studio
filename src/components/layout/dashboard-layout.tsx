@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -138,11 +137,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
     ];
 
+    // Filter out Home and Search from drawer because they are in the bottom nav
     return baseItems.filter(item => 
       item.roles.includes(activeAccount?.type || 'pribadi') && 
       item.href !== "/feed" && 
       item.href !== "/cari"
-    );
+    ).sort((a, b) => {
+      if (a.href === "/profile") return -1;
+      if (b.href === "/profile") return 1;
+      return 0;
+    });
   };
 
   const drawerItems = getDrawerItems();
@@ -196,7 +200,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       reader.onloadend = () => {
         setRegFormData(prev => ({ ...prev, avatar: reader.result as string }));
         setIsMediaPickerOpen(false);
-        toast({ title: "Foto profil disiapkan dari galeri" });
+        toast({ title: "Foto profil disiapkan" });
       };
       reader.readAsDataURL(file);
     }
@@ -204,15 +208,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const handleCloudSource = (source: 'drive' | 'photos') => {
     setIsCloudLoading(true);
-    toast({ title: "Menghubungkan akun Google..." });
+    toast({ title: "Menghubungkan layanan Cloud..." });
 
     setTimeout(() => {
       const simulatedUrl = `https://picsum.photos/seed/reg${Date.now()}/200/200`;
       setRegFormData(prev => ({ ...prev, avatar: simulatedUrl }));
       setIsCloudLoading(false);
       setIsMediaPickerOpen(false);
-      toast({ title: "Gambar berhasil diimpor dari Cloud" });
-    }, 2000);
+      toast({ title: "Gambar berhasil diimpor" });
+    }, 1500);
   };
 
   if (loading) {
@@ -264,7 +268,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <DropdownMenuTrigger asChild>
               <button className="flex items-center rounded-full border-2 border-accent/20 hover:border-accent transition p-0.5 outline-none">
                 <Avatar className="h-7 w-7 rounded-full shadow-sm">
-                  <AvatarImage src={activeAccount.avatar} />
+                  <AvatarImage src={activeAccount.avatar} className="object-cover" />
                   <AvatarFallback className="bg-accent text-white font-bold text-[10px]">{activeAccount.name[0]}</AvatarFallback>
                 </Avatar>
               </button>
@@ -305,7 +309,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   >
                     <div className="flex items-center gap-3">
                       <Avatar className="size-8 rounded-xl">
-                        <AvatarImage src={acc.avatar} />
+                        <AvatarImage src={acc.avatar} className="object-cover" />
                         <AvatarFallback className="text-[8px] bg-muted">{acc.name[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
@@ -326,7 +330,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   Tambahkan Akun
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[160px] bg-card">
+                  <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[160px] bg-card text-foreground">
                     <DropdownMenuItem onSelect={() => handleOpenRegistration('pribadi')} className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"><User className="size-4 text-muted-foreground" /> Pribadi</DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => handleOpenRegistration('professional')} className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"><ShieldCheck className="size-4 text-emerald-400" /> Professional</DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => handleOpenRegistration('bisnis')} className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"><Briefcase className="size-4 text-accent" /> Bisnis</DropdownMenuItem>
@@ -374,14 +378,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <SheetTrigger asChild>
                 <button className="flex flex-col items-center gap-1 hover:text-accent w-full py-2 outline-none"><Menu className="size-6" /><span>{t('more')}</span></button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 overflow-hidden h-[90vh] bg-card">
+              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 h-[90vh] bg-card overflow-hidden">
                 <SheetHeader className="p-8 pb-4 bg-muted border-b border-border">
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-xl font-black text-foreground tracking-tight flex items-center gap-2"><LayoutGrid className="size-5 text-accent" />OnTapp Hub</SheetTitle>
                     <Badge variant="outline" className="bg-card border-border text-muted-foreground font-bold px-3 uppercase text-[10px]">{activeAccount?.type} Mode</Badge>
                   </div>
                 </SheetHeader>
-                <div className="overflow-y-auto max-h-full pb-32">
+                <div className="overflow-y-auto h-full pb-32 no-scrollbar">
                   <div className="flex flex-col divide-y divide-border">
                     {drawerItems.map((item) => (
                       <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-8 py-5 transition-colors gap-6 group", pathname === item.href ? "bg-accent/5 text-accent" : "bg-transparent hover:bg-accent/10")}>
@@ -390,8 +394,22 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         <ChevronRight className="ml-auto size-4 text-muted-foreground/30 group-hover:text-accent transition-colors" />
                       </Link>
                     ))}
-                    <div className="px-8 py-6 bg-card"><div className="flex items-center gap-6 mb-4"><div className="size-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center"><Languages className="size-5" /></div><span className="text-sm font-black uppercase tracking-widest">Setting Bahasa</span></div><LanguagePicker /></div>
-                    <button onClick={handleLogout} className="flex items-center px-8 py-6 bg-rose-500/5 hover:bg-rose-500/10 transition-colors gap-6 group text-rose-500 w-full text-left"><div className="size-10 rounded-xl bg-card border border-rose-500/20 flex items-center justify-center shadow-sm"><LogOut className="size-5" /></div><span className="text-sm font-black uppercase tracking-widest">Logout Session</span><ChevronRight className="ml-auto size-4 opacity-50" /></button>
+                    <div className="px-8 py-6 bg-card">
+                      <div className="flex items-center gap-6 mb-4">
+                        <div className="size-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center">
+                          <Languages className="size-5" />
+                        </div>
+                        <span className="text-sm font-black uppercase tracking-widest">Bahasa</span>
+                      </div>
+                      <LanguagePicker />
+                    </div>
+                    <button onClick={handleLogout} className="flex items-center px-8 py-6 bg-rose-500/5 hover:bg-rose-500/10 transition-colors gap-6 group text-rose-500 w-full text-left">
+                      <div className="size-10 rounded-xl bg-card border border-rose-500/20 flex items-center justify-center shadow-sm">
+                        <LogOut className="size-5" />
+                      </div>
+                      <span className="text-sm font-black uppercase tracking-widest">Logout</span>
+                      <ChevronRight className="ml-auto size-4 opacity-50" />
+                    </button>
                   </div>
                 </div>
               </SheetContent>
@@ -401,16 +419,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </nav>
 
       <Dialog open={isRegModalOpen} onOpenChange={(open) => { if (activeAccount?.isNew) return; setIsRegModalOpen(open); }}>
-        <DialogContent className="max-w-md rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card">
+        <DialogContent className="max-w-md rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground">
           <form onSubmit={handleRegisterSubmit} className="flex flex-col h-full">
             <DialogHeader className="p-8 pb-4 bg-muted border-b border-border text-center sm:text-center">
               <div className="flex flex-col items-center gap-4 mb-2">
                 <div className="size-16 rounded-2xl bg-accent text-white flex items-center justify-center font-black text-2xl shadow-xl">O</div>
-                <DialogTitle className="text-2xl font-black text-foreground tracking-tight">Selamat Datang di OnTapp</DialogTitle>
-                <DialogDescription className="font-medium text-muted-foreground">Silakan pilih jenis profil Anda untuk mulai terhubung dengan jaringan global.</DialogDescription>
+                <DialogTitle className="text-2xl font-black tracking-tight">Selamat Datang</DialogTitle>
+                <DialogDescription className="font-medium text-muted-foreground">Pilih jenis profil untuk mulai terhubung.</DialogDescription>
               </div>
             </DialogHeader>
-            <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh]">
+            <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh] no-scrollbar">
               {!pendingType ? (
                 <div className="grid gap-4 animate-in fade-in zoom-in-95 duration-300">
                   {['pribadi', 'professional', 'bisnis'].map((type) => (
@@ -420,7 +438,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       </div>
                       <div>
                         <h4 className="font-black text-foreground capitalize">Profil {type}</h4>
-                        <p className="text-xs text-muted-foreground font-medium">{type === 'pribadi' ? 'Cari produk & berbagi momen harian.' : type === 'professional' ? 'Pamerkan keahlian & cari kemitraan strategis.' : 'Kelola peluang & akses intelijen pasar.'}</p>
+                        <p className="text-xs text-muted-foreground font-medium">{type === 'pribadi' ? 'Berbagi momen harian.' : type === 'professional' ? 'Pamerkan portofolio Anda.' : 'Akses intelijen pasar.'}</p>
                       </div>
                     </button>
                   ))}
@@ -435,30 +453,30 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     <div onClick={() => setIsMediaPickerOpen(true)} className="size-24 rounded-3xl bg-muted border-2 border-dashed border-border flex items-center justify-center text-muted-foreground group cursor-pointer hover:border-accent hover:bg-accent/5 transition-all overflow-hidden">
                       {regFormData.avatar ? <img src={regFormData.avatar} className="w-full h-full object-cover" alt="Profile" /> : <Camera className="size-8 group-hover:scale-110 transition-transform" />}
                     </div>
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Unggah Foto Profil</span>
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Foto Profil</span>
                   </div>
                   <div className="space-y-4">
-                    <div className="space-y-2"><Label className="font-bold text-foreground">Nama Tampilan / Bisnis</Label><Input required value={regFormData.name} onChange={(e) => setRegFormData({...regFormData, name: e.target.value})} placeholder={pendingType === 'bisnis' ? "e.g. Acme Corp" : "e.g. John Doe"} className="rounded-xl border-border h-12 bg-muted/50 focus:bg-background" /></div>
-                    <div className="space-y-2"><Label className="font-bold text-foreground">Bio / Deskripsi Singkat</Label><Textarea required value={regFormData.bio} onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})} placeholder="Ceritakan tentang diri Anda..." className="rounded-xl border-border min-h-[80px] bg-muted/50 focus:bg-background" /></div>
-                    <div className="space-y-2"><Label className="font-bold text-foreground">Kontak (WhatsApp)</Label><Input required value={regFormData.contact} onChange={(e) => setRegFormData({...regFormData, contact: e.target.value})} placeholder="+62 8..." className="rounded-xl border-border h-12 bg-muted/50 focus:bg-background" /></div>
-                    {pendingType === 'professional' && <div className="space-y-2 animate-in fade-in slide-in-from-top-2"><Label className="font-bold text-foreground">Keahlian Utama (Skills)</Label><Input required value={regFormData.extra} onChange={(e) => setRegFormData({...regFormData, extra: e.target.value})} placeholder="e.g. Designer, Developer, Marketing" className="rounded-xl border-border h-12 bg-muted/50 focus:bg-background" /></div>}
-                    {pendingType === 'bisnis' && <div className="space-y-2 animate-in fade-in slide-in-from-top-2"><Label className="font-bold text-foreground">Kategori Industri</Label><Select value={regFormData.extra} onValueChange={(v) => setRegFormData({...regFormData, extra: v})}><SelectTrigger className="rounded-xl border-border h-12 bg-muted/50 focus:bg-background"><SelectValue placeholder="Pilih Sektor" /></SelectTrigger><SelectContent className="rounded-xl"><SelectItem value="Tech & SaaS">Tech & SaaS</SelectItem><SelectItem value="Logistics">Logistics</SelectItem><SelectItem value="Retail">Retail</SelectItem><SelectItem value="Service">Service Provider</SelectItem><SelectItem value="F&B">Food & Beverage</SelectItem></SelectContent></Select></div>}
+                    <div className="space-y-2"><Label className="font-bold">Nama Tampilan</Label><Input required value={regFormData.name} onChange={(e) => setRegFormData({...regFormData, name: e.target.value})} className="rounded-xl h-12 bg-muted/50 border-none" /></div>
+                    <div className="space-y-2"><Label className="font-bold">Bio</Label><Textarea required value={regFormData.bio} onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})} className="rounded-xl border-none min-h-[80px] bg-muted/50" /></div>
+                    <div className="space-y-2"><Label className="font-bold">WhatsApp</Label><Input required value={regFormData.contact} onChange={(e) => setRegFormData({...regFormData, contact: e.target.value})} placeholder="+62 8..." className="rounded-xl border-none h-12 bg-muted/50" /></div>
+                    {pendingType === 'professional' && <div className="space-y-2"><Label className="font-bold">Keahlian (Skills)</Label><Input required value={regFormData.extra} onChange={(e) => setRegFormData({...regFormData, extra: e.target.value})} placeholder="e.g. Designer" className="rounded-xl border-none h-12 bg-muted/50" /></div>}
+                    {pendingType === 'bisnis' && <div className="space-y-2"><Label className="font-bold">Kategori Industri</Label><Select value={regFormData.extra} onValueChange={(v) => setRegFormData({...regFormData, extra: v})}><SelectTrigger className="rounded-xl border-none h-12 bg-muted/50"><SelectValue placeholder="Sektor" /></SelectTrigger><SelectContent><SelectItem value="Tech">Tech</SelectItem><SelectItem value="Logistics">Logistics</SelectItem><SelectItem value="Retail">Retail</SelectItem><SelectItem value="F&B">F&B</SelectItem></SelectContent></Select></div>}
                   </div>
                 </div>
               )}
             </div>
-            {pendingType && <DialogFooter className="p-8 pt-4 bg-muted border-t border-border"><Button type="submit" className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 text-white font-black text-lg shadow-xl shadow-accent/20 transition-all active:scale-95">Selesaikan & Masuk Beranda</Button></DialogFooter>}
+            {pendingType && <DialogFooter className="p-8 pt-4 bg-muted border-t border-border"><Button type="submit" className="w-full h-14 rounded-2xl bg-accent text-white font-black">Selesaikan</Button></DialogFooter>}
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
-        <DialogContent className="max-w-md rounded-[3rem] p-8 border-none shadow-2xl bg-card">
-          <DialogHeader className="text-center sm:text-center"><DialogTitle className="text-2xl font-black text-foreground">Impor Gambar</DialogTitle><DialogDescription className="text-muted-foreground">Pilih sumber foto profil Anda.</DialogDescription></DialogHeader>
+        <DialogContent className="max-w-md rounded-[3rem] p-8 border-none shadow-2xl bg-card text-foreground">
+          <DialogHeader className="text-center sm:text-center"><DialogTitle className="text-2xl font-black">Impor Gambar</DialogTitle></DialogHeader>
           <div className="grid gap-4 py-8">
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 hover:border-accent hover:text-accent group transition-all justify-start gap-6 px-6"><div className="size-12 rounded-xl bg-background shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform"><Smartphone className="size-6" /></div><div className="text-left"><p className="font-black text-sm uppercase tracking-widest">Perangkat</p><p className="text-[10px] font-bold opacity-60">Ambil dari memori telepon</p></div></Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 hover:border-accent hover:text-accent group transition-all justify-start gap-6 px-6"><div className="size-12 rounded-xl bg-background shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">{isCloudLoading ? <RefreshCw className="size-6 animate-spin" /> : <Cloud className="size-6 text-blue-500" />}</div><div className="text-left"><p className="font-black text-sm uppercase tracking-widest">Google Drive</p><p className="text-[10px] font-bold opacity-60">Gunakan file Drive</p></div></Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('photos')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 hover:border-accent hover:text-accent group transition-all justify-start gap-6 px-6"><div className="size-12 rounded-xl bg-background shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">{isCloudLoading ? <RefreshCw className="size-6 animate-spin" /> : <ImageIcon className="size-6 text-rose-500" />}</div><div className="text-left"><p className="font-black text-sm uppercase tracking-widest">Google Photos</p><p className="text-[10px] font-bold opacity-60">Pilih momen terbaik Anda</p></div></Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6"><Smartphone className="size-6 text-accent" /><div className="text-left font-black text-sm uppercase">Perangkat</div></Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6"><Cloud className="size-6 text-blue-500" /><div className="text-left font-black text-sm uppercase">Google Drive</div></Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('photos')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6"><ImageIcon className="size-6 text-rose-500" /><div className="text-left font-black text-sm uppercase">Google Photos</div></Button>
           </div>
           <DialogFooter><Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-bold text-muted-foreground">Batal</Button></DialogFooter>
         </DialogContent>
