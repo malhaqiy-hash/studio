@@ -94,10 +94,17 @@ export default function CariPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Helper untuk membersihkan teks "Informasi Terkait: "
+  const cleanTitle = (text: string) => text.replace(/^Informasi Terkait:\s*/i, '');
+
   React.useEffect(() => {
     const saved = localStorage.getItem('ontapp_discovery_history');
     if (saved) {
-      setHistory(JSON.parse(saved));
+      const parsedHistory = JSON.parse(saved).map((item: any) => ({
+        ...item,
+        name: cleanTitle(item.name)
+      }));
+      setHistory(parsedHistory);
     }
   }, []);
 
@@ -156,7 +163,9 @@ export default function CariPage() {
 
   const handleSearch = async (e?: React.FormEvent, overrideQuery?: string) => {
     e?.preventDefault();
-    const finalQuery = (overrideQuery || query).replace(/^Informasi Terkait:\s*/i, '');
+    // Pastikan query benar-benar bersih dari "Informasi Terkait"
+    const finalQuery = cleanTitle(overrideQuery || query);
+    
     if (!finalQuery && !activeCategory) {
       toast({ title: "Input Required", description: "Keyword or category is required.", variant: "destructive" });
       return;
@@ -189,6 +198,8 @@ export default function CariPage() {
 
             if (!isExpired) {
               const parsedResults = JSON.parse(cacheData.results);
+              // Bersihkan nama hasil di cache
+              parsedResults.results = parsedResults.results.map((r: any) => ({ ...r, name: cleanTitle(r.name) }));
               setResults(parsedResults);
               setLoading(false);
               toast({ title: "Cache Optimization", description: "Loading from smart cache (24h)." });
@@ -210,26 +221,32 @@ export default function CariPage() {
         } 
       });
 
-      if (db && output) {
-        const cacheRef = doc(db, 'search_cache', cacheId);
-        setDoc(cacheRef, {
-          results: JSON.stringify(output),
-          timestamp: new Date().toISOString()
-        }).catch(() => {});
-      }
+      if (output) {
+        // Bersihkan hasil output baru
+        output.results = output.results.map(r => ({ ...r, name: cleanTitle(r.name) }));
+        
+        if (db) {
+          const cacheRef = doc(db, 'search_cache', cacheId);
+          setDoc(cacheRef, {
+            results: JSON.stringify(output),
+            timestamp: new Date().toISOString()
+          }).catch(() => {});
+        }
 
-      setResults(output);
-      
-      if (typeof window !== 'undefined' && output) {
-        const currentHistory = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
-        const newItems = output.results.map(r => ({
-          ...r,
-          id: `h-${Date.now()}-${Math.random()}`,
-          date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-        }));
-        const updatedHistory = [...newItems, ...currentHistory].slice(0, 50);
-        localStorage.setItem('ontapp_discovery_history', JSON.stringify(updatedHistory));
-        setHistory(updatedHistory);
+        setResults(output);
+        
+        if (typeof window !== 'undefined') {
+          const currentHistory = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
+          const newItems = output.results.map(r => ({
+            ...r,
+            name: cleanTitle(r.name), // Simpan tanpa prefiks
+            id: `h-${Date.now()}-${Math.random()}`,
+            date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+          }));
+          const updatedHistory = [...newItems, ...currentHistory].slice(0, 50);
+          localStorage.setItem('ontapp_discovery_history', JSON.stringify(updatedHistory));
+          setHistory(updatedHistory);
+        }
       }
       
     } catch (err: any) {
@@ -252,8 +269,7 @@ export default function CariPage() {
   };
 
   const handleHistoryClick = (item: any) => {
-    // Bersihkan prefiks "Informasi Terkait: " sebelum memasukkan ke input
-    const cleanedQuery = item.name.replace(/^Informasi Terkait:\s*/i, '');
+    const cleanedQuery = cleanTitle(item.name);
     setQuery(cleanedQuery);
     if (item.location) setActiveLocation(item.location);
     if (item.category) setActiveCategory(item.category);
@@ -261,7 +277,7 @@ export default function CariPage() {
   };
 
   const openInGoogleMaps = (name: string, location?: string) => {
-    const cleanedName = name.replace(/^Informasi Terkait:\s*/i, '');
+    const cleanedName = cleanTitle(name);
     const searchQuery = encodeURIComponent(`${cleanedName} ${location || ''}`);
     window.open(`https://www.google.com/maps/search/?api=1&query=${searchQuery}`, '_blank');
   };
@@ -440,7 +456,7 @@ export default function CariPage() {
                         <div className="size-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
                           {getTypeIcon(item.type)}
                         </div>
-                        <h5 className="text-xs font-black text-slate-900 truncate max-w-[140px]">{item.name}</h5>
+                        <h5 className="text-xs font-black text-slate-900 truncate max-w-[140px]">{cleanTitle(item.name)}</h5>
                       </div>
                       <span 
                         role="button"
@@ -486,7 +502,7 @@ export default function CariPage() {
                         <div className="size-14 rounded-2xl bg-slate-50 text-slate-600 flex items-center justify-center shrink-0">{getTypeIcon(result.type)}</div>
                         <div className="flex-1 space-y-2">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h4 className="text-lg font-black text-slate-900">{result.name}</h4>
+                            <h4 className="text-lg font-black text-slate-900">{cleanTitle(result.name)}</h4>
                             <Badge className={cn("text-[10px] font-bold rounded-lg px-2", result.source === 'external' ? 'bg-amber-50 text-amber-600' : 'bg-teal-50 text-teal-600')}>
                               {result.source === 'external' ? (language === 'id' ? 'Media Eksternal' : 'External Media') : 'Verified OnTapp'}
                             </Badge>

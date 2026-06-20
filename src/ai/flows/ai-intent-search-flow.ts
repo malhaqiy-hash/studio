@@ -86,11 +86,23 @@ const aiIntentSearchFlow = ai.defineFlow(
     const maxRetries = 2; 
     let lastError;
     
+    // Pastikan query bersih dari prefiks sistem apa pun
+    const cleanQuery = input.query.replace(/^Informasi Terkait:\s*/i, '');
+
     for (let i = 0; i < maxRetries; i++) {
       try {
-        const { output } = await aiIntentSearchPrompt(input);
+        const { output } = await aiIntentSearchPrompt({
+          ...input,
+          query: cleanQuery
+        });
         
         if (output) {
+          // Bersihkan nama hasil dari prefiks sistem jika ada
+          output.results = output.results.map(r => ({
+            ...r,
+            name: r.name.replace(/^Informasi Terkait:\s*/i, '')
+          }));
+          
           // Filter results for high relevance
           output.results = output.results.filter(r => r.matchScore >= 80);
           return output;
@@ -110,17 +122,13 @@ const aiIntentSearchFlow = ai.defineFlow(
       }
     }
     
-    // Final UI Fallback - Jika AI sibuk atau kuota habis, kembalikan data simulasi agar UX tetap berjalan
-    // Cek agar tidak duplikasi prefiks "Informasi Terkait: "
-    const cleanedQuery = input.query.replace(/^Informasi Terkait:\s*/i, '');
-    const fallbackName = `Informasi Terkait: ${cleanedQuery}`;
-
+    // Final UI Fallback - Tanpa prefiks "Informasi Terkait"
     return {
       results: [
         {
           type: 'business',
-          name: fallbackName,
-          description: `Sistem sedang melakukan sinkronisasi trafik tinggi. Secara umum, ${cleanedQuery} tersedia banyak di area ${input.filters?.location || 'terdekat'} Anda melalui jaringan OnTapp.`,
+          name: cleanQuery,
+          description: `Sistem sedang melakukan sinkronisasi trafik tinggi. Secara umum, ${cleanQuery} tersedia banyak di area ${input.filters?.location || 'terdekat'} Anda melalui jaringan OnTapp.`,
           matchScore: 100,
           source: 'external',
           isVerified: false,
