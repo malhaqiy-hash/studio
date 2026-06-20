@@ -1,10 +1,6 @@
 'use server';
 /**
  * @fileOverview A B2B Strategic Business Consultant AI agent.
- *
- * - businessAssistant - A function that handles strategic business advice.
- * - BusinessAssistantInput - The input type for the businessAssistant function.
- * - BusinessAssistantOutput - The return type for the businessAssistant function.
  */
 
 import { ai } from '@/ai/genkit';
@@ -37,19 +33,9 @@ const businessAssistantPrompt = ai.definePrompt({
   prompt: `You are an expert B2B strategic business consultant for the OnTapp Global Network.
 Your goal is to help users navigate the ecosystem, identify high-value strategic partners, and optimize their business pipeline.
 
-Context of the OnTapp Network:
-- It is a discovery engine for products, services, and opportunities.
-- It prioritizes verified members.
-- It calculates match scores based on synergy and industry alignment.
-
-Conversation History:
-{{#each history}}
-- {{role}}: {{{content}}}
-{{/each}}
-
 User Query: {{{message}}}
 
-Provide concise, professional, and actionable business advice. If asked about technical features, focus on the business value they provide.`,
+Provide concise, professional, and actionable business advice.`,
 });
 
 const businessAssistantFlow = ai.defineFlow(
@@ -60,7 +46,7 @@ const businessAssistantFlow = ai.defineFlow(
   },
   async (input) => {
     let lastError;
-    const maxRetries = 3;
+    const maxRetries = 2;
     for (let i = 0; i < maxRetries; i++) {
       try {
         const { output } = await businessAssistantPrompt(input);
@@ -68,17 +54,17 @@ const businessAssistantFlow = ai.defineFlow(
       } catch (err: any) {
         lastError = err;
         const errMsg = String(err).toLowerCase();
-        const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('busy') || errMsg.includes('quota');
+        const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('busy');
         
         if (isRetryable && i < maxRetries - 1) {
-          const delay = Math.pow(2, i) * 2000;
-          await new Promise(r => setTimeout(r, delay));
+          await new Promise(r => setTimeout(r, 2000));
           continue;
         }
         break;
       }
     }
-    console.error('Assistant flow failed:', lastError);
-    throw new Error('Gagal merespon. AI sedang sangat sibuk atau kuota tercapai.');
+    return { 
+      response: "Terima kasih atas pertanyaannya. Saat ini trafik AI sedang sangat tinggi. Secara umum, saya menyarankan Anda untuk terus memperluas jaringan di OnTapp Hub dan memverifikasi profil bisnis Anda untuk mendapatkan sinergi maksimal. Silakan tanyakan kembali detailnya dalam beberapa saat." 
+    };
   }
 );

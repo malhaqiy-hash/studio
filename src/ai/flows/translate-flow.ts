@@ -1,10 +1,6 @@
 'use server';
 /**
  * @fileOverview AI Translation Flow for the OnTapp Global Network.
- *
- * - translateText - A function that handles translating content between languages.
- * - TranslateInput - The input type for the translate function.
- * - TranslateOutput - The return type for the translate function.
  */
 
 import { ai } from '@/ai/genkit';
@@ -31,12 +27,9 @@ const translatePrompt = ai.definePrompt({
   input: { schema: TranslateInputSchema },
   output: { schema: TranslateOutputSchema },
   prompt: `You are an expert polyglot translator for the OnTapp B2B Network.
-Your task is to translate the provided business text into the target language while maintaining the professional tone and industry-specific terminology.
+Translate the following business text into: {{{targetLanguage}}}
 
-Target Language: {{{targetLanguage}}}
-Original Text: {{{text}}}
-
-Provide the translated text and identify the source language. Output MUST be valid JSON.`,
+Original Text: {{{text}}}`,
 });
 
 const translateFlow = ai.defineFlow(
@@ -46,28 +39,15 @@ const translateFlow = ai.defineFlow(
     outputSchema: TranslateOutputSchema,
   },
   async (input) => {
-    let lastError;
-    const maxRetries = 3;
-    
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        const { output } = await translatePrompt(input);
-        if (output) return output;
-      } catch (err: any) {
-        lastError = err;
-        const errMsg = String(err).toLowerCase();
-        const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('busy') || errMsg.includes('quota');
-        
-        if (isRetryable && i < maxRetries - 1) {
-          const delay = Math.pow(2, i) * 1500;
-          await new Promise(r => setTimeout(r, delay));
-          continue;
-        }
-        break;
-      }
+    try {
+      const { output } = await translatePrompt(input);
+      if (output) return output;
+    } catch (err) {
+      console.warn('Translation failed, returning original text.');
     }
-    
-    console.error('Translation flow failed:', lastError);
-    throw new Error('Gagal menerjemahkan teks. Layanan sedang sangat sibuk. Silakan coba lagi nanti.');
+    return {
+      translatedText: input.text,
+      detectedLanguage: 'unknown'
+    };
   }
 );
