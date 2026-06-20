@@ -15,24 +15,20 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { 
   Palette, 
-  Bell, 
   Save, 
   Languages,
   Monitor,
   Globe,
   Lock,
-  Zap,
-  Info,
   ChevronRight,
   Cpu,
   Eye,
   Heart,
   Users,
-  ShieldCheck
+  RefreshCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage, LANGUAGES } from "@/context/language-context";
-import { useNotifications } from "@/hooks/use-notifications";
 import { useAccount } from "@/context/account-context";
 import Link from "next/link";
 
@@ -141,7 +137,6 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-between p-5 rounded-2xl border border-border bg-muted/20">
                       <div className="space-y-1">
                         <Label className="font-black text-sm uppercase tracking-tight flex items-center gap-2 text-foreground"><Users className="size-4 text-accent" /> Daftar Pengikut</Label>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase">Bisa diklik oleh publik</p>
                       </div>
                       <Switch 
                         checked={activeAccount.preferences?.publicFollowers} 
@@ -151,7 +146,6 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-between p-5 rounded-2xl border border-border bg-muted/20">
                       <div className="space-y-1">
                         <Label className="font-black text-sm uppercase tracking-tight flex items-center gap-2 text-foreground"><Users className="size-4 text-accent" /> Daftar Mengikuti</Label>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase">Bisa diklik oleh publik</p>
                       </div>
                       <Switch 
                         checked={activeAccount.preferences?.publicFollowing} 
@@ -163,7 +157,6 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between p-5 rounded-2xl border border-border bg-muted/20">
                     <div className="space-y-1">
                       <Label className="font-black text-sm uppercase tracking-tight flex items-center gap-2 text-foreground"><Eye className="size-4 text-accent" /> Daftar Penonton Profil</Label>
-                      <p className="text-[10px] text-muted-foreground font-bold uppercase">Bisa diklik oleh publik</p>
                     </div>
                     <Switch 
                       checked={activeAccount.preferences?.publicViews} 
@@ -174,7 +167,6 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between p-5 rounded-2xl border border-border bg-muted/20">
                   <div className="space-y-1">
                     <Label className="font-black text-sm uppercase tracking-tight flex items-center gap-2 text-foreground"><Heart className="size-4 text-rose-500" /> Daftar Penyukat</Label>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase">Bisa diklik oleh publik</p>
                   </div>
                   <Switch 
                     checked={activeAccount.preferences?.publicLikes} 
@@ -215,7 +207,7 @@ export default function SettingsPage() {
               <CardHeader className="bg-muted/20 border-b border-border pb-4">
                 <div className="flex items-center gap-3">
                   <div className="size-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Languages className="size-5" />
+                    <Globe className="size-5" />
                   </div>
                   <div>
                     <CardTitle className="text-lg font-bold text-foreground">Lokalisasi</CardTitle>
@@ -254,7 +246,7 @@ export default function SettingsPage() {
                 <button className="w-full flex items-center justify-between p-5 rounded-2xl bg-muted/20 hover:bg-accent/5 border border-border hover:border-accent transition-all group">
                   <div className="flex items-center gap-4">
                     <div className="size-10 rounded-xl bg-card shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Info className="size-5 text-accent" />
+                      <Lock className="size-5 text-accent" />
                     </div>
                     <div className="text-left">
                       <h4 className="font-bold text-foreground">Info Aplikasi</h4>
