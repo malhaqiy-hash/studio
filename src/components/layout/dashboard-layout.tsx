@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -127,7 +128,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
     ];
 
-    return baseItems.filter(item => item.roles.includes(activeAccount?.type || 'pribadi'));
+    // Filter berdasarkan peran DAN jangan tampilkan yang sudah ada di navbar utama (feed & cari)
+    return baseItems.filter(item => 
+      item.roles.includes(activeAccount?.type || 'pribadi') && 
+      item.href !== "/feed" && 
+      item.href !== "/cari"
+    );
   };
 
   const drawerItems = getDrawerItems();
