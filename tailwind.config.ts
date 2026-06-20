@@ -35,8 +35,8 @@ export default {
   				foreground: 'hsl(var(--popover-foreground))'
   			},
   			primary: {
-  				DEFAULT: '#0F172A',
-  				foreground: '#F8FAFC'
+  				DEFAULT: 'hsl(var(--primary))',
+  				foreground: 'hsl(var(--primary-foreground))'
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
@@ -47,8 +47,8 @@ export default {
   				foreground: 'hsl(var(--muted-foreground))'
   			},
   			accent: {
-  				DEFAULT: '#6366F1',
-  				foreground: '#FFFFFF'
+  				DEFAULT: 'hsl(var(--accent))',
+  				foreground: 'hsl(var(--accent-foreground))'
   			},
   			destructive: {
   				DEFAULT: 'hsl(var(--destructive))',
@@ -56,10 +56,10 @@ export default {
   			},
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
-  			ring: '#6366F1',
+  			ring: 'hsl(var(--ring))',
   			chart: {
-  				'1': '#6366F1',
-  				'2': '#0F172A',
+  				'1': 'hsl(var(--accent))',
+  				'2': 'hsl(var(--primary))',
   				'3': '#94A3B8',
   				'4': '#CBD5E1',
   				'5': '#E2E8F0'

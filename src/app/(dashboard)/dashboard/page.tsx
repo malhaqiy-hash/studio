@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -72,7 +73,7 @@ export default function UserDashboardPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { label: t('active_opps'), val: "24", icon: Briefcase, color: "text-indigo-600", bg: "bg-indigo-50" },
+            { label: t('active_opps'), val: "24", icon: Briefcase, color: "text-teal-600", bg: "bg-teal-50" },
             { label: t('ai_matches_label'), val: "128", icon: Target, color: "text-accent", bg: "bg-accent/10" },
             { label: t('pipeline_est'), val: "$42.5k", icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-50" },
             { label: t('synergy_score'), val: "92%", icon: Zap, color: "text-amber-500", bg: "bg-amber-50" }
@@ -113,7 +114,7 @@ export default function UserDashboardPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={PERFORMANCE_DATA}>
                       <defs>
-                        <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id="colorRev" x1="0" x1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3}/>
                           <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0}/>
                         </linearGradient>
@@ -178,20 +179,20 @@ export default function UserDashboardPage() {
         </div>
 
         {/* Intelligence Banner */}
-        <div className="p-12 rounded-[4rem] bg-indigo-600 text-white shadow-2xl relative overflow-hidden group">
+        <div className="p-12 rounded-[4rem] bg-teal-700 text-white shadow-2xl relative overflow-hidden group">
           <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
             <div className="size-24 rounded-[2.5rem] bg-white/20 backdrop-blur-xl flex items-center justify-center rotate-6 group-hover:rotate-12 transition-transform duration-500">
               <Zap className="size-12 text-white fill-white" />
             </div>
             <div className="space-y-3 flex-1 text-center md:text-left">
               <h3 className="text-3xl font-black tracking-tight">{t('network_evolution')}</h3>
-              <p className="text-indigo-100 font-medium text-lg max-w-xl">
+              <p className="text-teal-100 font-medium text-lg max-w-xl">
                 {language === 'id' 
                   ? 'AI OnTapp telah mendeteksi 14 kembaran bisnis (*lookalike partners*) di wilayah Asia Timur yang belum Anda sapa.' 
                   : 'OnTapp AI has detected 14 business lookalike partners in the East Asia region that you have not connected with.'}
               </p>
             </div>
-            <Button className="rounded-2xl bg-white text-indigo-600 hover:bg-indigo-50 font-black px-10 h-14 shadow-xl shadow-black/10 active:scale-95 transition-all">
+            <Button className="rounded-2xl bg-white text-teal-700 hover:bg-teal-50 font-black px-10 h-14 shadow-xl shadow-black/10 active:scale-95 transition-all">
               {t('connect_now')}
             </Button>
           </div>

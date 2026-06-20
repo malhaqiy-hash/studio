@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -10,7 +11,6 @@ import {
   Globe, 
   MapPin, 
   Zap, 
-  Sparkles, 
   Brain,
   Heart, 
   MessageCircle, 
@@ -29,7 +29,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { useToast } from "@/hooks/use-toast";
 
 const CATEGORIES = [
-  { id: 'for-you', label: 'For You', icon: Sparkles },
+  { id: 'for-you', label: 'For You', icon: Brain },
   { id: 'lokal', label: 'Lokal', icon: MapPin },
   { id: 'global', label: 'Global', icon: Globe },
   { id: 'trending', label: 'Trending', icon: TrendingUp },
@@ -165,7 +165,7 @@ export default function FeedPage() {
               className={cn(
                 "px-5 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2",
                 activeCategory === cat.id 
-                  ? "bg-slate-900 text-white shadow-lg scale-105" 
+                  ? "bg-teal-600 text-white shadow-lg scale-105" 
                   : "bg-white text-slate-400 hover:bg-slate-100"
               )}
             >
@@ -195,7 +195,7 @@ export default function FeedPage() {
                           <div className="flex items-center gap-3">
                             <Avatar className="size-10 border border-slate-100">
                               <AvatarImage src={post.avatar} />
-                              <AvatarFallback className="bg-indigo-50 text-accent font-bold">
+                              <AvatarFallback className="bg-teal-50 text-teal-600 font-bold">
                                 {post.author[0]}
                               </AvatarFallback>
                             </Avatar>
@@ -215,10 +215,10 @@ export default function FeedPage() {
                               onClick={() => handleSavePost(post)}
                               className={cn(
                                 "p-2 rounded-full transition-all active:scale-90",
-                                isSaved ? "text-accent bg-indigo-50" : "text-slate-300 hover:text-slate-400 hover:bg-slate-50"
+                                isSaved ? "text-teal-600 bg-teal-50" : "text-slate-300 hover:text-slate-400 hover:bg-slate-50"
                               )}
                             >
-                              <Bookmark className={cn("size-5", isSaved && "fill-accent")} />
+                              <Bookmark className={cn("size-5", isSaved && "fill-teal-600")} />
                             </button>
                             <Badge variant="outline" className="text-[9px] font-black uppercase border-slate-100 text-slate-400">
                               {cat.label}
@@ -228,7 +228,7 @@ export default function FeedPage() {
 
                         <CardContent className="px-8 py-4 flex-1 space-y-4">
                           {post.type === 'insight' && (
-                            <div className="inline-flex items-center gap-2 bg-indigo-50 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-indigo-100">
+                            <div className="inline-flex items-center gap-2 bg-teal-50 text-teal-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-teal-100">
                               <Brain className="size-2.5 animate-pulse" />
                               AI Analysis
                             </div>
@@ -249,7 +249,7 @@ export default function FeedPage() {
                             </p>
                             
                             {trans?.show && (
-                              <div className="mt-3 flex items-center gap-2 text-[9px] font-black text-accent uppercase tracking-widest bg-indigo-50/50 w-fit px-2 py-1 rounded-md">
+                              <div className="mt-3 flex items-center gap-2 text-[9px] font-black text-teal-600 uppercase tracking-widest bg-teal-50/50 w-fit px-2 py-1 rounded-md">
                                 <RefreshCw className="size-2.5" />
                                 Diterjemahkan oleh AI
                               </div>
@@ -269,7 +269,7 @@ export default function FeedPage() {
                               <Heart className="size-5 group-hover:fill-rose-500" />
                               <span className="text-xs font-black">{post.stats.likes}</span>
                             </button>
-                            <button className="flex items-center gap-2 text-slate-400 hover:text-accent transition-colors">
+                            <button className="flex items-center gap-2 text-slate-400 hover:text-teal-600 transition-colors">
                               <MessageCircle className="size-5" />
                               <span className="text-xs font-black">{post.stats.comments}</span>
                             </button>
@@ -277,7 +277,7 @@ export default function FeedPage() {
                               onClick={() => handleTranslate(post.id, post.content)}
                               disabled={trans?.loading}
                               className={cn(
-                                "flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-colors",
+                                "flex items-center gap-2 text-slate-400 hover:text-teal-600 transition-colors",
                                 trans?.loading && "animate-pulse"
                               )}
                             >
@@ -291,7 +291,7 @@ export default function FeedPage() {
                             <button className="p-2 text-slate-300 hover:text-slate-500 transition-colors">
                               <Share2 className="size-5" />
                             </button>
-                            <Button variant="ghost" size="sm" className="font-black text-accent hover:bg-indigo-50 rounded-xl text-xs gap-1">
+                            <Button variant="ghost" size="sm" className="font-black text-teal-600 hover:bg-teal-50 rounded-xl text-xs gap-1">
                               Detail
                               <ArrowUpRight className="size-3.5" />
                             </Button>
@@ -303,7 +303,7 @@ export default function FeedPage() {
                 })}
 
                 <div className="py-20 text-center space-y-4 opacity-50">
-                   <div className="size-8 border-2 border-slate-200 border-t-accent rounded-full animate-spin mx-auto" />
+                   <div className="size-8 border-2 border-slate-200 border-t-teal-600 rounded-full animate-spin mx-auto" />
                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Memuat lebih banyak...</p>
                 </div>
               </div>
@@ -312,7 +312,7 @@ export default function FeedPage() {
         </div>
 
         <button 
-          className="absolute bottom-6 right-6 size-14 bg-slate-900 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-black hover:scale-110 transition-all z-30 active:scale-95"
+          className="absolute bottom-6 right-6 size-14 bg-teal-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-teal-700 hover:scale-110 transition-all z-30 active:scale-95"
         >
           <Zap className="size-6 fill-white" />
         </button>

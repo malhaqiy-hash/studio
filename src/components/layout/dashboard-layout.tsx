@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -165,8 +166,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
         <div className="relative size-16 mb-4">
-          <div className="absolute inset-0 border-4 border-indigo-100 rounded-2xl" />
-          <div className="absolute inset-0 border-4 border-accent rounded-2xl border-t-transparent animate-spin" />
+          <div className="absolute inset-0 border-4 border-teal-100 rounded-2xl" />
+          <div className="absolute inset-0 border-4 border-teal-600 rounded-2xl border-t-transparent animate-spin" />
         </div>
         <p className="text-slate-500 font-black uppercase tracking-widest text-[10px] animate-pulse">Authorizing Session...</p>
       </div>
@@ -181,12 +182,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-[100] w-full border-b bg-white/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm pointer-events-auto">
         <div className="flex items-center gap-2">
           <Link href="/feed" className="flex items-center gap-2">
-            <div className="size-8 rounded-lg bg-accent flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-100">
+            <div className="size-8 rounded-lg bg-teal-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-teal-100">
               O
             </div>
             <span className="font-headline font-black text-lg tracking-tight text-slate-900">OnTapp</span>
           </Link>
-          <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter px-1.5 py-0 border-accent/20 text-accent bg-accent/5">Beta</Badge>
+          <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter px-1.5 py-0 border-teal-200 text-teal-600 bg-teal-50">Beta</Badge>
         </div>
         
         <div className="flex items-center gap-2">
@@ -205,10 +206,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center rounded-full border-2 border-indigo-100 hover:border-accent transition p-0.5 outline-none pointer-events-auto">
+              <button className="flex items-center rounded-full border-2 border-teal-100 hover:border-teal-600 transition p-0.5 outline-none pointer-events-auto">
                 <Avatar className="h-7 w-7 rounded-full shadow-sm">
                   <AvatarImage src={activeAccount.avatar} />
-                  <AvatarFallback className="bg-accent text-white font-bold text-[10px]">{activeAccount.name[0]}</AvatarFallback>
+                  <AvatarFallback className="bg-teal-600 text-white font-bold text-[10px]">{activeAccount.name[0]}</AvatarFallback>
                 </Avatar>
               </button>
             </DropdownMenuTrigger>
@@ -227,7 +228,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     className={cn(
                       "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1",
                       activeAccount.id === acc.id 
-                        ? "bg-indigo-50 text-accent" 
+                        ? "bg-teal-50 text-teal-600" 
                         : "text-slate-600 focus:bg-slate-50"
                     )}
                   >
@@ -249,7 +250,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuSeparator className="my-2" />
 
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-indigo-50 focus:text-accent cursor-pointer">
+                <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-slate-600 focus:bg-teal-50 focus:text-teal-600 cursor-pointer">
                   <UserPlus className="size-4" />
                   Tambahkan Akun
                 </DropdownMenuSubTrigger>
@@ -271,7 +272,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       onSelect={() => handleOpenRegistration('bisnis')}
                       className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"
                     >
-                      <Briefcase className="size-4 text-indigo-400" /> Bisnis
+                      <Briefcase className="size-4 text-teal-600" /> Bisnis
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
@@ -299,7 +300,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             href="/feed" 
             className={cn(
               "flex flex-col items-center gap-1 w-full py-2 transition-colors",
-              pathname === "/feed" ? "text-accent" : "hover:text-slate-600"
+              pathname === "/feed" ? "text-teal-600" : "hover:text-slate-600"
             )}
           >
             <Rss className="size-6" />
@@ -310,7 +311,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             href="/cari" 
             className={cn(
               "flex flex-col items-center gap-1 w-full py-2 transition-colors",
-              pathname === "/cari" ? "text-accent" : "hover:text-slate-600"
+              pathname === "/cari" ? "text-teal-600" : "hover:text-slate-600"
             )}
           >
             <Search className="size-6" />
@@ -320,7 +321,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
-              className="absolute bottom-20 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-blue-700 transition active:scale-95 z-[95] ring-4 ring-white"
+              className="absolute bottom-20 w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-teal-700 transition active:scale-95 z-[95] ring-4 ring-white"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -329,7 +330,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild>
-                <button className="flex flex-col items-center gap-1 hover:text-indigo-600 w-full py-2 outline-none">
+                <button className="flex flex-col items-center gap-1 hover:text-teal-600 w-full py-2 outline-none">
                   <Menu className="size-6" />
                   <span>{t('more')}</span>
                 </button>
@@ -338,7 +339,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <SheetHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100">
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                      <LayoutGrid className="size-5 text-accent" />
+                      <LayoutGrid className="size-5 text-teal-600" />
                       OnTapp Hub
                     </SheetTitle>
                     <Badge variant="outline" className="bg-white border-slate-200 text-slate-500 font-bold px-3">
@@ -357,18 +358,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         className={cn(
                           "flex items-center px-8 py-5 transition-colors gap-6 group",
                           pathname === item.href 
-                            ? "bg-indigo-50/50 text-accent" 
+                            ? "bg-teal-50/50 text-teal-600" 
                             : "bg-white hover:bg-slate-50"
                         )}
                       >
                         <div className={cn(
                           "size-10 rounded-xl flex items-center justify-center transition-all group-hover:scale-110",
-                          pathname === item.href ? "bg-accent text-white" : "bg-slate-100 text-slate-400"
+                          pathname === item.href ? "bg-teal-600 text-white" : "bg-slate-100 text-slate-400"
                         )}>
                           <item.icon className="size-5" />
                         </div>
                         <span className="text-sm font-black uppercase tracking-widest">{item.label}</span>
-                        <ChevronRight className="ml-auto size-4 text-slate-300 group-hover:text-accent transition-colors" />
+                        <ChevronRight className="ml-auto size-4 text-slate-300 group-hover:text-teal-600 transition-colors" />
                       </Link>
                     ))}
 
@@ -408,7 +409,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <form onSubmit={handleRegisterSubmit} className="flex flex-col h-full">
             <DialogHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100 text-center sm:text-center">
               <div className="flex flex-col items-center gap-4 mb-2">
-                <div className="size-16 rounded-2xl bg-accent text-white flex items-center justify-center font-black text-2xl shadow-xl">O</div>
+                <div className="size-16 rounded-2xl bg-teal-600 text-white flex items-center justify-center font-black text-2xl shadow-xl">O</div>
                 <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Selamat Datang di OnTapp</DialogTitle>
                 <DialogDescription className="font-medium text-slate-500">
                   Silakan pilih jenis profil Anda untuk mulai terhubung dengan jaringan global.
@@ -422,9 +423,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <button 
                     type="button"
                     onClick={() => setPendingType('pribadi')}
-                    className="flex items-center gap-6 p-6 rounded-3xl border-2 border-slate-50 hover:border-blue-200 hover:bg-blue-50 transition-all group text-left"
+                    className="flex items-center gap-6 p-6 rounded-3xl border-2 border-slate-50 hover:border-teal-200 hover:bg-teal-50 transition-all group text-left"
                   >
-                    <div className="size-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="size-12 rounded-2xl bg-teal-100 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <User className="size-6" />
                     </div>
                     <div>
@@ -450,9 +451,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <button 
                     type="button"
                     onClick={() => setPendingType('bisnis')}
-                    className="flex items-center gap-6 p-6 rounded-3xl border-2 border-slate-50 hover:border-indigo-200 hover:bg-indigo-50 transition-all group text-left"
+                    className="flex items-center gap-6 p-6 rounded-3xl border-2 border-slate-50 hover:border-teal-200 hover:bg-teal-50 transition-all group text-left"
                   >
-                    <div className="size-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="size-12 rounded-2xl bg-teal-100 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Briefcase className="size-6" />
                     </div>
                     <div>
@@ -467,16 +468,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-8 px-2 font-bold text-xs">← Kembali</Button>
                     <Badge className={cn(
                       "px-3 py-1 font-black text-[10px] uppercase border-none ml-auto",
-                      pendingType === 'pribadi' ? "bg-blue-100 text-blue-600" :
+                      pendingType === 'pribadi' ? "bg-teal-100 text-teal-600" :
                       pendingType === 'professional' ? "bg-emerald-100 text-emerald-600" :
-                      "bg-indigo-100 text-indigo-600"
+                      "bg-teal-100 text-teal-600"
                     )}>
                       {pendingType}
                     </Badge>
                   </div>
 
                   <div className="flex flex-col items-center gap-4">
-                    <div className="size-24 rounded-3xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 group cursor-pointer hover:border-accent hover:bg-indigo-50 transition-all">
+                    <div className="size-24 rounded-3xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 group cursor-pointer hover:border-teal-600 hover:bg-teal-50 transition-all">
                       <Camera className="size-8 group-hover:scale-110 transition-transform" />
                     </div>
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Unggah Foto Profil</span>
@@ -555,7 +556,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <DialogFooter className="p-8 pt-4 bg-slate-50 border-t border-slate-100">
                 <Button 
                   type="submit"
-                  className="w-full h-14 rounded-2xl bg-accent hover:bg-indigo-600 text-white font-black text-lg shadow-xl shadow-indigo-100 transition-all active:scale-95"
+                  className="w-full h-14 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-lg shadow-xl shadow-teal-100 transition-all active:scale-95"
                 >
                   Selesaikan & Masuk Beranda
                 </Button>
