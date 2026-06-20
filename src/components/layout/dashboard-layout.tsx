@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -104,12 +103,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   });
 
   const drawerItems = [
-    { icon: LayoutDashboard, label: "Pusat Kendali", href: "/dashboard" },
+    { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
     { icon: Bookmark, label: t('saved'), href: "/saved" },
-    { icon: History, label: "Penemuan AI (Backup)", href: "/discover" },
-    { icon: TrendingUp, label: "Market Radar", href: "/market-radar" },
-    { icon: MapIcon, label: "Opportunity Map", href: "/opportunity-map" },
-    { icon: Building2, label: "OnTapp Registry", href: "/registry" },
+    { icon: History, label: t('ai_backup'), href: "/discover" },
+    { icon: TrendingUp, label: t('market_radar'), href: "/market-radar" },
+    { icon: MapIcon, label: t('opportunity_map'), href: "/opportunity-map" },
+    { icon: Building2, label: t('registry'), href: "/registry" },
     { icon: Radar, label: t('scout'), href: "/scout" },
     { icon: Magnet, label: t('reverse_discovery'), href: "/reverse-discovery" },
     { icon: BookOpen, label: t('knowledge'), href: "/knowledge" },
@@ -305,7 +304,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             )}
           >
             <Rss className="size-6" />
-            <span>Beranda</span>
+            <span>{t('feed')}</span>
           </Link>
 
           <Link 
@@ -316,7 +315,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             )}
           >
             <Search className="size-6" />
-            <span>Cari</span>
+            <span>{t('search')}</span>
           </Link>
 
           <div className="relative w-full h-full flex flex-col items-center justify-center">
@@ -333,7 +332,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <SheetTrigger asChild>
                 <button className="flex flex-col items-center gap-1 hover:text-indigo-600 w-full py-2 outline-none">
                   <Menu className="size-6" />
-                  <span>Lainnya</span>
+                  <span>{t('more')}</span>
                 </button>
               </SheetTrigger>
               <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 overflow-hidden h-[90vh] bg-white pointer-events-auto">

@@ -24,25 +24,37 @@ export const LANGUAGES: LanguageOption[] = [
 
 export const translations = {
   dashboard: {
-    en: 'Dashboard', id: 'Dasbor', ja: 'ダッシュボード', zh: '仪表板', ko: '대시보드', ar: 'لوحة القيada', es: 'Tablero', fr: 'Tableau de bord', all: 'Dashboard'
+    en: 'Control Center', id: 'Pusat Kendali', ja: 'コントロールセンター', zh: '控制中心', ko: '제어 센터', ar: 'مركز التحكم', es: 'Centro de Control', fr: 'Centre de contrôle', all: 'Dashboard'
   },
   feed: {
-    en: 'Feed', id: 'Umpan', ja: 'フィード', zh: '动态', ko: '피드', ar: 'التغذية', es: 'Noticias', fr: 'Flux', all: 'Feed'
+    en: 'Feed', id: 'Beranda', ja: 'フィード', zh: '动态', ko: '피드', ar: 'التغذية', es: 'Noticias', fr: 'Flux', all: 'Feed'
   },
   search: {
-    en: 'AI Search Hub', id: 'Pusat Pencarian AI', ja: 'AI検索ハブ', zh: 'AI搜索中心', ko: 'AI 검색 허브', ar: 'مركز بحث AI', es: 'Búsqueda AI', fr: 'Recherche AI', all: 'AI Search'
+    en: 'Search', id: 'Cari', ja: '検索', zh: '搜索', ko: '검색', ar: 'بحث', es: 'Búsqueda', fr: 'Recherche', all: 'Search'
+  },
+  ai_backup: {
+    en: 'AI Backup', id: 'Penemuan AI (Backup)', ja: 'AIバックアップ', zh: 'AI 备份', ko: 'AI 백업', ar: 'نسخ احتياطي للذكاء الاصطناعي', es: 'Respaldo AI', fr: 'Sauvegarde AI', all: 'AI Backup'
+  },
+  market_radar: {
+    en: 'Market Radar', id: 'Market Radar', ja: '市場レーダー', zh: '市场雷达', ko: '시장 레이더', ar: 'رادار السوق', es: 'Radar de Mercado', fr: 'Radar du marché', all: 'Market Radar'
+  },
+  opportunity_map: {
+    en: 'Opportunity Map', id: 'Peta Peluang', ja: 'オポチュニティマップ', zh: '机遇地图', ko: '기회 지도', ar: 'خريطة الفرص', es: 'Mapa de Oportunidades', fr: 'Carte des opportunités', all: 'Opportunity Map'
+  },
+  registry: {
+    en: 'OnTapp Registry', id: 'Registri OnTapp', ja: 'OnTappレジストリ', zh: 'OnTapp 注册', ko: 'OnTapp 레지스트리', ar: 'سجل OnTapp', es: 'Registro OnTapp', fr: 'Registre OnTapp', all: 'Registry'
   },
   discovery: {
-    en: 'AI Discovery', id: 'Penemuan AI', ja: 'AIディスカバリー', zh: 'AI 发现', ko: 'AI ディスカーバリー', ar: 'اكتشاف AI', es: 'Descubrimiento AI', fr: 'Découverte AI', all: 'AI Discovery'
+    en: 'AI Discovery', id: 'Penemuan AI', ja: 'AIディスカバリー', zh: 'AI 发现', ko: 'AI 디스커버리', ar: 'اكتشاف AI', es: 'Descubrimiento AI', fr: 'Découverte AI', all: 'AI Discovery'
   },
   matches: {
-    en: 'Intelligent Matches', id: 'Kecocokan Cerdas', ja: 'インテリジェントマッチ', zh: '智能匹配', ko: '지능형 매칭', ar: 'مطابقات ذكية', es: 'Emparejamientos', fr: 'Matchs intelligents', all: 'Matches'
+    en: 'Intelligent Pairings', id: 'Kecocokan Cerdas', ja: 'インテリジェントマッチ', zh: '智能匹配', ko: '지능형 매칭', ar: 'مطابقات ذكية', es: 'Emparejamientos', fr: 'Matchs intelligents', all: 'Matches'
   },
   matchmaker: {
-    en: 'Matchmaker', id: 'Pencari Mitra', ja: 'マッチメーカー', zh: '撮合者', ko: '매치메이커', ar: 'صانع المطابقات', es: 'Casamentero', fr: 'Entremetteur', all: 'Matchmaker'
+    en: 'AI Matchmaker', id: 'Pencari Mitra', ja: 'マッチメーカー', zh: '撮合者', ko: '매치메이커', ar: 'صانع المطابقات', es: 'Casamentero', fr: 'Entremetteur', all: 'Matchmaker'
   },
   opportunities: {
-    en: 'Opportunities', id: 'Peluang', ja: 'オポチュニティ', zh: '机遇', ko: '기회', ar: 'فرص', es: 'Oportunidades', fr: 'Opportunités', all: 'Opportunities'
+    en: 'Pipeline', id: 'Peluang', ja: 'オポチュニティ', zh: '机遇', ko: '기회', ar: 'فرص', es: 'Oportunidades', fr: 'Opportunités', all: 'Opportunities'
   },
   messages: {
     en: 'Messages', id: 'Pesan', ja: 'メッセージ', zh: '消息', ko: '메시지', ar: 'رسائل', es: 'Mensajes', fr: 'Messages', all: 'Messages'
@@ -54,7 +66,7 @@ export const translations = {
     en: 'Settings', id: 'Pengaturan', ja: '設定', zh: '设置', ko: '설정', ar: 'الإعدادات', es: 'Ajustes', fr: 'Paramètres', all: 'Settings'
   },
   saved: {
-    en: 'Saved', id: 'Simpan', ja: '保存済み', zh: '已保存', ko: '저장됨', ar: 'محفوظ', es: 'Guardado', fr: 'Enregistré', all: 'Saved'
+    en: 'Saved', id: 'Koleksi', ja: '保存済み', zh: '已保存', ko: '저장됨', ar: 'محفوظ', es: 'Guardado', fr: 'Enregistré', all: 'Saved'
   },
   logout: {
     en: 'Logout', id: 'Keluar', ja: 'ログアウト', zh: '登出', ko: '로그아웃', ar: 'تسجيل الخروج', es: 'Cerrar Sesión', fr: 'Déconnexion', all: 'Logout'
@@ -72,10 +84,13 @@ export const translations = {
     en: 'AI Scout', id: 'Pemandu AI', ja: 'AIスカウト', zh: 'AI 侦察', ko: 'AI 스카우트', ar: 'مستطلع AI', es: 'Explorador AI', fr: 'Scout AI', all: 'AI Scout'
   },
   reverse_discovery: {
-    en: 'Reverse Discovery', id: 'Penemuan Terbalik', ja: 'リバースディスカバリー', zh: '反向发现', ko: '리버스 디스커버리', ar: 'اكتشاف عكسي', es: 'Descubrimiento Inverso', fr: 'Découverte inversée', all: 'Reverse Discovery'
+    en: 'Demand Detection', id: 'Deteksi Permintaan', ja: '需要検出', zh: '需求检测', ko: '수요 탐지', ar: 'كشف الطلب', es: 'Detección de Demanda', fr: 'Détection de la demande', all: 'Demand Detection'
   },
   knowledge: {
-    en: 'Business Academy', id: 'Akademi Bisnis', ja: 'ビジネスアカデミー', zh: '商业学院', ko: '비즈니스 아카데미', ar: 'أكاديمية الأعمال', es: 'Academia de Negocios', fr: 'Académie des affaires', all: 'Business Academy'
+    en: 'Academy', id: 'Akademi Bisnis', ja: 'ビジネスアカデミー', zh: '商业学院', ko: '비즈니스 아카데미', ar: 'أكاديمية الأعمال', es: 'Academia de Negocios', fr: 'Académie des affaires', all: 'Academy'
+  },
+  more: {
+    en: 'More', id: 'Lainnya', ja: 'もっと', zh: '更多', ko: '더보기', ar: 'المزيد', es: 'Más', fr: 'Plus', all: 'More'
   }
 };
 
