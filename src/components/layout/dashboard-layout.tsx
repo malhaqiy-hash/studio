@@ -104,8 +104,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   });
 
   const drawerItems = [
-    { icon: LayoutDashboard, label: "Pusat Kendali", href: "/dashboard" },
     { icon: Rss, label: "Beranda Utama", href: "/feed" },
+    { icon: LayoutDashboard, label: "Pusat Kendali", href: "/dashboard" },
     { icon: Globe, label: "Mesin Cari AI", href: "/cari" },
     { icon: Bookmark, label: t('saved'), href: "/saved" },
     { icon: History, label: "Penemuan AI (Backup)", href: "/discover" },
@@ -125,7 +125,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Pengecekan otomatis untuk pengguna baru (Onboarding)
   React.useEffect(() => {
     if (hasInitialized && activeAccount?.isNew && !isRegModalOpen) {
-      // Jika akun baru dan modal belum terbuka, paksa buka modal pendaftaran
       setIsRegModalOpen(true);
     }
   }, [hasInitialized, activeAccount, isRegModalOpen]);
@@ -164,7 +163,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     });
 
     setIsRegModalOpen(false);
-    // Tidak perlu redirect, UI akan terupdate otomatis karena activeAccount berubah
+    // Setelah buat akun, langsung ke Beranda (Feed)
+    router.push("/feed");
   };
 
   if (loading) {
@@ -186,7 +186,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       
       <header className="sticky top-0 z-[100] w-full border-b bg-white/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm pointer-events-auto">
         <div className="flex items-center gap-2">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/feed" className="flex items-center gap-2">
             <div className="size-8 rounded-lg bg-accent flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-100">
               O
             </div>
@@ -400,9 +400,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      {/* MODAL ONBOARDING (Layar Pembuatan Akun) */}
       <Dialog open={isRegModalOpen} onOpenChange={(open) => {
-        // Jangan biarkan tutup jika akun masih baru (isNew)
         if (activeAccount?.isNew) return;
         setIsRegModalOpen(open);
       }}>

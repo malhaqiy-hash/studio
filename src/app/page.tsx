@@ -12,8 +12,8 @@ export default function Home() {
   useEffect(() => {
     if (!loading) {
       if (user) {
-        // Jika sudah login, langsung ke dashboard
-        router.push("/dashboard");
+        // Jika sudah login, langsung ke beranda (feed)
+        router.push("/feed");
       } else {
         // Jika belum, ke login
         router.push("/login");

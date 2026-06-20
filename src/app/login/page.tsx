@@ -50,7 +50,6 @@ export default function LoginPage() {
   const [isRegistrationAlertOpen, setIsRegistrationAlertOpen] = React.useState(false);
 
   const handleAuthError = (error: any) => {
-    // Gracefully handle common user-cancelled errors
     if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
       return;
     }
@@ -91,7 +90,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard");
+      // Redirect ke Beranda (Feed)
+      router.push("/feed");
     } catch (error: any) {
       handleAuthError(error);
     } finally {
@@ -105,7 +105,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signInWithPopup(auth, provider);
-      router.push("/dashboard");
+      // Redirect ke Beranda (Feed)
+      router.push("/feed");
     } catch (error: any) {
       handleAuthError(error);
     } finally {
