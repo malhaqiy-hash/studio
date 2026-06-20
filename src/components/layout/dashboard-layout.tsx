@@ -115,11 +115,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isCloudLoading, setIsCloudLoading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Logika Filter Menu Berdasarkan Tipe Akun
+  // Logika Filter Menu Berdasarkan Tipe Akun - Profil diletakkan paling atas
   const getDrawerItems = () => {
     const baseItems = [
-      { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: User, label: t('profile'), href: "/profile", roles: ['pribadi', 'professional', 'bisnis'] },
+      { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Bookmark, label: t('saved'), href: "/saved", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Rss, label: t('feed'), href: "/feed", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Search, label: t('search'), href: "/cari", roles: ['pribadi', 'professional', 'bisnis'] },
