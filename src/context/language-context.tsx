@@ -36,10 +36,10 @@ export const translations = {
     en: 'Search', id: 'Cari', ja: '検索', zh: '搜索', ko: '검색', ar: 'بحث', es: 'Búsqueda', fr: 'Recherche', all: 'Search'
   },
   search_placeholder: {
-    en: 'Search anything in OnTapp...', id: 'Cari apa saja di OnTapp...', ja: 'OnTappで何でも検索...', zh: '在 OnTapp 中搜索任何内容...', ko: 'OnTapp에서 무엇이든 검색하세요...', ar: 'ابحث عن أي شيء في OnTapp...', es: 'Busca cualquier cosa en OnTapp...', fr: 'Recherchez n\'importe quoi dans OnTapp...', all: 'Search...'
+    en: 'Search anything in OnTapp...', id: 'Cari apa saja di OnTapp...', ja: 'OnTappで何でも検索...', zh: '在 OnTapp 中搜索任何内容...', ko: 'OnTapp에서 무엇이든 검색하세요...', ar: 'ابحث عن أي شيء in OnTapp...', es: 'Busca cualquier cosa en OnTapp...', fr: 'Recherchez n\'importe quoi dans OnTapp...', all: 'Search...'
   },
   search_now: {
-    en: 'Search Now', id: 'Cari Sekarang', ja: '今すぐ検索', zh: '现在搜索', ko: '지금 검색', ar: 'ابحث الآن', es: 'Buscar ahora', fr: 'Rechercher maintenant', all: 'Search'
+    en: 'Search Now', id: 'Cari Sekarang', ja: '今すぐ検索', zh: '现在搜索', ko: '지금 검색', ar: 'ابحث الآن', es: 'Buscar ahora', fr: 'Rechercher sekarang', all: 'Search'
   },
   nearby: {
     en: 'Nearby (GPS)', id: 'Cari Sekitar (GPS)', ja: '近く (GPS)', zh: '附近 (GPS)', ko: '근처 (GPS)', ar: 'بالقرب (GPS)', es: 'Cerca (GPS)', fr: 'À proximité (GPS)', all: 'Nearby'
@@ -60,7 +60,7 @@ export const translations = {
     en: 'Opportunity Map', id: 'Peta Peluang', ja: 'オポチュニティマップ', zh: '机遇地图', ko: '기회 지도', ar: 'خريطة الفرص', es: 'Mapa de Oportunidades', fr: 'Carte des opportunités', all: 'Opportunity Map'
   },
   opportunity_map_desc: {
-    en: 'Visualize global business leads and market demands.', id: 'Visualisasikan prospek bisnis global dan permintaan pasar.', ja: 'グローバルなビジネスリードと市場の需要を可視化します。', zh: '可视化全球业务线索和市场需求。', ko: '글로벌 비즈니스 리드와 시장 수요를 시각화합니다.', ar: 'تصور فرص العمل العالمية وطلبات السوق.', es: 'Visualice clientes potenciales de negocios globales y demandas del mercado.', fr: 'Visualisez les pistes d\'affaires mondiales et les demandes du marché.', all: 'Map'
+    en: 'Visualize global business leads and market demands.', id: 'Visualisasikan prospek bisnis global dan permintaan pasar.', ja: 'グローバルなビジネスリードと市場の需要を可視化します。', zh: '可视化全球业务线索和市场需求。', ko: '글로벌 비즈니스 리드와 시장 수요를 시각화합니다.', ar: 'تصور فرص العمل العالمية وطلبات السوق.', es: 'Visualice clientes potenciales de negocios globales y demandas del mercado.', fr: 'Visualisez les pistes d\'affaires mondiales et les demandas del mercado.', all: 'Map'
   },
   registry: {
     en: 'OnTapp Registry', id: 'Registri OnTapp', ja: 'OnTappレジストリ', zh: 'OnTapp 注册', ko: 'OnTapp 레지스트리', ar: 'سجل OnTapp', es: 'Registro OnTapp', fr: 'Registre OnTapp', all: 'Registry'
@@ -84,7 +84,7 @@ export const translations = {
     en: 'Pipeline', id: 'Peluang', ja: 'オポチュニティ', zh: '机遇', ko: '기회', ar: 'فرص', es: 'Oportunidades', fr: 'Opportunités', all: 'Opportunities'
   },
   opportunities_desc: {
-    en: 'Track and manage your B2B sales funnel with real-time intelligence.', id: 'Lacak dan kelola corong penjualan B2B Anda dengan intelijen real-time.', ja: 'リアルタイムのインテリジェンスで B2B セールスファネルを追跡および管理します。', zh: '利用实时情报跟踪和管理您的 B2B 销售渠道。', ko: '실시간 인텔리전스로 B2B 판매 퍼널을 추적하고 관리하세요.', ar: 'تتبع وإدارة مسار مبيعات B2B بذكاء في الوقت الفعلي.', es: 'Rastree y gestione su embudo de ventas B2B con inteligencia en tiempo real.', fr: 'Suivez et gérez votre entonnoir de vente B2B avec une intelligence en temps réel.', all: 'Pipeline'
+    en: 'Track and manage your B2B sales funnel with real-time intelligence.', id: 'Lacak dan kelola corong penjualan B2B Anda dengan intelijen real-time.', ja: 'リアルタイムのインテリジェンスで B2B セールスファネルを追跡および管理します。', zh: '利用实时情报跟踪和管理您的 B2B 销售渠道。', ko: '실시간 인텔리전스로 B2B 판매 퍼널을 추적하고 관리하세요.', ar: 'تتبع وإدارة مسار مبيعات B2B بذكاء في الوقت الفعلي.', es: 'Rastree y gestione su embudo de ventas B2B con inteligencia en tiempo real.', fr: 'Suivez et gérez votre entonnoir de vente B2B avec une intelligence en tiempo réel.', all: 'Pipeline'
   },
   messages: {
     en: 'Messages', id: 'Pesan', ja: 'メッセージ', zh: '消息', ko: '메시지', ar: 'رسائل', es: 'Mensajes', fr: 'Messages', all: 'Messages'
@@ -142,6 +142,30 @@ export const translations = {
   },
   daily_limit_msg: {
     en: '30 daily accesses to maintain OnTapp network quality.', id: 'Batas 30 akses harian untuk menjaga kualitas jaringan OnTapp.', ja: 'OnTapp ネットワークの品質を維持するための 1 日 30 回のアクセス制限。', zh: '每天 30 次访问以维持 OnTapp 网络质量。', ko: 'OnTapp 네트워크 품질을 유지하기 위한 일일 30회 액세스.', ar: '30 وصولاً يوميًا للحفاظ على جودة شبكة OnTapp.', es: '30 accesos diarios para mantener la calidad de la red OnTapp.', fr: '30 accès quotidiens pour maintenir la qualité du réseau OnTapp.', all: 'Limit'
+  },
+  active_opps: {
+    en: 'Active Opportunities', id: 'Peluang Aktif', ja: 'アクティブなオポチュニティ', zh: '活跃机遇', ko: '활성 기회', ar: 'فرص نشطة', es: 'Oportunidades Activas', fr: 'Opportunités actives', all: 'Active'
+  },
+  ai_matches_label: {
+    en: 'AI Matches', id: 'Kecocokan AI', ja: 'AIマッチ', zh: 'AI 匹配', ko: 'AI 매치', ar: 'مطابقات الذكاء الاصطناعي', es: 'Emparejamientos IA', fr: 'Matchs IA', all: 'Matches'
+  },
+  pipeline_est: {
+    en: 'Pipeline Estimate', id: 'Estimasi Pipeline', ja: 'パイプライン見積もり', zh: '销售渠道估算', ko: '파이프라인 추정', ar: 'تقدير المسار', es: 'Estimación de Pipeline', fr: 'Estimation du pipeline', all: 'Estimate'
+  },
+  synergy_score: {
+    en: 'Synergy Score', id: 'Skor Sinergi', ja: 'シナジースコア', zh: '协同得分', ko: '시너지 점수', ar: 'درجة التآزر', es: 'Puntaje de Sinergia', fr: 'Score de synergie', all: 'Synergy'
+  },
+  network_perf: {
+    en: 'Network Performance', id: 'Performa Jaringan', ja: 'ネットワークパフォーマンス', zh: '网络性能', ko: '네트워크 성능', ar: 'أداء الشبكة', es: 'Desempeño de Red', fr: 'Performance du réseau', all: 'Performance'
+  },
+  recent_act: {
+    en: 'Recent Activity', id: 'Aktivitas Terkini', ja: '最近のアクティビティ', zh: '最近动态', ko: '최근 활동', ar: 'النشاط الأخير', es: 'Actividad Reciente', fr: 'Activité récente', all: 'Activity'
+  },
+  network_evolution: {
+    en: 'Your Network Evolution', id: 'Evolusi Jaringan Anda', ja: 'あなたのネットワークの進化', zh: '您的网络进化', ko: '네트워크 진화', ar: 'تطور شبكتك', es: 'Evolución de su Red', fr: 'Évolution de votre réseau', all: 'Evolution'
+  },
+  connect_now: {
+    en: 'Connect Now', id: 'Hubungkan Sekarang', ja: '今すぐ接続', zh: '现在连接', ko: '지금 연결', ar: 'اتصل الآن', es: 'Conectar ahora', fr: 'Connecter maintenant', all: 'Connect'
   }
 };
 

@@ -30,7 +30,8 @@ import {
   Headphones,
   Truck,
   Layers,
-  Users
+  Users,
+  Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -322,7 +323,7 @@ export default function CariPage() {
                     <div className="flex items-center gap-2"><MapPin className="size-3.5 text-rose-500" />{activeLocation}</div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
-                </DropdownMenuTrigger>
+                </PopoverTrigger>
                 <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl border-slate-100 space-y-3">
                   <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" /><Input placeholder="Search location..." value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} className="h-9 pl-9 rounded-xl border-slate-100 bg-slate-50 text-[11px] font-bold" /></div>
                   <div className="space-y-1 max-h-[200px] overflow-y-auto">

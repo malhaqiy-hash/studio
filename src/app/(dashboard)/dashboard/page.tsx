@@ -52,7 +52,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function UserDashboardPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <DashboardLayout>
@@ -72,10 +72,10 @@ export default function UserDashboardPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { label: "Peluang Aktif", val: "24", icon: Briefcase, color: "text-indigo-600", bg: "bg-indigo-50" },
-            { label: "Kecocokan AI", val: "128", icon: Target, color: "text-accent", bg: "bg-accent/10" },
-            { label: "Estimasi Pipeline", val: "$42.5k", icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-50" },
-            { label: "Skor Sinergi", val: "92%", icon: Zap, color: "text-amber-500", bg: "bg-amber-50" }
+            { label: t('active_opps'), val: "24", icon: Briefcase, color: "text-indigo-600", bg: "bg-indigo-50" },
+            { label: t('ai_matches_label'), val: "128", icon: Target, color: "text-accent", bg: "bg-accent/10" },
+            { label: t('pipeline_est'), val: "$42.5k", icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-50" },
+            { label: t('synergy_score'), val: "92%", icon: Zap, color: "text-amber-500", bg: "bg-amber-50" }
           ].map((stat, i) => (
             <Card key={i} className="rounded-[2.5rem] border-slate-100 shadow-sm hover:shadow-md transition-all">
               <CardContent className="p-8 space-y-4">
@@ -97,10 +97,14 @@ export default function UserDashboardPage() {
             <CardHeader className="p-10 pb-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl font-black text-slate-900">Performa Jaringan</CardTitle>
-                  <CardDescription className="font-bold text-slate-400">Pertumbuhan koneksi dan nilai peluang bulanan.</CardDescription>
+                  <CardTitle className="text-2xl font-black text-slate-900">{t('network_perf')}</CardTitle>
+                  <CardDescription className="font-bold text-slate-400">
+                    {language === 'id' ? 'Pertumbuhan koneksi dan nilai peluang bulanan.' : 'Growth of connections and monthly opportunity values.'}
+                  </CardDescription>
                 </div>
-                <Badge variant="outline" className="rounded-lg h-8 px-3 text-xs font-black uppercase border-slate-100 text-slate-400">6 Bulan Terakhir</Badge>
+                <Badge variant="outline" className="rounded-lg h-8 px-3 text-xs font-black uppercase border-slate-100 text-slate-400">
+                  {language === 'id' ? '6 Bulan Terakhir' : 'Last 6 Months'}
+                </Badge>
               </div>
             </CardHeader>
             <CardContent className="p-10 pt-10">
@@ -146,7 +150,7 @@ export default function UserDashboardPage() {
                 <div className="size-10 rounded-xl bg-white/10 flex items-center justify-center">
                   <Activity className="size-5 text-accent" />
                 </div>
-                <CardTitle className="text-xl font-black">Aktivitas Terkini</CardTitle>
+                <CardTitle className="text-xl font-black">{t('recent_act')}</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-8 pt-0 space-y-6 relative z-10">
@@ -166,7 +170,7 @@ export default function UserDashboardPage() {
                 </div>
               ))}
               <Button variant="ghost" className="w-full text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/5 border border-white/5 mt-4">
-                Lihat Semua Log
+                {language === 'id' ? 'Lihat Semua Log' : 'See All Logs'}
               </Button>
             </CardContent>
             <div className="absolute top-0 right-0 w-48 h-48 bg-accent/20 rounded-full blur-3xl -mr-24 -mt-24" />
@@ -180,13 +184,15 @@ export default function UserDashboardPage() {
               <Zap className="size-12 text-white fill-white" />
             </div>
             <div className="space-y-3 flex-1 text-center md:text-left">
-              <h3 className="text-3xl font-black tracking-tight">Evolusi Jaringan Anda</h3>
+              <h3 className="text-3xl font-black tracking-tight">{t('network_evolution')}</h3>
               <p className="text-indigo-100 font-medium text-lg max-w-xl">
-                AI OnTapp telah mendeteksi 14 kembaran bisnis (*lookalike partners*) di wilayah Asia Timur yang belum Anda sapa.
+                {language === 'id' 
+                  ? 'AI OnTapp telah mendeteksi 14 kembaran bisnis (*lookalike partners*) di wilayah Asia Timur yang belum Anda sapa.' 
+                  : 'OnTapp AI has detected 14 business lookalike partners in the East Asia region that you have not connected with.'}
               </p>
             </div>
             <Button className="rounded-2xl bg-white text-indigo-600 hover:bg-indigo-50 font-black px-10 h-14 shadow-xl shadow-black/10 active:scale-95 transition-all">
-              Hubungkan Sekarang
+              {t('connect_now')}
             </Button>
           </div>
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[120px] -mr-96 -mt-96" />
