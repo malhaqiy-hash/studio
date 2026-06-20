@@ -35,7 +35,8 @@ import {
   BookOpen,
   TrendingUp,
   Map as MapIcon,
-  Building2
+  Building2,
+  History
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -95,7 +96,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { activeAccount, availableAccounts, switchAccount, registerAccount } = useAccount();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
   
-  // Registration Modal State
   const [isRegModalOpen, setIsRegModalOpen] = React.useState(false);
   const [pendingType, setPendingType] = React.useState<AccountType | null>(null);
   const [regFormData, setRegFormData] = React.useState({
@@ -106,8 +106,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   });
 
   const drawerItems = [
-    { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
-    { icon: Globe, label: t('discovery'), href: "/cari" },
+    { icon: LayoutDashboard, label: "Pusat Kendali", href: "/dashboard" },
+    { icon: Rss, label: "Beranda Utama", href: "/feed" },
+    { icon: Globe, label: "Mesin Cari AI", href: "/cari" },
+    { icon: History, label: "Penemuan AI (Backup)", href: "/discover" },
     { icon: TrendingUp, label: "Market Radar", href: "/market-radar" },
     { icon: MapIcon, label: "Opportunity Map", href: "/opportunity-map" },
     { icon: Building2, label: "OnTapp Registry", href: "/registry" },
@@ -118,7 +120,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { icon: Target, label: t('matches'), href: "/matches" },
     { icon: Briefcase, label: t('opportunities'), href: "/opportunities" },
     { icon: MessageSquare, label: t('messages'), href: "/messages" },
-    { icon: CreditCard, label: t('payment'), href: "/payment" },
     { icon: Sliders, label: t('settings'), href: "/settings" },
   ];
 
@@ -176,7 +177,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-body relative">
       
-      {/* Top Header */}
       <header className="sticky top-0 z-[100] w-full border-b bg-white/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm pointer-events-auto">
         <div className="flex items-center gap-2">
           <Link href="/dashboard" className="flex items-center gap-2">
@@ -196,7 +196,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </Button>
           </Link>
 
-          {/* Profile Switcher Hub */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center rounded-full border-2 border-indigo-100 hover:border-accent transition p-0.5 outline-none pointer-events-auto">
@@ -282,15 +281,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </main>
 
-      {/* Fixed Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t bg-white/95 backdrop-blur-md pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.03)] pointer-events-auto">
         <div className="grid grid-cols-3 h-16 items-center justify-items-center text-[10px] font-black uppercase tracking-widest text-slate-400 relative">
           
           <Link 
-            href="/dashboard" 
+            href="/feed" 
             className={cn(
               "flex flex-col items-center gap-1 w-full py-2 transition-colors",
-              pathname === "/dashboard" ? "text-accent" : "hover:text-slate-600"
+              pathname === "/feed" ? "text-accent" : "hover:text-slate-600"
             )}
           >
             <Rss className="size-6" />
@@ -308,7 +306,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <span>Cari</span>
           </Link>
 
-          {/* AI Advisor Trigger & Lainnya Menu */}
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
@@ -392,7 +389,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      {/* Account Registration Onboarding Modal */}
       <Dialog open={isRegModalOpen} onOpenChange={setIsRegModalOpen}>
         <DialogContent className="max-w-md rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-white">
           <form onSubmit={handleRegisterSubmit} className="flex flex-col h-full">
@@ -417,7 +413,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </DialogHeader>
 
             <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh]">
-              {/* Photo Placeholder */}
               <div className="flex flex-col items-center gap-4">
                 <div className="size-24 rounded-3xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 group cursor-pointer hover:border-accent hover:bg-indigo-50 transition-all">
                   <Camera className="size-8 group-hover:scale-110 transition-transform" />

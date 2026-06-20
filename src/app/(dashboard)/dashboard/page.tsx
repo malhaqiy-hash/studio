@@ -3,300 +3,193 @@
 
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   TrendingUp, 
-  Globe, 
-  MapPin, 
+  Users, 
+  Briefcase, 
   Zap, 
-  Sparkles, 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  Clock, 
-  ShieldCheck,
-  RefreshCw,
-  ArrowUpRight
+  ArrowUpRight, 
+  Activity, 
+  DollarSign,
+  Target,
+  Clock,
+  ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/context/language-context";
-import { translateText } from "@/ai/flows/translate-flow";
-import { cn } from "@/lib/utils";
-import useEmblaCarousel from 'embla-carousel-react';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip as RechartsTooltip, 
+  ResponsiveContainer,
+  AreaChart,
+  Area
+} from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
-const CATEGORIES = [
-  { id: 'for-you', label: 'For You', icon: Sparkles },
-  { id: 'lokal', label: 'Lokal', icon: MapPin },
-  { id: 'global', label: 'Global', icon: Globe },
-  { id: 'trending', label: 'Trending', icon: TrendingUp },
+const RECENT_ACTIVITY = [
+  { id: 1, type: 'match', title: 'New Match Found', desc: 'EcoPack Solutions (98%)', time: '10m ago' },
+  { id: 2, type: 'opportunity', title: 'Pipeline Update', desc: 'Global Logistics moved to Won', time: '2h ago' },
+  { id: 3, type: 'search', title: 'AI Scout Alert', desc: 'High demand in Green Tech detected', time: '5h ago' },
 ];
 
-const MOCK_POSTS = [
-  {
-    id: "p1",
-    type: "insight",
-    author: "OnTapp Intelligence",
-    avatar: "",
-    category: "Market Trend",
-    content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
-    time: "Baru saja",
-    stats: { likes: "1.2k", comments: "84" },
-    verified: true,
-    tag: "Trending"
-  },
-  {
-    id: "p2",
-    type: "post",
-    author: "Global Logistics Co.",
-    avatar: "https://picsum.photos/seed/log/100",
-    category: "Lokal",
-    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member.",
-    time: "2 jam yang lalu",
-    stats: { likes: "452", comments: "12" },
-    verified: true,
-    image: "https://picsum.photos/seed/truck/800/400"
-  },
-  {
-    id: "p3",
-    type: "opportunity",
-    author: "Skyline Ventures",
-    avatar: "https://picsum.photos/seed/invest/100",
-    category: "Global",
-    content: "Mencari mitra strategis di bidang EdTech untuk ekspansi ke pasar Eropa Timur. Kami menyediakan dukungan pendanaan dan akses jaringan distribusi.",
-    time: "5 jam yang lalu",
-    stats: { likes: "890", comments: "45" },
-    verified: false,
-    urgent: true
-  }
+const PERFORMANCE_DATA = [
+  { month: "Jan", revenue: 4500, leads: 24 },
+  { month: "Feb", revenue: 5200, leads: 32 },
+  { month: "Mar", revenue: 4800, leads: 28 },
+  { month: "Apr", revenue: 6100, leads: 45 },
+  { month: "May", revenue: 5900, leads: 38 },
+  { month: "Jun", revenue: 7200, leads: 52 },
 ];
 
-export default function DashboardPage() {
-  const { language } = useLanguage();
-  const [activeCategory, setActiveCategory] = React.useState('for-you');
-  const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean }>>({});
-  
-  // Carousel State
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start' });
+const chartConfig = {
+  revenue: {
+    label: "Revenue Pipeline",
+    color: "hsl(var(--accent))",
+  },
+};
 
-  const onSelect = React.useCallback(() => {
-    if (!emblaApi) return;
-    const index = emblaApi.selectedScrollSnap();
-    setActiveCategory(CATEGORIES[index].id);
-  }, [emblaApi]);
-
-  React.useEffect(() => {
-    if (!emblaApi) return;
-    emblaApi.on('select', onSelect);
-  }, [emblaApi, onSelect]);
-
-  const scrollTo = (index: number) => {
-    if (emblaApi) emblaApi.scrollTo(index);
-  };
-
-  const handleTranslate = async (postId: string, content: string) => {
-    if (translations[postId]?.text) {
-      setTranslations(prev => ({
-        ...prev,
-        [postId]: { ...prev[postId], show: !prev[postId].show }
-      }));
-      return;
-    }
-
-    setTranslations(prev => ({
-      ...prev,
-      [postId]: { text: "", show: false, loading: true }
-    }));
-
-    try {
-      const { translatedText } = await translateText({
-        text: content,
-        targetLanguage: language
-      });
-      setTranslations(prev => ({
-        ...prev,
-        [postId]: { text: translatedText, show: true, loading: false }
-      }));
-    } catch (err) {
-      console.error(err);
-      setTranslations(prev => ({
-        ...prev,
-        [postId]: { text: "", show: false, loading: false }
-      }));
-    }
-  };
-
+export default function UserDashboardPage() {
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-[calc(100vh-140px)] max-w-2xl mx-auto relative overflow-hidden">
-        
-        {/* Category Navigation (Horizontal) */}
-        <div className="flex items-center justify-center gap-1 mb-6 sticky top-0 z-20 bg-slate-50/80 backdrop-blur-sm py-2">
-          {CATEGORIES.map((cat, idx) => (
-            <button
-              key={cat.id}
-              onClick={() => scrollTo(idx)}
-              className={cn(
-                "px-5 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2",
-                activeCategory === cat.id 
-                  ? "bg-slate-900 text-white shadow-lg scale-105" 
-                  : "bg-white text-slate-400 hover:bg-slate-100"
-              )}
-            >
-              <cat.icon className="size-3" />
-              {cat.label}
-            </button>
+      <div className="space-y-8 py-6">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-1">
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-none">Pusat Kendali</h1>
+            <p className="text-slate-500 font-medium text-lg">Ringkasan performa bisnis dan intelijen jaringan Anda.</p>
+          </div>
+          <div className="flex gap-2">
+            <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex gap-2">
+              <ShieldCheck className="size-3" /> Akun Terverifikasi
+            </Badge>
+          </div>
+        </header>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { label: "Peluang Aktif", val: "24", icon: Briefcase, color: "text-indigo-600", bg: "bg-indigo-50" },
+            { label: "Kecocokan AI", val: "128", icon: Target, color: "text-accent", bg: "bg-accent/10" },
+            { label: "Estimasi Pipeline", val: "$42.5k", icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-50" },
+            { label: "Skor Sinergi", val: "92%", icon: Zap, color: "text-amber-500", bg: "bg-amber-50" }
+          ].map((stat, i) => (
+            <Card key={i} className="rounded-[2.5rem] border-slate-100 shadow-sm hover:shadow-md transition-all">
+              <CardContent className="p-8 space-y-4">
+                <div className={cn("size-12 rounded-2xl flex items-center justify-center", stat.bg, stat.color)}>
+                  <stat.icon className="size-6" />
+                </div>
+                <div>
+                  <p className="text-3xl font-black text-slate-900">{stat.val}</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{stat.label}</p>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
-        {/* Swipeable Columns Container */}
-        <div className="flex-1 overflow-hidden" ref={emblaRef}>
-          <div className="flex h-full">
-            {CATEGORIES.map((cat) => (
-              <div 
-                key={cat.id} 
-                className="flex-[0_0_100%] min-w-0 h-full overflow-y-auto snap-y snap-mandatory no-scrollbar space-y-4 pb-10 px-1"
-              >
-                {/* Specific Post for each category (simulated by shuffling or filtering) */}
-                {MOCK_POSTS.map((post) => {
-                  const trans = translations[post.id];
-                  return (
-                    <div 
-                      key={`${cat.id}-${post.id}`} 
-                      className="snap-start snap-always w-full min-h-[400px] flex flex-col mb-4"
-                    >
-                      <Card className="border-none shadow-sm rounded-[2.5rem] overflow-hidden bg-white flex-1 flex flex-col hover:shadow-md transition-shadow">
-                        {/* Post Header */}
-                        <div className="p-6 pb-2 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="size-10 border border-slate-100">
-                              <AvatarImage src={post.avatar} />
-                              <AvatarFallback className="bg-indigo-50 text-accent font-bold">
-                                {post.author[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-black text-slate-900 text-sm">{post.author}</h3>
-                                {post.verified && <ShieldCheck className="size-3.5 text-emerald-500 fill-emerald-50" />}
-                              </div>
-                              <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
-                                <Clock className="size-2.5" />
-                                {post.time}
-                              </div>
-                            </div>
-                          </div>
-                          <Badge variant="outline" className="text-[9px] font-black uppercase border-slate-100 text-slate-400">
-                            {cat.label}
-                          </Badge>
-                        </div>
-
-                        {/* Post Content */}
-                        <CardContent className="px-8 py-4 flex-1 space-y-4">
-                          {post.type === 'insight' && (
-                            <div className="inline-flex items-center gap-2 bg-indigo-50 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-indigo-100">
-                              <Sparkles className="size-2.5 animate-pulse" />
-                              AI Analysis
-                            </div>
-                          )}
-                          
-                          {post.urgent && (
-                            <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[9px] uppercase mb-2">
-                              Peluang Mendesak
-                            </Badge>
-                          )}
-
-                          <div className="relative">
-                            <p className={cn(
-                              "text-slate-700 leading-relaxed font-medium",
-                              post.type === 'insight' ? "text-lg italic" : "text-base"
-                            )}>
-                              {trans?.show ? trans.text : post.content}
-                            </p>
-                            
-                            {trans?.show && (
-                              <div className="mt-3 flex items-center gap-2 text-[9px] font-black text-accent uppercase tracking-widest bg-indigo-50/50 w-fit px-2 py-1 rounded-md">
-                                <RefreshCw className="size-2.5" />
-                                Diterjemahkan oleh AI
-                              </div>
-                            )}
-                          </div>
-
-                          {post.image && (
-                            <div className="rounded-3xl overflow-hidden border border-slate-50 mt-4">
-                              <img src={post.image} alt="Content" className="w-full h-auto object-cover max-h-[300px]" />
-                            </div>
-                          )}
-                        </CardContent>
-
-                        {/* Post Footer / Actions */}
-                        <div className="p-6 pt-0 mt-auto border-t border-slate-50 bg-slate-50/30 flex items-center justify-between">
-                          <div className="flex items-center gap-6">
-                            <button className="flex items-center gap-2 text-slate-400 hover:text-rose-500 transition-colors group">
-                              <Heart className="size-5 group-hover:fill-rose-500" />
-                              <span className="text-xs font-black">{post.stats.likes}</span>
-                            </button>
-                            <button className="flex items-center gap-2 text-slate-400 hover:text-accent transition-colors">
-                              <MessageCircle className="size-5" />
-                              <span className="text-xs font-black">{post.stats.comments}</span>
-                            </button>
-                            <button 
-                              onClick={() => handleTranslate(post.id, post.content)}
-                              disabled={trans?.loading}
-                              className={cn(
-                                "flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-colors",
-                                trans?.loading && "animate-pulse"
-                              )}
-                            >
-                              {trans?.loading ? <RefreshCw className="size-4 animate-spin" /> : <Globe className="size-4" />}
-                              <span className="text-[10px] font-black uppercase tracking-tighter">
-                                {trans?.show ? "Original" : "Translate"}
-                              </span>
-                            </button>
-                          </div>
-                          <div className="flex gap-2">
-                            <button className="p-2 text-slate-300 hover:text-slate-500 transition-colors">
-                              <Share2 className="size-5" />
-                            </button>
-                            <Button variant="ghost" size="sm" className="font-black text-accent hover:bg-indigo-50 rounded-xl text-xs gap-1">
-                              Detail
-                              <ArrowUpRight className="size-3.5" />
-                            </Button>
-                          </div>
-                        </div>
-                      </Card>
-                    </div>
-                  );
-                })}
-
-                {/* Loading State Footer for each column */}
-                <div className="py-20 text-center space-y-4 opacity-50">
-                   <div className="size-8 border-2 border-slate-200 border-t-accent rounded-full animate-spin mx-auto" />
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Memuat lebih banyak...</p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Main Chart */}
+          <Card className="lg:col-span-8 rounded-[3rem] border-slate-100 shadow-xl overflow-hidden bg-white">
+            <CardHeader className="p-10 pb-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-2xl font-black text-slate-900">Performa Jaringan</CardTitle>
+                  <CardDescription className="font-bold text-slate-400">Pertumbuhan koneksi dan nilai peluang bulanan.</CardDescription>
                 </div>
+                <Badge variant="outline" className="rounded-lg h-8 px-3 text-xs font-black uppercase border-slate-100 text-slate-400">6 Bulan Terakhir</Badge>
               </div>
-            ))}
-          </div>
+            </CardHeader>
+            <CardContent className="p-10 pt-10">
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={PERFORMANCE_DATA}>
+                    <defs>
+                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis 
+                      dataKey="month" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 700}} 
+                      dy={10}
+                    />
+                    <YAxis hide />
+                    <RechartsTooltip content={<ChartTooltipContent />} />
+                    <Area 
+                      type="monotone" 
+                      dataKey="revenue" 
+                      stroke="hsl(var(--accent))" 
+                      strokeWidth={4}
+                      fillOpacity={1} 
+                      fill="url(#colorRev)" 
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Activity Sidebar */}
+          <Card className="lg:col-span-4 rounded-[3rem] border-slate-100 shadow-xl bg-slate-900 text-white overflow-hidden relative">
+            <CardHeader className="p-8 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl bg-white/10 flex items-center justify-center">
+                  <Activity className="size-5 text-accent" />
+                </div>
+                <CardTitle className="text-xl font-black">Aktivitas Terkini</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-8 pt-0 space-y-6 relative z-10">
+              {RECENT_ACTIVITY.map((act) => (
+                <div key={act.id} className="flex gap-4 group cursor-pointer">
+                  <div className="flex flex-col items-center">
+                    <div className="size-2 rounded-full bg-accent mt-1.5" />
+                    <div className="w-0.5 flex-1 bg-white/10 my-2" />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex justify-between items-baseline">
+                      <h4 className="font-bold text-sm text-white group-hover:text-accent transition-colors">{act.title}</h4>
+                      <span className="text-[9px] font-bold text-white/30 uppercase">{act.time}</span>
+                    </div>
+                    <p className="text-xs text-white/50 leading-relaxed">{act.desc}</p>
+                  </div>
+                </div>
+              ))}
+              <Button variant="ghost" className="w-full text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/5 border border-white/5 mt-4">
+                Lihat Semua Log
+              </Button>
+            </CardContent>
+            <div className="absolute top-0 right-0 w-48 h-48 bg-accent/20 rounded-full blur-3xl -mr-24 -mt-24" />
+          </Card>
         </div>
 
-        {/* Global Action Floating Button */}
-        <button 
-          className="absolute bottom-6 right-6 size-14 bg-slate-900 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-black hover:scale-110 transition-all z-30 active:scale-95"
-        >
-          <Zap className="size-6 fill-white" />
-        </button>
+        {/* Intelligence Banner */}
+        <div className="p-12 rounded-[4rem] bg-indigo-600 text-white shadow-2xl relative overflow-hidden group">
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
+            <div className="size-24 rounded-[2.5rem] bg-white/20 backdrop-blur-xl flex items-center justify-center rotate-6 group-hover:rotate-12 transition-transform duration-500">
+              <Zap className="size-12 text-white fill-white" />
+            </div>
+            <div className="space-y-3 flex-1 text-center md:text-left">
+              <h3 className="text-3xl font-black tracking-tight">Evolusi Jaringan Anda</h3>
+              <p className="text-indigo-100 font-medium text-lg max-w-xl">
+                AI OnTapp telah mendeteksi 14 kembaran bisnis (*lookalike partners*) di wilayah Asia Timur yang belum Anda sapa.
+              </p>
+            </div>
+            <Button className="rounded-2xl bg-white text-indigo-600 hover:bg-indigo-50 font-black px-10 h-14 shadow-xl shadow-black/10 active:scale-95 transition-all">
+              Hubungkan Sekarang
+            </Button>
+          </div>
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[120px] -mr-96 -mt-96" />
+        </div>
       </div>
-
-      <style jsx global>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </DashboardLayout>
   );
 }
