@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -137,7 +138,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
     ];
 
-    // Filter out Home and Search from drawer because they are in the bottom nav
     return baseItems.filter(item => 
       item.roles.includes(activeAccount?.type || 'pribadi') && 
       item.href !== "/feed" && 
@@ -191,6 +191,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     });
 
     setIsRegModalOpen(false);
+    // Langsung masuk ke profil setelah registrasi akun baru
+    router.push("/profile");
+  };
+
+  const handleSwitchAccount = (accountId: string) => {
+    switchAccount(accountId);
+    // Langsung masuk ke profil saat beralih akun
+    router.push("/profile");
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -299,7 +307,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 {availableAccounts.filter(a => !a.isNew).map((acc) => (
                   <DropdownMenuItem 
                     key={acc.id}
-                    onSelect={() => switchAccount(acc.id)}
+                    onSelect={() => handleSwitchAccount(acc.id)}
                     className={cn(
                       "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1",
                       activeAccount.id === acc.id 
