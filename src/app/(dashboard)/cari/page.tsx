@@ -28,7 +28,6 @@ import {
   Layers,
   Users,
   Zap,
-  Trash2,
   History,
   X,
   Image as ImageIcon
@@ -168,7 +167,7 @@ export default function CariPage() {
 
     try {
       if (user && db) {
-        const canProceed = await checkThrottling(user.uid);
+        const canProceed = await withTimeout(checkThrottling(user.uid), 3000, true);
         if (!canProceed) {
           setLoading(false);
           return;
@@ -250,6 +249,13 @@ export default function CariPage() {
     const updated = history.filter(item => item.id !== id);
     setHistory(updated);
     localStorage.setItem('ontapp_discovery_history', JSON.stringify(updated));
+  };
+
+  const handleHistoryClick = (item: any) => {
+    setQuery(item.name);
+    if (item.location) setActiveLocation(item.location);
+    if (item.category) setActiveCategory(item.category);
+    handleSearch(undefined, item.name);
   };
 
   const openInGoogleMaps = (name: string, location?: string) => {
@@ -381,7 +387,8 @@ export default function CariPage() {
               {history.map((item) => (
                 <Card 
                   key={item.id} 
-                  className="shrink-0 w-64 rounded-2xl border-slate-100 bg-white shadow-sm hover:shadow-md transition-all relative group"
+                  onClick={() => handleHistoryClick(item)}
+                  className="shrink-0 w-64 rounded-2xl border-slate-100 bg-white shadow-sm hover:shadow-md transition-all relative group cursor-pointer active:scale-95"
                 >
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-start justify-between gap-2">
@@ -392,7 +399,10 @@ export default function CariPage() {
                         <h5 className="text-xs font-black text-slate-900 truncate max-w-[140px]">{item.name}</h5>
                       </div>
                       <button 
-                        onClick={() => handleRemoveHistoryItem(item.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveHistoryItem(item.id);
+                        }}
                         className="p-1.5 rounded-full bg-slate-50 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all"
                       >
                         <X className="size-3" />
