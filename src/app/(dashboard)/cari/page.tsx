@@ -23,8 +23,6 @@ import {
   Building2,
   Filter,
   Mic,
-  CheckCircle2,
-  Sparkles,
   Plus,
   Store,
   Hotel,
@@ -55,8 +53,6 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 
 const ENTITY_CATEGORIES = [
@@ -83,12 +79,10 @@ export default function CariPage() {
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
   
-  // Filters
   const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
   const [activeLocation, setActiveLocation] = React.useState("Pilih Lokasi");
   const [locationSearch, setLocationSearch] = React.useState("");
   
-  // Voice & Image state
   const [isListening, setIsListening] = React.useState(false);
   const [isAnalyzingImage, setIsAnalyzingImage] = React.useState(false);
   const [previewImage, setPreviewImage] = React.useState<string | null>(null);
@@ -97,7 +91,6 @@ export default function CariPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
   
-  // Translation state
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean, detected: string }>>({});
 
   const handleSearch = async (e?: React.FormEvent, overrideQuery?: string) => {
@@ -116,8 +109,19 @@ export default function CariPage() {
         } 
       });
       setResults(output);
+      
+      // Backup logic: Save to localStorage for Discovery History page
+      const history = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
+      const newItems = output.results.map(r => ({
+        ...r,
+        id: `h-${Date.now()}-${Math.random()}`,
+        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+      }));
+      localStorage.setItem('ontapp_discovery_history', JSON.stringify([...newItems, ...history].slice(0, 50)));
+      
     } catch (err) {
       console.error(err);
+      toast({ variant: "destructive", title: "Pencarian Gagal", description: "Terjadi kesalahan pada mesin AI." });
     } finally {
       setLoading(false);
     }
@@ -147,15 +151,13 @@ export default function CariPage() {
 
     recognition.onstart = () => {
       setIsListening(true);
-      toast({ title: "Mendengarkan...", description: "Silakan bicara sekarang." });
     };
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       setQuery(transcript);
       setIsListening(false);
-      toast({ title: "Suara Terdeteksi", description: `Mencari: "${transcript}"` });
-      setTimeout(() => handleSearch(undefined, transcript), 500);
+      handleSearch(undefined, transcript);
     };
 
     recognition.onerror = () => {
@@ -180,7 +182,6 @@ export default function CariPage() {
         setIsSourcePickerOpen(false);
         toast({ title: "Menganalisis Gambar...", description: "AI sedang mengidentifikasi objek bisnis dari foto Anda." });
         
-        // Simulasikan analisis AI
         setTimeout(() => {
           setIsAnalyzingImage(false);
           setQuery("Produk/bisnis serupa dari gambar");
@@ -214,7 +215,7 @@ export default function CariPage() {
         }
       }, () => {
         setLoading(false);
-        toast({ variant: "destructive", title: "Gagal Akses Lokasi", description: "Pastikan izin lokasi diaktifkan." });
+        toast({ variant: "destructive", title: "Gagal Akses Lokasi", description: "Pastikan izin lokasi diaktifkan di browser." });
       });
     } else {
       setLoading(false);
@@ -262,7 +263,7 @@ export default function CariPage() {
           <ShieldCheck className="size-3" /> Terverifikasi OnTapp
         </Badge>;
       case 'ontapp_member': 
-        return <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200 flex gap-1 items-center px-3 py-1 font-bold rounded-lg text-[10px]">
+        return <Badge className="bg-teal-100 text-teal-700 border-teal-200 flex gap-1 items-center px-3 py-1 font-bold rounded-lg text-[10px]">
           <Zap className="size-3" /> Anggota OnTapp
         </Badge>;
       default: 
@@ -292,7 +293,6 @@ export default function CariPage() {
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-6 py-2">
-        {/* Search & Filters Area */}
         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-5">
           <form onSubmit={(e) => handleSearch(e)} className="space-y-4">
             <div className="relative group w-full">
@@ -325,31 +325,14 @@ export default function CariPage() {
                 </button>
               </div>
               
-              {/* Hidden Inputs */}
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleImageInput} 
-                className="hidden" 
-                accept="image/*" 
-              />
-              <input 
-                type="file" 
-                ref={cameraInputRef} 
-                onChange={handleImageInput} 
-                className="hidden" 
-                accept="image/*" 
-                capture="environment"
-              />
+              <input type="file" ref={fileInputRef} onChange={handleImageInput} className="hidden" accept="image/*" />
+              <input type="file" ref={cameraInputRef} onChange={handleImageInput} className="hidden" accept="image/*" capture="environment" />
             </div>
 
             {previewImage && (
               <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-accent/20 animate-in zoom-in-50">
                 <img src={previewImage} className="w-full h-full object-cover" alt="Search visual" />
-                <button 
-                  onClick={() => setPreviewImage(null)}
-                  className="absolute top-1 right-1 bg-slate-900/80 text-white rounded-full p-1"
-                >
+                <button onClick={() => setPreviewImage(null)} className="absolute top-1 right-1 bg-slate-900/80 text-white rounded-full p-1">
                   <X className="size-3" />
                 </button>
                 {isAnalyzingImage && (
@@ -361,13 +344,9 @@ export default function CariPage() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              {/* Category Filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="w-full h-12 justify-between rounded-xl border-slate-100 bg-white text-slate-600 font-bold hover:bg-slate-50 px-4 text-xs"
-                  >
+                  <Button variant="outline" className="w-full h-12 justify-between rounded-xl border-slate-100 bg-white text-slate-600 font-bold hover:bg-slate-50 px-4 text-xs">
                     <div className="flex items-center gap-2">
                       <Filter className="size-3.5 text-accent" />
                       {activeCategory ? activeCategory : "Pilih Kategori"}
@@ -376,18 +355,11 @@ export default function CariPage() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-[280px] rounded-2xl p-2 shadow-2xl border-slate-100">
-                  <DropdownMenuItem 
-                    onClick={() => setActiveCategory(null)}
-                    className="font-bold text-slate-400 hover:text-accent p-2.5 rounded-lg text-xs"
-                  >
+                  <DropdownMenuItem onClick={() => setActiveCategory(null)} className="font-bold text-slate-400 hover:text-accent p-2.5 rounded-lg text-xs">
                     Semua Kategori
                   </DropdownMenuItem>
                   {ENTITY_CATEGORIES.map((cat) => (
-                    <DropdownMenuItem 
-                      key={cat.id} 
-                      onClick={() => setActiveCategory(cat.label)}
-                      className="flex items-center gap-3 py-2.5 rounded-lg font-bold cursor-pointer hover:bg-slate-50 text-xs"
-                    >
+                    <DropdownMenuItem key={cat.id} onClick={() => setActiveCategory(cat.label)} className="flex items-center gap-3 py-2.5 rounded-lg font-bold cursor-pointer hover:bg-slate-50 text-xs">
                       <div className="size-7 bg-slate-100 rounded flex items-center justify-center text-slate-500">
                         <cat.icon className="size-3.5" />
                       </div>
@@ -397,37 +369,29 @@ export default function CariPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Location Filter */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="w-full h-12 justify-between rounded-xl border-slate-100 bg-white text-slate-600 font-bold hover:bg-slate-50 px-4 text-xs"
-                  >
+                  <Button variant="outline" className="w-full h-12 justify-between rounded-xl border-slate-100 bg-white text-slate-600 font-bold hover:bg-slate-50 px-4 text-xs">
                     <div className="flex items-center gap-2">
                       <MapPin className="size-3.5 text-rose-500" />
                       {activeLocation}
                     </div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
-                </PopoverTrigger>
+                </DropdownMenuTrigger>
                 <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl border-slate-100 space-y-3">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
                     <Input 
-                      placeholder="Cari lokasi..."
-                      value={locationSearch}
+                      placeholder="Cari lokasi..." 
+                      value={locationSearch} 
                       onChange={(e) => setLocationSearch(e.target.value)}
                       className="h-9 pl-9 rounded-xl border-slate-100 bg-slate-50 text-[11px] font-bold"
                     />
                   </div>
                   <div className="space-y-1 max-h-[200px] overflow-y-auto no-scrollbar">
                     {filteredLocations.map((loc) => (
-                      <button 
-                        key={loc} 
-                        onClick={() => { setActiveLocation(loc); setLocationSearch(""); }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
-                      >
+                      <button key={loc} onClick={() => { setActiveLocation(loc); setLocationSearch(""); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
                         {loc}
                       </button>
                     ))}
@@ -435,29 +399,18 @@ export default function CariPage() {
                 </PopoverContent>
               </Popover>
 
-              {/* Nearby Search Button */}
-              <Button 
-                type="button"
-                variant="outline"
-                onClick={handleNearbySearch}
-                className="w-full h-12 rounded-xl border-emerald-100 bg-emerald-50/30 text-emerald-700 font-bold hover:bg-emerald-50 text-xs gap-2"
-              >
+              <Button type="button" variant="outline" onClick={handleNearbySearch} className="w-full h-12 rounded-xl border-emerald-100 bg-emerald-50/30 text-emerald-700 font-bold hover:bg-emerald-50 text-xs gap-2">
                 <LocateFixed className="size-4" />
                 Cari Sekitar
               </Button>
             </div>
 
-            <Button 
-              onClick={(e) => handleSearch(e)}
-              disabled={loading}
-              className="w-full h-14 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-sm shadow-md transition-all active:scale-95 flex gap-2"
-            >
+            <Button onClick={(e) => handleSearch(e)} disabled={loading} className="w-full h-14 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-sm shadow-md transition-all active:scale-95 flex gap-2">
               {loading ? <RefreshCw className="size-4 animate-spin" /> : <><Search className="size-4" /> Cari Sekarang</>}
             </Button>
           </form>
         </div>
 
-        {/* Results Section */}
         <div className="space-y-4">
           {loading && (
             <div className="grid gap-4">
@@ -493,7 +446,7 @@ export default function CariPage() {
                   return (
                     <Card key={idx} className={cn(
                       "group overflow-hidden border shadow-sm hover:shadow-md transition-all duration-300 bg-white relative rounded-[1.5rem]",
-                      result.source !== 'external' ? "border-indigo-100" : "border-slate-100"
+                      result.source !== 'external' ? "border-teal-100" : "border-slate-100"
                     )}>
                       <CardContent className="p-0">
                         <div className="flex flex-col md:flex-row">
@@ -505,7 +458,7 @@ export default function CariPage() {
                           <div className="p-6 flex-1 flex flex-col md:flex-row gap-5 items-start">
                             <div className={cn(
                               "size-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:rotate-6 transition-transform duration-300",
-                              result.source === 'external' ? 'bg-slate-50 text-slate-400' : 'bg-indigo-50 text-accent'
+                              result.source === 'external' ? 'bg-slate-50 text-slate-400' : 'bg-teal-50 text-accent'
                             )}>
                               {getTypeIcon(result.type)}
                             </div>
@@ -530,7 +483,7 @@ export default function CariPage() {
                                     {result.location}
                                   </div>
                                 )}
-                                <div className="flex items-center gap-1 text-[10px] font-black text-indigo-600">
+                                <div className="flex items-center gap-1 text-[10px] font-black text-teal-600">
                                   {result.matchScore}% Synergy
                                 </div>
                               </div>
@@ -555,7 +508,7 @@ export default function CariPage() {
                                   {trans?.loading ? <RefreshCw className="size-2.5 animate-spin" /> : <Globe className="size-2.5" />}
                                   {trans?.show ? "Asli" : "Translate"}
                                 </Button>
-                                <Button className="w-full rounded-lg h-9 bg-accent hover:bg-indigo-600 text-white text-[9px] font-black shadow-md transition-all active:scale-95">
+                                <Button className="w-full rounded-lg h-9 bg-accent hover:bg-teal-600 text-white text-[9px] font-black shadow-md transition-all active:scale-95">
                                   Lihat Profil
                                 </Button>
                             </div>
@@ -572,14 +525,11 @@ export default function CariPage() {
           {!loading && !results && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
               {[
-                { title: "Prioritas OnTapp", desc: "Internal member diprioritaskan.", icon: Zap, color: "text-accent", bg: "bg-indigo-50" },
+                { title: "Prioritas OnTapp", desc: "Internal member diprioritaskan.", icon: Zap, color: "text-accent", bg: "bg-teal-50" },
                 { title: "Web Hibrida", desc: "Data global dari seluruh web.", icon: Globe, color: "text-emerald-500", bg: "bg-emerald-50" },
                 { title: "Voice & Visual AI", desc: "Cari dengan suara atau gambar.", icon: Camera, color: "text-rose-500", bg: "bg-rose-50" }
               ].map((feature, i) => (
-                <div 
-                  key={i} 
-                  className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm text-center space-y-3"
-                >
+                <div key={i} className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm text-center space-y-3">
                   <div className={cn("size-10 rounded-2xl flex items-center justify-center mx-auto", feature.bg, feature.color)}>
                     <feature.icon className="size-5" />
                   </div>
@@ -594,17 +544,12 @@ export default function CariPage() {
         </div>
       </div>
 
-      {/* Media Source Picker Dialog */}
       <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
-        <DialogContent className="max-w-[320px] rounded-[2.5rem] border-none shadow-2xl p-8 bg-[#2d3035] text-white overflow-hidden outline-none animate-in zoom-in-95 duration-200">
+        <DialogContent className="max-w-[320px] rounded-[2.5rem] border-none shadow-2xl p-8 bg-[#2d3035] text-white overflow-hidden outline-none">
           <div className="space-y-8">
             <h2 className="text-xl font-bold text-white/90 tracking-tight">Cari dengan Visual</h2>
-            
             <div className="space-y-6">
-              <button 
-                onClick={() => cameraInputRef.current?.click()}
-                className="w-full flex items-center justify-between group text-left active:scale-[0.98] transition-transform"
-              >
+              <button onClick={() => cameraInputRef.current?.click()} className="w-full flex items-center justify-between group text-left active:scale-[0.98] transition-transform">
                 <div className="flex items-center gap-5">
                   <div className="size-12 rounded-full bg-white/10 flex items-center justify-center shadow-inner">
                     <Camera className="size-6 text-gray-300" />
@@ -616,11 +561,7 @@ export default function CariPage() {
                 </div>
                 <div className="size-5 rounded-full border-2 border-gray-500" />
               </button>
-
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-between group text-left active:scale-[0.98] transition-transform"
-              >
+              <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center justify-between group text-left active:scale-[0.98] transition-transform">
                 <div className="flex items-center gap-5">
                   <div className="size-12 rounded-full bg-white/10 flex items-center justify-center shadow-inner">
                     <ImageIcon className="size-6 text-gray-300" />
@@ -633,12 +574,8 @@ export default function CariPage() {
                 <div className="size-5 rounded-full border-2 border-gray-500" />
               </button>
             </div>
-
             <div className="flex justify-end pt-4">
-              <button 
-                onClick={() => setIsSourcePickerOpen(false)}
-                className="text-blue-400 font-black text-sm uppercase tracking-widest hover:text-blue-300 transition-colors"
-              >
+              <button onClick={() => setIsSourcePickerOpen(false)} className="text-blue-400 font-black text-sm uppercase tracking-widest hover:text-blue-300 transition-colors">
                 Batal
               </button>
             </div>
