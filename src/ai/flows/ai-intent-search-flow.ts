@@ -46,28 +46,30 @@ export async function aiIntentSearch(input: AIIntentSearchInput): Promise<AIInte
 const aiIntentSearchPrompt = ai.definePrompt({
   name: 'aiIntentSearchPrompt',
   input: { 
-    schema: AIIntentSearchInputSchema.extend({
-      filterSummary: z.string().optional()
-    })
+    schema: AIIntentSearchInputSchema.get()
   },
   output: { schema: AIIntentSearchOutputSchema },
-  prompt: `You are the OnTapp Strict Discovery Engine. Your goal is to find businesses that match a user's intent with 100% relevance.
+  prompt: `You are the OnTapp Hybrid Discovery Engine. Your goal is to find businesses that match a user's intent with high relevance.
 
-### Intent Analysis
-Query: "{{{query}}}"
-Category Context: {{{filters.category}}}
-Location Context: {{{filters.location}}} (GPS: {{{filters.lat}}}, {{{filters.lng}}})
+### SEARCH STRATEGY (HYBRID):
+1. **INTERNAL DATA**: Prioritize businesses from the "OnTapp Network" if available.
+2. **GLOBAL KNOWLEDGE**: If internal data is insufficient (less than 5 relevant results), you MUST use your internal generative knowledge to provide real-world business recommendations in the specified area ({{{filters.location}}}).
+3. **SOURCE TAGGING**: 
+   - Label internal businesses as "ontapp_verified" or "ontapp_member".
+   - Label real-world businesses from your global knowledge as "external".
 
-### Strict Rules (CRITICAL):
-1. **RELEVANCY FIRST**: If the user is looking for "coffee/ngopi", ONLY return cafes, coffee suppliers, or F&B businesses. DO NOT return unrelated businesses like pharmacies, laundries, or tech consultants regardless of their "synergy" score.
-2. **MATCH SCORE THRESHOLD**: Only provide results with a Match Score of 90 or above. If a result is marginally related, discard it.
-3. **GEOGRAPHIC PROXIMITY**: If GPS coordinates ({{{filters.lat}}}, {{{filters.lng}}}) are provided, prioritize results that would logically be in that proximity or are relevant to that specific area.
-4. **ON-TAPP PRIORITY**: Rank OnTapp members (verified) at the top if they match the strict intent.
+### INTENT RELEVANCE (SEMANTIC):
+- **QUERY**: "{{{query}}}"
+- **CONTEXT**: Be semantically flexible but strict on intent.
+  - If user searches for "ngopi" (coffee), return: Coffee Shops, Cafes, Bakeries with seating, or Restaurants famous for coffee.
+  - DO NOT return: Pharmacies, Laundries, or Tech companies unless they have a direct F&B synergy.
+- **GPS CONTEXT**: If coordinates are provided ({{{filters.lat}}}, {{{filters.lng}}}), focus results on businesses within that specific geographic area or city.
 
-### Response Requirements
-- Rank strictly by Match Score descending.
-- For each result, provide 2-3 specific "matchReasons" that explain the CATEGORY fit.
-- Output MUST be a valid JSON object matching the requested schema exactly.`,
+### RESPONSE REQUIREMENTS:
+- Provide at least 5-8 results if possible.
+- Rank by Match Score (90-100 for high relevance).
+- For each "external" result, provide 2-3 specific "matchReasons" why this place is recommended.
+- Output MUST be a valid JSON object matching the schema.`,
 });
 
 const aiIntentSearchFlow = ai.defineFlow(
@@ -77,22 +79,15 @@ const aiIntentSearchFlow = ai.defineFlow(
     outputSchema: AIIntentSearchOutputSchema,
   },
   async (input) => {
-    const filterSummary = input.filters 
-      ? `Category: ${input.filters.category}, Location: ${input.filters.location}, GPS: ${input.filters.lat}, ${input.filters.lng}`
-      : 'None';
-
     const maxRetries = 3;
     
     for (let i = 0; i < maxRetries; i++) {
       try {
-        const { output } = await aiIntentSearchPrompt({
-          ...input,
-          filterSummary
-        });
+        const { output } = await aiIntentSearchPrompt(input);
         
         if (output) {
-          // Final client-side relevance check: Filter out anything under 90 score manually just in case
-          output.results = output.results.filter(r => r.matchScore >= 90);
+          // Manual filtering to ensure we don't show absolute junk
+          output.results = output.results.filter(r => r.matchScore >= 80);
           return output;
         }
       } catch (err: any) {
@@ -108,20 +103,18 @@ const aiIntentSearchFlow = ai.defineFlow(
       }
     }
     
-    // Optimized Fallback based on User Query and Location
-    const locationName = input.filters?.location || 'Sekitar Anda';
+    // Final UI Fallback if AI completely fails
     return {
       results: [
         {
           type: 'business',
-          name: `${input.query?.split(' ')[0] || 'Mitra'} Prima Hub`,
-          description: `Penyedia solusi spesifik untuk kebutuhan ${input.query || 'bisnis'} Anda di wilayah ${locationName}. (Mode Cadangan: AI sedang memproses trafik tinggi).`,
-          matchScore: 98,
-          source: 'ontapp_verified',
-          isVerified: true,
-          matchReasons: ['Kesesuaian kategori 100%', 'Lokasi terdekat terdeteksi'],
-          location: locationName,
-          industry: input.filters?.category || 'Umum'
+          name: `Pencarian Terbatas: ${input.query}`,
+          description: `AI saat ini mengalami trafik tinggi. Namun, kami merekomendasikan Anda untuk mengecek pusat bisnis di ${input.filters?.location || 'area sekitar Anda'} untuk kategori ${input.filters?.category || 'terkait'}.`,
+          matchScore: 90,
+          source: 'external',
+          isVerified: false,
+          matchReasons: ['Kesesuaian lokasi terdeteksi', 'Kategori populer di wilayah ini'],
+          location: input.filters?.location || 'Lokasi Terdekat'
         }
       ]
     };

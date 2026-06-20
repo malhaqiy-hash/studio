@@ -31,7 +31,8 @@ import {
   LocateFixed,
   X,
   Image as ImageIcon,
-  Map as MapIcon
+  Map as MapIcon,
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -86,7 +87,6 @@ export default function CariPage() {
   const [coords, setCoords] = React.useState<{lat?: number, lng?: number}>({});
   
   const [isListening, setIsListening] = React.useState(false);
-  const [isAnalyzingImage, setIsAnalyzingImage] = React.useState(false);
   const [previewImage, setPreviewImage] = React.useState<string | null>(null);
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
   
@@ -95,7 +95,7 @@ export default function CariPage() {
   
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean, detected: string }>>({});
 
-  const handleSearch = async (e?: React.FormEvent, overrideQuery?: string, overrideCoords?: {lat?: number, lng?: number}) => {
+  const handleSearch = async (e?: React.FormEvent, overrideQuery?: string) => {
     e?.preventDefault();
     const finalQuery = overrideQuery || query;
     if (!finalQuery && !activeCategory && !previewImage) {
@@ -104,21 +104,21 @@ export default function CariPage() {
     }
     
     setLoading(true);
+    setResults(null);
     setTranslations({});
     try {
-      const currentCoords = overrideCoords || coords;
       const output = await aiIntentSearch({ 
         query: finalQuery || (activeCategory ? `Cari ${activeCategory}` : "Analisis Gambar Bisnis"), 
         filters: {
           category: activeCategory || undefined,
           location: activeLocation !== "Pilih Lokasi" ? activeLocation : undefined,
-          lat: currentCoords?.lat,
-          lng: currentCoords?.lng
+          lat: coords?.lat,
+          lng: coords?.lng
         } 
       });
       setResults(output);
       
-      // Save to discovery backup (localStorage)
+      // Sync to backup history
       if (typeof window !== 'undefined') {
         const history = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
         const newItems = output.results.map(r => ({
@@ -134,7 +134,7 @@ export default function CariPage() {
       toast({ 
         variant: "destructive", 
         title: "Pencarian Terganggu", 
-        description: err.message || "Terjadi respon tidak terduga dari server. Harap coba lagi." 
+        description: err.message || "Terjadi respon tidak terduga dari server." 
       });
     } finally {
       setLoading(false);
@@ -152,63 +152,31 @@ export default function CariPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result as string);
-        setIsAnalyzingImage(true);
         setIsSourcePickerOpen(false);
-        toast({ title: "Menganalisis Gambar...", description: "AI sedang mengidentifikasi objek bisnis dari foto Anda." });
-        
-        setTimeout(() => {
-          setIsAnalyzingImage(false);
-          setQuery("Analisis visual dari gambar");
-          handleSearch(undefined, "Analisis visual dari gambar");
-        }, 2000);
+        toast({ title: "Menganalisis Gambar...", description: "AI sedang mengidentifikasi bisnis dari foto Anda." });
+        handleSearch(undefined, "Pencarian visual dari gambar");
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleNearbySearch = () => {
-    setLoading(true);
-    toast({ title: "Mencari di Sekitar", description: "Mengakses lokasi GPS Anda..." });
-    
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        const newCoords = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-        setCoords(newCoords);
-        setActiveLocation("Lokasi Saat Ini (GPS)");
-        
-        try {
-          const output = await aiIntentSearch({ 
-            query: query || "Bisnis terdekat", 
-            filters: {
-              location: "Radius 5km dari posisi GPS",
-              lat: newCoords.lat,
-              lng: newCoords.lng
-            } 
-          });
-          setResults(output);
-          toast({ title: "Hasil Ditemukan", description: "Menampilkan bisnis yang sangat relevan di sekitar Anda." });
-        } catch (err) {
-          console.error(err);
-          toast({ variant: "destructive", title: "Gagal", description: "Gagal memproses pencarian sekitar." });
-        } finally {
-          setLoading(false);
-        }
-      }, (error) => {
-        setLoading(false);
-        let errorMsg = "Pastikan izin lokasi diaktifkan di browser.";
-        if (error.code === error.PERMISSION_DENIED) errorMsg = "Izin lokasi ditolak. Silakan masukkan lokasi secara manual.";
-        
-        toast({ variant: "destructive", title: "Gagal Akses GPS", description: errorMsg });
-        setActiveLocation("Pilih Lokasi Manual");
-        setIsLocationOpen(true);
-      });
-    } else {
-      setLoading(false);
-      toast({ variant: "destructive", title: "Fitur Tidak Tersedia", description: "Browser Anda tidak mendukung geolokasi." });
+    if (!("geolocation" in navigator)) {
+      toast({ variant: "destructive", title: "GPS Tidak Tersedia", description: "Browser Anda tidak mendukung geolokasi." });
+      return;
     }
+
+    setLoading(true);
+    navigator.geolocation.getCurrentPosition((position) => {
+      const newCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
+      setCoords(newCoords);
+      setActiveLocation("Sekitar Saya (GPS)");
+      toast({ title: "Lokasi Ditemukan", description: "Mencari bisnis terdekat dari koordinat Anda." });
+      handleSearch();
+    }, (error) => {
+      setLoading(false);
+      toast({ variant: "destructive", title: "Gagal Akses GPS", description: "Izinkan akses lokasi untuk mencari di sekitar Anda." });
+    });
   };
 
   const handleTranslateResult = async (resId: string, content: string) => {
@@ -222,9 +190,7 @@ export default function CariPage() {
       const { translatedText, detectedLanguage } = await translateText({ text: content, targetLanguage: language });
       setTranslations(prev => ({ ...prev, [resId]: { text: translatedText, show: true, loading: false, detected: detectedLanguage } }));
     } catch (err) {
-      console.error(err);
       setTranslations(prev => ({ ...prev, [resId]: { text: "", show: false, loading: false, detected: "" } }));
-      toast({ variant: "destructive", title: "Translate Gagal", description: "AI Translator sedang sibuk." });
     }
   };
 
@@ -239,7 +205,7 @@ export default function CariPage() {
           <Zap className="size-3" /> Anggota OnTapp
         </Badge>;
       default: 
-        return <Badge variant="outline" className="bg-slate-50 text-slate-400 flex gap-1 items-center px-3 py-1 font-bold rounded-lg text-[10px]">
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-100 flex gap-1 items-center px-3 py-1 font-bold rounded-lg text-[10px]">
           <Globe className="size-3" /> Media Eksternal
         </Badge>;
     }
@@ -264,26 +230,26 @@ export default function CariPage() {
           <form onSubmit={(e) => handleSearch(e)} className="space-y-4">
             <div className="relative group w-full">
               <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                <Search className="size-5 text-slate-400 group-focus-within:text-accent transition-colors" />
+                <Search className="size-5 text-slate-400 group-focus-within:text-teal-600 transition-colors" />
               </div>
               <Input 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Cari apa saja dengan AI (cth: tempat ngopi)..."
-                className="h-16 pl-12 pr-32 rounded-2xl border-slate-100 bg-slate-50/50 shadow-inner text-base font-medium focus:bg-white transition-all focus:border-accent"
+                placeholder="Cari apa saja (cth: tempat ngopi di Kendal)..."
+                className="h-16 pl-12 pr-32 rounded-2xl border-slate-100 bg-slate-50/50 shadow-inner text-base font-medium focus:bg-white transition-all focus:border-teal-500"
               />
               <div className="absolute inset-y-3 right-3 flex items-center gap-1.5">
                 <button 
                   type="button"
                   onClick={() => setIsSourcePickerOpen(true)}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-accent border border-slate-100 shadow-sm transition-all active:scale-90"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-teal-600 border border-slate-100 shadow-sm transition-all active:scale-90"
                 >
                   <Camera className="size-5" />
                 </button>
                 <button 
                   type="button"
                   className={cn(
-                    "w-10 h-10 flex items-center justify-center rounded-xl transition-all active:scale-90 bg-white text-slate-400 hover:text-accent shadow-sm border border-slate-100",
+                    "w-10 h-10 flex items-center justify-center rounded-xl transition-all active:scale-90 bg-white text-slate-400 hover:text-teal-600 shadow-sm border border-slate-100",
                     isListening && "bg-rose-500 text-white animate-pulse"
                   )}
                 >
@@ -295,33 +261,19 @@ export default function CariPage() {
               <input type="file" ref={cameraInputRef} onChange={handleImageInput} className="hidden" accept="image/*" capture="environment" />
             </div>
 
-            {previewImage && (
-              <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-accent/20">
-                <img src={previewImage} className="w-full h-full object-cover" alt="Search visual" />
-                <button type="button" onClick={() => setPreviewImage(null)} className="absolute top-1 right-1 bg-slate-900/80 text-white rounded-full p-1">
-                  <X className="size-3" />
-                </button>
-                {isAnalyzingImage && (
-                  <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                    <RefreshCw className="size-5 animate-spin text-accent" />
-                  </div>
-                )}
-              </div>
-            )}
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-full h-12 justify-between rounded-xl border-slate-100 bg-white text-slate-600 font-bold hover:bg-slate-50 px-4 text-xs">
                     <div className="flex items-center gap-2">
-                      <Filter className="size-3.5 text-accent" />
+                      <Filter className="size-3.5 text-teal-600" />
                       {activeCategory ? activeCategory : "Pilih Kategori"}
                     </div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-[280px] rounded-2xl p-2 shadow-2xl border-slate-100">
-                  <DropdownMenuItem onClick={() => setActiveCategory(null)} className="font-bold text-slate-400 hover:text-accent p-2.5 rounded-lg text-xs">
+                  <DropdownMenuItem onClick={() => setActiveCategory(null)} className="font-bold text-slate-400 hover:text-teal-600 p-2.5 rounded-lg text-xs">
                     Semua Kategori
                   </DropdownMenuItem>
                   {ENTITY_CATEGORIES.map((cat) => (
@@ -345,7 +297,7 @@ export default function CariPage() {
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl border-slate-100 space-y-3 z-[150] pointer-events-auto">
+                <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl border-slate-100 space-y-3 z-[150]">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
                     <Input 
@@ -355,13 +307,12 @@ export default function CariPage() {
                       className="h-9 pl-9 rounded-xl border-slate-100 bg-slate-50 text-[11px] font-bold"
                     />
                   </div>
-                  <div className="space-y-1 max-h-[200px] overflow-y-auto no-scrollbar">
-                    {locationSearch && !POPULAR_LOCATIONS.some(l => l.toLowerCase() === locationSearch.toLowerCase()) && (
+                  <div className="space-y-1 max-h-[200px] overflow-y-auto">
+                    {locationSearch && (
                       <button 
-                        key="custom-loc"
                         type="button" 
-                        onClick={() => { setActiveLocation(locationSearch); setLocationSearch(""); setCoords({}); setIsLocationOpen(false); }} 
-                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-accent bg-teal-50 hover:bg-teal-100 transition-colors flex items-center gap-2 pointer-events-auto cursor-pointer"
+                        onClick={() => { setActiveLocation(locationSearch); setIsLocationOpen(false); setLocationSearch(""); }} 
+                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 flex items-center gap-2"
                       >
                         <MapPin className="size-3" /> Gunakan "{locationSearch}"
                       </button>
@@ -370,8 +321,8 @@ export default function CariPage() {
                       <button 
                         key={loc} 
                         type="button" 
-                        onClick={() => { setActiveLocation(loc); setLocationSearch(""); setCoords({}); setIsLocationOpen(false); }} 
-                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors pointer-events-auto cursor-pointer block"
+                        onClick={() => { setActiveLocation(loc); setIsLocationOpen(false); setLocationSearch(""); }} 
+                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50"
                       >
                         {loc}
                       </button>
@@ -395,7 +346,7 @@ export default function CariPage() {
         <div className="space-y-4">
           {loading && (
             <div className="grid gap-4">
-              {[1, 2].map((i) => (
+              {[1, 2, 3].map((i) => (
                 <Card key={i} className="animate-pulse border-slate-100 rounded-[2rem]">
                   <CardContent className="p-6 flex gap-4">
                     <Skeleton className="size-14 rounded-xl" />
@@ -413,16 +364,16 @@ export default function CariPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-black text-slate-900 text-base tracking-tight">Hasil Akurat</h3>
+                  <h3 className="font-black text-slate-900 text-base tracking-tight">Hasil Hybrid Search</h3>
                   <Badge className="bg-teal-100 text-teal-700 font-bold px-2 py-0.5 rounded-lg text-[10px]">{results.results.length}</Badge>
                 </div>
                 <div className="flex items-center gap-1.5 text-[9px] font-black uppercase text-teal-600 bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
-                  <ShieldCheck className="size-3" /> Strict Matching Aktif
+                  <Sparkles className="size-3" /> Rekomendasi Pintar Aktif
                 </div>
               </div>
 
               <div className="grid gap-4">
-                {results.results.length > 0 ? results.results.map((result, idx) => {
+                {results.results.map((result, idx) => {
                   const resId = `res-${idx}`;
                   const trans = translations[resId];
                   return (
@@ -435,12 +386,12 @@ export default function CariPage() {
                           <div className={cn(
                             "w-1 shrink-0",
                             result.source === 'ontapp_verified' ? 'bg-teal-500' : 
-                            result.source === 'ontapp_member' ? 'bg-teal-400' : 'bg-slate-200'
+                            result.source === 'ontapp_member' ? 'bg-teal-400' : 'bg-amber-400'
                           )} />
                           <div className="p-6 flex-1 flex flex-col md:flex-row gap-5 items-start">
                             <div className={cn(
                               "size-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:rotate-6 transition-transform",
-                              result.source === 'external' ? 'bg-slate-50 text-slate-400' : 'bg-teal-50 text-accent'
+                              result.source === 'external' ? 'bg-amber-50 text-amber-600' : 'bg-teal-50 text-teal-600'
                             )}>
                               {getTypeIcon(result.type)}
                             </div>
@@ -448,7 +399,7 @@ export default function CariPage() {
                             <div className="flex-1 space-y-3">
                               <div className="space-y-1">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <h4 className="text-lg font-black text-slate-900 group-hover:text-accent transition-colors tracking-tight">{result.name}</h4>
+                                  <h4 className="text-lg font-black text-slate-900 group-hover:text-teal-600 transition-colors tracking-tight">{result.name}</h4>
                                   {getSourceBadge(result.source)}
                                 </div>
                                 <p className="text-slate-500 font-medium text-xs leading-relaxed line-clamp-2">
@@ -486,7 +437,7 @@ export default function CariPage() {
                                   variant="ghost" 
                                   size="sm" 
                                   onClick={() => handleTranslateResult(resId, result.description)}
-                                  className="w-full h-8 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-accent gap-1.5 rounded-lg"
+                                  className="w-full h-8 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-teal-600 gap-1.5 rounded-lg"
                                   disabled={trans?.loading}
                                 >
                                   {trans?.loading ? <RefreshCw className="size-2.5 animate-spin" /> : <Globe className="size-2.5" />}
@@ -509,38 +460,22 @@ export default function CariPage() {
                       </CardContent>
                     </Card>
                   );
-                }) : (
-                  <div className="py-20 text-center space-y-4 bg-white rounded-[2rem] border-2 border-dashed border-slate-100">
-                     <div className="size-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto">
-                        <X className="size-8 text-slate-200" />
-                     </div>
-                     <div className="space-y-1">
-                        <p className="font-black text-slate-900">Tidak ada hasil relevan</p>
-                        <p className="text-xs text-slate-400 max-w-xs mx-auto">AI tidak menemukan bisnis yang sesuai dengan kriteria ketat di lokasi ini. Coba kata kunci lain.</p>
-                     </div>
-                  </div>
-                )}
+                })}
               </div>
             </div>
           )}
 
           {!loading && !results && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-              {[
-                { title: "Strict Relevance", desc: "Hanya hasil yang benar-benar cocok.", icon: ShieldCheck, color: "text-teal-600", bg: "bg-teal-50" },
-                { title: "GPS Intelligence", desc: "Mencari radius terdekat dari Anda.", icon: LocateFixed, color: "text-rose-500", bg: "bg-rose-50" },
-                { title: "AI Filtering", desc: "Membuang sampah info yang tak perlu.", icon: Zap, color: "text-amber-500", bg: "bg-amber-50" }
-              ].map((feature, i) => (
-                <div key={i} className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm text-center space-y-3">
-                  <div className={cn("size-10 rounded-2xl flex items-center justify-center mx-auto", feature.bg, feature.color)}>
-                    <feature.icon className="size-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-black text-slate-900">{feature.title}</h4>
-                    <p className="text-slate-400 text-[9px] font-medium leading-relaxed">{feature.desc}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="py-20 text-center space-y-6 bg-white rounded-[2rem] border border-dashed border-slate-200">
+               <div className="size-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto">
+                  <Search className="size-10 text-slate-200" />
+               </div>
+               <div className="space-y-2">
+                  <h3 className="text-xl font-black text-slate-900">Mulai Pencarian Hybrid</h3>
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto font-medium">
+                    AI kami akan mencari di database OnTapp dan sumber eksternal untuk memberikan rekomendasi paling lengkap di wilayah Anda.
+                  </p>
+               </div>
             </div>
           )}
         </div>
