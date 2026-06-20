@@ -15,7 +15,8 @@ import {
   Users, 
   DollarSign,
   Maximize2,
-  Layers
+  Layers,
+  ArrowRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -90,8 +91,8 @@ export default function OpportunityMapPage() {
 
               {/* Map Controls */}
               <div className="absolute bottom-10 left-10 flex flex-col gap-2">
-                 <button className="size-10 rounded-xl bg-white border border-slate-100 shadow-lg flex items-center justify-center hover:bg-slate-50"><maximize2 className="size-4 text-slate-400" /></button>
-                 <button className="size-10 rounded-xl bg-white border border-slate-100 shadow-lg flex items-center justify-center hover:bg-slate-50"><globe className="size-4 text-slate-400" /></button>
+                 <button className="size-10 rounded-xl bg-white border border-slate-100 shadow-lg flex items-center justify-center hover:bg-slate-50"><Maximize2 className="size-4 text-slate-400" /></button>
+                 <button className="size-10 rounded-xl bg-white border border-slate-100 shadow-lg flex items-center justify-center hover:bg-slate-50"><Globe className="size-4 text-slate-400" /></button>
               </div>
 
               <div className="absolute top-10 right-10 flex gap-3">
@@ -165,6 +166,15 @@ export default function OpportunityMapPage() {
            </div>
         </div>
       </div>
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </DashboardLayout>
   );
 }
