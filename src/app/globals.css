@@ -14,7 +14,7 @@
     --primary-foreground: 173 80% 98%;
     --secondary: 173 20% 96%;
     --secondary-foreground: 173 80% 20%;
-    --muted: 210 40% 96.1%;
+    --muted: 210 40% 94%;
     --muted-foreground: 215 16% 47%;
     --accent: 173 80% 40%;
     --accent-foreground: 0 0% 100%;
@@ -28,22 +28,22 @@
   .dark {
     --background: 224 71% 4%;
     --foreground: 213 31% 91%;
-    --card: 224 71% 4%;
+    --card: 224 71% 6%;
     --card-foreground: 213 31% 91%;
-    --popover: 224 71% 4%;
+    --popover: 224 71% 6%;
     --popover-foreground: 213 31% 91%;
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 222.2 47.4% 11.2%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 56.9%;
+    --muted: 223 47% 12%;
+    --muted-foreground: 215.4 16.3% 60%;
     --accent: 173 80% 45%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 35%;
     --destructive-foreground: 210 40% 98%;
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
+    --border: 216 34% 18%;
+    --input: 216 34% 18%;
     --ring: 173 80% 45%;
   }
 }
@@ -66,4 +66,9 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Fix for overlapping issues on mobile */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }

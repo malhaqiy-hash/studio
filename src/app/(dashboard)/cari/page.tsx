@@ -41,7 +41,6 @@ import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-
 import { useLanguage } from "@/context/language-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFirestore, useUser } from "@/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -83,8 +82,6 @@ export default function CariPage() {
   const { language, t } = useLanguage();
   const { activeAccount } = useAccount();
   const { toast } = useToast();
-  const db = useFirestore();
-  const { user } = useUser();
   
   const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(false);

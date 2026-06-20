@@ -119,7 +119,6 @@ export default function ProfilePage() {
           updateActiveAccount({ avatar: result });
           toast({ title: "Foto profil diperbarui" });
         } else if (mediaTarget === 'cover') {
-          // We don't have a separate cover field in the mock state, but let's simulate it
           toast({ title: "Foto sampul diperbarui" });
         } else if (mediaTarget === 'post') {
           setNewItem(prev => ({ ...prev, image: result }));
@@ -255,7 +254,7 @@ export default function ProfilePage() {
                   {activeAccount.type === 'bisnis' ? <Building2 size={18} className="text-accent" /> : activeAccount.type === 'professional' ? <Briefcase size={18} className="text-accent" /> : <UserIcon size={18} className="text-accent" />}
                   {activeAccount.extra || 'OnTapp Member'}
                   <Link href="/messages">
-                    <Button variant="ghost" size="icon" className="size-8 rounded-xl bg-accent/10 text-accent ml-1"><MessageSquare className="size-4" /></Button>
+                    <Button variant="ghost" size="icon" className="size-8 rounded-xl bg-accent/10 text-accent ml-1 hover:bg-accent/20"><MessageSquare className="size-4" /></Button>
                   </Link>
                 </div>
                 
@@ -263,29 +262,29 @@ export default function ProfilePage() {
                   {activeAccount.type === 'pribadi' ? (
                     <>
                       <button onClick={() => openUserList("Pengikut", activeAccount.preferences?.publicFollowers)} className="flex flex-col items-center px-2 group">
-                         <span className={cn("text-sm font-black group-hover:text-accent", !activeAccount.preferences?.publicFollowers && "flex items-center gap-1")}>
-                           1.2k {!activeAccount.preferences?.publicFollowers && <Lock className="size-3 text-muted-foreground" />}
+                         <span className={cn("text-sm font-black group-hover:text-accent transition-colors flex items-center gap-1", !activeAccount.preferences?.publicFollowers && "text-muted-foreground")}>
+                           1.2k {!activeAccount.preferences?.publicFollowers && <Lock className="size-3" />}
                          </span>
                          <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Pengikut</span>
                       </button>
                       <button onClick={() => openUserList("Mengikuti", activeAccount.preferences?.publicFollowing)} className="flex flex-col items-center px-2 group">
-                         <span className={cn("text-sm font-black group-hover:text-accent", !activeAccount.preferences?.publicFollowing && "flex items-center gap-1")}>
-                           452 {!activeAccount.preferences?.publicFollowing && <Lock className="size-3 text-muted-foreground" />}
+                         <span className={cn("text-sm font-black group-hover:text-accent transition-colors flex items-center gap-1", !activeAccount.preferences?.publicFollowing && "text-muted-foreground")}>
+                           452 {!activeAccount.preferences?.publicFollowing && <Lock className="size-3" />}
                          </span>
                          <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Mengikuti</span>
                       </button>
                     </>
                   ) : (
                     <button onClick={() => openUserList("Tayangan", activeAccount.preferences?.publicViews)} className="flex flex-col items-center px-2 group">
-                       <span className={cn("text-sm font-black group-hover:text-accent", !activeAccount.preferences?.publicViews && "flex items-center gap-1")}>
-                         8.9k {!activeAccount.preferences?.publicViews && <Lock className="size-3 text-muted-foreground" />}
+                       <span className={cn("text-sm font-black group-hover:text-accent transition-colors flex items-center gap-1", !activeAccount.preferences?.publicViews && "text-muted-foreground")}>
+                         8.9k {!activeAccount.preferences?.publicViews && <Lock className="size-3" />}
                        </span>
                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-1"><Eye className="size-2.5" /> Tayangan</span>
                     </button>
                   )}
                   <button onClick={() => openUserList("Suka", activeAccount.preferences?.publicLikes)} className="flex flex-col items-center px-2 group text-rose-500">
-                     <span className={cn("text-sm font-black group-hover:text-rose-600", !activeAccount.preferences?.publicLikes && "flex items-center gap-1")}>
-                       4.2k {!activeAccount.preferences?.publicLikes && <Lock className="size-3 text-muted-foreground" />}
+                     <span className={cn("text-sm font-black group-hover:text-rose-600 transition-colors flex items-center gap-1", !activeAccount.preferences?.publicLikes && "text-muted-foreground")}>
+                       4.2k {!activeAccount.preferences?.publicLikes && <Lock className="size-3" />}
                      </span>
                      <span className="text-[8px] font-black uppercase tracking-widest flex items-center gap-1"><Heart className="size-2.5 fill-rose-500" /> Suka</span>
                   </button>
@@ -349,7 +348,7 @@ export default function ProfilePage() {
                       <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.title} />
                     </div>
                   )}
-                  <button onClick={() => handleRemoveItem(item.id)} className="absolute top-4 right-4 size-10 bg-rose-500 text-white rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110"><Trash2 className="size-5" /></button>
+                  <button onClick={() => handleRemoveItem(item.id)} className="absolute top-4 right-4 z-10 size-10 bg-rose-500 text-white rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110"><Trash2 className="size-5" /></button>
                   <CardContent className="p-6 space-y-3">
                     <h4 className="font-black text-foreground text-lg line-clamp-1">{item.title}</h4>
                     <p className="text-muted-foreground text-xs font-medium line-clamp-2">{item.description}</p>
@@ -368,11 +367,10 @@ export default function ProfilePage() {
         </section>
       </div>
 
-      {/* User List Modal */}
       <Dialog open={isUserListOpen} onOpenChange={setIsUserListOpen}>
         <DialogContent className="max-w-md rounded-[2.5rem] p-0 border-none shadow-2xl bg-card text-foreground overflow-hidden">
           <DialogHeader className="p-8 pb-4 bg-muted border-b border-border">
-            <DialogTitle className="text-xl font-black flex items-center gap-2">
+            <DialogTitle className="text-xl font-black flex items-center gap-2 text-foreground">
               <Users className="size-5 text-accent" />
               {userListTitle}
             </DialogTitle>
@@ -387,7 +385,7 @@ export default function ProfilePage() {
                       <AvatarFallback>{u.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                      <span className="text-sm font-black">{u.name}</span>
+                      <span className="text-sm font-black text-foreground">{u.name}</span>
                       <span className="text-[10px] font-bold text-muted-foreground uppercase">{u.role}</span>
                     </div>
                   </div>
@@ -405,17 +403,17 @@ export default function ProfilePage() {
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
         <DialogContent className="max-w-md rounded-[3rem] p-8 border-none shadow-2xl bg-card text-foreground">
           <DialogHeader className="text-center sm:text-center">
-            <DialogTitle className="text-2xl font-black">Pilih Sumber Media</DialogTitle>
+            <DialogTitle className="text-2xl font-black text-foreground">Pilih Sumber Media</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-8">
             <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
-              <Smartphone className="size-6 text-accent" /> <div className="text-left font-black text-sm uppercase">Perangkat</div>
+              <Smartphone className="size-6 text-accent" /> <div className="text-left font-black text-sm uppercase text-foreground">Perangkat</div>
             </Button>
             <Button variant="outline" onClick={() => handleCloudSource('drive')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
-              <Cloud className="size-6 text-blue-500" /> <div className="text-left font-black text-sm uppercase">Google Drive</div>
+              <Cloud className="size-6 text-blue-500" /> <div className="text-left font-black text-sm uppercase text-foreground">Google Drive</div>
             </Button>
             <Button variant="outline" onClick={() => handleCloudSource('photos')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
-              <ImageIcon className="size-6 text-rose-500" /> <div className="text-left font-black text-sm uppercase">Google Photos</div>
+              <ImageIcon className="size-6 text-rose-500" /> <div className="text-left font-black text-sm uppercase text-foreground">Google Photos</div>
             </Button>
           </div>
         </DialogContent>
@@ -423,10 +421,10 @@ export default function ProfilePage() {
 
       <Dialog open={isBioModalOpen} onOpenChange={setIsBioModalOpen}>
         <DialogContent className="max-w-xl rounded-[3rem] p-10 bg-card text-foreground">
-          <DialogHeader><DialogTitle className="text-2xl font-black">Edit Profil</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-2xl font-black text-foreground">Edit Profil</DialogTitle></DialogHeader>
           <div className="space-y-6 pt-6">
-            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Nama</Label><Input value={tempAccount.name} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-2xl h-14 bg-muted/50 border-none px-6" /></div>
-            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Bio</Label><Textarea value={tempAccount.bio} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} className="rounded-2xl bg-muted/50 border-none min-h-[140px] px-6 py-4" /></div>
+            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Nama</Label><Input value={tempAccount.name} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-2xl h-14 bg-muted/50 border-none px-6 text-foreground" /></div>
+            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Bio</Label><Textarea value={tempAccount.bio} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} className="rounded-2xl bg-muted/50 border-none min-h-[140px] px-6 py-4 text-foreground" /></div>
           </div>
           <DialogFooter className="mt-10"><Button onClick={handleSaveBio} className="rounded-2xl bg-accent h-14 px-12 font-black text-white w-full sm:w-auto">Simpan</Button></DialogFooter>
         </DialogContent>
@@ -434,16 +432,16 @@ export default function ProfilePage() {
 
       <Dialog open={isLinksModalOpen} onOpenChange={setIsLinksModalOpen}>
         <DialogContent className="max-w-xl rounded-[3rem] p-10 bg-card text-foreground">
-          <DialogHeader><DialogTitle className="text-2xl font-black">Kelola Tautan</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-2xl font-black text-foreground">Kelola Tautan</DialogTitle></DialogHeader>
           <div className="space-y-8 pt-6">
             <div className="flex gap-3">
-              <Input value={newLinkUrl} onChange={(e) => setNewLinkUrl(e.target.value)} placeholder="https://..." className="rounded-2xl h-14 border-border bg-muted/30" />
+              <Input value={newLinkUrl} onChange={(e) => setNewLinkUrl(e.target.value)} placeholder="https://..." className="rounded-2xl h-14 border-border bg-muted/30 text-foreground" />
               <Button onClick={handleAddLink} className="h-14 w-14 rounded-2xl bg-accent text-white shrink-0"><Plus size={24} /></Button>
             </div>
             <div className="space-y-3">
               {(activeAccount.links || []).map((link, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-muted/50 rounded-2xl">
-                  <span className="text-sm font-bold truncate">{link}</span>
+                <div key={i} className="flex items-center justify-between p-4 bg-muted/50 rounded-2xl border border-border/50">
+                  <span className="text-sm font-bold truncate text-foreground">{link}</span>
                   <button onClick={() => handleRemoveLink(i)} className="text-muted-foreground hover:text-rose-500"><X size={18} /></button>
                 </div>
               ))}
@@ -455,13 +453,13 @@ export default function ProfilePage() {
 
       <Dialog open={isContentModalOpen} onOpenChange={setIsContentModalOpen}>
         <DialogContent className="max-w-xl rounded-[3rem] p-10 bg-card text-foreground">
-          <DialogHeader><DialogTitle className="text-2xl font-black">Tambah Konten</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-2xl font-black text-foreground">Tambah Konten</DialogTitle></DialogHeader>
           <div className="space-y-6 pt-6">
-            <div onClick={() => openMediaPicker('post')} className="w-full aspect-video rounded-3xl bg-muted/50 border-2 border-dashed border-border flex items-center justify-center cursor-pointer overflow-hidden">
-              {newItem.image ? <img src={newItem.image} className="w-full h-full object-cover" alt="Preview" /> : <ImageIcon className="size-10 text-muted-foreground" />}
+            <div onClick={() => openMediaPicker('post')} className="w-full aspect-video rounded-3xl bg-muted/50 border-2 border-dashed border-border flex items-center justify-center cursor-pointer overflow-hidden group">
+              {newItem.image ? <img src={newItem.image} className="w-full h-full object-cover" alt="Preview" /> : <ImageIcon className="size-10 text-muted-foreground group-hover:scale-110 transition-transform" />}
             </div>
-            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Judul</Label><Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-2xl h-14 bg-muted/50 border-none px-6" /></div>
-            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Link Lokasi</Label><Input value={newItem.locationLink} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} className="rounded-2xl h-12 bg-muted/50 border-none px-6" placeholder="https://maps..." /></div>
+            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Judul</Label><Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-2xl h-14 bg-muted/50 border-none px-6 text-foreground" /></div>
+            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Link Lokasi</Label><Input value={newItem.locationLink} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} className="rounded-2xl h-12 bg-muted/50 border-none px-6 text-foreground" placeholder="https://maps..." /></div>
           </div>
           <DialogFooter className="mt-10"><Button onClick={handleAddContent} className="w-full h-14 rounded-2xl bg-accent font-black text-white uppercase">Posting</Button></DialogFooter>
         </DialogContent>
