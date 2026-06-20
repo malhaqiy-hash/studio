@@ -41,7 +41,8 @@ import {
   Eye,
   Heart,
   Users,
-  Lock
+  Lock,
+  CheckCircle2
 } from 'lucide-react';
 import {
   Dialog,
@@ -119,6 +120,7 @@ export default function ProfilePage() {
           updateActiveAccount({ avatar: result });
           toast({ title: "Foto profil diperbarui" });
         } else if (mediaTarget === 'cover') {
+          // Update cover image simulation
           toast({ title: "Foto sampul diperbarui" });
         } else if (mediaTarget === 'post') {
           setNewItem(prev => ({ ...prev, image: result }));
@@ -132,11 +134,12 @@ export default function ProfilePage() {
 
   const handleCloudSource = (source: 'drive' | 'photos') => {
     setIsCloudLoading(true);
-    toast({ title: "Menghubungkan layanan Cloud..." });
+    toast({ title: `Menghubungkan ${source}...` });
 
     setTimeout(() => {
       const simulatedUrl = `https://picsum.photos/seed/cloud${Date.now()}/800/600`;
       if (mediaTarget === 'avatar') updateActiveAccount({ avatar: simulatedUrl });
+      // In a real app we'd handle cover too
       setIsCloudLoading(false);
       setIsMediaPickerOpen(false);
       toast({ title: "Gambar berhasil diimpor" });
@@ -227,6 +230,16 @@ export default function ProfilePage() {
               </Button>
             </div>
           </div>
+
+          {/* Minimalist Verification Label exactly below cover */}
+          {activeAccount.verificationStatus === 'Verified' && (
+            <div className="flex justify-end px-10 mt-2">
+              <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-600 uppercase tracking-[0.25em] opacity-80">
+                <CheckCircle2 className="size-2.5" />
+                Verified by OnTapp
+              </div>
+            </div>
+          )}
 
           <div className="px-6 md:px-10 -mt-16 md:-mt-20 flex flex-col items-start gap-4">
             <div className="relative group/avatar">
