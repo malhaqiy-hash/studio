@@ -95,7 +95,7 @@ export default function CariPage() {
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
 
   // Helper untuk membersihkan teks prefiks sistem
-  const cleanTitle = (text: string) => text.replace(/^Informasi Terkait:\s*/i, '');
+  const cleanTitle = (text: string) => text.replace(/^Informasi Terkait:\s*/i, '').trim();
 
   React.useEffect(() => {
     const saved = localStorage.getItem('ontapp_discovery_history');
@@ -124,7 +124,7 @@ export default function CariPage() {
 
     const currentHistory = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
     
-    // Siapkan entri baru dengan format yang konsisten
+    // Siapkan entri baru dengan format yang konsisten dan bersih
     const newItems = newResults.map(r => ({
       ...r,
       name: cleanTitle(r.name),
@@ -132,15 +132,16 @@ export default function CariPage() {
       date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
     }));
 
-    // Dedukplikasi & Perbarui Urutan: Hapus entri lama yang memiliki nama dan lokasi yang sama
+    // LOGIKA ANTI-DUPLIKASI KETAT
+    // Filter riwayat lama: Hapus item yang memiliki nama dan lokasi yang sama persis (ignore case & trim)
     const filteredHistory = currentHistory.filter((oldItem: any) => 
       !newItems.some(newItem => 
-        newItem.name.toLowerCase() === oldItem.name.toLowerCase() && 
-        newItem.location === oldItem.location
+        newItem.name.toLowerCase().trim() === oldItem.name.toLowerCase().trim() && 
+        (newItem.location || '').toLowerCase().trim() === (oldItem.location || '').toLowerCase().trim()
       )
     );
 
-    // Gabungkan (entri baru di depan) dan batasi jumlah riwayat
+    // Gabungkan (entri baru di depan/kiri) dan batasi jumlah riwayat
     const updatedHistory = [...newItems, ...filteredHistory].slice(0, 50);
     localStorage.setItem('ontapp_discovery_history', JSON.stringify(updatedHistory));
     setHistory(updatedHistory);
@@ -198,7 +199,8 @@ export default function CariPage() {
     }
     
     setLoading(true);
-    setResults(null);
+    // Kita biarkan hasil lama tampil sampai hasil baru siap jika ini dipicu dari riwayat
+    if (!overrideQuery) setResults(null);
 
     try {
       if (user && db) {
@@ -285,7 +287,11 @@ export default function CariPage() {
   const handleHistoryClick = (item: any) => {
     const cleanedQuery = cleanTitle(item.name);
     setQuery(cleanedQuery);
-    if (item.location) setActiveLocation(item.location);
+    if (item.location && !item.location.toLowerCase().includes('global')) {
+      setActiveLocation(item.location);
+    } else {
+      setActiveLocation(language === 'id' ? "Pilih Lokasi" : "Choose Location");
+    }
     if (item.category) setActiveCategory(item.category);
     handleSearch(undefined, cleanedQuery);
   };
