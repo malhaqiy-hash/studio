@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -22,11 +23,8 @@ import {
   ShieldCheck,
   LayoutGrid,
   Languages,
-  CreditCard,
   UserPlus,
-  Sparkles,
   Check,
-  Plus,
   Camera,
   X,
   Radar,
@@ -93,7 +91,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
   const auth = useAuth();
   const { t } = useLanguage();
-  const { activeAccount, availableAccounts, switchAccount, registerAccount } = useAccount();
+  const { activeAccount, availableAccounts, switchAccount, registerAccount, hasInitialized } = useAccount();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
   
   const [isRegModalOpen, setIsRegModalOpen] = React.useState(false);
@@ -123,6 +121,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { icon: MessageSquare, label: t('messages'), href: "/messages" },
     { icon: Sliders, label: t('settings'), href: "/settings" },
   ];
+
+  // Pengecekan otomatis untuk pengguna baru (Onboarding)
+  React.useEffect(() => {
+    if (hasInitialized && activeAccount?.isNew && !isRegModalOpen) {
+      // Jika akun baru dan modal belum terbuka, paksa buka modal pendaftaran
+      setIsRegModalOpen(true);
+    }
+  }, [hasInitialized, activeAccount, isRegModalOpen]);
 
   React.useEffect(() => {
     if (!loading && !user) {
@@ -158,12 +164,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     });
 
     setIsRegModalOpen(false);
-    router.push("/profile");
+    // Tidak perlu redirect, UI akan terupdate otomatis karena activeAccount berubah
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8FAFC]">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
         <div className="relative size-16 mb-4">
           <div className="absolute inset-0 border-4 border-indigo-100 rounded-2xl" />
           <div className="absolute inset-0 border-4 border-accent rounded-2xl border-t-transparent animate-spin" />
@@ -212,12 +218,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </DropdownMenuLabel>
               
               <DropdownMenuGroup>
-                {availableAccounts.map((acc) => (
+                {availableAccounts.filter(a => !a.isNew).map((acc) => (
                   <DropdownMenuItem 
                     key={acc.id}
                     onSelect={() => {
                       switchAccount(acc.id);
-                      router.push("/profile");
                     }}
                     className={cn(
                       "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1",
@@ -271,6 +276,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
+
+              <DropdownMenuSeparator className="my-2" />
+              <DropdownMenuItem onClick={handleLogout} className="text-rose-500 font-bold px-3 py-2.5 rounded-xl focus:bg-rose-50 focus:text-rose-600 cursor-pointer flex gap-3">
+                <LogOut className="size-4" /> Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -390,112 +400,169 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      <Dialog open={isRegModalOpen} onOpenChange={setIsRegModalOpen}>
+      {/* MODAL ONBOARDING (Layar Pembuatan Akun) */}
+      <Dialog open={isRegModalOpen} onOpenChange={(open) => {
+        // Jangan biarkan tutup jika akun masih baru (isNew)
+        if (activeAccount?.isNew) return;
+        setIsRegModalOpen(open);
+      }}>
         <DialogContent className="max-w-md rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-white">
           <form onSubmit={handleRegisterSubmit} className="flex flex-col h-full">
-            <DialogHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100">
-              <div className="flex items-center justify-between mb-2">
-                <Badge className={cn(
-                  "px-3 py-1 font-black text-[10px] uppercase border-none",
-                  pendingType === 'pribadi' ? "bg-blue-100 text-blue-600" :
-                  pendingType === 'professional' ? "bg-emerald-100 text-emerald-600" :
-                  "bg-indigo-100 text-indigo-600"
-                )}>
-                  {pendingType} Onboarding
-                </Badge>
-                <button type="button" onClick={() => setIsRegModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                  <X className="size-5" />
-                </button>
+            <DialogHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100 text-center sm:text-center">
+              <div className="flex flex-col items-center gap-4 mb-2">
+                <div className="size-16 rounded-2xl bg-accent text-white flex items-center justify-center font-black text-2xl shadow-xl">O</div>
+                <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Selamat Datang di OnTapp</DialogTitle>
+                <DialogDescription className="font-medium text-slate-500">
+                  Silakan pilih jenis profil Anda untuk mulai terhubung dengan jaringan global.
+                </DialogDescription>
               </div>
-              <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Setup Your New Profile</DialogTitle>
-              <DialogDescription className="font-medium text-slate-500">
-                Unlock specialized networking features for your {pendingType} context.
-              </DialogDescription>
             </DialogHeader>
 
             <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh]">
-              <div className="flex flex-col items-center gap-4">
-                <div className="size-24 rounded-3xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 group cursor-pointer hover:border-accent hover:bg-indigo-50 transition-all">
-                  <Camera className="size-8 group-hover:scale-110 transition-transform" />
-                </div>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Unggah Foto Profil</span>
-              </div>
+              {!pendingType ? (
+                <div className="grid gap-4 animate-in fade-in zoom-in-95 duration-300">
+                  <button 
+                    type="button"
+                    onClick={() => setPendingType('pribadi')}
+                    className="flex items-center gap-6 p-6 rounded-3xl border-2 border-slate-50 hover:border-blue-200 hover:bg-blue-50 transition-all group text-left"
+                  >
+                    <div className="size-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <User className="size-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-slate-900">Profil Pribadi</h4>
+                      <p className="text-xs text-slate-400 font-medium">Untuk networking dan berbagi momen harian.</p>
+                    </div>
+                  </button>
 
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Nama Tampilan / Bisnis</Label>
-                  <Input 
-                    required
-                    value={regFormData.name}
-                    onChange={(e) => setRegFormData({...regFormData, name: e.target.value})}
-                    placeholder={pendingType === 'bisnis' ? "e.g. Acme Corp" : "e.g. John Doe"}
-                    className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white"
-                  />
-                </div>
+                  <button 
+                    type="button"
+                    onClick={() => setPendingType('professional')}
+                    className="flex items-center gap-6 p-6 rounded-3xl border-2 border-slate-50 hover:border-emerald-200 hover:bg-emerald-50 transition-all group text-left"
+                  >
+                    <div className="size-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <ShieldCheck className="size-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-slate-900">Profil Professional</h4>
+                      <p className="text-xs text-slate-400 font-medium">Pamerkan portfolio dan keahlian Anda.</p>
+                    </div>
+                  </button>
 
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Bio / Deskripsi</Label>
-                  <Textarea 
-                    required
-                    value={regFormData.bio}
-                    onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})}
-                    placeholder="Ceritakan tentang dirimu atau bisnis Anda..."
-                    className="rounded-xl border-slate-200 min-h-[100px] bg-slate-50/50 focus:bg-white"
-                  />
+                  <button 
+                    type="button"
+                    onClick={() => setPendingType('bisnis')}
+                    className="flex items-center gap-6 p-6 rounded-3xl border-2 border-slate-50 hover:border-indigo-200 hover:bg-indigo-50 transition-all group text-left"
+                  >
+                    <div className="size-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Briefcase className="size-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-slate-900">Profil Bisnis</h4>
+                      <p className="text-xs text-slate-400 font-medium">Kelola peluang dan katalog produk Anda.</p>
+                    </div>
+                  </button>
                 </div>
-
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Kontak (WhatsApp / Email)</Label>
-                  <Input 
-                    required
-                    value={regFormData.contact}
-                    onChange={(e) => setRegFormData({...regFormData, contact: e.target.value})}
-                    placeholder="+62..."
-                    className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white"
-                  />
-                </div>
-
-                {pendingType === 'professional' && (
-                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                    <Label className="font-bold text-slate-700">Keahlian Utama / Skills</Label>
-                    <Input 
-                      required
-                      value={regFormData.extra}
-                      onChange={(e) => setRegFormData({...regFormData, extra: e.target.value})}
-                      placeholder="e.g. UI/UX Design, React, Project Management"
-                      className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white"
-                    />
+              ) : (
+                <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-8 px-2 font-bold text-xs">← Kembali</Button>
+                    <Badge className={cn(
+                      "px-3 py-1 font-black text-[10px] uppercase border-none ml-auto",
+                      pendingType === 'pribadi' ? "bg-blue-100 text-blue-600" :
+                      pendingType === 'professional' ? "bg-emerald-100 text-emerald-600" :
+                      "bg-indigo-100 text-indigo-600"
+                    )}>
+                      {pendingType}
+                    </Badge>
                   </div>
-                )}
 
-                {pendingType === 'bisnis' && (
-                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                    <Label className="font-bold text-slate-700">Kategori Bisnis / Sektor</Label>
-                    <Select value={regFormData.extra} onValueChange={(v) => setRegFormData({...regFormData, extra: v})}>
-                      <SelectTrigger className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white">
-                        <SelectValue placeholder="Pilih Sektor" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="Tech & SaaS">Tech & SaaS</SelectItem>
-                        <SelectItem value="Logistics">Logistics</SelectItem>
-                        <SelectItem value="Retail">Retail</SelectItem>
-                        <SelectItem value="Service">Service Provider</SelectItem>
-                        <SelectItem value="F&B">Food & Beverage</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="size-24 rounded-3xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 group cursor-pointer hover:border-accent hover:bg-indigo-50 transition-all">
+                      <Camera className="size-8 group-hover:scale-110 transition-transform" />
+                    </div>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Unggah Foto Profil</span>
                   </div>
-                )}
-              </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="font-bold text-slate-700">Nama Tampilan / Bisnis</Label>
+                      <Input 
+                        required
+                        value={regFormData.name}
+                        onChange={(e) => setRegFormData({...regFormData, name: e.target.value})}
+                        placeholder={pendingType === 'bisnis' ? "e.g. Acme Corp" : "e.g. John Doe"}
+                        className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="font-bold text-slate-700">Bio / Deskripsi Singkat</Label>
+                      <Textarea 
+                        required
+                        value={regFormData.bio}
+                        onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})}
+                        placeholder="Ceritakan tentang diri Anda..."
+                        className="rounded-xl border-slate-200 min-h-[80px] bg-slate-50/50 focus:bg-white"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="font-bold text-slate-700">Kontak (WhatsApp)</Label>
+                      <Input 
+                        required
+                        value={regFormData.contact}
+                        onChange={(e) => setRegFormData({...regFormData, contact: e.target.value})}
+                        placeholder="+62 8..."
+                        className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white"
+                      />
+                    </div>
+
+                    {pendingType === 'professional' && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                        <Label className="font-bold text-slate-700">Keahlian Utama</Label>
+                        <Input 
+                          required
+                          value={regFormData.extra}
+                          onChange={(e) => setRegFormData({...regFormData, extra: e.target.value})}
+                          placeholder="e.g. Designer, Developer"
+                          className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white"
+                        />
+                      </div>
+                    )}
+
+                    {pendingType === 'bisnis' && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                        <Label className="font-bold text-slate-700">Kategori Bisnis</Label>
+                        <Select value={regFormData.extra} onValueChange={(v) => setRegFormData({...regFormData, extra: v})}>
+                          <SelectTrigger className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white">
+                            <SelectValue placeholder="Pilih Sektor" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            <SelectItem value="Tech & SaaS">Tech & SaaS</SelectItem>
+                            <SelectItem value="Logistics">Logistics</SelectItem>
+                            <SelectItem value="Retail">Retail</SelectItem>
+                            <SelectItem value="Service">Service Provider</SelectItem>
+                            <SelectItem value="F&B">Food & Beverage</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
-            <DialogFooter className="p-8 pt-4 bg-slate-50 border-t border-slate-100">
-              <Button 
-                type="submit"
-                className="w-full h-14 rounded-2xl bg-accent hover:bg-indigo-600 text-white font-black text-lg shadow-xl shadow-indigo-100 transition-all active:scale-95"
-              >
-                Simpan & Beralih Akun
-              </Button>
-            </DialogFooter>
+            {pendingType && (
+              <DialogFooter className="p-8 pt-4 bg-slate-50 border-t border-slate-100">
+                <Button 
+                  type="submit"
+                  className="w-full h-14 rounded-2xl bg-accent hover:bg-indigo-600 text-white font-black text-lg shadow-xl shadow-indigo-100 transition-all active:scale-95"
+                >
+                  Selesaikan & Masuk Beranda
+                </Button>
+              </DialogFooter>
+            )}
           </form>
         </DialogContent>
       </Dialog>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -24,6 +25,7 @@ export interface Account {
   extra?: string; // Keahlian for Professional, Kategori for Bisnis
   links?: string[];
   items?: ContentItem[];
+  isNew?: boolean; // Penanda untuk memicu onboarding
 }
 
 interface AccountContextProps {
@@ -32,27 +34,24 @@ interface AccountContextProps {
   switchAccount: (id: string) => void;
   registerAccount: (data: Omit<Account, 'id' | 'avatar' | 'items'>) => void;
   updateActiveAccount: (data: Partial<Account>) => void;
+  hasInitialized: boolean;
 }
 
 const DEFAULT_PRIBADI: Account = { 
-  id: 'acc-1', 
-  name: 'John Doe', 
+  id: 'acc-temp', 
+  name: 'Calon Member', 
   type: 'pribadi', 
-  avatar: 'https://picsum.photos/seed/user1/100',
-  bio: 'Networking enthusiast and business connector.',
-  contact: '+62 812 3456 7890',
-  links: ['https://instagram.com/johndoe', 'https://linkedin.com/in/johndoe'],
-  items: [
-    { id: 'item-1', image: 'https://picsum.photos/seed/post1/600/600', description: 'Checking out the new office today!', visibility: 'public', timestamp: '2h ago' },
-    { id: 'item-2', description: 'Thinking about the future of B2B networking. It is all about meaningful connections.', visibility: 'public', timestamp: '5h ago' }
-  ]
+  avatar: 'https://picsum.photos/seed/temp/100',
+  bio: 'Akun sementara sebelum onboarding.',
+  isNew: true
 };
 
 const AccountContext = createContext<AccountContextProps | undefined>(undefined);
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
-  const [activeAccountId, setActiveAccountId] = useState<string>('acc-1');
+  const [activeAccountId, setActiveAccountId] = useState<string>('acc-temp');
   const [accounts, setAccounts] = useState<Account[]>([DEFAULT_PRIBADI]);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   useEffect(() => {
     const savedActive = localStorage.getItem('ontapp_active_account_id');
@@ -60,12 +59,20 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     
     if (savedAccounts) {
       try {
-        setAccounts(JSON.parse(savedAccounts));
+        const parsed = JSON.parse(savedAccounts);
+        if (parsed.length > 0) {
+          setAccounts(parsed);
+          if (savedActive) {
+            setActiveAccountId(savedActive);
+          } else {
+            setActiveAccountId(parsed[0].id);
+          }
+        }
       } catch (e) {
-        setAccounts([DEFAULT_PRIBADI]);
+        console.error("Failed to parse accounts", e);
       }
     }
-    if (savedActive) setActiveAccountId(savedActive);
+    setHasInitialized(true);
   }, []);
 
   const switchAccount = (id: string) => {
@@ -83,10 +90,14 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
           ? `https://picsum.photos/seed/pro${Date.now()}/100` 
           : `https://picsum.photos/seed/user${Date.now()}/100`,
       links: [],
-      items: []
+      items: [],
+      isNew: false
     };
 
-    const updatedAccounts = [...accounts, newAccount];
+    // Hapus akun sementara jika ada
+    const filteredAccounts = accounts.filter(acc => acc.id !== 'acc-temp');
+    const updatedAccounts = [...filteredAccounts, newAccount];
+    
     setAccounts(updatedAccounts);
     localStorage.setItem('ontapp_user_accounts', JSON.stringify(updatedAccounts));
     switchAccount(newAccount.id);
@@ -94,7 +105,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 
   const updateActiveAccount = (data: Partial<Account>) => {
     const updatedAccounts = accounts.map(acc => 
-      acc.id === activeAccountId ? { ...acc, ...data } : acc
+      acc.id === activeAccountId ? { ...acc, ...data, isNew: false } : acc
     );
     setAccounts(updatedAccounts);
     localStorage.setItem('ontapp_user_accounts', JSON.stringify(updatedAccounts));
@@ -103,7 +114,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
   const activeAccount = accounts.find(a => a.id === activeAccountId) || accounts[0];
 
   return (
-    <AccountContext.Provider value={{ activeAccount, availableAccounts: accounts, switchAccount, registerAccount, updateActiveAccount }}>
+    <AccountContext.Provider value={{ activeAccount, availableAccounts: accounts, switchAccount, registerAccount, updateActiveAccount, hasInitialized }}>
       {children}
     </AccountContext.Provider>
   );
