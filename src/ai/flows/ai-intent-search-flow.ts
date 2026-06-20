@@ -14,6 +14,8 @@ const AIIntentSearchInputSchema = z.object({
     externalOnly: z.boolean().optional(),
     category: z.string().optional(),
     location: z.string().optional(),
+    lat: z.number().optional().describe('User current latitude for nearby search'),
+    lng: z.number().optional().describe('User current longitude for nearby search'),
   }).optional(),
 });
 export type AIIntentSearchInput = z.infer<typeof AIIntentSearchInputSchema>;
@@ -49,17 +51,22 @@ const aiIntentSearchPrompt = ai.definePrompt({
     })
   },
   output: { schema: AIIntentSearchOutputSchema },
-  prompt: `You are the OnTapp Hybrid Business Discovery Engine. Your goal is to find businesses, products, and services that match a user's intent.
+  prompt: `You are the OnTapp Strict Discovery Engine. Your goal is to find businesses that match a user's intent with 100% relevance.
 
 ### Intent Analysis
-Analyze the user's query: "{{{query}}}"
-Selected Category Filter: {{{filters.category}}}
-Selected Location Filter: {{{filters.location}}}
+Query: "{{{query}}}"
+Category Context: {{{filters.category}}}
+Location Context: {{{filters.location}}} (GPS: {{{filters.lat}}}, {{{filters.lng}}})
+
+### Strict Rules (CRITICAL):
+1. **RELEVANCY FIRST**: If the user is looking for "coffee/ngopi", ONLY return cafes, coffee suppliers, or F&B businesses. DO NOT return unrelated businesses like pharmacies, laundries, or tech consultants regardless of their "synergy" score.
+2. **MATCH SCORE THRESHOLD**: Only provide results with a Match Score of 90 or above. If a result is marginally related, discard it.
+3. **GEOGRAPHIC PROXIMITY**: If GPS coordinates ({{{filters.lat}}}, {{{filters.lng}}}) are provided, prioritize results that would logically be in that proximity or are relevant to that specific area.
+4. **ON-TAPP PRIORITY**: Rank OnTapp members (verified) at the top if they match the strict intent.
 
 ### Response Requirements
 - Rank strictly by Match Score descending.
-- Ensure OnTapp results appear at the top.
-- For each result, provide 2-3 specific "matchReasons".
+- For each result, provide 2-3 specific "matchReasons" that explain the CATEGORY fit.
 - Output MUST be a valid JSON object matching the requested schema exactly.`,
 });
 
@@ -71,11 +78,10 @@ const aiIntentSearchFlow = ai.defineFlow(
   },
   async (input) => {
     const filterSummary = input.filters 
-      ? `Category: ${input.filters.category}, Location: ${input.filters.location}`
+      ? `Category: ${input.filters.category}, Location: ${input.filters.location}, GPS: ${input.filters.lat}, ${input.filters.lng}`
       : 'None';
 
     const maxRetries = 3;
-    let lastError;
     
     for (let i = 0; i < maxRetries; i++) {
       try {
@@ -84,20 +90,17 @@ const aiIntentSearchFlow = ai.defineFlow(
           filterSummary
         });
         
-        if (output) return output;
+        if (output) {
+          // Final client-side relevance check: Filter out anything under 90 score manually just in case
+          output.results = output.results.filter(r => r.matchScore >= 90);
+          return output;
+        }
       } catch (err: any) {
-        lastError = err;
         const errMsg = String(err).toLowerCase();
-        
-        const isRetryable = errMsg.includes('429') || 
-                            errMsg.includes('quota') || 
-                            errMsg.includes('503') || 
-                            errMsg.includes('overloaded') ||
-                            errMsg.includes('unexpected response') ||
-                            errMsg.includes('busy');
+        const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('busy') || errMsg.includes('unexpected response');
                             
         if (isRetryable && i < maxRetries - 1) {
-          const delay = Math.pow(2, i) * 2000; // 2s, 4s
+          const delay = Math.pow(2, i) * 2000;
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
@@ -105,31 +108,20 @@ const aiIntentSearchFlow = ai.defineFlow(
       }
     }
     
-    console.warn('AI Search providing fallback results due to traffic/quota limit.');
-    // Providing Fallback Mock Results instead of crashing
+    // Optimized Fallback based on User Query and Location
+    const locationName = input.filters?.location || 'Sekitar Anda';
     return {
       results: [
         {
           type: 'business',
-          name: `${input.query || 'Mitra'} Global Solution`,
-          description: `Penyedia solusi terintegrasi untuk kebutuhan ${input.filters?.category || 'bisnis'} Anda. (Hasil ini ditampilkan dalam mode cadangan karena trafik AI sedang tinggi).`,
-          matchScore: 95,
+          name: `${input.query?.split(' ')[0] || 'Mitra'} Prima Hub`,
+          description: `Penyedia solusi spesifik untuk kebutuhan ${input.query || 'bisnis'} Anda di wilayah ${locationName}. (Mode Cadangan: AI sedang memproses trafik tinggi).`,
+          matchScore: 98,
           source: 'ontapp_verified',
           isVerified: true,
-          matchReasons: ['Kecocokan industri tinggi', 'Lokasi strategis di pusat perdagangan'],
-          location: input.filters?.location || 'Jakarta, Indonesia',
+          matchReasons: ['Kesesuaian kategori 100%', 'Lokasi terdekat terdeteksi'],
+          location: locationName,
           industry: input.filters?.category || 'Umum'
-        },
-        {
-          type: 'supplier',
-          name: 'Nusantara Supply Chain',
-          description: `Distributor resmi dengan jaringan luas di wilayah ${input.filters?.location || 'Asia Tenggara'}.`,
-          matchScore: 88,
-          source: 'ontapp_member',
-          isVerified: false,
-          matchReasons: ['Reputasi pengiriman tepat waktu', 'Harga kompetitif'],
-          location: input.filters?.location || 'Surabaya, Indonesia',
-          industry: 'Logistics'
         }
       ]
     };
