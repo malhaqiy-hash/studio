@@ -18,7 +18,9 @@ import {
   Award,
   Globe,
   Star,
-  Brain
+  Brain,
+  Bookmark,
+  Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
