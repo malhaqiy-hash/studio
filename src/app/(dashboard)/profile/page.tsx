@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import Link from 'next/link';
 import { 
   Instagram, 
   Linkedin, 
@@ -38,7 +39,8 @@ import {
   Image as ImageIcon,
   Smartphone,
   Cloud,
-  RefreshCw
+  RefreshCw,
+  MessageSquare
 } from 'lucide-react';
 import {
   Dialog,
@@ -267,9 +269,20 @@ export default function ProfilePage() {
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-slate-500 font-bold text-base">
-                {activeAccount.type === 'bisnis' ? <Building2 size={18} className="text-teal-600" /> : activeAccount.type === 'professional' ? <Briefcase size={18} className="text-teal-600" /> : <UserIcon size={18} className="text-teal-600" />}
-                {activeAccount.extra || (activeAccount.type === 'bisnis' ? 'Retail & General' : activeAccount.type === 'professional' ? 'Creative Talent' : 'General Member')}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-slate-500 font-bold text-base">
+                  {activeAccount.type === 'bisnis' ? <Building2 size={18} className="text-teal-600" /> : activeAccount.type === 'professional' ? <Briefcase size={18} className="text-teal-600" /> : <UserIcon size={18} className="text-teal-600" />}
+                  {activeAccount.extra || (activeAccount.type === 'bisnis' ? 'Retail & General' : activeAccount.type === 'professional' ? 'Creative Talent' : 'General Member')}
+                </div>
+                <Link href="/messages">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="size-9 rounded-xl bg-teal-50 text-teal-600 hover:bg-teal-100 transition-all border border-teal-100 shadow-sm active:scale-90"
+                  >
+                    <MessageSquare className="size-4" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
