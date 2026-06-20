@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Send, Phone, Video, Info, MoreVertical, Globe } from "lucide-react";
+import { Search, Send, Phone, Video, Info, MoreVertical, Globe, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/context/language-context";
 
@@ -18,6 +19,7 @@ const CHATS = [
 ];
 
 export default function MessagesPage() {
+  const router = useRouter();
   const { t } = useLanguage();
   const [selectedChat, setSelectedChat] = React.useState(CHATS[0]);
 
@@ -32,11 +34,29 @@ export default function MessagesPage() {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-12rem)] flex overflow-hidden bg-white rounded-3xl border border-slate-200 shadow-xl">
+      <div className="h-[calc(100vh-12rem)] flex overflow-hidden bg-white rounded-3xl border border-slate-200 shadow-xl relative">
+        {/* Close Button Mobile/Global Overlay */}
+        <button 
+          onClick={() => router.back()}
+          className="absolute top-4 right-4 z-50 p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-all active:scale-90 md:hidden"
+        >
+          <X className="size-5" />
+        </button>
+
         {/* Chat List */}
         <div className="w-full md:w-80 lg:w-96 border-r border-slate-100 flex flex-col bg-slate-50/30">
           <div className="p-6 space-y-4">
-            <h2 className="text-xl font-headline font-black text-slate-900">{t('global_pulse')}</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-headline font-black text-slate-900">{t('global_pulse')}</h2>
+              {/* Close Button Desktop */}
+              <button 
+                onClick={() => router.back()}
+                className="hidden md:flex p-1.5 hover:bg-slate-100 text-slate-400 hover:text-rose-500 rounded-lg transition-all"
+                title="Tutup Halaman"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
               <Input 

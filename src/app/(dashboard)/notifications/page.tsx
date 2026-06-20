@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,12 +11,12 @@ import {
   MessageSquare, 
   Briefcase, 
   Handshake, 
-  CheckCircle2, 
   Clock, 
   ChevronRight,
   MoreVertical,
   Zap,
-  ShieldCheck
+  ShieldCheck,
+  X
 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 
@@ -63,11 +64,12 @@ const MOCK_NOTIFICATIONS = [
 ];
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const { t } = useLanguage();
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 pb-10">
+      <div className="space-y-8 pb-10 relative">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-widest">
@@ -77,9 +79,19 @@ export default function NotificationsPage() {
             <h1 className="text-3xl font-headline font-black text-slate-900 tracking-tight">{t('activity_center')}</h1>
             <p className="text-slate-500 font-medium">{t('activity_desc')}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
             <Button variant="ghost" className="text-xs font-bold text-slate-400 hover:text-slate-600">
               {t('mark_read')}
+            </Button>
+            {/* Close Button */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => router.back()}
+              className="size-10 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-rose-500 transition-all border border-slate-100 shadow-sm"
+              title="Tutup Halaman"
+            >
+              <X className="size-5" />
             </Button>
           </div>
         </header>
