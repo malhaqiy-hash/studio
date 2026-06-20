@@ -36,7 +36,7 @@ Your task is to translate the provided business text into the target language wh
 Target Language: {{{targetLanguage}}}
 Original Text: {{{text}}}
 
-Provide the translated text and identify the source language.`,
+Provide the translated text and identify the source language. Output MUST be valid JSON.`,
 });
 
 const translateFlow = ai.defineFlow(
@@ -47,7 +47,7 @@ const translateFlow = ai.defineFlow(
   },
   async (input) => {
     let lastError;
-    const maxRetries = 2;
+    const maxRetries = 3;
     
     for (let i = 0; i < maxRetries; i++) {
       try {
@@ -55,14 +55,19 @@ const translateFlow = ai.defineFlow(
         if (output) return output;
       } catch (err: any) {
         lastError = err;
-        if (i < maxRetries - 1) {
-          await new Promise(r => setTimeout(r, 1500));
+        const errMsg = String(err).toLowerCase();
+        const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('busy') || errMsg.includes('quota');
+        
+        if (isRetryable && i < maxRetries - 1) {
+          const delay = Math.pow(2, i) * 1500;
+          await new Promise(r => setTimeout(r, delay));
           continue;
         }
+        break;
       }
     }
     
     console.error('Translation flow failed:', lastError);
-    throw new Error('Gagal menerjemahkan teks. Layanan sedang sibuk.');
+    throw new Error('Gagal menerjemahkan teks. Layanan sedang sangat sibuk. Silakan coba lagi nanti.');
   }
 );

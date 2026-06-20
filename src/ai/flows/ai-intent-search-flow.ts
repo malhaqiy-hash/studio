@@ -73,8 +73,7 @@ Calculate a Match Score (0-100) using these weights:
 - Rank strictly by Match Score descending.
 - Ensure OnTapp results appear at the top.
 - For each result, provide 2-3 specific "matchReasons".
-
-Output must be valid JSON.`,
+- Output MUST be a valid JSON object matching the requested schema exactly. Do not include markdown formatting or extra text.`,
 });
 
 const aiIntentSearchFlow = ai.defineFlow(
@@ -89,7 +88,7 @@ const aiIntentSearchFlow = ai.defineFlow(
       : 'None';
 
     let lastError;
-    const maxRetries = 3; // Reduced for faster response
+    const maxRetries = 4; // Increased for better stability
     
     for (let i = 0; i < maxRetries; i++) {
       try {
@@ -103,17 +102,20 @@ const aiIntentSearchFlow = ai.defineFlow(
         lastError = err;
         const errMsg = String(err).toLowerCase();
         
-        // Retry logic for common transient API errors
+        // Retry logic for common transient API errors and quota issues
         const isRetryable = errMsg.includes('429') || 
                             errMsg.includes('quota') || 
                             errMsg.includes('503') || 
                             errMsg.includes('overloaded') ||
                             errMsg.includes('unexpected response') ||
-                            errMsg.includes('network');
+                            errMsg.includes('network') ||
+                            errMsg.includes('timeout') ||
+                            errMsg.includes('busy');
                             
         if (isRetryable && i < maxRetries - 1) {
+          // Exponential backoff: 2s, 4s, 8s...
           const delay = Math.pow(2, i) * 2000; 
-          console.warn(`Search engine attempt ${i + 1} failed. Retrying in ${delay}ms...`);
+          console.warn(`Search engine attempt ${i + 1} failed. Retrying in ${delay}ms... Reason: ${errMsg.substring(0, 100)}`);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
@@ -121,7 +123,12 @@ const aiIntentSearchFlow = ai.defineFlow(
       }
     }
     
-    console.error('AI Intent Search failed:', lastError);
-    throw new Error('Gagal memproses pencarian. AI sedang sangat sibuk atau terjadi gangguan jaringan. Silakan coba lagi dalam 10 detik.');
+    console.error('AI Intent Search critically failed after retries:', lastError);
+    // Provide a more descriptive and user-friendly error message
+    const errorDetail = String(lastError).includes('429') 
+      ? 'Batas penggunaan AI (kuota) tercapai. Harap tunggu 60 detik sebelum mencari lagi.' 
+      : 'AI sedang sangat sibuk atau terjadi gangguan jaringan global.';
+      
+    throw new Error(`Pencarian Terganggu: ${errorDetail}`);
   }
 );
