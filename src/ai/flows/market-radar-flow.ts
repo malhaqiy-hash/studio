@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview AI Market Radar - Detects global business trends.
@@ -53,7 +52,23 @@ const marketRadarFlow = ai.defineFlow(
     outputSchema: MarketRadarOutputSchema,
   },
   async (input) => {
-    const { output } = await marketRadarPrompt(input);
-    return output!;
+    let lastError;
+    const maxRetries = 3;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const { output } = await marketRadarPrompt(input);
+        return output!;
+      } catch (err: any) {
+        lastError = err;
+        const errMsg = String(err).toLowerCase();
+        const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('quota') || errMsg.includes('busy');
+        if (isRetryable && i < maxRetries - 1) {
+          await new Promise(r => setTimeout(r, Math.pow(2, i) * 2000));
+          continue;
+        }
+        break;
+      }
+    }
+    throw lastError || new Error('Gagal memuat Market Radar. AI sedang sibuk.');
   }
 );

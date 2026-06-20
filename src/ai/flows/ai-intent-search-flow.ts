@@ -89,7 +89,7 @@ const aiIntentSearchFlow = ai.defineFlow(
       : 'None';
 
     let lastError;
-    const maxRetries = 5;
+    const maxRetries = 6;
     
     for (let i = 0; i < maxRetries; i++) {
       try {
@@ -102,21 +102,28 @@ const aiIntentSearchFlow = ai.defineFlow(
       } catch (err: any) {
         lastError = err;
         const errMsg = String(err).toLowerCase();
-        const isTransient = errMsg.includes('503') || 
+        
+        // Handle rate limiting (429) and transient server errors (503)
+        const isQuotaError = errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('exhausted');
+        const isTransient = isQuotaError || 
+                            errMsg.includes('503') || 
                             errMsg.includes('demand') || 
                             errMsg.includes('overloaded') ||
-                            errMsg.includes('429') ||
                             errMsg.includes('unavailable');
                             
         if (isTransient && i < maxRetries - 1) {
-          const delay = Math.pow(2, i) * 1000; // Exponential backoff
+          // Longer delay for quota errors
+          const baseDelay = isQuotaError ? 3000 : 1000;
+          const delay = Math.pow(2, i) * baseDelay; 
+          console.warn(`AI Engine busy (Attempt ${i + 1}/${maxRetries}). Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
-        throw err;
+        break;
       }
     }
     
-    throw lastError || new Error('AI Engine currently unavailable. Please try kembali dalam beberapa saat.');
+    console.error('AI Intent Search failed after retries:', lastError);
+    throw new Error('Mesin AI sedang mencapai batas kuota atau sangat sibuk. Silakan tunggu sekitar 30 detik dan coba cari kembali.');
   }
 );

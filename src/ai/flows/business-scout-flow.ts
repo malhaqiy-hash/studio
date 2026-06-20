@@ -1,9 +1,6 @@
-
 'use server';
 /**
  * @fileOverview AI Business Scout - Market intelligence flow.
- * 
- * - businessScout - Detects unmet demand and generates business opportunities.
  */
 
 import { ai } from '@/ai/genkit';
@@ -63,7 +60,23 @@ const businessScoutFlow = ai.defineFlow(
     outputSchema: BusinessScoutOutputSchema,
   },
   async (input) => {
-    const { output } = await businessScoutPrompt(input);
-    return output!;
+    let lastError;
+    const maxRetries = 3;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const { output } = await businessScoutPrompt(input);
+        return output!;
+      } catch (err: any) {
+        lastError = err;
+        const errMsg = String(err).toLowerCase();
+        const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('quota') || errMsg.includes('busy');
+        if (isRetryable && i < maxRetries - 1) {
+          await new Promise(r => setTimeout(r, Math.pow(2, i) * 2000));
+          continue;
+        }
+        break;
+      }
+    }
+    throw lastError || new Error('Gagal memuat laporan Scout. AI sedang sibuk.');
   }
 );
