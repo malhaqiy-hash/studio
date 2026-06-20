@@ -38,7 +38,8 @@ import {
   ExternalLink,
   Smartphone,
   Cloud,
-  Image as ImageIcon
+  Image as ImageIcon,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -111,6 +112,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   });
 
   const [isMediaPickerOpen, setIsMediaPickerOpen] = React.useState(false);
+  const [isCloudLoading, setIsCloudLoading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Logika Filter Menu Berdasarkan Tipe Akun
@@ -201,13 +203,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   };
 
   const handleCloudSource = (source: 'drive' | 'photos') => {
-    toast({ title: "Menghubungkan pustaka cloud..." });
+    setIsCloudLoading(true);
+    toast({ title: "Menghubungkan akun Google..." });
+
+    // Simulasi otorisasi dan pemilihan file cloud
     setTimeout(() => {
       const simulatedUrl = `https://picsum.photos/seed/reg${Date.now()}/200/200`;
       setRegFormData(prev => ({ ...prev, avatar: simulatedUrl }));
+      setIsCloudLoading(false);
       setIsMediaPickerOpen(false);
-      toast({ title: "Gambar berhasil diimpor" });
-    }, 1200);
+      toast({ title: "Gambar berhasil diimpor dari Cloud" });
+    }, 2000);
   };
 
   if (loading) {
@@ -650,6 +656,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <div className="grid gap-4 py-8">
             <Button 
               variant="outline" 
+              disabled={isCloudLoading}
               onClick={() => fileInputRef.current?.click()}
               className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
             >
@@ -664,11 +671,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
             <Button 
               variant="outline" 
+              disabled={isCloudLoading}
               onClick={() => handleCloudSource('drive')}
               className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
             >
               <div className="size-12 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Cloud className="size-6 text-blue-500" />
+                {isCloudLoading ? <RefreshCw className="size-6 animate-spin" /> : <Cloud className="size-6 text-blue-500" />}
               </div>
               <div className="text-left">
                 <p className="font-black text-sm uppercase tracking-widest">Google Drive</p>
@@ -678,11 +686,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
             <Button 
               variant="outline" 
+              disabled={isCloudLoading}
               onClick={() => handleCloudSource('photos')}
               className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
             >
               <div className="size-12 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                <ImageIcon className="size-6 text-rose-500" />
+                {isCloudLoading ? <RefreshCw className="size-6 animate-spin" /> : <ImageIcon className="size-6 text-rose-500" />}
               </div>
               <div className="text-left">
                 <p className="font-black text-sm uppercase tracking-widest">Google Photos</p>

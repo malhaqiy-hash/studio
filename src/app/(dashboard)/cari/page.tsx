@@ -32,7 +32,9 @@ import {
   Image as ImageIcon,
   Brain,
   Target,
-  Briefcase
+  Briefcase,
+  Smartphone,
+  Cloud
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -86,6 +88,7 @@ export default function CariPage() {
   
   const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [isCloudLoading, setIsCloudLoading] = React.useState(false);
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
   const [history, setHistory] = React.useState<any[]>([]);
   
@@ -128,13 +131,13 @@ export default function CariPage() {
     const newItems = newResults.map(r => ({
       ...r,
       name: cleanTitle(r.name),
-      category: activeCategory, // Simpan kategori aktif saat pencarian
-      location: activeLocation, // Simpan lokasi aktif
+      category: activeCategory,
+      location: activeLocation,
       id: `h-${Date.now()}-${Math.random()}`,
       date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
     }));
 
-    // LOGIKA ANTI-DUPLIKASI KETAT (Nama + Lokasi + Kategori)
+    // LOGIKA ANTI-DUPLIKASI KETAT
     const filteredHistory = currentHistory.filter((oldItem: any) => 
       !newItems.some(newItem => 
         newItem.name.toLowerCase().trim() === oldItem.name.toLowerCase().trim() && 
@@ -205,7 +208,6 @@ export default function CariPage() {
 
   const handleHistoryClick = (item: any) => {
     const cleanedQuery = cleanTitle(item.name);
-    // Sinkronkan state untuk UI feedback sesuai data kartu
     const targetCategory = item.category || null;
     const targetLocation = item.location || (language === 'id' ? "Pilih Lokasi" : "Choose Location");
 
@@ -214,8 +216,6 @@ export default function CariPage() {
     setActiveLocation(targetLocation);
     
     toast({ title: "Sinkronisasi Riwayat", description: `Mengulang indeks untuk ${cleanedQuery}...` });
-
-    // Jalankan pencarian dengan parameter eksplisit
     handleSearch(undefined, cleanedQuery, targetCategory, targetLocation);
   };
 
@@ -231,10 +231,23 @@ export default function CariPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setIsSourcePickerOpen(false);
+        toast({ title: "Visual AI Aktif", description: "Menganalisis objek dalam gambar..." });
         handleSearch(undefined, "Analisis visual");
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCloudImageInput = (source: 'drive' | 'photos') => {
+    setIsCloudLoading(true);
+    toast({ title: `Menghubungkan ${source === 'drive' ? 'Google Drive' : 'Google Photos'}...` });
+    
+    setTimeout(() => {
+      setIsCloudLoading(false);
+      setIsSourcePickerOpen(false);
+      toast({ title: "Media Cloud Terpilih", description: "Memulai analisis visual AI..." });
+      handleSearch(undefined, "Analisis visual Cloud");
+    }, 2000);
   };
 
   const handleNearbySearch = () => {
@@ -510,9 +523,46 @@ export default function CariPage() {
           <div className="space-y-8">
             <h2 className="text-xl font-bold">Cari dengan Visual</h2>
             <div className="space-y-6">
-              <button onClick={() => cameraInputRef.current?.click()} className="w-full flex items-center justify-between"><div className="flex items-center gap-5"><div className="size-12 rounded-full bg-white/10 flex items-center justify-center"><Camera className="size-6" /></div><span className="font-bold">Ambil Foto</span></div></button>
-              <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center justify-between"><div className="flex items-center gap-5"><div className="size-12 rounded-full bg-white/10 flex items-center justify-center"><ImageIcon className="size-6" /></div><span className="font-bold">Galeri</span></div></button>
+              <button disabled={isCloudLoading} onClick={() => cameraInputRef.current?.click()} className="w-full flex items-center justify-between group">
+                <div className="flex items-center gap-5">
+                  <div className="size-12 rounded-full bg-white/10 flex items-center justify-center">
+                    <Camera className="size-6" />
+                  </div>
+                  <span className="font-bold">Ambil Foto</span>
+                </div>
+              </button>
+
+              <button disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="w-full flex items-center justify-between group">
+                <div className="flex items-center gap-5">
+                  <div className="size-12 rounded-full bg-white/10 flex items-center justify-center">
+                    <ImageIcon className="size-6" />
+                  </div>
+                  <span className="font-bold">Galeri Perangkat</span>
+                </div>
+              </button>
+
+              <div className="h-px bg-white/10 w-full" />
+
+              <button disabled={isCloudLoading} onClick={() => handleCloudImageInput('drive')} className="w-full flex items-center justify-between group">
+                <div className="flex items-center gap-5">
+                  <div className="size-12 rounded-full bg-white/10 flex items-center justify-center">
+                    {isCloudLoading ? <RefreshCw className="size-6 animate-spin" /> : <Cloud className="size-6 text-blue-400" />}
+                  </div>
+                  <span className="font-bold">Google Drive</span>
+                </div>
+              </button>
+
+              <button disabled={isCloudLoading} onClick={() => handleCloudImageInput('photos')} className="w-full flex items-center justify-between group">
+                <div className="flex items-center gap-5">
+                  <div className="size-12 rounded-full bg-white/10 flex items-center justify-center">
+                    {isCloudLoading ? <RefreshCw className="size-6 animate-spin" /> : <ImageIcon className="size-6 text-rose-400" />}
+                  </div>
+                  <span className="font-bold">Google Photos</span>
+                </div>
+              </button>
             </div>
+            
+            <button onClick={() => setIsSourcePickerOpen(false)} className="w-full text-center text-sm font-bold text-slate-400 hover:text-white uppercase tracking-widest">Batal</button>
           </div>
         </DialogContent>
       </Dialog>

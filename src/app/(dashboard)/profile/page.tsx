@@ -37,7 +37,8 @@ import {
   Target,
   Image as ImageIcon,
   Smartphone,
-  Cloud
+  Cloud,
+  RefreshCw
 } from 'lucide-react';
 import {
   Dialog,
@@ -69,6 +70,7 @@ export default function ProfilePage() {
   const [isMediaPickerOpen, setIsMediaPickerOpen] = React.useState(false);
 
   const [mediaTarget, setMediaTarget] = React.useState<'avatar' | 'cover' | 'post'>('avatar');
+  const [isCloudLoading, setIsCloudLoading] = React.useState(false);
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
   const [newItem, setNewItem] = React.useState<Partial<ContentItem>>({
     visibility: 'public'
@@ -98,7 +100,7 @@ export default function ProfilePage() {
           updateActiveAccount({ avatar: result });
           toast({ title: "Foto profil diperbarui dari perangkat" });
         } else if (mediaTarget === 'cover') {
-          // Note: In real app we might store cover in account data, for now we simulate
+          // Simulasi update cover (di real app simpan ke field cover)
           toast({ title: "Foto sampul diperbarui dari perangkat" });
         } else if (mediaTarget === 'post') {
           setNewItem(prev => ({ ...prev, image: result }));
@@ -111,24 +113,31 @@ export default function ProfilePage() {
   };
 
   const handleCloudSource = (source: 'drive' | 'photos') => {
+    setIsCloudLoading(true);
     toast({ 
       title: source === 'drive' ? "Menghubungkan Google Drive" : "Menghubungkan Google Photos", 
       description: "Mengotorisasi akses ke pustaka cloud Anda..." 
     });
-    // Simulating delay for picker
+
+    // Simulasi integrasi Cloud API
     setTimeout(() => {
       const simulatedUrl = source === 'drive' 
-        ? `https://picsum.photos/seed/drive${Date.now()}/800/600`
-        : `https://picsum.photos/seed/photos${Date.now()}/800/600`;
+        ? `https://picsum.photos/seed/drive${Date.now()}/1200/800`
+        : `https://picsum.photos/seed/photos${Date.now()}/1200/800`;
         
       if (mediaTarget === 'avatar') {
         updateActiveAccount({ avatar: simulatedUrl });
+        toast({ title: "Avatar diimpor dari Cloud" });
+      } else if (mediaTarget === 'cover') {
+        toast({ title: "Sampul diimpor dari Cloud" });
       } else if (mediaTarget === 'post') {
         setNewItem(prev => ({ ...prev, image: simulatedUrl }));
+        toast({ title: "Media konten diimpor dari Cloud" });
       }
+      
+      setIsCloudLoading(false);
       setIsMediaPickerOpen(false);
-      toast({ title: "File berhasil diimpor dari cloud" });
-    }, 1500);
+    }, 2000);
   };
 
   const handleAddLink = () => {
@@ -398,6 +407,7 @@ export default function ProfilePage() {
           <div className="grid gap-4 py-8">
             <Button 
               variant="outline" 
+              disabled={isCloudLoading}
               onClick={() => fileInputRef.current?.click()}
               className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
             >
@@ -412,11 +422,12 @@ export default function ProfilePage() {
 
             <Button 
               variant="outline" 
+              disabled={isCloudLoading}
               onClick={() => handleCloudSource('drive')}
               className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
             >
               <div className="size-12 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Cloud className="size-6 text-blue-500" />
+                {isCloudLoading ? <RefreshCw className="size-6 animate-spin" /> : <Cloud className="size-6 text-blue-500" />}
               </div>
               <div className="text-left">
                 <p className="font-black text-sm uppercase tracking-widest">Google Drive</p>
@@ -426,11 +437,12 @@ export default function ProfilePage() {
 
             <Button 
               variant="outline" 
+              disabled={isCloudLoading}
               onClick={() => handleCloudSource('photos')}
               className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
             >
               <div className="size-12 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                <ImageIcon className="size-6 text-rose-500" />
+                {isCloudLoading ? <RefreshCw className="size-6 animate-spin" /> : <ImageIcon className="size-6 text-rose-500" />}
               </div>
               <div className="text-left">
                 <p className="font-black text-sm uppercase tracking-widest">Google Photos</p>
