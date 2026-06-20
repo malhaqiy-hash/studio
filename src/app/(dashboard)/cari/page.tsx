@@ -94,7 +94,7 @@ export default function CariPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Helper untuk membersihkan teks "Informasi Terkait: "
+  // Helper untuk membersihkan teks prefiks sistem
   const cleanTitle = (text: string) => text.replace(/^Informasi Terkait:\s*/i, '');
 
   React.useEffect(() => {
@@ -117,6 +117,33 @@ export default function CariPage() {
 
   const generateCacheId = (q: string, loc: string, cat: string | null) => {
     return btoa(`${q.toLowerCase()}-${loc.toLowerCase()}-${cat || 'all'}`).replace(/[/+=]/g, '_').substring(0, 50);
+  };
+
+  const updateVisualHistory = (newResults: any[]) => {
+    if (typeof window === 'undefined') return;
+
+    const currentHistory = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
+    
+    // Siapkan entri baru dengan format yang konsisten
+    const newItems = newResults.map(r => ({
+      ...r,
+      name: cleanTitle(r.name),
+      id: `h-${Date.now()}-${Math.random()}`,
+      date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+    }));
+
+    // Dedukplikasi: Hapus entri lama yang memiliki nama dan lokasi yang sama dengan entri baru
+    const filteredHistory = currentHistory.filter((oldItem: any) => 
+      !newItems.some(newItem => 
+        newItem.name.toLowerCase() === oldItem.name.toLowerCase() && 
+        newItem.location === oldItem.location
+      )
+    );
+
+    // Gabungkan (entri baru di depan) dan batasi jumlah riwayat
+    const updatedHistory = [...newItems, ...filteredHistory].slice(0, 50);
+    localStorage.setItem('ontapp_discovery_history', JSON.stringify(updatedHistory));
+    setHistory(updatedHistory);
   };
 
   const checkThrottling = async (userId: string) => {
@@ -163,7 +190,6 @@ export default function CariPage() {
 
   const handleSearch = async (e?: React.FormEvent, overrideQuery?: string) => {
     e?.preventDefault();
-    // Pastikan query benar-benar bersih dari "Informasi Terkait"
     const finalQuery = cleanTitle(overrideQuery || query);
     
     if (!finalQuery && !activeCategory) {
@@ -198,12 +224,14 @@ export default function CariPage() {
 
             if (!isExpired) {
               const parsedResults = JSON.parse(cacheData.results);
-              // Bersihkan nama hasil di cache
               parsedResults.results = parsedResults.results.map((r: any) => ({ ...r, name: cleanTitle(r.name) }));
               setResults(parsedResults);
               setLoading(false);
               toast({ title: "Cache Optimization", description: "Loading from smart cache (24h)." });
               cacheDataFound = true;
+              
+              // Perbarui urutan riwayat visual meskipun dari cache
+              updateVisualHistory(parsedResults.results);
             }
           }
         } catch (cacheErr) {}
@@ -222,7 +250,6 @@ export default function CariPage() {
       });
 
       if (output) {
-        // Bersihkan hasil output baru
         output.results = output.results.map(r => ({ ...r, name: cleanTitle(r.name) }));
         
         if (db) {
@@ -234,19 +261,7 @@ export default function CariPage() {
         }
 
         setResults(output);
-        
-        if (typeof window !== 'undefined') {
-          const currentHistory = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
-          const newItems = output.results.map(r => ({
-            ...r,
-            name: cleanTitle(r.name), // Simpan tanpa prefiks
-            id: `h-${Date.now()}-${Math.random()}`,
-            date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-          }));
-          const updatedHistory = [...newItems, ...currentHistory].slice(0, 50);
-          localStorage.setItem('ontapp_discovery_history', JSON.stringify(updatedHistory));
-          setHistory(updatedHistory);
-        }
+        updateVisualHistory(output.results);
       }
       
     } catch (err: any) {
