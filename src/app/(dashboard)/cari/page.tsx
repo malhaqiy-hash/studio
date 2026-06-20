@@ -111,13 +111,15 @@ export default function CariPage() {
       setResults(output);
       
       // Backup logic: Save to localStorage for Discovery History page
-      const history = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
-      const newItems = output.results.map(r => ({
-        ...r,
-        id: `h-${Date.now()}-${Math.random()}`,
-        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-      }));
-      localStorage.setItem('ontapp_discovery_history', JSON.stringify([...newItems, ...history].slice(0, 50)));
+      if (typeof window !== 'undefined') {
+        const history = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
+        const newItems = output.results.map(r => ({
+          ...r,
+          id: `h-${Date.now()}-${Math.random()}`,
+          date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+        }));
+        localStorage.setItem('ontapp_discovery_history', JSON.stringify([...newItems, ...history].slice(0, 50)));
+      }
       
     } catch (err) {
       console.error(err);
@@ -378,7 +380,7 @@ export default function CariPage() {
                     </div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
-                </DropdownMenuTrigger>
+                </PopoverTrigger>
                 <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl border-slate-100 space-y-3">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
