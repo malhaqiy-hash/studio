@@ -30,7 +30,8 @@ import {
   Zap,
   Trash2,
   History,
-  X
+  X,
+  Image as ImageIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
