@@ -315,9 +315,18 @@ export default function CariPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('search_placeholder')}
-                className="h-16 pl-12 pr-32 rounded-2xl border-slate-100 bg-slate-50/50 shadow-inner text-base font-medium focus:bg-white transition-all focus:border-teal-500"
+                className="h-16 pl-12 pr-44 rounded-2xl border-slate-100 bg-slate-50/50 shadow-inner text-base font-medium focus:bg-white transition-all focus:border-teal-500"
               />
               <div className="absolute inset-y-3 right-3 flex items-center gap-1.5">
+                {query && (
+                  <button 
+                    type="button" 
+                    onClick={() => setQuery("")}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-rose-500 border border-slate-100 shadow-sm transition-all active:scale-90"
+                  >
+                    <X className="size-5" />
+                  </button>
+                )}
                 <button type="button" onClick={() => setIsSourcePickerOpen(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-teal-600 border border-slate-100 shadow-sm transition-all active:scale-90"><Camera className="size-5" /></button>
                 <button type="button" className={cn("w-10 h-10 flex items-center justify-center rounded-xl transition-all active:scale-90 bg-white text-slate-400 hover:text-teal-600 shadow-sm border border-slate-100", isListening && "bg-rose-500 text-white animate-pulse")}><Mic className="size-5" /></button>
               </div>
@@ -329,7 +338,23 @@ export default function CariPage() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-full h-12 justify-between rounded-xl border-slate-100 bg-white text-slate-600 font-bold hover:bg-slate-50 px-4 text-xs">
-                    <div className="flex items-center gap-2"><Filter className="size-3.5 text-teal-600" />{activeCategory ? activeCategory : (language === 'id' ? "Pilih Kategori" : "Pick Category")}</div>
+                    <div className="flex items-center gap-2">
+                      <Filter className="size-3.5 text-teal-600" />
+                      {activeCategory ? (
+                        <div className="flex items-center gap-1.5">
+                          {activeCategory}
+                          <button 
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setActiveCategory(null); }}
+                            className="p-1 hover:bg-slate-100 rounded-full transition-colors"
+                          >
+                            <X className="size-3 text-slate-400 hover:text-rose-500" />
+                          </button>
+                        </div>
+                      ) : (
+                        language === 'id' ? "Pilih Kategori" : "Pick Category"
+                      )}
+                    </div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -346,7 +371,23 @@ export default function CariPage() {
               <Popover open={isLocationOpen} onOpenChange={setIsLocationOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full h-12 justify-between rounded-xl border-slate-100 bg-white text-slate-600 font-bold hover:bg-slate-50 px-4 text-xs">
-                    <div className="flex items-center gap-2"><MapPin className="size-3.5 text-rose-500" />{activeLocation}</div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="size-3.5 text-rose-500" />
+                      {(!activeLocation.includes('Lokasi') && !activeLocation.includes('Location')) ? (
+                        <div className="flex items-center gap-1.5">
+                          {activeLocation}
+                          <button 
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setActiveLocation(language === 'id' ? "Pilih Lokasi" : "Choose Location"); }}
+                            className="p-1 hover:bg-slate-100 rounded-full transition-colors"
+                          >
+                            <X className="size-3 text-slate-400 hover:text-rose-500" />
+                          </button>
+                        </div>
+                      ) : (
+                        activeLocation
+                      )}
+                    </div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
                 </PopoverTrigger>
