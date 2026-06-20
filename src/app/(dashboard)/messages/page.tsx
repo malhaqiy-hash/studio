@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -9,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Send, Phone, Video, Info, MoreVertical, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/context/language-context";
 
 const CHATS = [
   { id: 1, name: "Eco Packaging Co", avatar: "https://picsum.photos/seed/eco/100", lastMsg: "The shipment was sent this morning.", time: "10:30 AM", unread: 2, status: "online" },
@@ -18,7 +18,17 @@ const CHATS = [
 ];
 
 export default function MessagesPage() {
+  const { t } = useLanguage();
   const [selectedChat, setSelectedChat] = React.useState(CHATS[0]);
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'online': return t('online');
+      case 'offline': return t('offline');
+      case 'away': return t('away');
+      default: return status;
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -26,11 +36,11 @@ export default function MessagesPage() {
         {/* Chat List */}
         <div className="w-full md:w-80 lg:w-96 border-r border-slate-100 flex flex-col bg-slate-50/30">
           <div className="p-6 space-y-4">
-            <h2 className="text-xl font-headline font-black text-slate-900">Global Pulse</h2>
+            <h2 className="text-xl font-headline font-black text-slate-900">{t('global_pulse')}</h2>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
               <Input 
-                placeholder="Search conversations..." 
+                placeholder={t('search_chats')}
                 className="pl-10 h-11 bg-white border-slate-100 rounded-xl font-medium text-sm focus:ring-accent/10"
               />
             </div>
@@ -78,7 +88,7 @@ export default function MessagesPage() {
                 <h3 className="font-bold text-slate-900">{selectedChat.name}</h3>
                 <div className="flex items-center gap-1.5">
                   <div className={`size-1.5 rounded-full ${selectedChat.status === 'online' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedChat.status}</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{getStatusLabel(selectedChat.status)}</span>
                 </div>
               </div>
             </div>
@@ -92,7 +102,6 @@ export default function MessagesPage() {
           </header>
 
           <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-slate-50/20">
-            {/* Mock messages */}
             <div className="flex flex-col gap-1 max-w-[70%]">
               <div className="bg-slate-100 rounded-2xl rounded-tl-none p-4 text-sm font-medium text-slate-700 shadow-sm border border-slate-200">
                 Hi! We're reviewing your request for the eco-packaging bulk order.
@@ -119,10 +128,10 @@ export default function MessagesPage() {
             <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-2xl border border-slate-100 focus-within:ring-2 focus-within:ring-accent/10 transition-all">
               <Button variant="ghost" size="icon" className="text-slate-400 rounded-full"><Info className="size-5" /></Button>
               <Input 
-                placeholder="Type a secure message..." 
+                placeholder={t('type_message')}
                 className="border-none bg-transparent h-10 font-medium text-sm focus:ring-0 placeholder:text-slate-400"
               />
-              <Button className="size-10 rounded-xl bg-accent hover:bg-indigo-400 text-white shadow-md p-0 shrink-0">
+              <Button className="size-10 rounded-xl bg-accent hover:bg-teal-500 text-white shadow-md p-0 shrink-0">
                 <Send className="size-5" />
               </Button>
             </div>

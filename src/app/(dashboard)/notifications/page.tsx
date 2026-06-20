@@ -28,7 +28,7 @@ const MOCK_NOTIFICATIONS = [
     time: "10m ago",
     unread: true,
     icon: Handshake,
-    color: "bg-indigo-50 text-accent"
+    color: "bg-teal-50 text-accent"
   },
   {
     id: "n2",
@@ -74,12 +74,12 @@ export default function NotificationsPage() {
               <Bell className="size-3" />
               {t('notifications')}
             </div>
-            <h1 className="text-3xl font-headline font-black text-slate-900 tracking-tight">Activity Center</h1>
-            <p className="text-slate-500 font-medium">Stay updated with your latest business network interactions.</p>
+            <h1 className="text-3xl font-headline font-black text-slate-900 tracking-tight">{t('activity_center')}</h1>
+            <p className="text-slate-500 font-medium">{t('activity_desc')}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" className="text-xs font-bold text-slate-400 hover:text-slate-600">
-              Mark all as read
+              {t('mark_read')}
             </Button>
           </div>
         </header>
@@ -114,8 +114,8 @@ export default function NotificationsPage() {
                       {notification.description}
                     </p>
                     <div className="pt-2 flex items-center gap-4">
-                       <Button variant="ghost" size="sm" className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-accent hover:bg-indigo-50 rounded-lg">
-                         Take Action
+                       <Button variant="ghost" size="sm" className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-accent hover:bg-teal-50 rounded-lg">
+                         {t('take_action')}
                          <ChevronRight className="size-3 ml-1" />
                        </Button>
                        <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 rounded-full">
@@ -136,13 +136,13 @@ export default function NotificationsPage() {
               <Zap className="size-6 text-white fill-white" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-xl font-black">Notification Intelligence</h3>
+              <h3 className="text-xl font-black">{t('notif_intel')}</h3>
               <p className="text-slate-400 text-sm font-medium">
-                You've had <span className="text-indigo-400">12 new matches</span> and <span className="text-emerald-400">5 high-value messages</span> this week. Our engine suggests prioritizing the 'EcoPack' discussion.
+                Our engine provides personalized suggestions based on your network interactions.
               </p>
             </div>
             <Button className="w-full bg-white text-slate-900 hover:bg-slate-100 font-black rounded-xl h-12 shadow-lg transition-all active:scale-95">
-              View Insights Report
+              {t('view_insights')}
             </Button>
           </CardContent>
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-3xl -mr-32 -mt-32" />

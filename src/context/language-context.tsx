@@ -83,6 +83,20 @@ export const translations = {
   scout_pivot: { en: 'Suggested Pivot', id: 'Saran Pivot' },
   scout_create_opp: { en: 'Create Opportunity from Gap', id: 'Buat Peluang dari Celah' },
 
+  // Messages & Notifications
+  global_pulse: { en: 'Global Pulse', id: 'Nadi Global' },
+  search_chats: { en: 'Search conversations...', id: 'Cari percakapan...' },
+  type_message: { en: 'Type a secure message...', id: 'Ketik pesan aman...' },
+  online: { en: 'Online', id: 'Aktif' },
+  offline: { en: 'Offline', id: 'Luring' },
+  away: { en: 'Away', id: 'Sibuk' },
+  activity_center: { en: 'Activity Center', id: 'Pusat Aktivitas' },
+  activity_desc: { en: 'Stay updated with your latest business network interactions.', id: 'Tetap perbarui interaksi jaringan bisnis Anda.' },
+  mark_read: { en: 'Mark all as read', id: 'Tandai semua dibaca' },
+  take_action: { en: 'Take Action', id: 'Ambil Tindakan' },
+  notif_intel: { en: 'Notification Intelligence', id: 'Intelijen Notifikasi' },
+  view_insights: { en: 'View Insights Report', id: 'Lihat Laporan Wawasan' },
+
   // Specific Actions & Labels
   claim_profile: { en: 'Claim Profile', id: 'Klaim Profil' },
   view_profile: { en: 'View Profile', id: 'Lihat Profil' },
