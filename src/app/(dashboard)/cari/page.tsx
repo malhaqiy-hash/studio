@@ -460,7 +460,7 @@ export default function CariPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-black text-slate-900 text-base tracking-tight">Hasil Penemuan AI</h3>
+                  <h3 className="font-black text-slate-900 text-base tracking-tight">Hasil</h3>
                   <Badge className="bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded-lg text-[10px]">{results.results.length}</Badge>
                 </div>
               </div>
