@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -34,7 +33,8 @@ import {
   Map as MapIcon,
   Building2,
   History,
-  Bookmark
+  Bookmark,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -103,22 +103,35 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     extra: ""
   });
 
-  const drawerItems = [
-    { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
-    { icon: Bookmark, label: t('saved'), href: "/saved" },
-    { icon: TrendingUp, label: t('market_radar'), href: "/market-radar" },
-    { icon: MapIcon, label: t('opportunity_map'), href: "/opportunity-map" },
-    { icon: Building2, label: t('registry'), href: "/registry" },
-    { icon: Radar, label: t('scout'), href: "/scout" },
-    { icon: Magnet, label: t('reverse_discovery'), href: "/reverse-discovery" },
-    { icon: BookOpen, label: t('knowledge'), href: "/knowledge" },
-    { icon: Users, label: t('matchmaker'), href: "/matchmaker" },
-    { icon: Target, label: t('matches'), href: "/matches" },
-    { icon: Briefcase, label: t('opportunities'), href: "/opportunities" },
-    { icon: Sliders, label: t('settings'), href: "/settings" },
-  ];
+  // Logika Filter Menu Berdasarkan Tipe Akun
+  const getDrawerItems = () => {
+    const baseItems = [
+      { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard", roles: ['pribadi', 'professional', 'bisnis'] },
+      { icon: Bookmark, label: t('saved'), href: "/saved", roles: ['pribadi', 'professional', 'bisnis'] },
+      { icon: Rss, label: t('feed'), href: "/feed", roles: ['pribadi', 'professional', 'bisnis'] },
+      { icon: Search, label: t('search'), href: "/cari", roles: ['pribadi', 'professional', 'bisnis'] },
+      
+      // Professional & Bisnis
+      { icon: Users, label: t('matchmaker'), href: "/matchmaker", roles: ['professional', 'bisnis'] },
+      { icon: Target, label: t('matches'), href: "/matches", roles: ['professional', 'bisnis'] },
+      { icon: BookOpen, label: t('knowledge'), href: "/knowledge", roles: ['professional', 'bisnis'] },
+      
+      // Khusus Bisnis (Premium Intelligence)
+      { icon: TrendingUp, label: t('market_radar'), href: "/market-radar", roles: ['bisnis'] },
+      { icon: MapIcon, label: t('opportunity_map'), href: "/opportunity-map", roles: ['bisnis'] },
+      { icon: Building2, label: t('registry'), href: "/registry", roles: ['bisnis'] },
+      { icon: Radar, label: t('scout'), href: "/scout", roles: ['bisnis'] },
+      { icon: Magnet, label: t('reverse_discovery'), href: "/reverse-discovery", roles: ['bisnis'] },
+      { icon: Briefcase, label: t('opportunities'), href: "/opportunities", roles: ['bisnis'] },
+      
+      { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
+    ];
 
-  // Pengecekan otomatis untuk pengguna baru (Onboarding)
+    return baseItems.filter(item => item.roles.includes(activeAccount?.type || 'pribadi'));
+  };
+
+  const drawerItems = getDrawerItems();
+
   React.useEffect(() => {
     if (hasInitialized && activeAccount?.isNew && !isRegModalOpen) {
       setIsRegModalOpen(true);
@@ -159,7 +172,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     });
 
     setIsRegModalOpen(false);
-    router.push("/feed");
   };
 
   if (loading) {
@@ -187,7 +199,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </div>
             <span className="font-headline font-black text-lg tracking-tight text-slate-900">OnTapp</span>
           </Link>
-          <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter px-1.5 py-0 border-teal-200 text-teal-600 bg-teal-50">Beta</Badge>
+          <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter px-1.5 py-0 border-teal-200 text-teal-600 bg-teal-50">
+            {activeAccount?.type || 'Beta'}
+          </Badge>
         </div>
         
         <div className="flex items-center gap-2">
@@ -222,9 +236,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 {availableAccounts.filter(a => !a.isNew).map((acc) => (
                   <DropdownMenuItem 
                     key={acc.id}
-                    onSelect={() => {
-                      switchAccount(acc.id);
-                    }}
+                    onSelect={() => switchAccount(acc.id)}
                     className={cn(
                       "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1",
                       activeAccount.id === acc.id 
@@ -342,8 +354,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       <LayoutGrid className="size-5 text-teal-600" />
                       OnTapp Hub
                     </SheetTitle>
-                    <Badge variant="outline" className="bg-white border-slate-200 text-slate-500 font-bold px-3">
-                      Enterprise Mode
+                    <Badge variant="outline" className="bg-white border-slate-200 text-slate-500 font-bold px-3 uppercase text-[10px]">
+                      {activeAccount?.type} Mode
                     </Badge>
                   </div>
                 </SheetHeader>
@@ -401,6 +413,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
+      {/* Onboarding / Registration Modal */}
       <Dialog open={isRegModalOpen} onOpenChange={(open) => {
         if (activeAccount?.isNew) return;
         setIsRegModalOpen(open);
@@ -430,7 +443,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </div>
                     <div>
                       <h4 className="font-black text-slate-900">Profil Pribadi</h4>
-                      <p className="text-xs text-slate-400 font-medium">Untuk networking dan berbagi momen harian.</p>
+                      <p className="text-xs text-slate-400 font-medium">Cari produk & berbagi momen harian.</p>
                     </div>
                   </button>
 
@@ -444,7 +457,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </div>
                     <div>
                       <h4 className="font-black text-slate-900">Profil Professional</h4>
-                      <p className="text-xs text-slate-400 font-medium">Pamerkan portfolio dan keahlian Anda.</p>
+                      <p className="text-xs text-slate-400 font-medium">Pamerkan keahlian & cari kemitraan strategis.</p>
                     </div>
                   </button>
 
@@ -458,7 +471,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </div>
                     <div>
                       <h4 className="font-black text-slate-900">Profil Bisnis</h4>
-                      <p className="text-xs text-slate-400 font-medium">Kelola peluang dan katalog produk Anda.</p>
+                      <p className="text-xs text-slate-400 font-medium">Kelola peluang & akses intelijen pasar.</p>
                     </div>
                   </button>
                 </div>
@@ -519,12 +532,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
                     {pendingType === 'professional' && (
                       <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                        <Label className="font-bold text-slate-700">Keahlian Utama</Label>
+                        <Label className="font-bold text-slate-700">Keahlian Utama (Skills)</Label>
                         <Input 
                           required
                           value={regFormData.extra}
                           onChange={(e) => setRegFormData({...regFormData, extra: e.target.value})}
-                          placeholder="e.g. Designer, Developer"
+                          placeholder="e.g. Designer, Developer, Marketing"
                           className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white"
                         />
                       </div>
@@ -532,7 +545,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
                     {pendingType === 'bisnis' && (
                       <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                        <Label className="font-bold text-slate-700">Kategori Bisnis</Label>
+                        <Label className="font-bold text-slate-700">Kategori Industri</Label>
                         <Select value={regFormData.extra} onValueChange={(v) => setRegFormData({...regFormData, extra: v})}>
                           <SelectTrigger className="rounded-xl border-slate-200 h-12 bg-slate-50/50 focus:bg-white">
                             <SelectValue placeholder="Pilih Sektor" />

@@ -28,12 +28,13 @@ import {
   X,
   Globe,
   Lock,
-  MoreHorizontal,
-  Sparkles,
   Share2,
   QrCode,
   Copy,
-  MapPin
+  MapPin,
+  Sparkles,
+  Zap,
+  Target
 } from 'lucide-react';
 import {
   Dialog,
@@ -117,6 +118,18 @@ export default function ProfilePage() {
     toast({ title: "Tautan profil disalin!" });
   };
 
+  const handleAIContentGenerator = () => {
+    toast({ title: "AI Content Engine", description: "Membangun draf konten berdasarkan tren industri..." });
+    // Simulasi generator konten
+    setTimeout(() => {
+      setNewItem({
+        title: activeAccount.type === 'bisnis' ? "Penawaran Kerjasama Kemitraan" : "Portfolio Proyek Terbaru",
+        description: `Kami sedang memperluas jangkauan di sektor ${activeAccount.extra}. Mencari mitra yang fokus pada inovasi dan skalabilitas global.`
+      });
+      setIsContentModalOpen(true);
+    }, 1000);
+  };
+
   const getLinkIcon = (url: string) => {
     const lowerUrl = url.toLowerCase();
     if (lowerUrl.includes('instagram.com')) return <Instagram className="size-4" />;
@@ -160,12 +173,14 @@ export default function ProfilePage() {
             <div className="space-y-1 w-full">
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">{activeAccount.name}</h1>
-                <Badge className="bg-emerald-50 text-emerald-700 border-none px-2 py-0 text-[10px] uppercase font-black tracking-widest flex gap-1">
-                  <ShieldCheck className="size-3" /> AI Verified
-                </Badge>
+                {activeAccount.verificationStatus === 'Verified' && (
+                  <Badge className="bg-emerald-50 text-emerald-700 border-none px-2 py-0 text-[10px] uppercase font-black tracking-widest flex gap-1">
+                    <ShieldCheck className="size-3" /> AI Verified
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center gap-2 text-slate-500 font-medium text-sm">
-                {activeAccount.type === 'bisnis' ? <Building2 size={14} /> : activeAccount.type === 'professional' ? <Briefcase size={14} /> : <UserIcon size={14} />}
+                {activeAccount.type === 'bisnis' ? <Building2 size={14} className="text-teal-600" /> : activeAccount.type === 'professional' ? <Briefcase size={14} className="text-teal-600" /> : <UserIcon size={14} className="text-teal-600" />}
                 {activeAccount.extra || 'General Member'}
               </div>
             </div>
@@ -186,6 +201,19 @@ export default function ProfilePage() {
           <p className="text-slate-600 leading-relaxed font-medium">
             {activeAccount.bio || 'Tidak ada deskripsi profil.'}
           </p>
+          
+          {activeAccount.type !== 'pribadi' && (
+            <div className="flex gap-4 pt-2">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-teal-600 bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-100">
+                <Target className="size-3.5" /> 92% Synergy Discovery
+              </div>
+              {activeAccount.type === 'bisnis' && (
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-100">
+                  <Zap className="size-3.5" /> Verified Business
+                </div>
+              )}
+            </div>
+          )}
         </section>
 
         <section className="px-6 md:px-8 space-y-3">
@@ -212,10 +240,17 @@ export default function ProfilePage() {
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
               {activeAccount.type === 'pribadi' ? 'Threads & Moments' : activeAccount.type === 'professional' ? 'Portfolio Gallery' : 'Product Catalog'}
             </h3>
-            <Button size="sm" onClick={() => setIsContentModalOpen(true)} className="rounded-xl h-9 bg-accent hover:bg-teal-600 gap-2 font-bold px-4 shadow-sm">
-              <PlusCircle className="size-4" />
-              {activeAccount.type === 'pribadi' ? 'Buat Post' : 'Tambah Baru'}
-            </Button>
+            <div className="flex gap-2">
+              {activeAccount.type !== 'pribadi' && (
+                <Button onClick={handleAIContentGenerator} variant="outline" size="sm" className="rounded-xl h-9 border-teal-100 text-teal-600 gap-2 font-bold px-4">
+                  <Sparkles className="size-4" /> AI Generate
+                </Button>
+              )}
+              <Button size="sm" onClick={() => setIsContentModalOpen(true)} className="rounded-xl h-9 bg-teal-600 hover:bg-teal-700 gap-2 font-bold px-4 shadow-sm text-white">
+                <PlusCircle className="size-4" />
+                {activeAccount.type === 'pribadi' ? 'Buat Post' : 'Tambah Baru'}
+              </Button>
+            </div>
           </div>
 
           <div className={cn(activeAccount.type === 'pribadi' ? "space-y-6" : "grid grid-cols-1 md:grid-cols-2 gap-6")}>
@@ -234,7 +269,7 @@ export default function ProfilePage() {
                           <span className="text-[10px] text-slate-400 font-medium tracking-tight">{item.timestamp}</span>
                           {item.visibility === 'private' ? <Lock className="size-2.5 text-slate-300" /> : <Globe className="size-2.5 text-slate-300" />}
                         </div>
-                        <button onClick={() => handleRemoveItem(item.id)} className="text-slate-300 hover:text-rose-500"><Trash2 className="size-4" /></button>
+                        <button onClick={() => handleRemoveItem(item.id)} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="size-4" /></button>
                       </div>
                       <p className="text-sm text-slate-600 leading-relaxed font-medium">{item.description}</p>
                       {item.image && <img src={item.image} className="rounded-2xl border border-slate-100 shadow-sm max-w-sm" alt="Post" />}
@@ -243,8 +278,8 @@ export default function ProfilePage() {
                 ) : (
                   <Card className="rounded-3xl border-slate-100 shadow-sm overflow-hidden group hover:shadow-md relative">
                     <img src={item.image} className="aspect-video w-full object-cover group-hover:scale-105 transition-all" alt={item.title} />
-                    <button onClick={() => handleRemoveItem(item.id)} className="absolute top-2 right-2 size-8 bg-rose-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="size-4" /></button>
-                    <CardContent className="p-4"><h4 className="font-bold text-slate-900">{item.title}</h4></CardContent>
+                    <button onClick={() => handleRemoveItem(item.id)} className="absolute top-2 right-2 size-8 bg-rose-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"><Trash2 className="size-4" /></button>
+                    <CardContent className="p-4"><h4 className="font-bold text-slate-900 line-clamp-1">{item.title}</h4></CardContent>
                   </Card>
                 )}
               </div>
@@ -257,7 +292,7 @@ export default function ProfilePage() {
       <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
         <DialogContent className="max-w-[340px] rounded-[3rem] p-0 border-none shadow-2xl overflow-hidden bg-white">
           <DialogHeader className="p-8 pb-4 bg-slate-50 border-b">
-             <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">AI Business Card</DialogTitle>
+             <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">Kartu OnTapp Digital</DialogTitle>
              <DialogDescription className="font-medium text-xs">Pindai atau bagikan kartu bisnis digital Anda.</DialogDescription>
           </DialogHeader>
           <div className="p-8 flex flex-col items-center space-y-8">
@@ -278,28 +313,40 @@ export default function ProfilePage() {
 
       <Dialog open={isBioModalOpen} onOpenChange={setIsBioModalOpen}>
         <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-8 bg-white">
-          <DialogHeader><DialogTitle className="text-xl font-black text-slate-900 tracking-tight">Edit Bio</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-xl font-black text-slate-900 tracking-tight">Edit Detail Profil</DialogTitle></DialogHeader>
           <div className="space-y-6 pt-4">
-            <Input value={tempAccount.name} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} placeholder="Nama" className="rounded-xl" />
-            <Textarea value={tempAccount.bio} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} placeholder="Ceritakan tentang Anda..." className="rounded-xl min-h-[120px]" />
+            <div className="space-y-2">
+              <Label className="font-bold">Nama Lengkap / Bisnis</Label>
+              <Input value={tempAccount.name} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} placeholder="Nama" className="rounded-xl" />
+            </div>
+            <div className="space-y-2">
+              <Label className="font-bold">{activeAccount.type === 'bisnis' ? 'Kategori Industri' : activeAccount.type === 'professional' ? 'Keahlian Utama' : 'Status'}</Label>
+              <Input value={tempAccount.extra} onChange={(e) => setTempAccount({ ...tempAccount, extra: e.target.value })} placeholder="e.g. Retail, Tech, Designer" className="rounded-xl" />
+            </div>
+            <div className="space-y-2">
+              <Label className="font-bold">Bio</Label>
+              <Textarea value={tempAccount.bio} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} placeholder="Ceritakan tentang Anda..." className="rounded-xl min-h-[120px]" />
+            </div>
           </div>
           <DialogFooter className="mt-8 flex gap-2">
             <Button variant="ghost" onClick={() => setIsBioModalOpen(false)} className="rounded-xl">Batal</Button>
-            <Button onClick={handleSaveBio} className="rounded-xl bg-accent hover:bg-teal-600 font-black px-8">Simpan</Button>
+            <Button onClick={handleSaveBio} className="rounded-xl bg-teal-600 hover:bg-teal-700 font-black px-8 text-white">Simpan</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isContentModalOpen} onOpenChange={setIsContentModalOpen}>
         <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-8 bg-white">
-          <DialogHeader><DialogTitle className="text-xl font-black text-slate-900 tracking-tight">Tambah Konten</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-xl font-black text-slate-900 tracking-tight">
+            {activeAccount.type === 'bisnis' ? 'Tambah Produk/Promo' : activeAccount.type === 'professional' ? 'Tambah Portofolio' : 'Bagikan Momen'}
+          </DialogTitle></DialogHeader>
           <div className="space-y-6 pt-4">
-            <Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} placeholder="Judul" className="rounded-xl" />
-            <Textarea value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} placeholder="Keterangan..." className="rounded-xl" />
+            <Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} placeholder="Judul Konten" className="rounded-xl" />
+            <Textarea value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} placeholder="Berikan deskripsi detail..." className="rounded-xl min-h-[120px]" />
           </div>
           <DialogFooter className="mt-8 flex gap-2">
             <Button variant="ghost" onClick={() => setIsContentModalOpen(false)} className="rounded-xl">Batal</Button>
-            <Button onClick={handleAddContent} className="rounded-xl bg-accent hover:bg-teal-600 font-black px-8">Posting</Button>
+            <Button onClick={handleAddContent} className="rounded-xl bg-teal-600 hover:bg-teal-700 font-black px-8 text-white">Konfirmasi</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

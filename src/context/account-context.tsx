@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -22,10 +21,11 @@ export interface Account {
   avatar: string;
   bio?: string;
   contact?: string;
-  extra?: string; // Keahlian for Professional, Kategori for Bisnis
+  extra?: string; // Keahlian (Skills) untuk Professional, Kategori Industri untuk Bisnis
   links?: string[];
   items?: ContentItem[];
   isNew?: boolean; // Penanda untuk memicu onboarding
+  verificationStatus?: 'Unverified' | 'Pending' | 'Verified';
 }
 
 interface AccountContextProps {
@@ -62,7 +62,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
         const parsed = JSON.parse(savedAccounts);
         if (parsed.length > 0) {
           setAccounts(parsed);
-          if (savedActive) {
+          if (savedActive && parsed.some((a: any) => a.id === savedActive)) {
             setActiveAccountId(savedActive);
           } else {
             setActiveAccountId(parsed[0].id);
@@ -91,7 +91,8 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
           : `https://picsum.photos/seed/user${Date.now()}/100`,
       links: [],
       items: [],
-      isNew: false
+      isNew: false,
+      verificationStatus: data.type === 'pribadi' ? 'Verified' : 'Unverified'
     };
 
     // Hapus akun sementara jika ada
