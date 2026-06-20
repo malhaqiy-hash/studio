@@ -93,10 +93,34 @@ const aiIntentSearchFlow = ai.defineFlow(
       ? `Category: ${input.filters.category}, Location: ${input.filters.location}, Verified: ${input.filters.verifiedOnly}`
       : 'None';
 
-    const { output } = await aiIntentSearchPrompt({
-      ...input,
-      filterSummary
-    });
-    return output!;
+    // Retry logic for transient 503/429 errors from the AI provider
+    let lastError;
+    const maxRetries = 3;
+    
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const { output } = await aiIntentSearchPrompt({
+          ...input,
+          filterSummary
+        });
+        
+        if (output) return output;
+      } catch (err: any) {
+        lastError = err;
+        const isTransient = err.message?.includes('503') || 
+                            err.message?.includes('demand') || 
+                            err.message?.includes('overloaded') ||
+                            err.message?.includes('429');
+                            
+        if (isTransient && i < maxRetries - 1) {
+          // Wait longer for each retry (1s, 2s)
+          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+          continue;
+        }
+        throw err;
+      }
+    }
+    
+    throw lastError || new Error('AI Engine currently unavailable. Please try again in a few moments.');
   }
 );
