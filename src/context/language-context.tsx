@@ -37,6 +37,8 @@ export const translations = {
   results: { en: 'Results', id: 'Hasil' },
   start_search: { en: 'Start Smart Search', id: 'Mulai Cari Cerdas' },
   daily_limit_msg: { en: '30 daily accesses to maintain quality.', id: 'Batas 30 akses harian untuk menjaga kualitas.' },
+  recent_searches: { en: 'Recent Searches', id: 'Pencarian Terakhir' },
+  clear_all: { en: 'Clear All', id: 'Hapus Semua' },
   
   // Dashboard Stats
   active_opps: { en: 'Active Opportunities', id: 'Peluang Aktif' },

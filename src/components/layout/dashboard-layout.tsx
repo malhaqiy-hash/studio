@@ -105,7 +105,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const drawerItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard" },
     { icon: Bookmark, label: t('saved'), href: "/saved" },
-    { icon: History, label: t('ai_backup'), href: "/discover" },
     { icon: TrendingUp, label: t('market_radar'), href: "/market-radar" },
     { icon: MapIcon, label: t('opportunity_map'), href: "/opportunity-map" },
     { icon: Building2, label: t('registry'), href: "/registry" },

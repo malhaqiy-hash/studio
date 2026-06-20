@@ -8,10 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   Search, 
-  ShieldCheck, 
   MapPin, 
   RefreshCw,
-  Globe,
   ChevronDown,
   Building2,
   Filter,
@@ -22,8 +20,6 @@ import {
   MoreHorizontal,
   Camera,
   LocateFixed,
-  X,
-  Image as ImageIcon,
   Map as MapIcon,
   Sparkles,
   Package,
@@ -31,7 +27,10 @@ import {
   Truck,
   Layers,
   Users,
-  Zap
+  Zap,
+  Trash2,
+  History,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -81,6 +80,7 @@ export default function CariPage() {
   const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
+  const [history, setHistory] = React.useState<any[]>([]);
   
   const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
   const [activeLocation, setActiveLocation] = React.useState(language === 'id' ? "Pilih Lokasi" : "Choose Location");
@@ -89,11 +89,17 @@ export default function CariPage() {
   const [coords, setCoords] = React.useState<{lat?: number, lng?: number}>({});
   
   const [isListening, setIsListening] = React.useState(false);
-  const [previewImage, setPreviewImage] = React.useState<string | null>(null);
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
   
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('ontapp_discovery_history');
+    if (saved) {
+      setHistory(JSON.parse(saved));
+    }
+  }, []);
 
   const withTimeout = <T>(promise: Promise<T>, timeoutMs: number = 3000, fallbackValue: T): Promise<T> => {
     return Promise.race([
@@ -151,7 +157,7 @@ export default function CariPage() {
   const handleSearch = async (e?: React.FormEvent, overrideQuery?: string) => {
     e?.preventDefault();
     const finalQuery = overrideQuery || query;
-    if (!finalQuery && !activeCategory && !previewImage) {
+    if (!finalQuery && !activeCategory) {
       toast({ title: "Input Required", description: "Keyword or category is required.", variant: "destructive" });
       return;
     }
@@ -215,13 +221,15 @@ export default function CariPage() {
       setResults(output);
       
       if (typeof window !== 'undefined' && output) {
-        const history = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
+        const currentHistory = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
         const newItems = output.results.map(r => ({
           ...r,
           id: `h-${Date.now()}-${Math.random()}`,
           date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
         }));
-        localStorage.setItem('ontapp_discovery_history', JSON.stringify([...newItems, ...history].slice(0, 50)));
+        const updatedHistory = [...newItems, ...currentHistory].slice(0, 50);
+        localStorage.setItem('ontapp_discovery_history', JSON.stringify(updatedHistory));
+        setHistory(updatedHistory);
       }
       
     } catch (err: any) {
@@ -229,6 +237,18 @@ export default function CariPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClearHistory = () => {
+    localStorage.removeItem('ontapp_discovery_history');
+    setHistory([]);
+    toast({ title: language === 'id' ? "Riwayat Dihapus" : "History Cleared" });
+  };
+
+  const handleRemoveHistoryItem = (id: string) => {
+    const updated = history.filter(item => item.id !== id);
+    setHistory(updated);
+    localStorage.setItem('ontapp_discovery_history', JSON.stringify(updated));
   };
 
   const openInGoogleMaps = (name: string, location?: string) => {
@@ -241,7 +261,6 @@ export default function CariPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewImage(reader.result as string);
         setIsSourcePickerOpen(false);
         handleSearch(undefined, "Analisis gambar pencarian visual");
       };
@@ -342,6 +361,53 @@ export default function CariPage() {
           </form>
         </div>
 
+        {/* Section: Recent Searches (AI Backup) */}
+        {history.length > 0 && !loading && !results && (
+          <div className="space-y-4 px-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <History className="size-3 text-slate-400" />
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('recent_searches')}</h4>
+              </div>
+              <button 
+                onClick={handleClearHistory}
+                className="text-[9px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600 transition-colors"
+              >
+                {t('clear_all')}
+              </button>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+              {history.map((item) => (
+                <Card 
+                  key={item.id} 
+                  className="shrink-0 w-64 rounded-2xl border-slate-100 bg-white shadow-sm hover:shadow-md transition-all relative group"
+                >
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="size-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
+                          {getTypeIcon(item.type)}
+                        </div>
+                        <h5 className="text-xs font-black text-slate-900 truncate max-w-[140px]">{item.name}</h5>
+                      </div>
+                      <button 
+                        onClick={() => handleRemoveHistoryItem(item.id)}
+                        className="p-1.5 rounded-full bg-slate-50 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400">
+                      <MapPin className="size-2.5" />
+                      <span className="truncate">{item.location || 'Global'}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4">
           {loading && (
             <div className="grid gap-4">
@@ -387,7 +453,7 @@ export default function CariPage() {
             </div>
           )}
 
-          {!loading && !results && (
+          {!loading && !results && history.length === 0 && (
             <div className="py-20 text-center space-y-6 bg-white rounded-[2rem] border border-dashed border-slate-200">
                <div className="size-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto"><Search className="size-10 text-slate-200" /></div>
                <h3 className="text-xl font-black text-slate-900">{t('start_search')}</h3>
