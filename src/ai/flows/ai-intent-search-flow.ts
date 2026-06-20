@@ -111,12 +111,16 @@ const aiIntentSearchFlow = ai.defineFlow(
     }
     
     // Final UI Fallback - Jika AI sibuk atau kuota habis, kembalikan data simulasi agar UX tetap berjalan
+    // Cek agar tidak duplikasi prefiks "Informasi Terkait: "
+    const cleanedQuery = input.query.replace(/^Informasi Terkait:\s*/i, '');
+    const fallbackName = `Informasi Terkait: ${cleanedQuery}`;
+
     return {
       results: [
         {
           type: 'business',
-          name: `Informasi Terkait: ${input.query}`,
-          description: `Sistem sedang melakukan sinkronisasi trafik tinggi. Secara umum, ${input.query} tersedia banyak di area ${input.filters?.location || 'terdekat'} Anda melalui jaringan OnTapp.`,
+          name: fallbackName,
+          description: `Sistem sedang melakukan sinkronisasi trafik tinggi. Secara umum, ${cleanedQuery} tersedia banyak di area ${input.filters?.location || 'terdekat'} Anda melalui jaringan OnTapp.`,
           matchScore: 100,
           source: 'external',
           isVerified: false,

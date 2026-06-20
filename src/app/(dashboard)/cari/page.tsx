@@ -21,7 +21,6 @@ import {
   Camera,
   LocateFixed,
   Map as MapIcon,
-  Sparkles,
   Package,
   Headphones,
   Truck,
@@ -30,7 +29,8 @@ import {
   Zap,
   History,
   X,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Brain
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -156,7 +156,7 @@ export default function CariPage() {
 
   const handleSearch = async (e?: React.FormEvent, overrideQuery?: string) => {
     e?.preventDefault();
-    const finalQuery = overrideQuery || query;
+    const finalQuery = (overrideQuery || query).replace(/^Informasi Terkait:\s*/i, '');
     if (!finalQuery && !activeCategory) {
       toast({ title: "Input Required", description: "Keyword or category is required.", variant: "destructive" });
       return;
@@ -252,14 +252,17 @@ export default function CariPage() {
   };
 
   const handleHistoryClick = (item: any) => {
-    setQuery(item.name);
+    // Bersihkan prefiks "Informasi Terkait: " sebelum memasukkan ke input
+    const cleanedQuery = item.name.replace(/^Informasi Terkait:\s*/i, '');
+    setQuery(cleanedQuery);
     if (item.location) setActiveLocation(item.location);
     if (item.category) setActiveCategory(item.category);
-    handleSearch(undefined, item.name);
+    handleSearch(undefined, cleanedQuery);
   };
 
   const openInGoogleMaps = (name: string, location?: string) => {
-    const searchQuery = encodeURIComponent(`${name} ${location || ''}`);
+    const cleanedName = name.replace(/^Informasi Terkait:\s*/i, '');
+    const searchQuery = encodeURIComponent(`${cleanedName} ${location || ''}`);
     window.open(`https://www.google.com/maps/search/?api=1&query=${searchQuery}`, '_blank');
   };
 
