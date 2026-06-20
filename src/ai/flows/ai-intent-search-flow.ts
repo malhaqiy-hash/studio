@@ -46,7 +46,7 @@ export async function aiIntentSearch(input: AIIntentSearchInput): Promise<AIInte
 const aiIntentSearchPrompt = ai.definePrompt({
   name: 'aiIntentSearchPrompt',
   input: { 
-    schema: AIIntentSearchInputSchema.get()
+    schema: AIIntentSearchInputSchema
   },
   output: { schema: AIIntentSearchOutputSchema },
   prompt: `You are the OnTapp Hybrid Discovery Engine. Your goal is to find businesses that match a user's intent with high relevance.
