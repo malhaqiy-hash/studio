@@ -12,7 +12,14 @@ export interface ContentItem {
   price?: string;
   visibility?: 'public' | 'private';
   timestamp?: string;
-  locationLink?: string; // Field baru untuk link alamat/lokasi
+  locationLink?: string;
+}
+
+export interface AccountPreferences {
+  publicFollowers?: boolean;
+  publicFollowing?: boolean;
+  publicLikes?: boolean;
+  publicViews?: boolean;
 }
 
 export interface Account {
@@ -22,11 +29,12 @@ export interface Account {
   avatar: string;
   bio?: string;
   contact?: string;
-  extra?: string; // Keahlian (Skills) untuk Professional, Kategori Industri untuk Bisnis
+  extra?: string;
   links?: string[];
   items?: ContentItem[];
-  isNew?: boolean; // Penanda untuk memicu onboarding
+  isNew?: boolean;
   verificationStatus?: 'Unverified' | 'Pending' | 'Verified';
+  preferences?: AccountPreferences;
 }
 
 interface AccountContextProps {
@@ -38,13 +46,21 @@ interface AccountContextProps {
   hasInitialized: boolean;
 }
 
+const DEFAULT_PREFERENCES: AccountPreferences = {
+  publicFollowers: true,
+  publicFollowing: true,
+  publicLikes: true,
+  publicViews: false,
+};
+
 const DEFAULT_PRIBADI: Account = { 
   id: 'acc-temp', 
   name: 'Calon Member', 
   type: 'pribadi', 
   avatar: 'https://picsum.photos/seed/temp/100',
   bio: 'Akun sementara sebelum onboarding.',
-  isNew: true
+  isNew: true,
+  preferences: DEFAULT_PREFERENCES
 };
 
 const AccountContext = createContext<AccountContextProps | undefined>(undefined);
@@ -62,11 +78,15 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
       try {
         const parsed = JSON.parse(savedAccounts);
         if (parsed.length > 0) {
-          setAccounts(parsed);
-          if (savedActive && parsed.some((a: any) => a.id === savedActive)) {
+          const migratedAccounts = parsed.map((acc: Account) => ({
+            ...acc,
+            preferences: acc.preferences || DEFAULT_PREFERENCES
+          }));
+          setAccounts(migratedAccounts);
+          if (savedActive && migratedAccounts.some((a: any) => a.id === savedActive)) {
             setActiveAccountId(savedActive);
           } else {
-            setActiveAccountId(parsed[0].id);
+            setActiveAccountId(migratedAccounts[0].id);
           }
         }
       } catch (e) {
@@ -93,10 +113,10 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
       links: [],
       items: [],
       isNew: false,
-      verificationStatus: data.type === 'pribadi' ? 'Verified' : 'Unverified'
+      verificationStatus: data.type === 'pribadi' ? 'Verified' : 'Unverified',
+      preferences: DEFAULT_PREFERENCES
     };
 
-    // Hapus akun sementara jika ada
     const filteredAccounts = accounts.filter(acc => acc.id !== 'acc-temp');
     const updatedAccounts = [...filteredAccounts, newAccount];
     

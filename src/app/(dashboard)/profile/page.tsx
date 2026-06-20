@@ -10,12 +10,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import Link from 'next/link';
 import { 
   Instagram, 
   Linkedin, 
   Facebook, 
-  ShoppingBag, 
   Link2, 
   Pencil, 
   ShieldCheck, 
@@ -27,11 +27,8 @@ import {
   Camera,
   PlusCircle,
   X,
-  Globe,
-  Lock,
   Share2,
   QrCode,
-  Copy,
   MapPin,
   Brain,
   Zap,
@@ -43,7 +40,8 @@ import {
   MessageSquare,
   Eye,
   Heart,
-  Users
+  Users,
+  Lock
 } from 'lucide-react';
 import {
   Dialog,
@@ -53,15 +51,16 @@ import {
   DialogFooter,
   DialogDescription
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+
+const MOCK_USERS = [
+  { name: "Andi Wijaya", role: "UI Designer", avatar: "https://picsum.photos/seed/a1/100" },
+  { name: "Siti Rahma", role: "Marketing Lead", avatar: "https://picsum.photos/seed/a2/100" },
+  { name: "Budi Santoso", role: "Software Engineer", avatar: "https://picsum.photos/seed/a3/100" },
+  { name: "Digital Solutions Co", role: "Tech Partner", avatar: "https://picsum.photos/seed/a4/100" },
+  { name: "Lina Marlina", role: "Freelancer", avatar: "https://picsum.photos/seed/a5/100" },
+];
 
 export default function ProfilePage() {
   const { activeAccount, updateActiveAccount } = useAccount();
@@ -72,6 +71,7 @@ export default function ProfilePage() {
   const [isContentModalOpen, setIsContentModalOpen] = React.useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = React.useState(false);
+  const [isUserListOpen, setIsUserListOpen] = React.useState(false);
 
   const [mediaTarget, setMediaTarget] = React.useState<'avatar' | 'cover' | 'post'>('avatar');
   const [isCloudLoading, setIsCloudLoading] = React.useState(false);
@@ -81,6 +81,7 @@ export default function ProfilePage() {
     locationLink: ''
   });
   const [newLinkUrl, setNewLinkUrl] = React.useState('');
+  const [userListTitle, setUserListTitle] = React.useState('');
   
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -95,6 +96,19 @@ export default function ProfilePage() {
     setIsMediaPickerOpen(true);
   };
 
+  const openUserList = (title: string, isAllowed?: boolean) => {
+    if (!isAllowed) {
+      toast({ 
+        title: "Akses Dibatasi", 
+        description: "Pemilik akun mengatur daftar ini sebagai privat.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setUserListTitle(title);
+    setIsUserListOpen(true);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -105,7 +119,7 @@ export default function ProfilePage() {
           updateActiveAccount({ avatar: result });
           toast({ title: "Foto profil diperbarui" });
         } else if (mediaTarget === 'cover') {
-          updateActiveAccount({ avatar: activeAccount.avatar }); // Trigger update
+          updateActiveAccount({ avatar: activeAccount.avatar }); 
           toast({ title: "Foto sampul diperbarui" });
         } else if (mediaTarget === 'post') {
           setNewItem(prev => ({ ...prev, image: result }));
@@ -253,44 +267,67 @@ export default function ProfilePage() {
                     </Button>
                   </Link>
 
-                  {/* Statistik Dinamis di Samping Tombol Pesan */}
                   <div className="flex items-center gap-3 ml-2">
                     {activeAccount.type === 'pribadi' ? (
                       <>
-                        <div className="flex flex-col items-center px-2">
-                           <span className="text-sm font-black text-slate-900">1.2k</span>
+                        <button 
+                          onClick={() => openUserList("Pengikut", activeAccount.preferences?.publicFollowers)}
+                          className="flex flex-col items-center px-2 group"
+                        >
+                           <span className={cn("text-sm font-black group-hover:text-teal-600", !activeAccount.preferences?.publicFollowers && "flex items-center gap-1")}>
+                             1.2k {!activeAccount.preferences?.publicFollowers && <Lock className="size-3 text-slate-300" />}
+                           </span>
                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Pengikut</span>
-                        </div>
+                        </button>
                         <div className="w-px h-6 bg-slate-100" />
-                        <div className="flex flex-col items-center px-2">
-                           <span className="text-sm font-black text-slate-900">452</span>
+                        <button 
+                          onClick={() => openUserList("Mengikuti", activeAccount.preferences?.publicFollowing)}
+                          className="flex flex-col items-center px-2 group"
+                        >
+                           <span className={cn("text-sm font-black group-hover:text-teal-600", !activeAccount.preferences?.publicFollowing && "flex items-center gap-1")}>
+                             452 {!activeAccount.preferences?.publicFollowing && <Lock className="size-3 text-slate-300" />}
+                           </span>
                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Mengikuti</span>
-                        </div>
+                        </button>
                         <div className="w-px h-6 bg-slate-100" />
-                        <div className="flex flex-col items-center px-2 text-rose-500">
+                        <button 
+                          onClick={() => openUserList("Total Suka", activeAccount.preferences?.publicLikes)}
+                          className="flex flex-col items-center px-2 text-rose-500 group"
+                        >
                            <div className="flex items-center gap-1">
                              <Heart className="size-3 fill-rose-500" />
                              <span className="text-sm font-black">2.4k</span>
+                             {!activeAccount.preferences?.publicLikes && <Lock className="size-3 text-slate-300" />}
                            </div>
                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Suka Total</span>
-                        </div>
+                        </button>
                       </>
                     ) : (
                       <>
-                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                        <button 
+                          onClick={() => openUserList("Tayangan Profil", activeAccount.preferences?.publicViews)}
+                          className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors group"
+                        >
                            <Eye className="size-3.5 text-slate-400" />
-                           <div className="flex flex-col leading-none">
-                             <span className="text-xs font-black text-slate-900">8.9k</span>
+                           <div className="flex flex-col leading-none text-left">
+                             <span className="text-xs font-black text-slate-900 flex items-center gap-1">
+                               8.9k {!activeAccount.preferences?.publicViews && <Lock className="size-2 text-slate-300" />}
+                             </span>
                              <span className="text-[7px] font-black text-slate-400 uppercase">Tayangan</span>
                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100">
+                        </button>
+                        <button 
+                          onClick={() => openUserList("Total Suka", activeAccount.preferences?.publicLikes)}
+                          className="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100 hover:bg-rose-100 transition-colors group"
+                        >
                            <Heart className="size-3.5 text-rose-500 fill-rose-500" />
-                           <div className="flex flex-col leading-none">
-                             <span className="text-xs font-black text-rose-600">4.2k</span>
+                           <div className="flex flex-col leading-none text-left">
+                             <span className="text-xs font-black text-rose-600 flex items-center gap-1">
+                               4.2k {!activeAccount.preferences?.publicLikes && <Lock className="size-2 text-rose-300" />}
+                             </span>
                              <span className="text-[7px] font-black text-slate-400 uppercase">Suka</span>
                            </div>
-                        </div>
+                        </button>
                       </>
                     )}
                   </div>
@@ -381,7 +418,41 @@ export default function ProfilePage() {
         </section>
       </div>
 
-      {/* Modals remain the same but use updated functions */}
+      {/* User List Modal */}
+      <Dialog open={isUserListOpen} onOpenChange={setIsUserListOpen}>
+        <DialogContent className="max-w-md rounded-[2.5rem] p-0 border-none shadow-2xl bg-white overflow-hidden">
+          <DialogHeader className="p-8 pb-4 bg-slate-50 border-b">
+            <DialogTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <Users className="size-5 text-teal-600" />
+              {userListTitle}
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[400px] p-6">
+            <div className="space-y-4">
+              {MOCK_USERS.map((u, i) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="size-10 border border-white shadow-sm">
+                      <AvatarImage src={u.avatar} />
+                      <AvatarFallback>{u.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-black text-slate-900">{u.name}</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{u.role}</span>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase border-teal-100 text-teal-600">Profil</Button>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <DialogFooter className="p-6 pt-0">
+             <Button onClick={() => setIsUserListOpen(false)} className="w-full h-12 rounded-xl bg-slate-900 font-black uppercase tracking-widest">Tutup</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Media Picker Dialog */}
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
         <DialogContent className="max-w-md rounded-[3rem] p-8 border-none shadow-2xl bg-white">
           <DialogHeader className="text-center sm:text-center">
@@ -409,7 +480,6 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Share Modal & Other modals remain for functionality */}
       <Dialog open={isLinksModalOpen} onOpenChange={setIsLinksModalOpen}>
         <DialogContent className="max-w-xl rounded-[3rem] p-10 bg-white">
           <DialogHeader><DialogTitle className="text-2xl font-black">Kelola Tautan</DialogTitle></DialogHeader>
