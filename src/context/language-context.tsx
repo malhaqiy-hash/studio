@@ -29,6 +29,8 @@ export const translations = {
   feed: { en: 'Feed', id: 'Beranda' },
   search: { en: 'Search', id: 'Cari' },
   more: { en: 'More', id: 'Lainnya' },
+  profile: { en: 'Profile', id: 'Profil' },
+  view_profile: { en: 'View Profile', id: 'Lihat Profil' },
   
   // Search Page
   search_placeholder: { en: 'Search anything in OnTapp...', id: 'Cari apa saja di OnTapp...' },
@@ -99,7 +101,6 @@ export const translations = {
 
   // Specific Actions & Labels
   claim_profile: { en: 'Claim Profile', id: 'Klaim Profil' },
-  view_profile: { en: 'View Profile', id: 'Lihat Profil' },
   accuracy: { en: 'Accuracy', id: 'Akurasi' },
   recommendations: { en: 'Recommendations', id: 'Rekomendasi' },
   next_steps: { en: 'Next Steps', id: 'Langkah Selanjutnya' },

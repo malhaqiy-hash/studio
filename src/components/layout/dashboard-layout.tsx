@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -35,7 +34,8 @@ import {
   Building2,
   History,
   Bookmark,
-  Sparkles
+  Sparkles,
+  ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -108,6 +108,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const getDrawerItems = () => {
     const baseItems = [
       { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard", roles: ['pribadi', 'professional', 'bisnis'] },
+      { icon: User, label: t('profile'), href: "/profile", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Bookmark, label: t('saved'), href: "/saved", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Rss, label: t('feed'), href: "/feed", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Search, label: t('search'), href: "/cari", roles: ['pribadi', 'professional', 'bisnis'] },
@@ -235,10 +236,27 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-72 rounded-2xl p-2 shadow-2xl border-slate-100 bg-white pointer-events-auto">
               <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b mb-2">
-                Ganti Akun
+                Menu Akun
               </DropdownMenuLabel>
               
               <DropdownMenuGroup>
+                <Link href="/profile">
+                  <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1 hover:bg-teal-50 hover:text-teal-600">
+                    <div className="size-8 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600">
+                      <User className="size-4" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm leading-none mb-1">{t('view_profile')}</span>
+                      <span className="text-[9px] uppercase tracking-widest opacity-60">Manage Portfolio</span>
+                    </div>
+                  </DropdownMenuItem>
+                </Link>
+
+                <DropdownMenuSeparator className="my-2" />
+                <DropdownMenuLabel className="px-3 py-1 text-[9px] font-black text-slate-300 uppercase tracking-widest">
+                  Ganti Profil
+                </DropdownMenuLabel>
+
                 {availableAccounts.filter(a => !a.isNew).map((acc) => (
                   <DropdownMenuItem 
                     key={acc.id}
