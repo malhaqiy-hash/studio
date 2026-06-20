@@ -30,7 +30,11 @@ import {
   Globe,
   Building2,
   ChevronDown,
-  LayoutGrid
+  LayoutGrid,
+  Camera,
+  Mic,
+  X,
+  RefreshCw
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -41,6 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 const SEARCH_SCOPES = [
   { id: "products", label: "Product Search", icon: Package, color: "text-indigo-500", bg: "bg-indigo-50" },
@@ -111,9 +116,13 @@ const MOCK_RESULTS: SearchResult[] = [
 ];
 
 export default function SearchHubPage() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = React.useState("products");
   const [query, setQuery] = React.useState("");
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [previewImage, setPreviewImage] = React.useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  
   const [extractedData, setExtractedData] = React.useState<null | {
     industry: string;
     certification: string;
@@ -123,9 +132,9 @@ export default function SearchHubPage() {
 
   const activeScope = SEARCH_SCOPES.find(s => s.id === activeTab);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!query.trim() && !previewImage) return;
 
     setIsAnalyzing(true);
     setExtractedData(null);
@@ -139,6 +148,19 @@ export default function SearchHubPage() {
         location: "Indonesia"
       });
     }, 2000);
+  };
+
+  const handleImageSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+        toast({ title: "Visual AI Aktif", description: "Menganalisis objek dalam gambar..." });
+        handleSearch();
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -163,29 +185,62 @@ export default function SearchHubPage() {
             <CardContent className="p-8 space-y-8">
               {/* Premium Search Bar */}
               <div className="space-y-6">
-                <form onSubmit={handleSearch} className="relative group">
+                <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
                     <Search className="size-6 text-slate-400 group-focus-within:text-accent transition-colors" />
                   </div>
                   <Input 
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="e.g., Looking for halal food packaging suppliers for export to Japan."
-                    className="h-24 pl-16 pr-40 rounded-[2rem] border-slate-200 bg-slate-50/50 text-xl font-medium focus:bg-white focus:ring-accent/10 transition-all shadow-inner"
+                    placeholder="Apa yang Anda cari hari ini?"
+                    className="h-24 pl-16 pr-56 rounded-[2rem] border-slate-200 bg-slate-50/50 text-xl font-medium focus:bg-white focus:ring-accent/10 transition-all shadow-inner"
                   />
+                  
+                  <div className="absolute inset-y-5 right-32 flex items-center gap-2">
+                     <button 
+                       type="button" 
+                       onClick={() => fileInputRef.current?.click()}
+                       className="w-12 h-14 flex items-center justify-center rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-accent transition-all active:scale-90"
+                     >
+                        <Camera className="size-6" />
+                     </button>
+                     <button 
+                       type="button" 
+                       className="w-12 h-14 flex items-center justify-center rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-accent transition-all active:scale-90"
+                     >
+                        <Mic className="size-6" />
+                     </button>
+                     <input type="file" ref={fileInputRef} onChange={handleImageSearch} className="hidden" accept="image/*" />
+                  </div>
+
                   <Button 
-                    type="submit"
+                    onClick={() => handleSearch()}
                     disabled={isAnalyzing}
-                    className="absolute right-4 top-4 bottom-4 rounded-2xl px-10 bg-accent hover:bg-indigo-600 text-white font-black text-lg shadow-lg active:scale-95 transition-all"
+                    className="absolute right-4 top-4 bottom-4 rounded-2xl px-8 bg-accent hover:bg-indigo-600 text-white font-black text-lg shadow-lg active:scale-95 transition-all"
                   >
                     {isAnalyzing ? (
-                      <div className="flex items-center gap-2">
-                        <Cpu className="size-5 animate-spin" />
-                        Analyzing...
-                      </div>
+                      <RefreshCw className="size-6 animate-spin" />
                     ) : "Search"}
                   </Button>
-                </form>
+                </div>
+
+                {previewImage && (
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 animate-in slide-in-from-left-4">
+                    <div className="relative size-16 rounded-xl overflow-hidden shadow-md">
+                      <img src={previewImage} className="w-full h-full object-cover" alt="Search visual" />
+                      <button 
+                        onClick={() => setPreviewImage(null)}
+                        className="absolute top-1 right-1 bg-slate-900/80 text-white rounded-full p-0.5"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-black text-indigo-900 uppercase tracking-widest mb-1">Visual Analysis Source</p>
+                      <p className="text-[10px] text-indigo-600 font-bold italic">AI sedang mencocokkan pola gambar dengan inventaris global...</p>
+                    </div>
+                  </div>
+                )}
 
                 {isAnalyzing && (
                   <div className="p-8 rounded-[2rem] bg-indigo-50/50 border border-indigo-100 space-y-4 animate-in fade-in duration-300">
@@ -255,7 +310,7 @@ export default function SearchHubPage() {
                       </h3>
                       <Button 
                         variant="ghost" 
-                        onClick={() => { setQuery(""); setExtractedData(null); }}
+                        onClick={() => { setQuery(""); setExtractedData(null); setPreviewImage(null); }}
                         className="text-xs font-black uppercase text-slate-400 hover:text-accent tracking-widest"
                       >
                         Reset Hub

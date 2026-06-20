@@ -38,7 +38,11 @@ import {
   TrendingUp,
   Monitor,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  Share2,
+  QrCode,
+  Copy,
+  MapPin
 } from 'lucide-react';
 import {
   Dialog,
@@ -46,6 +50,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -83,6 +88,7 @@ export default function ProfilePage() {
   const [isContentModalOpen, setIsContentModalOpen] = React.useState(false);
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
   const [isCloudPickerOpen, setIsCloudPickerOpen] = React.useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
 
   // Form States
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
@@ -134,6 +140,24 @@ export default function ProfilePage() {
       items: (activeAccount.items || []).filter(item => item.id !== id)
     });
     toast({ title: 'Konten dihapus' });
+  };
+
+  const handleCopyLink = () => {
+    const link = `https://ontapp.network/p/${activeAccount.id}`;
+    navigator.clipboard.writeText(link);
+    toast({ title: "Tautan profil disalin!" });
+  };
+
+  const handleShareAddress = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: activeAccount.name,
+        text: activeAccount.bio || 'Cek profil OnTapp saya!',
+        url: `https://ontapp.network/p/${activeAccount.id}`
+      }).catch(console.error);
+    } else {
+      handleCopyLink();
+    }
   };
 
   // Local File Handler
@@ -192,22 +216,31 @@ export default function ProfilePage() {
               className="w-full h-full object-cover opacity-80"
               data-ai-hint="business office"
             />
-            <Button 
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setTempAccount({ avatar: activeAccount.avatar });
-                setIsPhotoModalOpen(true);
-              }}
-              className="absolute top-4 right-4 bg-white/80 backdrop-blur hover:bg-white rounded-xl border-none font-bold text-xs gap-2 shadow-sm"
-            >
-              <Camera className="size-4" /> Ubah Cover
-            </Button>
+            <div className="absolute top-4 right-4 flex gap-2">
+              <Button 
+                size="sm"
+                onClick={() => setIsShareModalOpen(true)}
+                className="bg-white/80 backdrop-blur hover:bg-white text-slate-900 rounded-xl border-none font-black text-xs gap-2 shadow-lg h-9 px-4"
+              >
+                <Share2 className="size-4" /> Bagi
+              </Button>
+              <Button 
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setTempAccount({ avatar: activeAccount.avatar });
+                  setIsPhotoModalOpen(true);
+                }}
+                className="bg-white/80 backdrop-blur hover:bg-white text-slate-600 rounded-xl border-none font-bold text-xs gap-2 shadow-sm h-9 px-4"
+              >
+                <Camera className="size-4" /> Edit
+              </Button>
+            </div>
           </div>
 
           <div className="px-6 md:px-8 -mt-16 md:-mt-20 flex flex-col items-start gap-4">
             <div className="relative group/avatar">
-              <Avatar className="size-32 md:size-40 border-[6px] border-white shadow-sm overflow-hidden">
+              <Avatar className="size-32 md:size-40 border-[6px] border-white shadow-xl overflow-hidden">
                 <AvatarImage src={activeAccount.avatar} className="object-cover" />
                 <AvatarFallback className="bg-indigo-50 text-accent"><UserIcon size={48} /></AvatarFallback>
               </Avatar>
@@ -219,7 +252,7 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            <div className="space-y-1 w-full flex justify-between items-start">
+            <div className="space-y-1 w-full flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl font-black text-slate-900 tracking-tight">{activeAccount.name}</h1>
@@ -413,41 +446,55 @@ export default function ProfilePage() {
               ))}
             </div>
           )}
-
-          {activeAccount.type === 'bisnis' && (
-            <div className="pt-10 space-y-8">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Conversion Intelligence</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <Card className="p-8 rounded-[2.5rem] bg-indigo-600 text-white flex flex-col justify-between h-64">
-                  <TrendingUp className="size-10 opacity-50" />
-                  <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-200">Total Leads</h4>
-                    <p className="text-4xl font-black">452</p>
-                  </div>
-                </Card>
-                <Card className="p-8 rounded-[2.5rem] bg-white border border-slate-100 flex flex-col justify-between h-64">
-                  <div className="size-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <DollarSign className="size-6" />
-                  </div>
-                  <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Est. Pipeline</h4>
-                    <p className="text-4xl font-black text-slate-900">$12.4k</p>
-                  </div>
-                </Card>
-                <Card className="p-8 rounded-[2.5rem] bg-slate-900 text-white flex flex-col justify-between h-64">
-                  <div className="size-10 rounded-xl bg-accent flex items-center justify-center">
-                    <ShieldCheck className="size-6 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Network Reach</h4>
-                    <p className="text-4xl font-black">8.2k</p>
-                  </div>
-                </Card>
-              </div>
-            </div>
-          )}
         </section>
       </div>
+
+      {/* Share & Business Card QR Modal */}
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent className="max-w-[340px] rounded-[3rem] p-0 border-none shadow-2xl overflow-hidden bg-white">
+          <DialogHeader className="p-8 pb-4 bg-slate-50 border-b">
+             <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">AI Business Card</DialogTitle>
+             <DialogDescription className="font-medium text-xs">Pindai atau bagikan kartu bisnis digital Anda.</DialogDescription>
+          </DialogHeader>
+          <div className="p-8 flex flex-col items-center space-y-8">
+             {/* Simulai QR Code */}
+             <div className="size-48 p-4 bg-white rounded-[2rem] border-4 border-indigo-50 shadow-inner flex items-center justify-center relative overflow-hidden">
+                <QrCode className="size-full text-slate-900" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-accent/5 to-transparent pointer-events-none" />
+             </div>
+
+             <div className="w-full space-y-3">
+                <Button 
+                  onClick={handleShareAddress}
+                  className="w-full h-12 rounded-2xl bg-slate-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest gap-3 shadow-lg"
+                >
+                  <Share2 className="size-4" /> Bagikan Alamat
+                </Button>
+                <div className="grid grid-cols-2 gap-3">
+                   <Button 
+                     variant="outline"
+                     onClick={handleCopyLink}
+                     className="rounded-2xl h-12 border-slate-200 font-black text-[10px] uppercase tracking-widest gap-2"
+                   >
+                     <Copy className="size-3.5" /> Salin Link
+                   </Button>
+                   <Button 
+                     variant="outline"
+                     onClick={() => toast({ title: "Membuka Maps..." })}
+                     className="rounded-2xl h-12 border-slate-200 font-black text-[10px] uppercase tracking-widest gap-2"
+                   >
+                     <MapPin className="size-3.5" /> Alamat Toko
+                   </Button>
+                </div>
+             </div>
+          </div>
+          <DialogFooter className="p-4 bg-slate-50 text-center border-t">
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                <Sparkles className="size-3 text-amber-500" /> Profil Terverifikasi AI
+             </p>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Independent Photo Modal */}
       <Dialog open={isPhotoModalOpen} onOpenChange={setIsPhotoModalOpen}>
@@ -568,296 +615,6 @@ export default function ProfilePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Independent Media Content Modal */}
-      <Dialog open={isContentModalOpen} onOpenChange={setIsContentModalOpen}>
-        <DialogContent className={cn(
-          "max-w-lg rounded-[2.5rem] border-none shadow-2xl p-0 bg-white overflow-hidden",
-          activeAccount.type === 'pribadi' && "max-w-md"
-        )}>
-          {activeAccount.type === 'pribadi' ? (
-            <div className="flex flex-col">
-              <DialogHeader className="p-6 pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <DialogTitle className="text-lg font-black tracking-tight">Buat Post Baru</DialogTitle>
-                  </div>
-                  <Select 
-                    value={newItem.visibility} 
-                    onValueChange={(v: any) => setNewItem({ ...newItem, visibility: v })}
-                  >
-                    <SelectTrigger className="w-[110px] h-8 rounded-full border-slate-100 text-[10px] font-black uppercase tracking-wider">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="public">
-                        <div className="flex items-center gap-2">
-                          <Globe className="size-3" /> Publik
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="private">
-                        <div className="flex items-center gap-2">
-                          <Lock className="size-3" /> Pribadi
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </DialogHeader>
-              <div className="px-6 py-4 space-y-4">
-                <div className="flex gap-4">
-                  <Avatar className="size-10 shrink-0 border border-slate-100">
-                    <AvatarImage src={activeAccount.avatar} />
-                    <AvatarFallback>{activeAccount.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <Textarea 
-                    value={newItem.description}
-                    onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                    placeholder="Apa yang Anda pikirkan?"
-                    className="flex-1 border-none focus-visible:ring-0 text-sm font-medium placeholder:text-slate-400 bg-transparent resize-none min-h-[120px] p-0 pt-2"
-                  />
-                </div>
-
-                {newItem.image && (
-                  <div className="relative group/thumb w-fit mx-auto">
-                    <img src={newItem.image} className="h-48 w-auto rounded-2xl object-cover border shadow-sm" alt="Preview" />
-                    <button 
-                      onClick={() => setNewItem({ ...newItem, image: undefined })}
-                      className="absolute -top-2 -right-2 bg-slate-900 text-white rounded-full p-1 shadow-lg group-hover/thumb:scale-110 transition-transform"
-                    >
-                      <X className="size-3" />
-                    </button>
-                  </div>
-                )}
-              </div>
-              <DialogFooter className="p-4 border-t bg-slate-50/50 flex items-center justify-between">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setIsSourcePickerOpen(true)}
-                  className="text-slate-500 hover:text-accent font-bold gap-2 rounded-full"
-                >
-                  <ImageIcon className="size-4" />
-                  Lampirkan Foto
-                </Button>
-                <Button 
-                  onClick={handleAddContent}
-                  disabled={isPostEmpty}
-                  className="rounded-full bg-accent hover:bg-indigo-600 font-black px-8 shadow-lg shadow-indigo-100 disabled:opacity-50"
-                >
-                  Post
-                </Button>
-              </DialogFooter>
-            </div>
-          ) : (
-            <>
-              <DialogHeader className="p-8 pb-4 bg-slate-50 border-b">
-                <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">
-                  {activeAccount.type === 'professional' ? 'Tambah Portfolio Baru' : 'Tambah Produk Baru'}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="p-8 space-y-6">
-                <div className="aspect-video rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-100 overflow-hidden flex items-center justify-center relative group">
-                  <img src={newItem.image || `https://picsum.photos/seed/${Date.now()}/800/600`} className="w-full h-full object-cover" alt="Preview" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4">
-                    <Camera className="size-8 mb-2" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Ganti Media</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex-1 space-y-2">
-                    <Label className="font-bold text-slate-700">{activeAccount.type === 'bisnis' ? 'Nama Produk' : 'Judul Proyek'}</Label>
-                    <Input 
-                      value={newItem.title}
-                      onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
-                      className="rounded-xl border-slate-200"
-                      placeholder="Masukkan judul..."
-                    />
-                  </div>
-                  {activeAccount.type === 'bisnis' && (
-                    <div className="w-32 space-y-2">
-                      <Label className="font-bold text-slate-700">Harga</Label>
-                      <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-slate-400" />
-                        <Input 
-                          value={newItem.price}
-                          onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-                          className="rounded-xl border-slate-200 pl-8"
-                          placeholder="0.00"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Deskripsi Detail</Label>
-                  <Textarea 
-                    value={newItem.description}
-                    onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                    className="rounded-xl border-slate-200 min-h-[100px]"
-                    placeholder="Tulis detail di sini..."
-                  />
-                </div>
-              </div>
-              <DialogFooter className="p-8 pt-0 flex gap-2">
-                <Button variant="ghost" onClick={() => setIsContentModalOpen(false)} className="rounded-xl font-bold">Batal</Button>
-                <Button onClick={handleAddContent} className="rounded-xl bg-accent hover:bg-indigo-600 font-black px-10">Publikasikan</Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Native-Style Media Picker Modal (Pilih dari) */}
-      <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
-        <DialogContent className="max-w-[320px] rounded-3xl border-none shadow-2xl p-6 bg-[#2d3035] text-white overflow-hidden outline-none">
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white/90">Pilih dari</h2>
-            
-            <div className="space-y-5">
-              {/* Galeri Item */}
-              <button 
-                onClick={triggerFilePicker}
-                className="w-full flex items-center justify-between group text-left"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="size-11 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
-                    <div className="grid grid-cols-2 gap-0.5 scale-75">
-                      <div className="size-2.5 bg-blue-400 rounded-sm" />
-                      <div className="size-2.5 bg-green-400 rounded-sm" />
-                      <div className="size-2.5 bg-orange-400 rounded-sm" />
-                      <div className="size-2.5 bg-purple-400 rounded-sm" />
-                    </div>
-                  </div>
-                  <span className="font-medium text-[15px]">Galeri</span>
-                </div>
-                <div className="size-5 rounded-full border-2 border-gray-500" />
-              </button>
-
-              {/* Google Foto Item */}
-              <button 
-                onClick={openCloudPicker}
-                className="w-full flex items-center justify-between group text-left"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="size-11 rounded-full bg-white/10 flex items-center justify-center relative">
-                    <div className="absolute top-1.5 left-1.5 size-4 bg-red-400 rounded-full blur-[1px]" />
-                    <div className="absolute top-1.5 right-1.5 size-4 bg-blue-400 rounded-full blur-[1px]" />
-                    <div className="absolute bottom-1.5 left-1.5 size-4 bg-yellow-400 rounded-full blur-[1px]" />
-                    <div className="absolute bottom-1.5 right-1.5 size-4 bg-green-400 rounded-full blur-[1px]" />
-                    <div className="relative size-5 bg-white/20 rounded-sm rotate-45" />
-                  </div>
-                  <span className="font-medium text-[15px]">Google Foto</span>
-                </div>
-                <div className="size-5 rounded-full border-2 border-gray-500" />
-              </button>
-
-              {/* Browser Item */}
-              <button 
-                onClick={triggerFilePicker}
-                className="w-full flex items-center justify-between group text-left"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="size-11 rounded-full bg-white/10 flex items-center justify-center">
-                    <Monitor className="size-5 text-gray-300" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-medium text-[15px]">Browser</span>
-                    <span className="text-[11px] text-gray-400 mt-0.5">File Browser</span>
-                  </div>
-                </div>
-                <div className="size-5 rounded-full border-2 border-gray-500" />
-              </button>
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <button 
-                onClick={triggerFilePicker}
-                className="text-blue-400 font-medium text-sm ml-6 hover:text-blue-300 transition-colors"
-              >
-                Selalu
-              </button>
-              <button 
-                onClick={triggerFilePicker}
-                className="text-blue-400 font-medium text-sm ml-6 hover:text-blue-300 transition-colors"
-              >
-                Cuma sekali
-              </button>
-            </div>
-          </div>
-          
-          {/* Hidden Native Input */}
-          <input 
-            type="file" 
-            ref={fileBrowserRef} 
-            className="hidden" 
-            accept="image/*"
-            onChange={handleFileChange}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* Google Photos Cloud Picker Simulation */}
-      <Dialog open={isCloudPickerOpen} onOpenChange={setIsCloudPickerOpen}>
-        <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 bg-white overflow-hidden">
-          <DialogHeader className="p-8 pb-4 bg-slate-50 border-b flex flex-row items-center justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-widest">
-                <Cloud className="size-3" /> Cloud Storage
-              </div>
-              <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Google Photos</DialogTitle>
-            </div>
-            <div className="flex items-center gap-3">
-               <div className="text-right hidden sm:block">
-                 <p className="text-[10px] font-black text-slate-900 leading-none uppercase">{user?.displayName || activeAccount.name}</p>
-                 <p className="text-[9px] font-bold text-slate-400 truncate max-w-[120px]">{user?.email || 'user@ontapp.network'}</p>
-               </div>
-              <div className="size-10 rounded-full bg-blue-100 border-2 border-white shadow-sm flex items-center justify-center text-blue-600 font-black text-sm">
-                {(user?.displayName || activeAccount.name)[0]}
-              </div>
-            </div>
-          </DialogHeader>
-          <div className="bg-blue-50/50 px-8 py-2 border-b border-blue-100 flex items-center justify-between">
-             <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest">
-                <RefreshCw className="size-3 animate-spin" />
-                Sinkronisasi Aktif...
-             </div>
-             <span className="text-[9px] font-bold text-slate-400 italic">Terakhir diperbarui: Baru saja</span>
-          </div>
-          <ScrollArea className="h-[450px] p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {MOCK_GOOGLE_PHOTOS.map((url, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleCloudSelect(url)}
-                  className="group relative aspect-square rounded-2xl overflow-hidden bg-slate-100 hover:ring-4 hover:ring-accent transition-all active:scale-95"
-                >
-                  <img src={url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Cloud Photo" />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="size-6 rounded-full bg-accent text-white flex items-center justify-center shadow-lg">
-                      <Check className="size-4" />
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-            <div className="mt-8 text-center pb-6">
-              <Button variant="ghost" className="text-slate-400 font-bold text-xs uppercase tracking-widest gap-2">
-                <RefreshCw className="size-3" /> Muat Lebih Banyak
-              </Button>
-            </div>
-          </ScrollArea>
-          <DialogFooter className="p-6 bg-slate-50 border-t flex items-center justify-center">
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <Sparkles className="size-3 text-amber-500" /> Terhubung dengan Google Photos Anda
-             </p>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
     </DashboardLayout>
   );
 }
