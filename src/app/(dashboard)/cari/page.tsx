@@ -410,7 +410,7 @@ export default function CariPage() {
         </div>
 
         {/* Section: Recent Searches (AI Backup) */}
-        {history.length > 0 && !loading && !results && (
+        {history.length > 0 && !loading && (
           <div className="space-y-4 px-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -439,15 +439,16 @@ export default function CariPage() {
                         </div>
                         <h5 className="text-xs font-black text-slate-900 truncate max-w-[140px]">{item.name}</h5>
                       </div>
-                      <button 
+                      <span 
+                        role="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRemoveHistoryItem(item.id);
                         }}
-                        className="p-1.5 rounded-full bg-slate-50 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all"
+                        className="p-1.5 rounded-full bg-slate-50 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                       >
                         <X className="size-3" />
-                      </button>
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400">
                       <MapPin className="size-2.5" />
