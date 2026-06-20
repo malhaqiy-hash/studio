@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -25,7 +24,7 @@ export const LANGUAGES: LanguageOption[] = [
 
 export const translations = {
   dashboard: {
-    en: 'Dashboard', id: 'Dasbor', ja: 'ダッシュボード', zh: '仪表板', ko: '대시보드', ar: 'لوحة القيادة', es: 'Tablero', fr: 'Tableau de bord', all: 'Dashboard'
+    en: 'Dashboard', id: 'Dasbor', ja: 'ダッシュボード', zh: '仪表板', ko: '대시보드', ar: 'لوحة القيada', es: 'Tablero', fr: 'Tableau de bord', all: 'Dashboard'
   },
   feed: {
     en: 'Feed', id: 'Umpan', ja: 'フィード', zh: '动态', ko: '피드', ar: 'التغذية', es: 'Noticias', fr: 'Flux', all: 'Feed'
@@ -34,7 +33,7 @@ export const translations = {
     en: 'AI Search Hub', id: 'Pusat Pencarian AI', ja: 'AI検索ハブ', zh: 'AI搜索中心', ko: 'AI 검색 허브', ar: 'مركز بحث AI', es: 'Búsqueda AI', fr: 'Recherche AI', all: 'AI Search'
   },
   discovery: {
-    en: 'AI Discovery', id: 'Penemuan AI', ja: 'AIディスカバリー', zh: 'AI 发现', ko: 'AI 디스커버리', ar: 'اكتشاف AI', es: 'Descubrimiento AI', fr: 'Découverte AI', all: 'AI Discovery'
+    en: 'AI Discovery', id: 'Penemuan AI', ja: 'AIディスカバリー', zh: 'AI 发现', ko: 'AI ディスカーバリー', ar: 'اكتشاف AI', es: 'Descubrimiento AI', fr: 'Découverte AI', all: 'AI Discovery'
   },
   matches: {
     en: 'Intelligent Matches', id: 'Kecocokan Cerdas', ja: 'インテリジェントマッチ', zh: '智能匹配', ko: '지능형 매칭', ar: 'مطابقات ذكية', es: 'Emparejamientos', fr: 'Matchs intelligents', all: 'Matches'
@@ -53,6 +52,9 @@ export const translations = {
   },
   settings: {
     en: 'Settings', id: 'Pengaturan', ja: '設定', zh: '设置', ko: '설정', ar: 'الإعدادات', es: 'Ajustes', fr: 'Paramètres', all: 'Settings'
+  },
+  saved: {
+    en: 'Saved', id: 'Simpan', ja: '保存済み', zh: '已保存', ko: '저장됨', ar: 'محفوظ', es: 'Guardado', fr: 'Enregistré', all: 'Saved'
   },
   logout: {
     en: 'Logout', id: 'Keluar', ja: 'ログアウト', zh: '登出', ko: '로그아웃', ar: 'تسجيل الخروج', es: 'Cerrar Sesión', fr: 'Déconnexion', all: 'Logout'

@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -36,7 +35,8 @@ import {
   TrendingUp,
   Map as MapIcon,
   Building2,
-  History
+  History,
+  Bookmark
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -109,6 +109,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { icon: LayoutDashboard, label: "Pusat Kendali", href: "/dashboard" },
     { icon: Rss, label: "Beranda Utama", href: "/feed" },
     { icon: Globe, label: "Mesin Cari AI", href: "/cari" },
+    { icon: Bookmark, label: t('saved'), href: "/saved" },
     { icon: History, label: "Penemuan AI (Backup)", href: "/discover" },
     { icon: TrendingUp, label: "Market Radar", href: "/market-radar" },
     { icon: MapIcon, label: "Opportunity Map", href: "/opportunity-map" },

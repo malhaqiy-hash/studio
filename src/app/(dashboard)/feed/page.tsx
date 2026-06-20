@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -18,13 +17,15 @@ import {
   Clock, 
   ShieldCheck,
   RefreshCw,
-  ArrowUpRight
+  ArrowUpRight,
+  Bookmark
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
 import { translateText } from "@/ai/flows/translate-flow";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from 'embla-carousel-react';
+import { useToast } from "@/hooks/use-toast";
 
 const CATEGORIES = [
   { id: 'for-you', label: 'For You', icon: Sparkles },
@@ -74,8 +75,10 @@ const MOCK_POSTS = [
 
 export default function FeedPage() {
   const { language } = useLanguage();
+  const { toast } = useToast();
   const [activeCategory, setActiveCategory] = React.useState('for-you');
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean }>>({});
+  const [savedPosts, setSavedPosts] = React.useState<string[]>([]);
   
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start' });
 
@@ -90,8 +93,32 @@ export default function FeedPage() {
     emblaApi.on('select', onSelect);
   }, [emblaApi, onSelect]);
 
+  React.useEffect(() => {
+    const saved = localStorage.getItem('ontapp_saved_posts');
+    if (saved) setSavedPosts(JSON.parse(saved));
+  }, []);
+
   const scrollTo = (index: number) => {
     if (emblaApi) emblaApi.scrollTo(index);
+  };
+
+  const handleSavePost = (post: any) => {
+    let newSaved;
+    if (savedPosts.includes(post.id)) {
+      newSaved = savedPosts.filter(id => id !== post.id);
+      toast({ title: "Dihapus dari simpanan", description: "Postingan telah dihapus dari koleksi Anda." });
+      
+      const fullSaved = JSON.parse(localStorage.getItem('ontapp_saved_posts_data') || '[]');
+      localStorage.setItem('ontapp_saved_posts_data', JSON.stringify(fullSaved.filter((p: any) => p.id !== post.id)));
+    } else {
+      newSaved = [...savedPosts, post.id];
+      toast({ title: "Berhasil disimpan", description: "Cek menu 'Simpan' di OnTapp Hub untuk melihatnya kembali." });
+      
+      const fullSaved = JSON.parse(localStorage.getItem('ontapp_saved_posts_data') || '[]');
+      localStorage.setItem('ontapp_saved_posts_data', JSON.stringify([post, ...fullSaved]));
+    }
+    setSavedPosts(newSaved);
+    localStorage.setItem('ontapp_saved_posts', JSON.stringify(newSaved));
   };
 
   const handleTranslate = async (postId: string, content: string) => {
@@ -156,6 +183,7 @@ export default function FeedPage() {
               >
                 {MOCK_POSTS.map((post) => {
                   const trans = translations[post.id];
+                  const isSaved = savedPosts.includes(post.id);
                   return (
                     <div 
                       key={`${cat.id}-${post.id}`} 
@@ -181,9 +209,20 @@ export default function FeedPage() {
                               </div>
                             </div>
                           </div>
-                          <Badge variant="outline" className="text-[9px] font-black uppercase border-slate-100 text-slate-400">
-                            {cat.label}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <button 
+                              onClick={() => handleSavePost(post)}
+                              className={cn(
+                                "p-2 rounded-full transition-all active:scale-90",
+                                isSaved ? "text-accent bg-indigo-50" : "text-slate-300 hover:text-slate-400 hover:bg-slate-50"
+                              )}
+                            >
+                              <Bookmark className={cn("size-5", isSaved && "fill-accent")} />
+                            </button>
+                            <Badge variant="outline" className="text-[9px] font-black uppercase border-slate-100 text-slate-400">
+                              {cat.label}
+                            </Badge>
+                          </div>
                         </div>
 
                         <CardContent className="px-8 py-4 flex-1 space-y-4">
