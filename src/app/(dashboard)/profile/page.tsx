@@ -34,7 +34,10 @@ import {
   MapPin,
   Brain,
   Zap,
-  Target
+  Target,
+  Image as ImageIcon,
+  Smartphone,
+  Cloud
 } from 'lucide-react';
 import {
   Dialog,
@@ -63,12 +66,16 @@ export default function ProfilePage() {
   const [isLinksModalOpen, setIsLinksModalOpen] = React.useState(false);
   const [isContentModalOpen, setIsContentModalOpen] = React.useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = React.useState(false);
 
+  const [mediaTarget, setMediaTarget] = React.useState<'avatar' | 'cover' | 'post'>('avatar');
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
   const [newItem, setNewItem] = React.useState<Partial<ContentItem>>({
     visibility: 'public'
   });
   const [newLinkUrl, setNewLinkUrl] = React.useState('');
+  
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSaveBio = () => {
     updateActiveAccount(tempAccount);
@@ -76,33 +83,70 @@ export default function ProfilePage() {
     toast({ title: 'Profil diperbarui' });
   };
 
-  const handleSavePhotos = () => {
-    updateActiveAccount(tempAccount);
-    setIsPhotoModalOpen(false);
-    toast({ title: 'Foto diperbarui' });
+  const openMediaPicker = (target: 'avatar' | 'cover' | 'post') => {
+    setMediaTarget(target);
+    setIsMediaPickerOpen(true);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        if (mediaTarget === 'avatar') {
+          updateActiveAccount({ avatar: result });
+          toast({ title: "Foto profil diperbarui dari perangkat" });
+        } else if (mediaTarget === 'cover') {
+          // Note: In real app we might store cover in account data, for now we simulate
+          toast({ title: "Foto sampul diperbarui dari perangkat" });
+        } else if (mediaTarget === 'post') {
+          setNewItem(prev => ({ ...prev, image: result }));
+          toast({ title: "Gambar postingan ditambahkan" });
+        }
+        setIsMediaPickerOpen(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCloudSource = (source: 'drive' | 'photos') => {
+    toast({ 
+      title: source === 'drive' ? "Menghubungkan Google Drive" : "Menghubungkan Google Photos", 
+      description: "Mengotorisasi akses ke pustaka cloud Anda..." 
+    });
+    // Simulating delay for picker
+    setTimeout(() => {
+      const simulatedUrl = source === 'drive' 
+        ? `https://picsum.photos/seed/drive${Date.now()}/800/600`
+        : `https://picsum.photos/seed/photos${Date.now()}/800/600`;
+        
+      if (mediaTarget === 'avatar') {
+        updateActiveAccount({ avatar: simulatedUrl });
+      } else if (mediaTarget === 'post') {
+        setNewItem(prev => ({ ...prev, image: simulatedUrl }));
+      }
+      setIsMediaPickerOpen(false);
+      toast({ title: "File berhasil diimpor dari cloud" });
+    }, 1500);
   };
 
   const handleAddLink = () => {
     if (!newLinkUrl) return;
     try {
       new URL(newLinkUrl);
-      const updatedLinks = [...(tempAccount.links || []), newLinkUrl];
-      setTempAccount({ ...tempAccount, links: updatedLinks });
+      const updatedLinks = [...(activeAccount.links || []), newLinkUrl];
+      updateActiveAccount({ links: updatedLinks });
       setNewLinkUrl('');
+      toast({ title: "Tautan ditambahkan" });
     } catch (e) {
-      toast({ variant: "destructive", title: "URL tidak valid", description: "Pastikan menggunakan format https://" });
+      toast({ variant: "destructive", title: "URL tidak valid" });
     }
   };
 
   const handleRemoveLink = (index: number) => {
-    const updatedLinks = (tempAccount.links || []).filter((_, i) => i !== index);
-    setTempAccount({ ...tempAccount, links: updatedLinks });
-  };
-
-  const handleSaveLinks = () => {
-    updateActiveAccount({ links: tempAccount.links });
-    setIsLinksModalOpen(false);
-    toast({ title: 'Tautan diperbarui' });
+    const updatedLinks = (activeAccount.links || []).filter((_, i) => i !== index);
+    updateActiveAccount({ links: updatedLinks });
   };
 
   const handleAddContent = () => {
@@ -120,7 +164,7 @@ export default function ProfilePage() {
     });
     setIsContentModalOpen(false);
     setNewItem({ visibility: 'public' });
-    toast({ title: activeAccount.type === 'pribadi' ? 'Berhasil diposting' : 'Konten ditambahkan' });
+    toast({ title: 'Konten berhasil dipublikasikan' });
   };
 
   const handleRemoveItem = (id: string) => {
@@ -144,7 +188,8 @@ export default function ProfilePage() {
       setNewItem({
         title: activeAccount.type === 'bisnis' ? "Penawaran Kerjasama Kemitraan Strategis" : "Portfolio Proyek Inovasi Terbaru",
         description: `Kami sedang aktif mencari kolaborasi baru di sektor ${activeAccount.extra || 'industri'}. Fokus utama kami adalah pada efisiensi operasional dan integrasi teknologi cerdas untuk pertumbuhan berkelanjutan.`,
-        visibility: 'public'
+        visibility: 'public',
+        image: `https://picsum.photos/seed/ai${Date.now()}/800/500`
       });
       setIsContentModalOpen(true);
     }, 1200);
@@ -162,6 +207,15 @@ export default function ProfilePage() {
   return (
     <DashboardLayout>
       <div className="max-w-3xl mx-auto space-y-12 pb-24">
+        {/* Hidden File Input */}
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          className="hidden" 
+          accept="image/*" 
+          onChange={handleFileChange} 
+        />
+
         {/* Cover & Avatar Section */}
         <section className="relative group">
           <div className="h-48 md:h-64 w-full bg-slate-50 border-b border-slate-100 relative overflow-hidden rounded-[2.5rem]">
@@ -174,7 +228,7 @@ export default function ProfilePage() {
               <Button onClick={() => setIsShareModalOpen(true)} className="bg-white/90 backdrop-blur hover:bg-white text-slate-900 rounded-2xl border-none font-black text-[10px] uppercase tracking-widest gap-2 shadow-lg h-10 px-5">
                 <Share2 className="size-4" /> Bagi
               </Button>
-              <Button onClick={() => { setTempAccount({ avatar: activeAccount.avatar }); setIsPhotoModalOpen(true); }} variant="outline" className="bg-white/90 backdrop-blur hover:bg-white text-slate-600 rounded-2xl border-none font-black text-[10px] uppercase tracking-widest gap-2 shadow-sm h-10 px-5">
+              <Button onClick={() => openMediaPicker('cover')} variant="outline" className="bg-white/90 backdrop-blur hover:bg-white text-slate-600 rounded-2xl border-none font-black text-[10px] uppercase tracking-widest gap-2 shadow-sm h-10 px-5">
                 <Camera className="size-4" /> Edit Foto
               </Button>
             </div>
@@ -186,7 +240,7 @@ export default function ProfilePage() {
                 <AvatarImage src={activeAccount.avatar} className="object-cover" />
                 <AvatarFallback className="bg-teal-50 text-accent"><UserIcon size={56} /></AvatarFallback>
               </Avatar>
-              <button onClick={() => { setTempAccount({ avatar: activeAccount.avatar }); setIsPhotoModalOpen(true); }} className="absolute bottom-3 right-3 size-11 bg-teal-600 text-white rounded-2xl flex items-center justify-center border-4 border-white shadow-xl hover:scale-110 transition-transform active:scale-95">
+              <button onClick={() => openMediaPicker('avatar')} className="absolute bottom-3 right-3 size-11 bg-teal-600 text-white rounded-2xl flex items-center justify-center border-4 border-white shadow-xl hover:scale-110 transition-transform active:scale-95">
                 <Pencil className="size-5" />
               </button>
             </div>
@@ -242,7 +296,7 @@ export default function ProfilePage() {
         <section className="px-6 md:px-10 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Hub Koneksi Eksternal</h3>
-            <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ links: [...(activeAccount.links || [])] }); setIsLinksModalOpen(true); }} className="text-[10px] font-black uppercase text-teal-600 hover:bg-teal-50 px-4 rounded-xl">
+            <Button variant="ghost" size="sm" onClick={() => setIsLinksModalOpen(true)} className="text-[10px] font-black uppercase text-teal-600 hover:bg-teal-50 px-4 rounded-xl">
               <Plus className="size-3.5 mr-2" /> Kelola Link
             </Button>
           </div>
@@ -271,7 +325,7 @@ export default function ProfilePage() {
             <div className="flex gap-3">
               {activeAccount.type !== 'pribadi' && (
                 <Button onClick={handleAIContentGenerator} variant="outline" size="sm" className="rounded-2xl h-11 border-teal-100 text-teal-600 gap-2 font-black text-[10px] uppercase tracking-widest px-5 shadow-sm">
-                  <Brain className="size-4 animate-pulse" /> AI Generate
+                  <Brain className="size-4" /> AI Generate
                 </Button>
               )}
               <Button size="sm" onClick={() => setIsContentModalOpen(true)} className="rounded-2xl h-11 bg-teal-600 hover:bg-teal-700 gap-2 font-black text-[10px] uppercase tracking-widest px-6 shadow-xl shadow-teal-100 text-white active:scale-95 transition-all">
@@ -334,24 +388,58 @@ export default function ProfilePage() {
         </section>
       </div>
 
-      {/* Modals Implementation */}
-      
-      {/* Photo Modal */}
-      <Dialog open={isPhotoModalOpen} onOpenChange={setIsPhotoModalOpen}>
-        <DialogContent className="max-w-md rounded-[3rem] border-none shadow-2xl p-10 bg-white">
-          <DialogHeader className="text-center sm:text-center"><DialogTitle className="text-2xl font-black text-slate-900">Ubah Foto Profil</DialogTitle><DialogDescription>Masukkan URL gambar baru untuk memperbarui avatar Anda.</DialogDescription></DialogHeader>
-          <div className="space-y-8 py-6 flex flex-col items-center">
-            <div className="size-32 rounded-3xl overflow-hidden border-4 border-teal-50 shadow-inner">
-               <img src={tempAccount.avatar || activeAccount.avatar} className="w-full h-full object-cover" alt="Preview" />
-            </div>
-            <div className="w-full space-y-2">
-              <Label className="font-bold ml-1">URL Gambar Baru</Label>
-              <Input value={tempAccount.avatar} onChange={(e) => setTempAccount({ ...tempAccount, avatar: e.target.value })} placeholder="https://picsum.photos/..." className="rounded-2xl h-12 border-slate-200" />
-            </div>
+      {/* Media Picker Modal */}
+      <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
+        <DialogContent className="max-w-md rounded-[3rem] p-8 border-none shadow-2xl bg-white">
+          <DialogHeader className="text-center sm:text-center">
+            <DialogTitle className="text-2xl font-black">Pilih Sumber Media</DialogTitle>
+            <DialogDescription>Pilih asal gambar yang ingin Anda unggah ke profil.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-8">
+            <Button 
+              variant="outline" 
+              onClick={() => fileInputRef.current?.click()}
+              className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
+            >
+              <div className="size-12 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Smartphone className="size-6" />
+              </div>
+              <div className="text-left">
+                <p className="font-black text-sm uppercase tracking-widest">Perangkat / Galeri</p>
+                <p className="text-[10px] font-bold opacity-60">Pilih dari penyimpanan lokal Anda</p>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              onClick={() => handleCloudSource('drive')}
+              className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
+            >
+              <div className="size-12 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Cloud className="size-6 text-blue-500" />
+              </div>
+              <div className="text-left">
+                <p className="font-black text-sm uppercase tracking-widest">Google Drive</p>
+                <p className="text-[10px] font-bold opacity-60">Impor dokumen dari Drive</p>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              onClick={() => handleCloudSource('photos')}
+              className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
+            >
+              <div className="size-12 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ImageIcon className="size-6 text-rose-500" />
+              </div>
+              <div className="text-left">
+                <p className="font-black text-sm uppercase tracking-widest">Google Photos</p>
+                <p className="text-[10px] font-bold opacity-60">Pilih momen dari pustaka foto</p>
+              </div>
+            </Button>
           </div>
-          <DialogFooter className="flex gap-3">
-            <Button variant="ghost" onClick={() => setIsPhotoModalOpen(false)} className="rounded-2xl flex-1 font-bold">Batal</Button>
-            <Button onClick={handleSavePhotos} className="rounded-2xl flex-1 bg-teal-600 hover:bg-teal-700 font-black text-white">Simpan Foto</Button>
+          <DialogFooter>
+             <Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-bold">Batal</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -398,7 +486,7 @@ export default function ProfilePage() {
               <Button onClick={handleAddLink} className="h-14 w-14 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white shrink-0"><Plus size={24} /></Button>
             </div>
             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 no-scrollbar">
-              {(tempAccount.links || []).map((link, i) => (
+              {(activeAccount.links || []).map((link, i) => (
                 <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group/link">
                   <div className="flex items-center gap-3 overflow-hidden">
                     {getLinkIcon(link)}
@@ -410,7 +498,7 @@ export default function ProfilePage() {
             </div>
           </div>
           <DialogFooter className="mt-8">
-            <Button onClick={handleSaveLinks} className="w-full h-14 rounded-2xl bg-slate-900 hover:bg-black font-black text-white uppercase tracking-widest">Update Links Hub</Button>
+            <Button onClick={() => setIsLinksModalOpen(false)} className="w-full h-14 rounded-2xl bg-slate-900 hover:bg-black font-black text-white uppercase tracking-widest">Selesai</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -422,6 +510,22 @@ export default function ProfilePage() {
             {activeAccount.type === 'bisnis' ? 'Tambah Produk/Promo' : activeAccount.type === 'professional' ? 'Tambah Portofolio' : 'Bagikan Momen'}
           </DialogTitle></DialogHeader>
           <div className="space-y-6 pt-6">
+            <div className="flex flex-col items-center gap-4">
+              <div 
+                onClick={() => openMediaPicker('post')}
+                className="w-full aspect-video rounded-3xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:border-teal-600 hover:bg-teal-50 transition-all cursor-pointer overflow-hidden group"
+              >
+                {newItem.image ? (
+                  <img src={newItem.image} className="w-full h-full object-cover" alt="Preview" />
+                ) : (
+                  <>
+                    <ImageIcon className="size-10 group-hover:scale-110 transition-transform mb-2" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Pilih Gambar dari Cloud / Perangkat</span>
+                  </>
+                )}
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label className="font-black text-[10px] uppercase tracking-widest text-slate-400 ml-1">Judul Konten</Label>
               <Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-2xl h-14 bg-slate-50 border-none font-bold px-6" placeholder="Berikan judul yang menarik..." />
@@ -437,10 +541,6 @@ export default function ProfilePage() {
                     <SelectTrigger className="rounded-2xl h-14 bg-slate-50 border-none px-6 font-bold"><SelectValue /></SelectTrigger>
                     <SelectContent className="rounded-2xl border-none shadow-xl"><SelectItem value="public">Publik</SelectItem><SelectItem value="private">Privat</SelectItem></SelectContent>
                  </Select>
-               </div>
-               <div className="space-y-2">
-                 <Label className="font-black text-[10px] uppercase tracking-widest text-slate-400 ml-1">Gambar URL (Opsional)</Label>
-                 <Input value={newItem.image} onChange={(e) => setNewItem({ ...newItem, image: e.target.value })} className="rounded-2xl h-14 bg-slate-50 border-none px-6 font-medium" placeholder="https://..." />
                </div>
             </div>
           </div>

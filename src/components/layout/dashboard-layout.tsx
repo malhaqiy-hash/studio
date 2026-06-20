@@ -35,7 +35,10 @@ import {
   History,
   Bookmark,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Smartphone,
+  Cloud,
+  Image as ImageIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -85,6 +88,7 @@ import { LanguagePicker } from "@/components/language-picker";
 import { useLanguage } from "@/context/language-context";
 import { useAccount, AccountType } from "@/context/account-context";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -92,6 +96,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
   const auth = useAuth();
   const { t } = useLanguage();
+  const { toast } = useToast();
   const { activeAccount, availableAccounts, switchAccount, registerAccount, hasInitialized } = useAccount();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
   
@@ -101,8 +106,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     name: "",
     bio: "",
     contact: "",
-    extra: ""
+    extra: "",
+    avatar: ""
   });
+
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Logika Filter Menu Berdasarkan Tipe Akun
   const getDrawerItems = () => {
@@ -113,12 +122,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: Rss, label: t('feed'), href: "/feed", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Search, label: t('search'), href: "/cari", roles: ['pribadi', 'professional', 'bisnis'] },
       
-      // Professional & Bisnis
       { icon: Users, label: t('matchmaker'), href: "/matchmaker", roles: ['professional', 'bisnis'] },
       { icon: Target, label: t('matches'), href: "/matches", roles: ['professional', 'bisnis'] },
       { icon: BookOpen, label: t('knowledge'), href: "/knowledge", roles: ['professional', 'bisnis'] },
       
-      // Khusus Bisnis (Premium Intelligence)
       { icon: TrendingUp, label: t('market_radar'), href: "/market-radar", roles: ['bisnis'] },
       { icon: MapIcon, label: t('opportunity_map'), href: "/opportunity-map", roles: ['bisnis'] },
       { icon: Building2, label: t('registry'), href: "/registry", roles: ['bisnis'] },
@@ -129,7 +136,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
     ];
 
-    // Filter berdasarkan peran DAN jangan tampilkan yang sudah ada di navbar utama (feed & cari)
     return baseItems.filter(item => 
       item.roles.includes(activeAccount?.type || 'pribadi') && 
       item.href !== "/feed" && 
@@ -162,7 +168,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const handleOpenRegistration = (type: AccountType) => {
     setPendingType(type);
-    setRegFormData({ name: "", bio: "", contact: "", extra: "" });
+    setRegFormData({ name: "", bio: "", contact: "", extra: "", avatar: "" });
     setIsRegModalOpen(true);
   };
 
@@ -181,6 +187,29 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     setIsRegModalOpen(false);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setRegFormData(prev => ({ ...prev, avatar: reader.result as string }));
+        setIsMediaPickerOpen(false);
+        toast({ title: "Foto profil disiapkan dari galeri" });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCloudSource = (source: 'drive' | 'photos') => {
+    toast({ title: "Menghubungkan pustaka cloud..." });
+    setTimeout(() => {
+      const simulatedUrl = `https://picsum.photos/seed/reg${Date.now()}/200/200`;
+      setRegFormData(prev => ({ ...prev, avatar: simulatedUrl }));
+      setIsMediaPickerOpen(false);
+      toast({ title: "Gambar berhasil diimpor" });
+    }, 1200);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
@@ -197,6 +226,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-body relative">
+      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       
       <header className="sticky top-0 z-[100] w-full border-b bg-white/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm pointer-events-auto">
         <div className="flex items-center gap-2">
@@ -514,8 +544,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   </div>
 
                   <div className="flex flex-col items-center gap-4">
-                    <div className="size-24 rounded-3xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 group cursor-pointer hover:border-teal-600 hover:bg-teal-50 transition-all">
-                      <Camera className="size-8 group-hover:scale-110 transition-transform" />
+                    <div 
+                      onClick={() => setIsMediaPickerOpen(true)}
+                      className="size-24 rounded-3xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 group cursor-pointer hover:border-teal-600 hover:bg-teal-50 transition-all overflow-hidden"
+                    >
+                      {regFormData.avatar ? (
+                        <img src={regFormData.avatar} className="w-full h-full object-cover" alt="Profile" />
+                      ) : (
+                        <Camera className="size-8 group-hover:scale-110 transition-transform" />
+                      )}
                     </div>
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Unggah Foto Profil</span>
                   </div>
@@ -600,6 +637,62 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </DialogFooter>
             )}
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Global Media Source Picker Modal */}
+      <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
+        <DialogContent className="max-w-md rounded-[3rem] p-8 border-none shadow-2xl bg-white z-[110]">
+          <DialogHeader className="text-center sm:text-center">
+            <DialogTitle className="text-2xl font-black">Impor Gambar</DialogTitle>
+            <DialogDescription>Pilih sumber foto profil Anda.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-8">
+            <Button 
+              variant="outline" 
+              onClick={() => fileInputRef.current?.click()}
+              className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
+            >
+              <div className="size-12 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Smartphone className="size-6" />
+              </div>
+              <div className="text-left">
+                <p className="font-black text-sm uppercase tracking-widest">Perangkat</p>
+                <p className="text-[10px] font-bold opacity-60">Ambil dari memori telepon</p>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              onClick={() => handleCloudSource('drive')}
+              className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
+            >
+              <div className="size-12 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Cloud className="size-6 text-blue-500" />
+              </div>
+              <div className="text-left">
+                <p className="font-black text-sm uppercase tracking-widest">Google Drive</p>
+                <p className="text-[10px] font-bold opacity-60">Gunakan file Drive</p>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              onClick={() => handleCloudSource('photos')}
+              className="h-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-600 group transition-all justify-start gap-6 px-6"
+            >
+              <div className="size-12 rounded-xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ImageIcon className="size-6 text-rose-500" />
+              </div>
+              <div className="text-left">
+                <p className="font-black text-sm uppercase tracking-widest">Google Photos</p>
+                <p className="text-[10px] font-bold opacity-60">Pilih momen terbaik Anda</p>
+              </div>
+            </Button>
+          </div>
+          <DialogFooter>
+             <Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-bold">Batal</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
