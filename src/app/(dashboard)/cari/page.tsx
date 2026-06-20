@@ -23,7 +23,6 @@ import {
   Building2,
   Filter,
   Mic,
-  Plus,
   Store,
   Hotel,
   User,
@@ -111,6 +110,7 @@ export default function CariPage() {
       });
       setResults(output);
       
+      // Save to discovery backup (localStorage)
       if (typeof window !== 'undefined') {
         const history = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
         const newItems = output.results.map(r => ({
@@ -123,7 +123,7 @@ export default function CariPage() {
       
     } catch (err) {
       console.error(err);
-      toast({ variant: "destructive", title: "Pencarian Gagal", description: "Terjadi kesalahan pada mesin AI." });
+      toast({ variant: "destructive", title: "Pencarian Gagal", description: "Mesin AI sedang sibuk. Kami sedang mencoba kembali otomatis." });
     } finally {
       setLoading(false);
     }
@@ -132,51 +132,6 @@ export default function CariPage() {
   const openInGoogleMaps = (name: string, location?: string) => {
     const searchQuery = encodeURIComponent(`${name} ${location || ''}`);
     window.open(`https://www.google.com/maps/search/?api=1&query=${searchQuery}`, '_blank');
-  };
-
-  const toggleVoiceSearch = () => {
-    if (typeof window !== 'undefined' && !('webkitSpeechRecognition' in window) && !('speechRecognition' in window)) {
-      toast({
-        variant: "destructive",
-        title: "Browser Tidak Mendukung",
-        description: "Browser Anda tidak mendukung pencarian suara."
-      });
-      return;
-    }
-
-    if (isListening) {
-      setIsListening(false);
-      return;
-    }
-
-    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).speechRecognition;
-    const recognition = new SpeechRecognition();
-
-    recognition.lang = 'id-ID';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onstart = () => {
-      setIsListening(true);
-    };
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setQuery(transcript);
-      setIsListening(false);
-      handleSearch(undefined, transcript);
-    };
-
-    recognition.onerror = () => {
-      setIsListening(false);
-      toast({ variant: "destructive", title: "Gagal Mendengar", description: "Coba lagi nanti." });
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.start();
   };
 
   const handleImageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,8 +146,8 @@ export default function CariPage() {
         
         setTimeout(() => {
           setIsAnalyzingImage(false);
-          setQuery("Produk/bisnis serupa dari gambar");
-          handleSearch(undefined, "Produk/bisnis serupa dari gambar");
+          setQuery("Analisis visual dari gambar");
+          handleSearch(undefined, "Analisis visual dari gambar");
         }, 2000);
       };
       reader.readAsDataURL(file);
@@ -233,33 +188,16 @@ export default function CariPage() {
   const handleTranslateResult = async (resId: string, content: string) => {
     const existing = translations[resId];
     if (existing?.text) {
-      setTranslations(prev => ({
-        ...prev,
-        [resId]: { ...existing, show: !existing.show }
-      }));
+      setTranslations(prev => ({ ...prev, [resId]: { ...existing, show: !existing.show } }));
       return;
     }
-
-    setTranslations(prev => ({
-      ...prev,
-      [resId]: { text: "", show: false, loading: true, detected: "" }
-    }));
-
+    setTranslations(prev => ({ ...prev, [resId]: { text: "", show: false, loading: true, detected: "" } }));
     try {
-      const { translatedText, detectedLanguage } = await translateText({
-        text: content,
-        targetLanguage: language
-      });
-      setTranslations(prev => ({
-        ...prev,
-        [resId]: { text: translatedText, show: true, loading: false, detected: detectedLanguage }
-      }));
+      const { translatedText, detectedLanguage } = await translateText({ text: content, targetLanguage: language });
+      setTranslations(prev => ({ ...prev, [resId]: { text: translatedText, show: true, loading: false, detected: detectedLanguage } }));
     } catch (err) {
-      console.error("Result translation failed", err);
-      setTranslations(prev => ({
-        ...prev,
-        [resId]: { text: "", show: false, loading: false, detected: "" }
-      }));
+      console.error(err);
+      setTranslations(prev => ({ ...prev, [resId]: { text: "", show: false, loading: false, detected: "" } }));
     }
   };
 
@@ -285,17 +223,12 @@ export default function CariPage() {
       case 'product': return <Package className="size-5" />;
       case 'service': return <Headphones className="size-5" />;
       case 'supplier': return <Truck className="size-5" />;
-      case 'transporter': return <Truck className="size-5" />;
-      case 'opportunity': return <Briefcase className="size-5" />;
       case 'shop': return <Store className="size-5" />;
       case 'hotel': return <Hotel className="size-5" />;
+      case 'opportunity': return <Briefcase className="size-5" />;
       default: return <Building2 className="size-5" />;
     }
   };
-
-  const filteredLocations = POPULAR_LOCATIONS.filter(loc => 
-    loc.toLowerCase().includes(locationSearch.toLowerCase())
-  );
 
   return (
     <DashboardLayout>
@@ -322,10 +255,9 @@ export default function CariPage() {
                 </button>
                 <button 
                   type="button"
-                  onClick={toggleVoiceSearch}
                   className={cn(
-                    "w-10 h-10 flex items-center justify-center rounded-xl transition-all active:scale-90",
-                    isListening ? "bg-rose-500 text-white animate-pulse" : "bg-white text-slate-400 hover:text-accent shadow-sm border border-slate-100"
+                    "w-10 h-10 flex items-center justify-center rounded-xl transition-all active:scale-90 bg-white text-slate-400 hover:text-accent shadow-sm border border-slate-100",
+                    isListening && "bg-rose-500 text-white animate-pulse"
                   )}
                 >
                   <Mic className="size-5" />
@@ -337,7 +269,7 @@ export default function CariPage() {
             </div>
 
             {previewImage && (
-              <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-accent/20 animate-in zoom-in-50">
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-accent/20">
                 <img src={previewImage} className="w-full h-full object-cover" alt="Search visual" />
                 <button onClick={() => setPreviewImage(null)} className="absolute top-1 right-1 bg-slate-900/80 text-white rounded-full p-1">
                   <X className="size-3" />
@@ -397,7 +329,7 @@ export default function CariPage() {
                     />
                   </div>
                   <div className="space-y-1 max-h-[200px] overflow-y-auto no-scrollbar">
-                    {filteredLocations.map((loc) => (
+                    {POPULAR_LOCATIONS.filter(l => l.toLowerCase().includes(locationSearch.toLowerCase())).map((loc) => (
                       <button key={loc} onClick={() => { setActiveLocation(loc); setLocationSearch(""); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
                         {loc}
                       </button>
@@ -423,13 +355,11 @@ export default function CariPage() {
             <div className="grid gap-4">
               {[1, 2].map((i) => (
                 <Card key={i} className="animate-pulse border-slate-100 rounded-[2rem]">
-                  <CardContent className="p-6">
-                    <div className="flex gap-4">
-                      <Skeleton className="size-14 rounded-xl" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-6 w-1/3 rounded" />
-                        <Skeleton className="h-4 w-2/3 rounded" />
-                      </div>
+                  <CardContent className="p-6 flex gap-4">
+                    <Skeleton className="size-14 rounded-xl" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-6 w-1/3 rounded" />
+                      <Skeleton className="h-4 w-2/3 rounded" />
                     </div>
                   </CardContent>
                 </Card>
@@ -464,7 +394,7 @@ export default function CariPage() {
                           )} />
                           <div className="p-6 flex-1 flex flex-col md:flex-row gap-5 items-start">
                             <div className={cn(
-                              "size-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:rotate-6 transition-transform duration-300",
+                              "size-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:rotate-6 transition-transform",
                               result.source === 'external' ? 'bg-slate-50 text-slate-400' : 'bg-teal-50 text-accent'
                             )}>
                               {getTypeIcon(result.type)}
@@ -476,11 +406,9 @@ export default function CariPage() {
                                   <h4 className="text-lg font-black text-slate-900 group-hover:text-accent transition-colors tracking-tight">{result.name}</h4>
                                   {getSourceBadge(result.source)}
                                 </div>
-                                <div className="relative">
-                                  <p className="text-slate-500 font-medium text-xs leading-relaxed line-clamp-2">
-                                    {trans?.show ? trans.text : result.description}
-                                  </p>
-                                </div>
+                                <p className="text-slate-500 font-medium text-xs leading-relaxed line-clamp-2">
+                                  {trans?.show ? trans.text : result.description}
+                                </p>
                               </div>
 
                               <div className="flex flex-wrap items-center gap-4">
@@ -561,16 +489,6 @@ export default function CariPage() {
           )}
         </div>
       </div>
-
-      <style jsx global>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
 
       <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
         <DialogContent className="max-w-[320px] rounded-[2.5rem] border-none shadow-2xl p-8 bg-[#2d3035] text-white overflow-hidden outline-none">

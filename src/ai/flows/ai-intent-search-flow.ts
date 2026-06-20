@@ -1,11 +1,6 @@
-
 'use server';
 /**
  * @fileOverview A Hybrid Business Discovery Engine that intelligently ranks internal and external business results.
- *
- * - aiIntentSearch - A function that handles the AI intent search and ranking process.
- * - AIIntentSearchInput - The input type for the aiIntentSearch function.
- * - AIIntentSearchOutput - The return type for the aiIntentSearch function.
  */
 
 import { ai } from '@/ai/genkit';
@@ -90,12 +85,11 @@ const aiIntentSearchFlow = ai.defineFlow(
   },
   async (input) => {
     const filterSummary = input.filters 
-      ? `Category: ${input.filters.category}, Location: ${input.filters.location}, Verified: ${input.filters.verifiedOnly}`
+      ? `Category: ${input.filters.category}, Location: ${input.filters.location}`
       : 'None';
 
-    // Retry logic for transient 503/429 errors from the AI provider
     let lastError;
-    const maxRetries = 3;
+    const maxRetries = 5;
     
     for (let i = 0; i < maxRetries; i++) {
       try {
@@ -107,20 +101,22 @@ const aiIntentSearchFlow = ai.defineFlow(
         if (output) return output;
       } catch (err: any) {
         lastError = err;
-        const isTransient = err.message?.includes('503') || 
-                            err.message?.includes('demand') || 
-                            err.message?.includes('overloaded') ||
-                            err.message?.includes('429');
+        const errMsg = String(err).toLowerCase();
+        const isTransient = errMsg.includes('503') || 
+                            errMsg.includes('demand') || 
+                            errMsg.includes('overloaded') ||
+                            errMsg.includes('429') ||
+                            errMsg.includes('unavailable');
                             
         if (isTransient && i < maxRetries - 1) {
-          // Wait longer for each retry (1s, 2s)
-          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+          const delay = Math.pow(2, i) * 1000; // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
         throw err;
       }
     }
     
-    throw lastError || new Error('AI Engine currently unavailable. Please try again in a few moments.');
+    throw lastError || new Error('AI Engine currently unavailable. Please try kembali dalam beberapa saat.');
   }
 );
