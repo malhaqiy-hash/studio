@@ -277,7 +277,7 @@ export default function CariPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('search_placeholder')}
-                className="h-16 pl-12 pr-44 rounded-2xl border-border bg-muted/30 shadow-inner text-base font-medium focus:bg-background transition-all focus:border-accent"
+                className="h-16 pl-12 pr-44 rounded-2xl border-border bg-muted/30 shadow-inner text-base font-medium focus:bg-background transition-all focus:border-accent text-foreground"
               />
               <div className="absolute inset-y-3 right-3 flex items-center gap-1.5">
                 {query && (
@@ -313,7 +313,7 @@ export default function CariPage() {
                 <DropdownMenuContent align="start" className="w-[280px] rounded-2xl p-2 shadow-2xl bg-card border-border">
                   <DropdownMenuItem onClick={() => setActiveCategory(null)} className="font-bold text-muted-foreground p-2.5 rounded-lg text-xs">Semua Kategori</DropdownMenuItem>
                   {categories.map((cat) => (
-                    <DropdownMenuItem key={cat.id} onClick={() => setActiveCategory(cat.label)} className="flex items-center gap-3 py-2.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-xs">
+                    <DropdownMenuItem key={cat.id} onClick={() => setActiveCategory(cat.label)} className="flex items-center gap-3 py-2.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-xs text-foreground">
                       <div className="size-7 bg-muted rounded flex items-center justify-center text-muted-foreground"><cat.icon className="size-3.5" /></div>{cat.label}
                     </DropdownMenuItem>
                   ))}
@@ -329,17 +329,17 @@ export default function CariPage() {
                     </div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
-                </DropdownMenuTrigger>
+                </PopoverTrigger>
                 <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl bg-card border-border space-y-3">
                   <Button type="button" variant="outline" onClick={handleNearbySearch} className="w-full h-11 rounded-xl border-accent/20 bg-accent/5 text-accent font-black text-xs gap-2">
                     <LocateFixed className="size-4" /> {t('nearby')}
                   </Button>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-                    <Input placeholder="Cari lokasi..." value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} className="h-9 pl-9 rounded-xl bg-muted/50 text-[11px] border-none" />
+                    <Input placeholder="Cari lokasi..." value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} className="h-9 pl-9 rounded-xl bg-muted/50 text-[11px] border-none text-foreground" />
                   </div>
                   <div className="space-y-1 max-h-[200px] overflow-y-auto no-scrollbar">
-                    {POPULAR_LOCATIONS.filter(l => l.toLowerCase().includes(locationSearch.toLowerCase())).map((loc) => (<button key={loc} type="button" onClick={() => { setActiveLocation(loc); setIsLocationOpen(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-muted">{loc}</button>))}
+                    {POPULAR_LOCATIONS.filter(l => l.toLowerCase().includes(locationSearch.toLowerCase())).map((loc) => (<button key={loc} type="button" onClick={() => { setActiveLocation(loc); setIsLocationOpen(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-muted text-foreground">{loc}</button>))}
                   </div>
                 </PopoverContent>
               </Popover>
@@ -412,7 +412,7 @@ export default function CariPage() {
                           </div>
                           <p className="text-muted-foreground font-medium text-xs leading-relaxed">{result.description}</p>
                           <div className="flex items-center gap-4 text-[10px] font-black text-muted-foreground uppercase">
-                            {result.location && <button onClick={() => openInGoogleMaps(result.name, result.location)} className="flex items-center gap-1 hover:text-accent"><MapPin className="size-3 text-rose-400" />{result.location}</button>}
+                            {result.location && <button onClick={() => openInGoogleMaps(result.name, result.location)} className="flex items-center gap-1 hover:text-accent transition-colors"><MapPin className="size-3 text-rose-400" />{result.location}</button>}
                             <div className="flex items-center gap-1 text-accent"><Target className="size-3" />{result.matchScore}% Synergy</div>
                           </div>
                         </div>
