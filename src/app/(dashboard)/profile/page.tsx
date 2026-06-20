@@ -32,7 +32,7 @@ import {
   QrCode,
   Copy,
   MapPin,
-  Sparkles,
+  Brain,
   Zap,
   Target
 } from 'lucide-react';
@@ -243,7 +243,7 @@ export default function ProfilePage() {
             <div className="flex gap-2">
               {activeAccount.type !== 'pribadi' && (
                 <Button onClick={handleAIContentGenerator} variant="outline" size="sm" className="rounded-xl h-9 border-teal-100 text-teal-600 gap-2 font-bold px-4">
-                  <Sparkles className="size-4" /> AI Generate
+                  <Brain className="size-4" /> AI Generate
                 </Button>
               )}
               <Button size="sm" onClick={() => setIsContentModalOpen(true)} className="rounded-xl h-9 bg-teal-600 hover:bg-teal-700 gap-2 font-bold px-4 shadow-sm text-white">
