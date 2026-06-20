@@ -18,7 +18,8 @@ import {
   Search,
   Star,
   Zap,
-  Bookmark
+  Bookmark,
+  Clock
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -125,7 +126,7 @@ export default function KnowledgePage() {
                                <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
                                   <Clock className="size-3" />
                                   {article.time}
-                               </div>
+                                </div>
                             </div>
                             <h4 className="text-2xl font-black text-slate-900 leading-tight group-hover:text-accent transition-colors">{article.title}</h4>
                             <p className="text-slate-500 font-medium leading-relaxed line-clamp-2">{article.description}</p>
