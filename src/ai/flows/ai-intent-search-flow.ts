@@ -103,19 +103,21 @@ const aiIntentSearchFlow = ai.defineFlow(
         lastError = err;
         const errMsg = String(err).toLowerCase();
         
-        // Handle rate limiting (429) and transient server errors (503)
+        // Handle rate limiting (429), transient server errors (503), and unexpected response issues
         const isQuotaError = errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('exhausted');
         const isTransient = isQuotaError || 
                             errMsg.includes('503') || 
                             errMsg.includes('demand') || 
                             errMsg.includes('overloaded') ||
-                            errMsg.includes('unavailable');
+                            errMsg.includes('unavailable') ||
+                            errMsg.includes('unexpected response') ||
+                            errMsg.includes('network');
                             
         if (isTransient && i < maxRetries - 1) {
-          // Longer delay for quota errors
-          const baseDelay = isQuotaError ? 3000 : 1000;
+          // Exponential backoff with longer delay for quota errors
+          const baseDelay = isQuotaError ? 3000 : 1500;
           const delay = Math.pow(2, i) * baseDelay; 
-          console.warn(`AI Engine busy (Attempt ${i + 1}/${maxRetries}). Retrying in ${delay}ms...`);
+          console.warn(`AI Engine busy/unexpected response (Attempt ${i + 1}/${maxRetries}). Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
@@ -123,7 +125,8 @@ const aiIntentSearchFlow = ai.defineFlow(
       }
     }
     
-    console.error('AI Intent Search failed after retries:', lastError);
-    throw new Error('Mesin AI sedang mencapai batas kuota atau sangat sibuk. Silakan tunggu sekitar 30 detik dan coba cari kembali.');
+    console.error('AI Intent Search failed after multiple retries:', lastError);
+    // Return a graceful error message that the client can show in the UI
+    throw new Error('Mesin AI sedang sangat sibuk atau mengalami gangguan teknis sementara. Silakan coba kembali dalam 30 detik.');
   }
 );

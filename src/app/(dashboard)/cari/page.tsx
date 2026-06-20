@@ -121,9 +121,13 @@ export default function CariPage() {
         localStorage.setItem('ontapp_discovery_history', JSON.stringify([...newItems, ...history].slice(0, 50)));
       }
       
-    } catch (err) {
-      console.error(err);
-      toast({ variant: "destructive", title: "Pencarian Gagal", description: "Mesin AI sedang sibuk. Kami sedang mencoba kembali otomatis." });
+    } catch (err: any) {
+      console.error('Search handler error:', err);
+      toast({ 
+        variant: "destructive", 
+        title: "Pencarian Terganggu", 
+        description: err.message || "Terjadi respon tidak terduga dari server. Harap coba lagi." 
+      });
     } finally {
       setLoading(false);
     }
@@ -172,6 +176,7 @@ export default function CariPage() {
           toast({ title: "Hasil Ditemukan", description: "Menampilkan bisnis dalam radius 5km." });
         } catch (err) {
           console.error(err);
+          toast({ variant: "destructive", title: "Gagal", description: "Gagal memproses pencarian sekitar." });
         } finally {
           setLoading(false);
         }
@@ -198,6 +203,7 @@ export default function CariPage() {
     } catch (err) {
       console.error(err);
       setTranslations(prev => ({ ...prev, [resId]: { text: "", show: false, loading: false, detected: "" } }));
+      toast({ variant: "destructive", title: "Translate Gagal", description: "AI Translator sedang sibuk." });
     }
   };
 
@@ -330,7 +336,7 @@ export default function CariPage() {
                   </div>
                   <div className="space-y-1 max-h-[200px] overflow-y-auto no-scrollbar">
                     {POPULAR_LOCATIONS.filter(l => l.toLowerCase().includes(locationSearch.toLowerCase())).map((loc) => (
-                      <button key={loc} onClick={() => { setActiveLocation(loc); setLocationSearch(""); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                      <button key={loc} type="button" onClick={() => { setActiveLocation(loc); setLocationSearch(""); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
                         {loc}
                       </button>
                     ))}
@@ -344,7 +350,7 @@ export default function CariPage() {
               </Button>
             </div>
 
-            <Button onClick={(e) => handleSearch(e)} disabled={loading} className="w-full h-14 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-sm shadow-md transition-all active:scale-95 flex gap-2">
+            <Button type="submit" disabled={loading} className="w-full h-14 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-sm shadow-md transition-all active:scale-95 flex gap-2">
               {loading ? <RefreshCw className="size-4 animate-spin" /> : <><Search className="size-4" /> Cari Sekarang</>}
             </Button>
           </form>

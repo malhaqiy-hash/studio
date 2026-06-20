@@ -53,7 +53,7 @@ const marketRadarFlow = ai.defineFlow(
   },
   async (input) => {
     let lastError;
-    const maxRetries = 3;
+    const maxRetries = 5;
     for (let i = 0; i < maxRetries; i++) {
       try {
         const { output } = await marketRadarPrompt(input);
@@ -61,14 +61,23 @@ const marketRadarFlow = ai.defineFlow(
       } catch (err: any) {
         lastError = err;
         const errMsg = String(err).toLowerCase();
-        const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('quota') || errMsg.includes('busy');
+        const isRetryable = errMsg.includes('429') || 
+                            errMsg.includes('503') || 
+                            errMsg.includes('quota') || 
+                            errMsg.includes('busy') || 
+                            errMsg.includes('unexpected response') ||
+                            errMsg.includes('network');
+                            
         if (isRetryable && i < maxRetries - 1) {
-          await new Promise(r => setTimeout(r, Math.pow(2, i) * 2000));
+          const delay = Math.pow(2, i) * 2000;
+          console.warn(`Market Radar retrying (Attempt ${i + 1}/${maxRetries}) due to: ${errMsg}`);
+          await new Promise(r => setTimeout(r, delay));
           continue;
         }
         break;
       }
     }
-    throw lastError || new Error('Gagal memuat Market Radar. AI sedang sibuk.');
+    console.error('Market Radar Flow failed:', lastError);
+    throw new Error('Gagal memuat Market Radar. AI sedang sibuk atau terjadi gangguan jaringan. Silakan coba kembali.');
   }
 );
