@@ -12,6 +12,7 @@ export interface ContentItem {
   price?: string;
   visibility?: 'public' | 'private';
   timestamp?: string;
+  locationLink?: string; // Field baru untuk link alamat/lokasi
 }
 
 export interface Account {

@@ -73,7 +73,8 @@ export default function ProfilePage() {
   const [isCloudLoading, setIsCloudLoading] = React.useState(false);
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
   const [newItem, setNewItem] = React.useState<Partial<ContentItem>>({
-    visibility: 'public'
+    visibility: 'public',
+    locationLink: ''
   });
   const [newLinkUrl, setNewLinkUrl] = React.useState('');
   
@@ -100,7 +101,7 @@ export default function ProfilePage() {
           updateActiveAccount({ avatar: result });
           toast({ title: "Foto profil diperbarui dari perangkat" });
         } else if (mediaTarget === 'cover') {
-          // Simulasi update cover (di real app simpan ke field cover)
+          updateActiveAccount({ id: activeAccount.id, avatar: activeAccount.avatar }); // Trigger update
           toast({ title: "Foto sampul diperbarui dari perangkat" });
         } else if (mediaTarget === 'post') {
           setNewItem(prev => ({ ...prev, image: result }));
@@ -119,7 +120,6 @@ export default function ProfilePage() {
       description: "Mengotorisasi akses ke pustaka cloud Anda..." 
     });
 
-    // Simulasi integrasi Cloud API
     setTimeout(() => {
       const simulatedUrl = source === 'drive' 
         ? `https://picsum.photos/seed/drive${Date.now()}/1200/800`
@@ -166,13 +166,14 @@ export default function ProfilePage() {
       description: newItem.description || '',
       price: newItem.price,
       visibility: newItem.visibility || 'public',
-      timestamp: 'Baru saja'
+      timestamp: 'Baru saja',
+      locationLink: newItem.locationLink
     };
     updateActiveAccount({
       items: [item, ...(activeAccount.items || [])]
     });
     setIsContentModalOpen(false);
-    setNewItem({ visibility: 'public' });
+    setNewItem({ visibility: 'public', locationLink: '' });
     toast({ title: 'Konten berhasil dipublikasikan' });
   };
 
@@ -198,7 +199,8 @@ export default function ProfilePage() {
         title: activeAccount.type === 'bisnis' ? "Penawaran Kerjasama Kemitraan Strategis" : "Portfolio Proyek Inovasi Terbaru",
         description: `Kami sedang aktif mencari kolaborasi baru di sektor ${activeAccount.extra || 'industri'}. Fokus utama kami adalah pada efisiensi operasional dan integrasi teknologi cerdas untuk pertumbuhan berkelanjutan.`,
         visibility: 'public',
-        image: `https://picsum.photos/seed/ai${Date.now()}/800/500`
+        image: `https://picsum.photos/seed/ai${Date.now()}/800/500`,
+        locationLink: 'https://maps.google.com/?q=Jakarta'
       });
       setIsContentModalOpen(true);
     }, 1200);
@@ -213,10 +215,13 @@ export default function ProfilePage() {
     return <Link2 className="size-4" />;
   };
 
+  const openInMaps = (url?: string) => {
+    if (url) window.open(url, '_blank');
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-3xl mx-auto space-y-12 pb-24">
-        {/* Hidden File Input */}
         <input 
           type="file" 
           ref={fileInputRef} 
@@ -225,7 +230,6 @@ export default function ProfilePage() {
           onChange={handleFileChange} 
         />
 
-        {/* Cover & Avatar Section */}
         <section className="relative group">
           <div className="h-48 md:h-64 w-full bg-slate-50 border-b border-slate-100 relative overflow-hidden rounded-[2.5rem]">
             <img 
@@ -271,7 +275,6 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* Bio Section */}
         <section className="px-6 md:px-10 space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div className="flex items-center gap-6 text-[11px] font-black text-slate-400 uppercase tracking-widest">
@@ -301,7 +304,6 @@ export default function ProfilePage() {
           )}
         </section>
 
-        {/* Links Section */}
         <section className="px-6 md:px-10 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Hub Koneksi Eksternal</h3>
@@ -325,7 +327,6 @@ export default function ProfilePage() {
 
         <hr className="border-slate-100 mx-6 md:mx-10" />
 
-        {/* Content Section */}
         <section className="px-6 md:px-10 space-y-8 pb-20">
           <div className="flex items-center justify-between">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
@@ -368,6 +369,17 @@ export default function ProfilePage() {
                           <img src={item.image} className="w-full h-auto object-cover" alt="Post" />
                         </div>
                       )}
+                      {item.locationLink && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => openInMaps(item.locationLink)}
+                          className="h-8 px-3 rounded-lg text-rose-500 hover:bg-rose-50 font-black text-[10px] uppercase gap-1.5"
+                        >
+                          <MapPin className="size-3.5 fill-rose-50" />
+                          Lihat Lokasi
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -377,9 +389,20 @@ export default function ProfilePage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                     <button onClick={() => handleRemoveItem(item.id)} className="absolute top-4 right-4 size-10 bg-rose-500 text-white rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110 active:scale-90"><Trash2 className="size-5" /></button>
-                    <CardContent className="p-6">
+                    <CardContent className="p-6 space-y-3">
                       <h4 className="font-black text-slate-900 text-lg group-hover:text-teal-600 transition-colors line-clamp-1">{item.title}</h4>
-                      <p className="text-slate-500 text-xs font-medium mt-1 line-clamp-2">{item.description}</p>
+                      <p className="text-slate-500 text-xs font-medium line-clamp-2">{item.description}</p>
+                      {item.locationLink && (
+                        <div className="pt-2 border-t border-slate-50">
+                          <button 
+                            onClick={() => openInMaps(item.locationLink)}
+                            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600 transition-colors"
+                          >
+                            <MapPin className="size-3" />
+                            Lokasi Bisnis
+                          </button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 )}
@@ -542,6 +565,15 @@ export default function ProfilePage() {
               <Label className="font-black text-[10px] uppercase tracking-widest text-slate-400 ml-1">Judul Konten</Label>
               <Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-2xl h-14 bg-slate-50 border-none font-bold px-6" placeholder="Berikan judul yang menarik..." />
             </div>
+            
+            <div className="space-y-2">
+              <Label className="font-black text-[10px] uppercase tracking-widest text-slate-400 ml-1">Link Alamat / Lokasi (Opsional)</Label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <Input value={newItem.locationLink} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} className="rounded-2xl h-12 bg-slate-50 border-none px-12 font-medium" placeholder="https://maps.google.com/..." />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label className="font-black text-[10px] uppercase tracking-widest text-slate-400 ml-1">Deskripsi Detail</Label>
               <Textarea value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="rounded-2xl bg-slate-50 border-none min-h-[140px] px-6 py-4 font-medium" placeholder="Ceritakan detail keunggulan produk atau proyek Anda..." />

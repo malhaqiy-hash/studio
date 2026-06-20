@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -46,7 +45,8 @@ const MOCK_POSTS = [
     time: "Baru saja",
     stats: { likes: "1.2k", comments: "84" },
     verified: true,
-    tag: "Trending"
+    tag: "Trending",
+    locationLink: "https://maps.google.com/?q=Southeast+Asia"
   },
   {
     id: "p2",
@@ -58,7 +58,8 @@ const MOCK_POSTS = [
     time: "2 jam yang lalu",
     stats: { likes: "452", comments: "12" },
     verified: true,
-    image: "https://picsum.photos/seed/truck/800/400"
+    image: "https://picsum.photos/seed/truck/800/400",
+    locationLink: "https://maps.google.com/?q=Jakarta"
   },
   {
     id: "p3",
@@ -70,7 +71,8 @@ const MOCK_POSTS = [
     time: "5 jam yang lalu",
     stats: { likes: "890", comments: "45" },
     verified: false,
-    urgent: true
+    urgent: true,
+    locationLink: "https://maps.google.com/?q=Brussels"
   }
 ];
 
@@ -152,6 +154,10 @@ export default function FeedPage() {
         [postId]: { text: "", show: false, loading: false }
       }));
     }
+  };
+
+  const openInMaps = (url?: string) => {
+    if (url) window.open(url, '_blank');
   };
 
   return (
@@ -259,6 +265,18 @@ export default function FeedPage() {
                           {post.image && (
                             <div className="rounded-3xl overflow-hidden border border-slate-50 mt-4">
                               <img src={post.image} alt="Content" className="w-full h-auto object-cover max-h-[300px]" />
+                            </div>
+                          )}
+
+                          {post.locationLink && (
+                            <div className="pt-2">
+                              <button 
+                                onClick={() => openInMaps(post.locationLink)}
+                                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600 transition-colors bg-rose-50/50 px-3 py-1.5 rounded-lg w-fit"
+                              >
+                                <MapPin className="size-3.5 fill-rose-50" />
+                                Lihat Lokasi
+                              </button>
                             </div>
                           )}
                         </CardContent>
