@@ -1,6 +1,7 @@
 'use server';
 /**
  * @fileOverview A B2B Strategic Business Consultant AI agent.
+ * Optimized for cost with token limits and context windowing.
  */
 
 import { ai } from '@/ai/genkit';
@@ -30,12 +31,16 @@ const businessAssistantPrompt = ai.definePrompt({
   name: 'businessAssistantPrompt',
   input: { schema: BusinessAssistantInputSchema },
   output: { schema: z.string() },
+  config: {
+    maxOutputTokens: 300, // Cost Efficiency: Shorter responses
+    temperature: 0.7
+  },
   prompt: `You are an expert B2B strategic business consultant for the OnTapp Global Network.
 Your goal is to help users navigate the ecosystem, identify high-value strategic partners, and optimize their business pipeline.
 
 User Query: {{{message}}}
 
-Provide concise, professional, and actionable business advice.`,
+Provide concise, professional, and actionable business advice in maximum 2-3 short paragraphs.`,
 });
 
 const businessAssistantFlow = ai.defineFlow(
@@ -45,11 +50,17 @@ const businessAssistantFlow = ai.defineFlow(
     outputSchema: BusinessAssistantOutputSchema,
   },
   async (input) => {
+    // Context Windowing: Only send the last 5 messages to save input tokens
+    const windowedHistory = input.history ? input.history.slice(-5) : [];
+    
     let lastError;
     const maxRetries = 2;
     for (let i = 0; i < maxRetries; i++) {
       try {
-        const { output } = await businessAssistantPrompt(input);
+        const { output } = await businessAssistantPrompt({
+          ...input,
+          history: windowedHistory
+        });
         if (output) return { response: output! };
       } catch (err: any) {
         lastError = err;
@@ -64,7 +75,7 @@ const businessAssistantFlow = ai.defineFlow(
       }
     }
     return { 
-      response: "Terima kasih atas pertanyaannya. Saat ini trafik AI sedang sangat tinggi. Secara umum, saya menyarankan Anda untuk terus memperluas jaringan di OnTapp Hub dan memverifikasi profil bisnis Anda untuk mendapatkan sinergi maksimal. Silakan tanyakan kembali detailnya dalam beberapa saat." 
+      response: "Terima kasih atas pertanyaannya. Saat ini trafik AI sedang sangat tinggi. Secara umum, saya menyarankan Anda untuk terus memperluas jaringan di OnTapp Hub. Silakan tanyakan kembali detailnya dalam beberapa saat." 
     };
   }
 );
