@@ -343,13 +343,13 @@ export default function CariPage() {
                       {activeCategory ? (
                         <div className="flex items-center gap-1.5">
                           {activeCategory}
-                          <button 
-                            type="button"
+                          <span 
+                            role="button"
                             onClick={(e) => { e.stopPropagation(); setActiveCategory(null); }}
-                            className="p-1 hover:bg-slate-100 rounded-full transition-colors"
+                            className="p-1 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
                           >
                             <X className="size-3 text-slate-400 hover:text-rose-500" />
-                          </button>
+                          </span>
                         </div>
                       ) : (
                         language === 'id' ? "Pilih Kategori" : "Pick Category"
@@ -376,13 +376,13 @@ export default function CariPage() {
                       {(!activeLocation.includes('Lokasi') && !activeLocation.includes('Location')) ? (
                         <div className="flex items-center gap-1.5">
                           {activeLocation}
-                          <button 
-                            type="button"
+                          <span 
+                            role="button"
                             onClick={(e) => { e.stopPropagation(); setActiveLocation(language === 'id' ? "Pilih Lokasi" : "Choose Location"); }}
-                            className="p-1 hover:bg-slate-100 rounded-full transition-colors"
+                            className="p-1 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
                           >
                             <X className="size-3 text-slate-400 hover:text-rose-500" />
-                          </button>
+                          </span>
                         </div>
                       ) : (
                         activeLocation
