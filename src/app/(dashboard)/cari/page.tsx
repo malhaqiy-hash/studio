@@ -81,6 +81,7 @@ export default function CariPage() {
   
   const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
   const [activeLocation, setActiveLocation] = React.useState("Pilih Lokasi");
+  const [isLocationOpen, setIsLocationOpen] = React.useState(false);
   const [locationSearch, setLocationSearch] = React.useState("");
   const [coords, setCoords] = React.useState<{lat?: number, lng?: number}>({});
   
@@ -97,7 +98,10 @@ export default function CariPage() {
   const handleSearch = async (e?: React.FormEvent, overrideQuery?: string, overrideCoords?: {lat?: number, lng?: number}) => {
     e?.preventDefault();
     const finalQuery = overrideQuery || query;
-    if (!finalQuery && !activeCategory && !previewImage) return;
+    if (!finalQuery && !activeCategory && !previewImage) {
+      toast({ title: "Input diperlukan", description: "Silakan masukkan kata kunci atau pilih kategori.", variant: "destructive" });
+      return;
+    }
     
     setLoading(true);
     setTranslations({});
@@ -198,8 +202,8 @@ export default function CariPage() {
         if (error.code === error.PERMISSION_DENIED) errorMsg = "Izin lokasi ditolak. Silakan masukkan lokasi secara manual.";
         
         toast({ variant: "destructive", title: "Gagal Akses GPS", description: errorMsg });
-        // Fallback: Show location picker or use a default if dev
         setActiveLocation("Pilih Lokasi Manual");
+        setIsLocationOpen(true);
       });
     } else {
       setLoading(false);
@@ -294,7 +298,7 @@ export default function CariPage() {
             {previewImage && (
               <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-accent/20">
                 <img src={previewImage} className="w-full h-full object-cover" alt="Search visual" />
-                <button onClick={() => setPreviewImage(null)} className="absolute top-1 right-1 bg-slate-900/80 text-white rounded-full p-1">
+                <button type="button" onClick={() => setPreviewImage(null)} className="absolute top-1 right-1 bg-slate-900/80 text-white rounded-full p-1">
                   <X className="size-3" />
                 </button>
                 {isAnalyzingImage && (
@@ -331,7 +335,7 @@ export default function CariPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Popover>
+              <Popover open={isLocationOpen} onOpenChange={setIsLocationOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full h-12 justify-between rounded-xl border-slate-100 bg-white text-slate-600 font-bold hover:bg-slate-50 px-4 text-xs">
                     <div className="flex items-center gap-2">
@@ -341,7 +345,7 @@ export default function CariPage() {
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl border-slate-100 space-y-3">
+                <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl border-slate-100 space-y-3 z-[150] pointer-events-auto">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
                     <Input 
@@ -352,8 +356,23 @@ export default function CariPage() {
                     />
                   </div>
                   <div className="space-y-1 max-h-[200px] overflow-y-auto no-scrollbar">
+                    {locationSearch && !POPULAR_LOCATIONS.some(l => l.toLowerCase() === locationSearch.toLowerCase()) && (
+                      <button 
+                        key="custom-loc"
+                        type="button" 
+                        onClick={() => { setActiveLocation(locationSearch); setLocationSearch(""); setCoords({}); setIsLocationOpen(false); }} 
+                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-accent bg-teal-50 hover:bg-teal-100 transition-colors flex items-center gap-2 pointer-events-auto cursor-pointer"
+                      >
+                        <MapPin className="size-3" /> Gunakan "{locationSearch}"
+                      </button>
+                    )}
                     {POPULAR_LOCATIONS.filter(l => l.toLowerCase().includes(locationSearch.toLowerCase())).map((loc) => (
-                      <button key={loc} type="button" onClick={() => { setActiveLocation(loc); setLocationSearch(""); setCoords({}); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                      <button 
+                        key={loc} 
+                        type="button" 
+                        onClick={() => { setActiveLocation(loc); setLocationSearch(""); setCoords({}); setIsLocationOpen(false); }} 
+                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors pointer-events-auto cursor-pointer block"
+                      >
                         {loc}
                       </button>
                     ))}
@@ -396,6 +415,9 @@ export default function CariPage() {
                 <div className="flex items-center gap-2">
                   <h3 className="font-black text-slate-900 text-base tracking-tight">Hasil Akurat</h3>
                   <Badge className="bg-teal-100 text-teal-700 font-bold px-2 py-0.5 rounded-lg text-[10px]">{results.results.length}</Badge>
+                </div>
+                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase text-teal-600 bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
+                  <ShieldCheck className="size-3" /> Strict Matching Aktif
                 </div>
               </div>
 
@@ -445,6 +467,7 @@ export default function CariPage() {
                                   </button>
                                 )}
                                 <div className="flex items-center gap-1 text-[10px] font-black text-teal-600">
+                                  <Zap className="size-3 text-amber-500 fill-amber-500" />
                                   {result.matchScore}% Relevance
                                 </div>
                               </div>
