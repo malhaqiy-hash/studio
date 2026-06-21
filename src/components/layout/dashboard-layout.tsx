@@ -258,11 +258,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
-        <div className="relative size-16 mb-4">
+        <div className="relative size-12 mb-4">
           <div className="absolute inset-0 border-4 border-accent/20 rounded-2xl" />
           <div className="absolute inset-0 border-4 border-accent rounded-2xl border-t-transparent animate-spin" />
         </div>
-        <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px] animate-pulse">Authorizing Session...</p>
+        <p className="text-muted-foreground font-black uppercase tracking-widest text-[9px] animate-pulse">Authorizing Session...</p>
       </div>
     );
   }
@@ -273,62 +273,62 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-body relative">
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       
-      <header className="sticky top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm">
+      <header className="sticky top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-12 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <Link href="/feed" className="flex items-center gap-2">
-            <div className="size-8 rounded-lg bg-accent flex items-center justify-center text-white font-black text-xl shadow-lg shadow-accent/20">
+            <div className="size-7 rounded-lg bg-accent flex items-center justify-center text-white font-black text-lg shadow-lg shadow-accent/20">
               O
             </div>
-            <span className="font-headline font-black text-lg tracking-tight text-foreground">OnTapp</span>
+            <span className="font-headline font-black text-base tracking-tight text-foreground">OnTapp</span>
           </Link>
-          <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter px-1.5 py-0 border-accent/30 text-accent bg-accent/5">
+          <Badge variant="outline" className="text-[8px] font-black uppercase tracking-tighter px-1.5 py-0 border-accent/30 text-accent bg-accent/5">
             {activeAccount?.type || 'Beta'}
           </Badge>
         </div>
         
         <div className="flex items-center gap-2">
           <Link href="/messages">
-            <Button variant="ghost" size="icon" className="p-2 text-foreground/70 hover:bg-accent/10 hover:text-accent rounded-full transition">
-              <MessageSquare className="size-5" />
+            <Button variant="ghost" size="icon" className="size-9 text-foreground/70 hover:bg-accent/10 hover:text-accent rounded-full transition">
+              <MessageSquare className="size-4" />
             </Button>
           </Link>
 
           <Link href="/notifications">
-            <Button variant="ghost" size="icon" className="relative p-2 text-foreground/70 hover:bg-accent/10 hover:text-accent rounded-full transition">
-              <Bell className="size-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-background"></span>
+            <Button variant="ghost" size="icon" className="relative size-9 text-foreground/70 hover:bg-accent/10 hover:text-accent rounded-full transition">
+              <Bell className="size-4" />
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full ring-2 ring-background"></span>
             </Button>
           </Link>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center rounded-full border-2 border-accent/20 hover:border-accent transition p-0.5 outline-none">
-                <Avatar className="h-7 w-7 rounded-full shadow-sm">
+                <Avatar className="h-6 w-6 rounded-full shadow-sm">
                   <AvatarImage src={activeAccount.avatar} className="object-cover" />
-                  <AvatarFallback className="bg-accent text-white font-bold text-[10px]">{activeAccount.name[0]}</AvatarFallback>
+                  <AvatarFallback className="bg-accent text-white font-bold text-[8px]">{activeAccount.name[0]}</AvatarFallback>
                 </Avatar>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-72 rounded-2xl p-2 shadow-2xl border-border bg-card">
-              <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b mb-2">
+            <DropdownMenuContent align="end" className="w-64 rounded-2xl p-2 shadow-2xl border-border bg-card">
+              <DropdownMenuLabel className="px-3 py-1.5 text-[9px] font-black text-muted-foreground uppercase tracking-widest border-b mb-1">
                 Menu Akun
               </DropdownMenuLabel>
               
               <DropdownMenuGroup>
                 <Link href="/profile">
-                  <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1 hover:bg-accent/10 hover:text-accent">
-                    <div className="size-8 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
-                      <User className="size-4" />
+                  <DropdownMenuItem className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold cursor-pointer transition-colors mb-0.5 hover:bg-accent/10 hover:text-accent">
+                    <div className="size-7 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                      <User className="size-3.5" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-sm leading-none mb-1">{t('view_profile')}</span>
-                      <span className="text-[9px] uppercase tracking-widest opacity-60">Manage Portfolio</span>
+                      <span className="text-xs leading-none mb-0.5">{t('view_profile')}</span>
+                      <span className="text-[8px] uppercase tracking-widest opacity-60">Manage Portfolio</span>
                     </div>
                   </DropdownMenuItem>
                 </Link>
 
-                <DropdownMenuSeparator className="my-2" />
-                <DropdownMenuLabel className="px-3 py-1 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                <DropdownMenuSeparator className="my-1.5" />
+                <DropdownMenuLabel className="px-3 py-1 text-[8px] font-black text-muted-foreground uppercase tracking-widest">
                   Ganti Profil
                 </DropdownMenuLabel>
 
@@ -337,68 +337,68 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     key={acc.id}
                     onSelect={() => handleSwitchAccount(acc.id)}
                     className={cn(
-                      "flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer transition-colors mb-1",
+                      "flex items-center justify-between px-3 py-2.5 rounded-xl font-bold cursor-pointer transition-colors mb-0.5",
                       activeAccount.id === acc.id 
                         ? "bg-accent/10 text-accent" 
                         : "text-foreground focus:bg-accent/10 focus:text-accent"
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <Avatar className="size-8 rounded-xl">
+                      <Avatar className="size-7 rounded-lg">
                         <AvatarImage src={acc.avatar} className="object-cover" />
-                        <AvatarFallback className="text-[8px] bg-muted">{acc.name[0]}</AvatarFallback>
+                        <AvatarFallback className="text-[7px] bg-muted">{acc.name[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <span className="text-sm leading-none mb-1">{acc.name}</span>
-                        <span className="text-[9px] uppercase tracking-widest opacity-60">{acc.type}</span>
+                        <span className="text-xs leading-none mb-0.5">{acc.name}</span>
+                        <span className="text-[8px] uppercase tracking-widest opacity-60">{acc.type}</span>
                       </div>
                     </div>
-                    {activeAccount.id === acc.id && <Check className="size-4" />}
+                    {activeAccount.id === acc.id && <Check className="size-3.5" />}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
 
-              <DropdownMenuSeparator className="my-2" />
+              <DropdownMenuSeparator className="my-1.5" />
 
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-foreground focus:bg-accent/10 focus:text-accent cursor-pointer">
-                  <UserPlus className="size-4" />
+                <DropdownMenuSubTrigger className="gap-3 px-3 py-2 rounded-xl font-bold text-xs text-foreground focus:bg-accent/10 focus:text-accent cursor-pointer">
+                  <UserPlus className="size-3.5" />
                   Tambahkan Akun
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[160px] bg-card text-foreground">
-                    <DropdownMenuItem onSelect={() => handleOpenRegistration('pribadi')} className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"><User className="size-4 text-muted-foreground" /> Pribadi</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => handleOpenRegistration('professional')} className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"><ShieldCheck className="size-4 text-emerald-400" /> Professional</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => handleOpenRegistration('bisnis')} className="font-bold px-4 py-2.5 rounded-lg cursor-pointer flex gap-3"><Briefcase className="size-4 text-accent" /> Bisnis</DropdownMenuItem>
+                  <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card text-foreground">
+                    <DropdownMenuItem onSelect={() => handleOpenRegistration('pribadi')} className="font-bold text-xs px-3 py-2 rounded-lg cursor-pointer flex gap-2.5"><User className="size-3.5 text-muted-foreground" /> Pribadi</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleOpenRegistration('professional')} className="font-bold text-xs px-3 py-2 rounded-lg cursor-pointer flex gap-2.5"><ShieldCheck className="size-3.5 text-emerald-400" /> Professional</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleOpenRegistration('bisnis')} className="font-bold text-xs px-3 py-2 rounded-lg cursor-pointer flex gap-2.5"><Briefcase className="size-3.5 text-accent" /> Bisnis</DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
 
-              <DropdownMenuSeparator className="my-2" />
-              <DropdownMenuItem onClick={handleLogout} className="text-rose-500 font-bold px-3 py-2.5 rounded-xl focus:bg-rose-500/10 focus:text-rose-500 cursor-pointer flex gap-3">
-                <LogOut className="size-4" /> Logout
+              <DropdownMenuSeparator className="my-1.5" />
+              <DropdownMenuItem onClick={handleLogout} className="text-rose-500 font-bold text-xs px-3 py-2 rounded-xl focus:bg-rose-500/10 focus:text-rose-500 cursor-pointer flex gap-2.5">
+                <LogOut className="size-3.5" /> Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
 
-      <main className="flex-1 pb-28 pt-4 px-4 w-full overflow-x-hidden relative">
+      <main className="flex-1 pb-24 pt-2 px-3 w-full overflow-x-hidden relative">
         <div className="max-w-4xl mx-auto">
           {children}
         </div>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t bg-background/95 backdrop-blur-md pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
-        <div className="grid grid-cols-3 h-16 items-center justify-items-center text-[10px] font-black uppercase tracking-widest text-muted-foreground relative">
+      <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t bg-background/95 backdrop-blur-md pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <div className="grid grid-cols-3 h-14 items-center justify-items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground relative">
           
-          <Link href="/feed" className={cn("flex flex-col items-center gap-1 w-full py-2 transition-colors", pathname === "/feed" ? "text-accent" : "hover:text-accent")}>
-            <Rss className="size-6" />
+          <Link href="/feed" className={cn("flex flex-col items-center gap-0.5 w-full py-1.5 transition-colors", pathname === "/feed" ? "text-accent" : "hover:text-accent")}>
+            <Rss className="size-5" />
             <span>{t('feed')}</span>
           </Link>
 
-          <Link href="/cari" className={cn("flex flex-col items-center gap-1 w-full py-2 transition-colors", pathname === "/cari" ? "text-accent" : "hover:text-accent")}>
-            <Search className="size-6" />
+          <Link href="/cari" className={cn("flex flex-col items-center gap-0.5 w-full py-1.5 transition-colors", pathname === "/cari" ? "text-accent" : "hover:text-accent")}>
+            <Search className="size-5" />
             <span>{t('search')}</span>
           </Link>
 
@@ -406,63 +406,63 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             {pathname === '/feed' && (
               <button 
                 onClick={() => window.dispatchEvent(new CustomEvent('open-post-modal'))}
-                className="absolute bottom-36 w-12 h-12 bg-accent rounded-full flex items-center justify-center text-white shadow-xl hover:bg-accent/80 transition active:scale-95 z-[96] ring-4 ring-background"
+                className="absolute bottom-28 w-10 h-10 bg-accent rounded-full flex items-center justify-center text-white shadow-xl hover:bg-accent/80 transition active:scale-95 z-[96] ring-4 ring-background"
               >
-                <Plus className="size-6" />
+                <Plus className="size-5" />
               </button>
             )}
 
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
-              className="absolute bottom-20 w-12 h-12 bg-accent rounded-full flex items-center justify-center text-white shadow-xl hover:bg-accent/80 transition active:scale-95 z-[95] ring-4 ring-background"
+              className="absolute bottom-16 w-10 h-10 bg-accent rounded-full flex items-center justify-center text-white shadow-xl hover:bg-accent/80 transition active:scale-95 z-[95] ring-4 ring-background"
             >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
             </button>
 
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild>
-                <button className="flex flex-col items-center gap-1 hover:text-accent w-full py-2 outline-none"><Menu className="size-6" /><span>{t('more')}</span></button>
+                <button className="flex flex-col items-center gap-0.5 hover:text-accent w-full py-1.5 outline-none"><Menu className="size-5" /><span>{t('more')}</span></button>
               </SheetTrigger>
               <SheetContent 
                 side="bottom" 
-                className="rounded-t-[2.5rem] border-none p-0 h-[90vh] bg-card overflow-hidden"
+                className="rounded-t-[2rem] border-none p-0 h-[85vh] bg-card overflow-hidden"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
               >
-                <div className="w-full flex justify-center pt-4 pb-2">
-                  <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
+                <div className="w-full flex justify-center pt-3 pb-1">
+                  <div className="w-10 h-1 bg-muted-foreground/20 rounded-full" />
                 </div>
 
-                <SheetHeader className="p-8 pt-2 pb-4 bg-muted border-b border-border">
+                <SheetHeader className="p-6 pt-1 pb-3 bg-muted border-b border-border">
                   <div className="flex items-center justify-between">
-                    <SheetTitle className="text-xl font-black text-foreground tracking-tight flex items-center gap-2"><LayoutGrid className="size-5 text-accent" />OnTapp Hub</SheetTitle>
-                    <Badge variant="outline" className="bg-card border-border text-muted-foreground font-bold px-3 uppercase text-[10px]">{activeAccount?.type} Mode</Badge>
+                    <SheetTitle className="text-lg font-black text-foreground tracking-tight flex items-center gap-2"><LayoutGrid className="size-4 text-accent" />OnTapp Hub</SheetTitle>
+                    <Badge variant="outline" className="bg-card border-border text-muted-foreground font-bold px-2 py-0 uppercase text-[8px]">{activeAccount?.type} Mode</Badge>
                   </div>
                 </SheetHeader>
-                <div className="overflow-y-auto h-full pb-32 no-scrollbar">
+                <div className="overflow-y-auto h-full pb-24 no-scrollbar">
                   <div className="flex flex-col divide-y divide-border">
                     {drawerItems.map((item) => (
-                      <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-8 py-5 transition-colors gap-6 group", pathname === item.href ? "bg-accent/5 text-accent" : "bg-transparent hover:bg-accent/10")}>
-                        <div className={cn("size-10 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", pathname === item.href ? "bg-accent text-white" : "bg-muted text-muted-foreground")}><item.icon className="size-5" /></div>
-                        <span className="text-sm font-black uppercase tracking-widest">{item.label}</span>
-                        <ChevronRight className="ml-auto size-4 text-muted-foreground/30 group-hover:text-accent transition-colors" />
+                      <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-6 py-4 transition-colors gap-5 group", pathname === item.href ? "bg-accent/5 text-accent" : "bg-transparent hover:bg-accent/10")}>
+                        <div className={cn("size-9 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", pathname === item.href ? "bg-accent text-white" : "bg-muted text-muted-foreground")}><item.icon className="size-4.5" /></div>
+                        <span className="text-xs font-black uppercase tracking-widest">{item.label}</span>
+                        <ChevronRight className="ml-auto size-3.5 text-muted-foreground/30 group-hover:text-accent transition-colors" />
                       </Link>
                     ))}
-                    <div className="px-8 py-6 bg-card">
-                      <div className="flex items-center gap-6 mb-4">
-                        <div className="size-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center">
-                          <Languages className="size-5" />
+                    <div className="px-6 py-5 bg-card">
+                      <div className="flex items-center gap-5 mb-3">
+                        <div className="size-9 rounded-xl bg-muted text-muted-foreground flex items-center justify-center">
+                          <Languages className="size-4.5" />
                         </div>
-                        <span className="text-sm font-black uppercase tracking-widest">Bahasa</span>
+                        <span className="text-xs font-black uppercase tracking-widest">Bahasa</span>
                       </div>
                       <LanguagePicker />
                     </div>
-                    <button onClick={handleLogout} className="flex items-center px-8 py-6 bg-rose-500/5 hover:bg-rose-500/10 transition-colors gap-6 group text-rose-500 w-full text-left">
-                      <div className="size-10 rounded-xl bg-card border border-rose-500/20 flex items-center justify-center shadow-sm">
-                        <LogOut className="size-5" />
+                    <button onClick={handleLogout} className="flex items-center px-6 py-5 bg-rose-500/5 hover:bg-rose-500/10 transition-colors gap-5 group text-rose-500 w-full text-left">
+                      <div className="size-9 rounded-xl bg-card border border-rose-500/20 flex items-center justify-center shadow-sm">
+                        <LogOut className="size-4.5" />
                       </div>
-                      <span className="text-sm font-black uppercase tracking-widest">Logout</span>
-                      <ChevronRight className="ml-auto size-4 opacity-50" />
+                      <span className="text-xs font-black uppercase tracking-widest">Logout</span>
+                      <ChevronRight className="ml-auto size-3.5 opacity-50" />
                     </button>
                   </div>
                 </div>
@@ -473,83 +473,83 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </nav>
 
       <Dialog open={isRegModalOpen} onOpenChange={(open) => { if (activeAccount?.isNew) return; setIsRegModalOpen(open); }}>
-        <DialogContent className="w-full md:max-w-md p-0 border-none shadow-none md:shadow-2xl overflow-y-auto max-h-screen h-screen md:h-auto bg-card text-foreground rounded-none md:rounded-[2.5rem] outline-none no-scrollbar">
+        <DialogContent className="w-full md:max-w-md p-0 border-none shadow-none md:shadow-2xl overflow-y-auto max-h-screen h-screen md:h-auto bg-card text-foreground rounded-none md:rounded-[2rem] outline-none no-scrollbar">
           <form onSubmit={handleRegisterSubmit} className="flex flex-col min-h-screen md:min-h-0">
             {/* Header / Welcome Section */}
-            <div className="flex flex-col items-center justify-center text-center space-y-3 pt-12 pb-6 md:pt-12 md:pb-8 md:bg-muted md:border-b md:border-border px-6">
-              <div className="size-16 md:size-20 rounded-full bg-accent text-white flex items-center justify-center font-black text-3xl md:text-4xl shadow-xl shadow-accent/20 animate-in zoom-in-50 duration-700">O</div>
-              <div className="space-y-1">
-                <DialogTitle className="text-2xl md:text-3xl font-black tracking-tight">Selamat Datang</DialogTitle>
-                <DialogDescription className="font-bold text-muted-foreground text-sm md:text-lg">Pilih jenis profil untuk mulai terhubung.</DialogDescription>
+            <div className="flex flex-col items-center justify-center text-center space-y-2.5 pt-10 pb-5 md:pt-10 md:pb-6 md:bg-muted md:border-b md:border-border px-5">
+              <div className="size-14 md:size-16 rounded-full bg-accent text-white flex items-center justify-center font-black text-2xl md:text-3xl shadow-xl shadow-accent/20 animate-in zoom-in-50 duration-700">O</div>
+              <div className="space-y-0.5">
+                <DialogTitle className="text-xl md:text-2xl font-black tracking-tight">Selamat Datang</DialogTitle>
+                <DialogDescription className="font-bold text-muted-foreground text-xs md:text-base">Pilih jenis profil untuk mulai terhubung.</DialogDescription>
               </div>
             </div>
 
             {/* Form Section */}
-            <div className="flex-1 px-6 space-y-6 md:p-10">
+            <div className="flex-1 px-5 space-y-5 md:p-8">
               {!pendingType ? (
-                <div className="grid gap-3 animate-in fade-in zoom-in-95 duration-300">
+                <div className="grid gap-2.5 animate-in fade-in zoom-in-95 duration-300">
                   {['pribadi', 'professional', 'bisnis'].map((type) => (
-                    <button key={type} type="button" onClick={() => setPendingType(type as AccountType)} className="flex items-center gap-4 md:gap-6 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border-2 border-muted hover:border-accent hover:bg-accent/5 transition-all group text-left shadow-sm hover:shadow-md">
-                      <div className="size-12 md:size-14 rounded-xl md:rounded-2xl bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
-                        {type === 'pribadi' ? <User className="size-6 md:size-7" /> : type === 'professional' ? <ShieldCheck className="size-6 md:size-7" /> : <Briefcase className="size-6 md:size-7" />}
+                    <button key={type} type="button" onClick={() => setPendingType(type as AccountType)} className="flex items-center gap-3.5 md:gap-5 p-3.5 md:p-5 rounded-[1.25rem] md:rounded-[1.5rem] border-2 border-muted hover:border-accent hover:bg-accent/5 transition-all group text-left shadow-sm">
+                      <div className="size-10 md:size-12 rounded-xl bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                        {type === 'pribadi' ? <User className="size-5 md:size-6" /> : type === 'professional' ? <ShieldCheck className="size-5 md:size-6" /> : <Briefcase className="size-5 md:size-6" />}
                       </div>
                       <div>
-                        <h4 className="font-black text-base md:text-lg text-foreground capitalize">Profil {type}</h4>
-                        <p className="text-xs md:text-sm text-muted-foreground font-medium">{type === 'pribadi' ? 'Berbagi momen harian.' : type === 'professional' ? 'Pamerkan portofolio.' : 'Akses intelijen pasar.'}</p>
+                        <h4 className="font-black text-sm md:text-base text-foreground capitalize">Profil {type}</h4>
+                        <p className="text-[10px] md:text-xs text-muted-foreground font-medium">{type === 'pribadi' ? 'Berbagi momen harian.' : type === 'professional' ? 'Pamerkan portofolio.' : 'Akses intelijen pasar.'}</p>
                       </div>
                     </button>
                   ))}
                 </div>
               ) : (
-                <div className="space-y-6 animate-in slide-in-from-right-4 duration-500 pb-24">
+                <div className="space-y-5 animate-in slide-in-from-right-4 duration-500 pb-20">
                   <div className="flex items-center justify-between">
-                    <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-9 px-3 font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-accent">← Kembali</Button>
-                    <Badge className="px-4 py-1.5 font-black text-[9px] uppercase border-none bg-accent text-white shadow-lg shadow-accent/20 rounded-full">{pendingType}</Badge>
+                    <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-8 px-2 font-black text-[9px] uppercase tracking-widest text-muted-foreground hover:text-accent">← Kembali</Button>
+                    <Badge className="px-3 py-1 font-black text-[8px] uppercase border-none bg-accent text-white shadow-lg shadow-accent/20 rounded-full">{pendingType}</Badge>
                   </div>
                   
-                  <div className="flex flex-col items-center gap-2">
-                    <div onClick={() => setIsMediaPickerOpen(true)} className="size-24 md:size-32 rounded-full bg-muted border-4 border-dashed border-border flex items-center justify-center text-muted-foreground group cursor-pointer hover:border-accent hover:bg-accent/5 transition-all overflow-hidden shadow-inner">
-                      {regFormData.avatar ? <img src={regFormData.avatar} className="w-full h-full object-cover" alt="Profile" /> : <Camera className="size-8 md:size-10 group-hover:scale-110 transition-transform" />}
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div onClick={() => setIsMediaPickerOpen(true)} className="size-20 md:size-28 rounded-full bg-muted border-4 border-dashed border-border flex items-center justify-center text-muted-foreground group cursor-pointer hover:border-accent hover:bg-accent/5 transition-all overflow-hidden shadow-inner">
+                      {regFormData.avatar ? <img src={regFormData.avatar} className="w-full h-full object-cover" alt="Profile" /> : <Camera className="size-6 md:size-8 group-hover:scale-110 transition-transform" />}
                     </div>
-                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Pilih Foto Profil (Opsional)</span>
+                    <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Pilih Foto Profil (Opsional)</span>
                   </div>
 
-                  <div className="space-y-5">
-                    <div className="space-y-1.5">
-                      <Label className="font-black text-[10px] uppercase tracking-widest text-slate-500 ml-1">Nama Tampilan *</Label>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <Label className="font-black text-[9px] uppercase tracking-widest text-slate-500 ml-1">Nama Tampilan *</Label>
                       <Input 
                         required 
                         placeholder="Nama Lengkap atau Bisnis"
                         value={regFormData.name} 
                         onChange={(e) => setRegFormData({...regFormData, name: e.target.value})} 
-                        className="rounded-xl md:rounded-2xl h-12 md:h-14 bg-muted/30 border-border focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-bold px-5 md:px-6 text-base md:text-lg" 
+                        className="rounded-xl h-11 md:h-12 bg-muted/30 border-border focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-bold px-4 md:px-5 text-sm md:text-base" 
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="font-black text-[10px] uppercase tracking-widest text-slate-500 ml-1">Bio Singkat</Label>
+                    <div className="space-y-1">
+                      <Label className="font-black text-[9px] uppercase tracking-widest text-slate-500 ml-1">Bio Singkat</Label>
                       <Textarea 
                         placeholder="Ceritakan sedikit tentang Anda..."
                         value={regFormData.bio} 
                         onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})} 
-                        className="rounded-xl md:rounded-2xl border-border min-h-[100px] md:min-h-[120px] bg-muted/30 focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-medium px-5 md:px-6 py-3 md:py-4 text-sm md:text-base" 
+                        className="rounded-xl border-border min-h-[80px] md:min-h-[100px] bg-muted/30 focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-medium px-4 md:px-5 py-2.5 md:py-3.5 text-xs md:text-sm" 
                       />
                     </div>
                     {pendingType === 'professional' && (
-                      <div className="space-y-1.5">
-                        <Label className="font-black text-[10px] uppercase tracking-widest text-slate-500 ml-1">Keahlian (Skills)</Label>
+                      <div className="space-y-1">
+                        <Label className="font-black text-[9px] uppercase tracking-widest text-slate-500 ml-1">Keahlian (Skills)</Label>
                         <Input 
                           value={regFormData.extra} 
                           onChange={(e) => setRegFormData({...regFormData, extra: e.target.value})} 
                           placeholder="e.g. UI/UX Designer, Architect" 
-                          className="rounded-xl md:rounded-2xl h-12 md:h-14 bg-muted/30 border-border focus:bg-white font-bold px-5 md:px-6 text-sm md:text-base" 
+                          className="rounded-xl h-11 md:h-12 bg-muted/30 border-border focus:bg-white font-bold px-4 md:px-5 text-xs md:text-sm" 
                         />
                       </div>
                     )}
                     {pendingType === 'bisnis' && (
-                      <div className="space-y-1.5">
-                        <Label className="font-black text-[10px] uppercase tracking-widest text-slate-500 ml-1">Sektor Industri</Label>
+                      <div className="space-y-1">
+                        <Label className="font-black text-[9px] uppercase tracking-widest text-slate-500 ml-1">Sektor Industri</Label>
                         <Select value={regFormData.extra} onValueChange={(v) => setRegFormData({...regFormData, extra: v})}>
-                          <SelectTrigger className="rounded-xl md:rounded-2xl h-12 md:h-14 bg-muted/30 border-border focus:bg-white font-bold px-5 md:px-6 text-sm md:text-base">
+                          <SelectTrigger className="rounded-xl h-11 md:h-12 bg-muted/30 border-border focus:bg-white font-bold px-4 md:px-5 text-xs md:text-sm">
                             <SelectValue placeholder="Pilih Sektor" />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl">
@@ -564,11 +564,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     )}
                   </div>
 
-                  <div className="pt-2">
+                  <div className="pt-1.5">
                     <Button 
                       type="submit" 
                       disabled={!regFormData.name.trim()}
-                      className="w-full h-14 md:h-16 rounded-xl md:rounded-[1.5rem] bg-accent hover:bg-accent/90 text-white font-black text-lg md:text-xl shadow-xl shadow-accent/20 active:scale-[0.98] transition-all"
+                      className="w-full h-12 md:h-14 rounded-xl bg-accent hover:bg-accent/90 text-white font-black text-base md:text-lg shadow-xl shadow-accent/20 active:scale-[0.98] transition-all"
                     >
                       Selesaikan Pendaftaran
                     </Button>
@@ -581,36 +581,36 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </Dialog>
 
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
-        <DialogContent className="w-[90%] md:max-w-md rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-8 border-none shadow-2xl bg-card text-foreground outline-none">
+        <DialogContent className="w-[85%] md:max-w-md rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-6 border-none shadow-2xl bg-card text-foreground outline-none">
           <DialogHeader className="text-center sm:text-center">
-            <DialogTitle className="text-xl md:text-2xl font-black tracking-tight">Impor Gambar</DialogTitle>
-            <DialogDescription className="font-medium text-sm">Pilih sumber foto profil Anda.</DialogDescription>
+            <DialogTitle className="text-lg md:text-xl font-black tracking-tight">Impor Gambar</DialogTitle>
+            <DialogDescription className="font-medium text-xs">Pilih sumber foto profil Anda.</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-3 md:gap-4 py-6 md:py-8">
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-16 md:h-20 rounded-xl md:rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-4 md:gap-6 px-5 md:px-6">
-              <Smartphone className="size-5 md:size-6 text-accent" />
+          <div className="grid gap-2.5 md:gap-3.5 py-5 md:py-6">
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-14 md:h-16 rounded-xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-4 px-4 md:px-5">
+              <Smartphone className="size-4 md:size-5 text-accent" />
               <div className="text-left">
-                <p className="font-black text-xs md:text-sm uppercase tracking-widest">Perangkat</p>
-                <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase opacity-60">Galeri Lokal</p>
+                <p className="font-black text-[10px] md:text-xs uppercase tracking-widest">Perangkat</p>
+                <p className="text-[7px] md:text-[9px] font-bold text-muted-foreground uppercase opacity-60">Galeri Lokal</p>
               </div>
             </Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-16 md:h-20 rounded-xl md:rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-4 md:gap-6 px-5 md:px-6">
-              <Cloud className="size-5 md:size-6 text-blue-500" />
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-14 md:h-16 rounded-xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-4 px-4 md:px-5">
+              <Cloud className="size-4 md:size-5 text-blue-500" />
               <div className="text-left">
-                <p className="font-black text-xs md:text-sm uppercase tracking-widest">Google Drive</p>
-                <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase opacity-60">Impor Cloud</p>
+                <p className="font-black text-[10px] md:text-xs uppercase tracking-widest">Google Drive</p>
+                <p className="text-[7px] md:text-[9px] font-bold text-muted-foreground uppercase opacity-60">Impor Cloud</p>
               </div>
             </Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('photos')} className="h-16 md:h-20 rounded-xl md:rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-4 md:gap-6 px-5 md:px-6">
-              <ImageIcon className="size-5 md:size-6 text-rose-500" />
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('photos')} className="h-14 md:h-16 rounded-xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-4 px-4 md:px-5">
+              <ImageIcon className="size-4 md:size-5 text-rose-500" />
               <div className="text-left">
-                <p className="font-black text-xs md:text-sm uppercase tracking-widest">Google Photos</p>
-                <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase opacity-60">Arsip Foto</p>
+                <p className="font-black text-[10px] md:text-xs uppercase tracking-widest">Google Photos</p>
+                <p className="text-[7px] md:text-[9px] font-bold text-muted-foreground uppercase opacity-60">Arsip Foto</p>
               </div>
             </Button>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-black text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground">Batal</Button>
+            <Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-black text-[9px] md:text-xs uppercase tracking-widest text-muted-foreground">Batal</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
