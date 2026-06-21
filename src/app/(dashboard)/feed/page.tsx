@@ -387,12 +387,7 @@ export default function FeedPage() {
         <DialogContent className="max-w-xl rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground">
           <div className="p-8 space-y-6">
             <DialogHeader>
-              <div className="flex items-center justify-between">
-                <DialogTitle className="text-xl font-black">Buat Postingan</DialogTitle>
-                <button onClick={() => setIsPostModalOpen(false)} className="p-2 hover:bg-muted rounded-full transition-colors">
-                  <X className="size-5 text-muted-foreground" />
-                </button>
-              </div>
+              <DialogTitle className="text-xl font-black">Buat Postingan</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
