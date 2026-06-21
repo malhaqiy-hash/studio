@@ -50,6 +50,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
 import { useAccount } from "@/context/account-context";
+import { ShareSheet } from "@/components/share-sheet";
 
 const CATEGORIES = [
   { id: 'for-you', label: 'For You', icon: Brain },
@@ -111,6 +112,7 @@ export default function FeedPage() {
   const [goToProfile, setGoToProfile] = React.useState(false);
   
   const [zoomedImage, setExpandedImage] = React.useState<string | null>(null);
+  const [shareData, setShareData] = React.useState<{ isOpen: boolean; url: string }>({ isOpen: false, url: '' });
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
@@ -179,21 +181,8 @@ export default function FeedPage() {
   };
 
   const handleShare = (post: any) => {
-    const shareData = {
-      title: `OnTapp: ${post.author}`,
-      text: post.content,
-      url: window.location.href,
-    };
-
-    if (navigator.share) {
-      navigator.share(shareData).catch(() => {
-        navigator.clipboard.writeText(window.location.href);
-        toast({ title: "Link Disalin", description: "Tautan postingan telah disalin ke clipboard." });
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast({ title: "Link Disalin", description: "Tautan postingan telah disalin ke clipboard." });
-    }
+    const postUrl = `${window.location.origin}/post/${post.id}`;
+    setShareData({ isOpen: true, url: postUrl });
   };
 
   const handleDetail = (postId: string) => {
@@ -579,6 +568,12 @@ export default function FeedPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ShareSheet 
+        isOpen={shareData.isOpen} 
+        onOpenChange={(open) => setShareData(prev => ({ ...prev, isOpen: open }))} 
+        postUrl={shareData.url} 
+      />
 
       {/* Lightbox for Image Expansion */}
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
