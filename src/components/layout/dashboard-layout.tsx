@@ -476,83 +476,83 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <DialogContent className="w-full md:max-w-md p-0 border-none shadow-none md:shadow-2xl overflow-y-auto max-h-screen h-screen md:h-auto bg-card text-foreground rounded-none md:rounded-[2.5rem] outline-none no-scrollbar">
           <form onSubmit={handleRegisterSubmit} className="flex flex-col min-h-screen md:min-h-0">
             {/* Header / Welcome Section */}
-            <div className="flex flex-col items-center justify-center text-center space-y-4 pt-24 pb-8 md:pt-12 md:pb-8 md:bg-muted md:border-b md:border-border px-6">
-              <div className="size-20 rounded-full bg-accent text-white flex items-center justify-center font-black text-4xl shadow-2xl shadow-accent/30 animate-in zoom-in-50 duration-700">O</div>
-              <div className="space-y-2">
-                <DialogTitle className="text-3xl font-black tracking-tight">Selamat Datang</DialogTitle>
-                <DialogDescription className="font-bold text-muted-foreground text-lg">Pilih jenis profil untuk mulai terhubung.</DialogDescription>
+            <div className="flex flex-col items-center justify-center text-center space-y-3 pt-12 pb-6 md:pt-12 md:pb-8 md:bg-muted md:border-b md:border-border px-6">
+              <div className="size-16 md:size-20 rounded-full bg-accent text-white flex items-center justify-center font-black text-3xl md:text-4xl shadow-xl shadow-accent/20 animate-in zoom-in-50 duration-700">O</div>
+              <div className="space-y-1">
+                <DialogTitle className="text-2xl md:text-3xl font-black tracking-tight">Selamat Datang</DialogTitle>
+                <DialogDescription className="font-bold text-muted-foreground text-sm md:text-lg">Pilih jenis profil untuk mulai terhubung.</DialogDescription>
               </div>
             </div>
 
             {/* Form Section */}
-            <div className="flex-1 px-6 space-y-8 md:p-10">
+            <div className="flex-1 px-6 space-y-6 md:p-10">
               {!pendingType ? (
-                <div className="grid gap-4 animate-in fade-in zoom-in-95 duration-300">
+                <div className="grid gap-3 animate-in fade-in zoom-in-95 duration-300">
                   {['pribadi', 'professional', 'bisnis'].map((type) => (
-                    <button key={type} type="button" onClick={() => setPendingType(type as AccountType)} className="flex items-center gap-6 p-6 rounded-[2rem] border-2 border-muted hover:border-accent hover:bg-accent/5 transition-all group text-left shadow-sm hover:shadow-md">
-                      <div className="size-14 rounded-2xl bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
-                        {type === 'pribadi' ? <User className="size-7" /> : type === 'professional' ? <ShieldCheck className="size-7" /> : <Briefcase className="size-7" />}
+                    <button key={type} type="button" onClick={() => setPendingType(type as AccountType)} className="flex items-center gap-4 md:gap-6 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border-2 border-muted hover:border-accent hover:bg-accent/5 transition-all group text-left shadow-sm hover:shadow-md">
+                      <div className="size-12 md:size-14 rounded-xl md:rounded-2xl bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                        {type === 'pribadi' ? <User className="size-6 md:size-7" /> : type === 'professional' ? <ShieldCheck className="size-6 md:size-7" /> : <Briefcase className="size-6 md:size-7" />}
                       </div>
                       <div>
-                        <h4 className="font-black text-lg text-foreground capitalize">Profil {type}</h4>
-                        <p className="text-sm text-muted-foreground font-medium">{type === 'pribadi' ? 'Berbagi momen harian.' : type === 'professional' ? 'Pamerkan portofolio Anda.' : 'Akses intelijen pasar.'}</p>
+                        <h4 className="font-black text-base md:text-lg text-foreground capitalize">Profil {type}</h4>
+                        <p className="text-xs md:text-sm text-muted-foreground font-medium">{type === 'pribadi' ? 'Berbagi momen harian.' : type === 'professional' ? 'Pamerkan portofolio.' : 'Akses intelijen pasar.'}</p>
                       </div>
                     </button>
                   ))}
                 </div>
               ) : (
-                <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 pb-32">
+                <div className="space-y-6 animate-in slide-in-from-right-4 duration-500 pb-24">
                   <div className="flex items-center justify-between">
-                    <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-10 px-4 font-black text-xs uppercase tracking-widest text-muted-foreground hover:text-accent">← Kembali</Button>
-                    <Badge className="px-5 py-2 font-black text-[10px] uppercase border-none bg-accent text-white shadow-lg shadow-accent/20 rounded-full">{pendingType}</Badge>
+                    <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-9 px-3 font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-accent">← Kembali</Button>
+                    <Badge className="px-4 py-1.5 font-black text-[9px] uppercase border-none bg-accent text-white shadow-lg shadow-accent/20 rounded-full">{pendingType}</Badge>
                   </div>
                   
-                  <div className="flex flex-col items-center gap-3">
-                    <div onClick={() => setIsMediaPickerOpen(true)} className="size-32 rounded-full bg-muted border-4 border-dashed border-border flex items-center justify-center text-muted-foreground group cursor-pointer hover:border-accent hover:bg-accent/5 transition-all overflow-hidden shadow-inner">
-                      {regFormData.avatar ? <img src={regFormData.avatar} className="w-full h-full object-cover" alt="Profile" /> : <Camera className="size-10 group-hover:scale-110 transition-transform" />}
+                  <div className="flex flex-col items-center gap-2">
+                    <div onClick={() => setIsMediaPickerOpen(true)} className="size-24 md:size-32 rounded-full bg-muted border-4 border-dashed border-border flex items-center justify-center text-muted-foreground group cursor-pointer hover:border-accent hover:bg-accent/5 transition-all overflow-hidden shadow-inner">
+                      {regFormData.avatar ? <img src={regFormData.avatar} className="w-full h-full object-cover" alt="Profile" /> : <Camera className="size-8 md:size-10 group-hover:scale-110 transition-transform" />}
                     </div>
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Pilih Foto Profil (Opsional)</span>
+                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Pilih Foto Profil (Opsional)</span>
                   </div>
 
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <Label className="font-black text-xs uppercase tracking-widest text-slate-500 ml-1">Nama Tampilan *</Label>
+                  <div className="space-y-5">
+                    <div className="space-y-1.5">
+                      <Label className="font-black text-[10px] uppercase tracking-widest text-slate-500 ml-1">Nama Tampilan *</Label>
                       <Input 
                         required 
                         placeholder="Nama Lengkap atau Bisnis"
                         value={regFormData.name} 
                         onChange={(e) => setRegFormData({...regFormData, name: e.target.value})} 
-                        className="rounded-2xl h-16 bg-muted/30 border-border focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-bold px-6 text-lg" 
+                        className="rounded-xl md:rounded-2xl h-12 md:h-14 bg-muted/30 border-border focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-bold px-5 md:px-6 text-base md:text-lg" 
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="font-black text-xs uppercase tracking-widest text-slate-500 ml-1">Bio Singkat</Label>
+                    <div className="space-y-1.5">
+                      <Label className="font-black text-[10px] uppercase tracking-widest text-slate-500 ml-1">Bio Singkat</Label>
                       <Textarea 
                         placeholder="Ceritakan sedikit tentang Anda..."
                         value={regFormData.bio} 
                         onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})} 
-                        className="rounded-2xl border-border min-h-[120px] bg-muted/30 focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-medium px-6 py-4 text-base" 
+                        className="rounded-xl md:rounded-2xl border-border min-h-[100px] md:min-h-[120px] bg-muted/30 focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-medium px-5 md:px-6 py-3 md:py-4 text-sm md:text-base" 
                       />
                     </div>
                     {pendingType === 'professional' && (
-                      <div className="space-y-2">
-                        <Label className="font-black text-xs uppercase tracking-widest text-slate-500 ml-1">Keahlian (Skills)</Label>
+                      <div className="space-y-1.5">
+                        <Label className="font-black text-[10px] uppercase tracking-widest text-slate-500 ml-1">Keahlian (Skills)</Label>
                         <Input 
                           value={regFormData.extra} 
                           onChange={(e) => setRegFormData({...regFormData, extra: e.target.value})} 
                           placeholder="e.g. UI/UX Designer, Architect" 
-                          className="rounded-2xl h-16 bg-muted/30 border-border focus:bg-white font-bold px-6 text-base" 
+                          className="rounded-xl md:rounded-2xl h-12 md:h-14 bg-muted/30 border-border focus:bg-white font-bold px-5 md:px-6 text-sm md:text-base" 
                         />
                       </div>
                     )}
                     {pendingType === 'bisnis' && (
-                      <div className="space-y-2">
-                        <Label className="font-black text-xs uppercase tracking-widest text-slate-500 ml-1">Sektor Industri</Label>
+                      <div className="space-y-1.5">
+                        <Label className="font-black text-[10px] uppercase tracking-widest text-slate-500 ml-1">Sektor Industri</Label>
                         <Select value={regFormData.extra} onValueChange={(v) => setRegFormData({...regFormData, extra: v})}>
-                          <SelectTrigger className="rounded-2xl h-16 bg-muted/30 border-border focus:bg-white font-bold px-6 text-base">
+                          <SelectTrigger className="rounded-xl md:rounded-2xl h-12 md:h-14 bg-muted/30 border-border focus:bg-white font-bold px-5 md:px-6 text-sm md:text-base">
                             <SelectValue placeholder="Pilih Sektor" />
                           </SelectTrigger>
-                          <SelectContent className="rounded-2xl">
+                          <SelectContent className="rounded-xl">
                             <SelectItem value="Tech">Teknologi & SaaS</SelectItem>
                             <SelectItem value="Logistics">Logistik & Distribusi</SelectItem>
                             <SelectItem value="Retail">Retail & E-commerce</SelectItem>
@@ -564,11 +564,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     )}
                   </div>
 
-                  <div className="pt-4">
+                  <div className="pt-2">
                     <Button 
                       type="submit" 
                       disabled={!regFormData.name.trim()}
-                      className="w-full h-16 rounded-[1.5rem] bg-accent hover:bg-accent/90 text-white font-black text-xl shadow-xl shadow-accent/20 active:scale-[0.98] transition-all"
+                      className="w-full h-14 md:h-16 rounded-xl md:rounded-[1.5rem] bg-accent hover:bg-accent/90 text-white font-black text-lg md:text-xl shadow-xl shadow-accent/20 active:scale-[0.98] transition-all"
                     >
                       Selesaikan Pendaftaran
                     </Button>
@@ -581,36 +581,36 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </Dialog>
 
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
-        <DialogContent className="w-[90%] md:max-w-md rounded-[3rem] p-8 border-none shadow-2xl bg-card text-foreground outline-none">
+        <DialogContent className="w-[90%] md:max-w-md rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-8 border-none shadow-2xl bg-card text-foreground outline-none">
           <DialogHeader className="text-center sm:text-center">
-            <DialogTitle className="text-2xl font-black tracking-tight">Impor Gambar</DialogTitle>
-            <DialogDescription className="font-medium">Pilih sumber foto profil Anda.</DialogDescription>
+            <DialogTitle className="text-xl md:text-2xl font-black tracking-tight">Impor Gambar</DialogTitle>
+            <DialogDescription className="font-medium text-sm">Pilih sumber foto profil Anda.</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-8">
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
-              <Smartphone className="size-6 text-accent" />
+          <div className="grid gap-3 md:gap-4 py-6 md:py-8">
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-16 md:h-20 rounded-xl md:rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-4 md:gap-6 px-5 md:px-6">
+              <Smartphone className="size-5 md:size-6 text-accent" />
               <div className="text-left">
-                <p className="font-black text-sm uppercase tracking-widest">Perangkat</p>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Galeri Lokal</p>
+                <p className="font-black text-xs md:text-sm uppercase tracking-widest">Perangkat</p>
+                <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase opacity-60">Galeri Lokal</p>
               </div>
             </Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
-              <Cloud className="size-6 text-blue-500" />
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-16 md:h-20 rounded-xl md:rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-4 md:gap-6 px-5 md:px-6">
+              <Cloud className="size-5 md:size-6 text-blue-500" />
               <div className="text-left">
-                <p className="font-black text-sm uppercase tracking-widest">Google Drive</p>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Impor Cloud</p>
+                <p className="font-black text-xs md:text-sm uppercase tracking-widest">Google Drive</p>
+                <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase opacity-60">Impor Cloud</p>
               </div>
             </Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('photos')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
-              <ImageIcon className="size-6 text-rose-500" />
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('photos')} className="h-16 md:h-20 rounded-xl md:rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-4 md:gap-6 px-5 md:px-6">
+              <ImageIcon className="size-5 md:size-6 text-rose-500" />
               <div className="text-left">
-                <p className="font-black text-sm uppercase tracking-widest">Google Photos</p>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Arsip Foto</p>
+                <p className="font-black text-xs md:text-sm uppercase tracking-widest">Google Photos</p>
+                <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase opacity-60">Arsip Foto</p>
               </div>
             </Button>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-black text-xs uppercase tracking-widest text-muted-foreground">Batal</Button>
+            <Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-black text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground">Batal</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
