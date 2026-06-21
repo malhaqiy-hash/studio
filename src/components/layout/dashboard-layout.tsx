@@ -106,7 +106,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     const touchEnd = e.changedTouches[0].clientY;
     const distance = touchEnd - touchStart;
     
-    // Swipe down gesture to close
     if (distance > 70) {
       setIsMoreMenuOpen(false);
     }
@@ -135,18 +134,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: Users, label: t('communities'), href: "/communities", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Rss, label: t('feed'), href: "/feed", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Search, label: t('search'), href: "/cari", roles: ['pribadi', 'professional', 'bisnis'] },
-      
       { icon: Handshake, label: t('matchmaker'), href: "/matchmaker", roles: ['professional', 'bisnis'] },
       { icon: Target, label: t('matches'), href: "/matches", roles: ['professional', 'bisnis'] },
       { icon: BookOpen, label: t('knowledge'), href: "/knowledge", roles: ['professional', 'bisnis'] },
-      
       { icon: TrendingUp, label: t('market_radar'), href: "/market-radar", roles: ['bisnis'] },
       { icon: MapIcon, label: t('opportunity_map'), href: "/opportunity-map", roles: ['bisnis'] },
       { icon: Building2, label: t('registry'), href: "/registry", roles: ['bisnis'] },
       { icon: Radar, label: t('scout'), href: "/scout", roles: ['bisnis'] },
       { icon: Magnet, label: t('reverse_discovery'), href: "/reverse-discovery", roles: ['bisnis'] },
       { icon: Briefcase, label: t('opportunities'), href: "/opportunities", roles: ['bisnis'] },
-      
       { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
     ];
 
@@ -154,11 +150,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       item.roles.includes(activeAccount?.type || 'pribadi') && 
       item.href !== "/feed" && 
       item.href !== "/cari"
-    ).sort((a, b) => {
-      if (a.href === "/profile") return -1;
-      if (b.href === "/profile") return 1;
-      return 0;
-    });
+    );
   };
 
   const drawerItems = getDrawerItems();
@@ -266,7 +258,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuSeparator className="my-1" />
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-[13px]"><UserPlus className="size-4" /> Tambah Profil</DropdownMenuSubTrigger>
-                <DropdownMenuPortal><DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card"><DropdownMenuItem onSelect={() => setPendingType('pribadi'); setIsRegModalOpen(true)} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Pribadi</DropdownMenuItem><DropdownMenuItem onSelect={() => setPendingType('professional'); setIsRegModalOpen(true)} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Professional</DropdownMenuItem><DropdownMenuItem onSelect={() => setPendingType('bisnis'); setIsRegModalOpen(true)} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Bisnis</DropdownMenuItem></DropdownMenuSubContent></DropdownMenuPortal>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card">
+                    <DropdownMenuItem onSelect={() => { setPendingType('pribadi'); setIsRegModalOpen(true); }} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Pribadi</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => { setPendingType('professional'); setIsRegModalOpen(true); }} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Professional</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => { setPendingType('bisnis'); setIsRegModalOpen(true); }} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Bisnis</DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
               </DropdownMenuSub>
               <DropdownMenuSeparator className="my-1" />
               <DropdownMenuItem onClick={handleLogout} className="text-black font-bold text-[13px] px-3 py-2.5 rounded-xl focus:bg-black/5 cursor-pointer flex gap-3"><LogOut className="size-4" /> Keluar</DropdownMenuItem>
@@ -309,11 +307,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       </Link>
                     ))}
                     <div className="px-6 py-6 bg-muted/10"><div className="flex items-center gap-5 mb-4"><div className="size-9 rounded-xl bg-muted text-muted-foreground flex items-center justify-center"><Languages className="size-5" /></div><span className="text-[13px] font-black uppercase tracking-widest">Bahasa</span></div><LanguagePicker /></div>
-                    <button onClick={handleLogout} className="flex items-center px-6 py-6 bg-black/[0.02] hover:bg-black/[0.05] transition-colors gap-5 group text-black w-full text-left">
-                      <div className="size-9 rounded-xl bg-card border border-black/10 flex items-center justify-center shadow-sm"><LogOut className="size-4.5" /></div>
-                      <span className="text-[13px] font-black uppercase tracking-widest">Keluar</span>
-                      <ChevronRight className="ml-auto size-4 opacity-30" />
-                    </button>
                   </div>
                 </div>
               </SheetContent>
@@ -322,7 +315,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      {/* Profile Onboarding Modal - No X, Tap Outside to Close or Complete Form */}
       <Dialog open={isRegModalOpen} onOpenChange={(open) => { if (activeAccount?.isNew) return; setIsRegModalOpen(open); }}>
         <DialogContent className="w-[95%] md:max-w-md p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground rounded-2xl outline-none [&>button]:hidden">
           <div className="flex flex-col max-h-[85vh] overflow-y-auto no-scrollbar">

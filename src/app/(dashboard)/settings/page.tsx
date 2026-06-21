@@ -72,7 +72,6 @@ export default function SettingsPage() {
     setMounted(true);
   }, []);
 
-  // AUTO-SAVE LOGIC
   const handleThemeChange = (val: string) => {
     const newSettings = { ...settings, theme: val };
     setSettings(newSettings);

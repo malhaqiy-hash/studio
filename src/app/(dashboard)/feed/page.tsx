@@ -35,8 +35,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useAccount } from "@/context/account-context";
 import Link from "next/link";
-
-// Swiper imports for nested isolation
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 
@@ -80,7 +78,6 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
-  // Isolasi Gesture: Mencegah event geser horizontal bocor ke navigasi Beranda
   const handleIsolate = (e: React.PointerEvent | React.TouchEvent | React.MouseEvent) => {
     if (images.length > 1) {
       e.stopPropagation();
