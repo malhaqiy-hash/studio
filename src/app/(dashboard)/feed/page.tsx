@@ -21,6 +21,7 @@ import {
   Linkedin,
   Facebook,
   Link as LinkIcon,
+  Smartphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -47,6 +48,7 @@ import type { Swiper as SwiperType } from 'swiper';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import { ShareSheet } from "@/components/share-sheet";
 
 const CATEGORIES = [
   { id: 'saran', label: 'Saran' },
@@ -111,6 +113,7 @@ function PostMedia({ images }: { images?: string[] }) {
       className="relative group/carousel w-full overflow-hidden rounded-xl border border-border bg-muted/5 touch-pan-x select-none"
       onPointerDown={handleIsolate}
       onTouchStart={handleIsolate}
+      onTouchMove={handleIsolate}
     >
       <Swiper
         modules={[Navigation]}
@@ -158,9 +161,7 @@ function PostMedia({ images }: { images?: string[] }) {
           onClick={() => setIsZoomOpen(false)}
         >
           <div className="w-full h-full relative flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-             {/* Backdrop click area for closing */}
              <div className="absolute inset-0 z-0" onClick={() => setIsZoomOpen(false)} />
-             
              <div className="relative z-10 w-full max-w-4xl px-4 flex items-center justify-center">
                 <Swiper
                   initialSlide={activeIdx}
@@ -201,6 +202,9 @@ export default function FeedPage() {
   const [postLocationLink, setPostLocationLink] = React.useState("");
   const [postVisibility, setPostVisibility] = React.useState<'public' | 'private'>('public');
   
+  const [isShareSheetOpen, setIsShareSheetOpen] = React.useState(false);
+  const [shareUrl, setShareUrl] = React.useState("");
+
   const [zoomedAvatar, setExpandedAvatar] = React.useState<string | null>(null);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -217,8 +221,6 @@ export default function FeedPage() {
     if (swipeStartX === null) return;
     const endX = e.changedTouches[0].clientX;
     const diff = endX - swipeStartX;
-    
-    // Swipe right (from left to right) opens post modal
     if (diff > 120) {
       setIsPostModalOpen(true);
     }
@@ -259,6 +261,11 @@ export default function FeedPage() {
     } catch (err) {
       setTranslations(prev => ({ ...prev, [postId]: { text: "", show: false, loading: false } }));
     }
+  };
+
+  const handleShare = (postId: string) => {
+    setShareUrl(`https://ontapp.network/post/${postId}`);
+    setIsShareSheetOpen(true);
   };
 
   const handleCreatePost = () => {
@@ -392,7 +399,7 @@ export default function FeedPage() {
                         {trans?.loading ? <RefreshCw className="size-5 animate-spin" /> : <Globe className="size-5" />}
                       </button>
                     </div>
-                    <button className="p-2 text-muted-foreground hover:text-foreground"><Share2 className="size-5" /></button>
+                    <button onClick={() => handleShare(post.id)} className="p-2 text-muted-foreground hover:text-foreground active:scale-90 transition-transform"><Share2 className="size-5" /></button>
                   </div>
                 </Card>
               );
@@ -453,6 +460,8 @@ export default function FeedPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ShareSheet isOpen={isShareSheetOpen} onOpenChange={setIsShareSheetOpen} postUrl={shareUrl} />
     </DashboardLayout>
   );
 }

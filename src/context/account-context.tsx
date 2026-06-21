@@ -30,11 +30,12 @@ export interface Account {
   name: string;
   type: AccountType;
   avatar: string;
+  cover?: string; // Multi-photo or vertical cover support
   bio?: string;
   contact?: string;
   extra?: string;
   links?: string[];
-  locationLink?: string; // Added for main profile location
+  locationLink?: string; 
   items?: ContentItem[];
   isNew?: boolean;
   verificationStatus?: 'Unverified' | 'Pending' | 'Verified';

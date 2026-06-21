@@ -27,6 +27,7 @@ import {
   Linkedin,
   Facebook,
   Link as LinkIcon,
+  Share2,
 } from 'lucide-react';
 import {
   Dialog,
@@ -43,6 +44,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
+import { ShareSheet } from '@/components/share-sheet';
 
 function getSmartIcon(url: string) {
   const lower = url.toLowerCase();
@@ -61,6 +63,7 @@ export default function ProfilePage() {
   const [isBioModalOpen, setIsBioModalOpen] = React.useState(false);
   const [isContentModalOpen, setIsContentModalOpen] = React.useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = React.useState(false);
+  const [isShareSheetOpen, setIsShareSheetOpen] = React.useState(false);
 
   const [mediaTarget, setMediaTarget] = React.useState<'avatar' | 'cover' | 'post'>('avatar');
   const [isCloudLoading, setIsCloudLoading] = React.useState(false);
@@ -101,6 +104,7 @@ export default function ProfilePage() {
         reader.onloadend = () => {
           const result = reader.result as string;
           if (mediaTarget === 'avatar') updateActiveAccount({ avatar: result });
+          if (mediaTarget === 'cover') updateActiveAccount({ cover: result });
           setIsMediaPickerOpen(false);
         };
         reader.readAsDataURL(files[0]);
@@ -141,16 +145,17 @@ export default function ProfilePage() {
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
 
         <section className="relative group">
-          <div className="h-32 md:h-48 w-full bg-muted border-b border-border relative overflow-hidden rounded-xl md:rounded-2xl">
-            <img src={`https://picsum.photos/seed/${activeAccount.id}_cover/1200/400`} alt="Cover" className="w-full h-full object-cover opacity-60" />
-            <div className="absolute top-2 right-2">
+          <div className="aspect-[9/16] w-full bg-muted border-b border-border relative overflow-hidden rounded-xl md:rounded-2xl">
+            <img src={activeAccount.cover || `https://picsum.photos/seed/${activeAccount.id}_cover/1200/400`} alt="Cover" className="w-full h-full object-cover opacity-60" />
+            <div className="absolute top-4 right-4 flex flex-col gap-2">
               <Button onClick={() => openMediaPicker('cover')} variant="outline" className="bg-background/80 backdrop-blur text-foreground rounded-lg border-none font-bold text-xs uppercase tracking-widest gap-1.5 shadow-sm h-8 px-3"><Camera className="size-3.5 text-accent" /> Edit Sampul</Button>
+              <Button onClick={() => setIsShareSheetOpen(true)} variant="outline" className="bg-background/80 backdrop-blur text-foreground rounded-lg border-none font-bold text-xs uppercase tracking-widest gap-1.5 shadow-sm h-8 px-3"><Share2 className="size-3.5 text-accent" /> Bagi Profil</Button>
             </div>
           </div>
 
           <div className="px-4 md:px-6 -mt-12 md:-mt-14 flex flex-col items-start gap-3">
             <div className="relative group/avatar">
-              <Avatar className="size-24 md:size-32 border-[4px] border-background dark:border-card shadow-lg rounded-2xl cursor-zoom-in" onClick={() => setZoomedImage(activeAccount.avatar)}>
+              <Avatar className="size-24 md:size-32 border-[4px] border-background dark:border-card shadow-lg rounded-2xl cursor-zoom-in" onClick={() => setExpandedAvatar(activeAccount.avatar)}>
                 <AvatarImage src={activeAccount.avatar} className="object-cover" />
                 <AvatarFallback className="bg-accent/10 text-accent font-bold text-xl">{activeAccount.name[0]}</AvatarFallback>
               </Avatar>
@@ -284,6 +289,8 @@ export default function ProfilePage() {
           {zoomedImage && <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4"><img src={zoomedImage} alt="Zoomed View" className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300 shadow-none border-none" /></div>}
         </DialogContent>
       </Dialog>
+
+      <ShareSheet isOpen={isShareSheetOpen} onOpenChange={setIsShareSheetOpen} postUrl={`https://ontapp.network/profile/${activeAccount.id}`} />
     </DashboardLayout>
   );
 }
