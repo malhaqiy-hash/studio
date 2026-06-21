@@ -93,7 +93,7 @@ import { useAccount, AccountType } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
+export function DashboardLayout({ children }: { children: React.Node }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading } = useUser();
@@ -103,6 +103,29 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { activeAccount, availableAccounts, switchAccount, registerAccount, hasInitialized } = useAccount();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
   
+  // Swipe to close logic for More Menu
+  const [touchStart, setTouchStart] = React.useState<number | null>(null);
+  
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientY;
+    const distance = touchEnd - touchStart;
+    
+    // Detect scroll position to ensure we only close when at the top
+    const scrollContainer = e.currentTarget.querySelector('.overflow-y-auto');
+    const isAtTop = scrollContainer ? scrollContainer.scrollTop <= 0 : true;
+
+    // Threshold: swipe down more than 100px and must be at top of content
+    if (distance > 100 && isAtTop) {
+      setIsMoreMenuOpen(false);
+    }
+    setTouchStart(null);
+  };
+
   const [isRegModalOpen, setIsRegModalOpen] = React.useState(false);
   const [pendingType, setPendingType] = React.useState<AccountType | null>(null);
   const [regFormData, setRegFormData] = React.useState({
@@ -397,8 +420,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <SheetTrigger asChild>
                 <button className="flex flex-col items-center gap-1 hover:text-accent w-full py-2 outline-none"><Menu className="size-6" /><span>{t('more')}</span></button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 h-[90vh] bg-card overflow-hidden">
-                <SheetHeader className="p-8 pb-4 bg-muted border-b border-border">
+              <SheetContent 
+                side="bottom" 
+                className="rounded-t-[2.5rem] border-none p-0 h-[90vh] bg-card overflow-hidden"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
+                {/* Visual Handle for swipe to close */}
+                <div className="w-full flex justify-center pt-4 pb-2">
+                  <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
+                </div>
+
+                <SheetHeader className="p-8 pt-2 pb-4 bg-muted border-b border-border">
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-xl font-black text-foreground tracking-tight flex items-center gap-2"><LayoutGrid className="size-5 text-accent" />OnTapp Hub</SheetTitle>
                     <Badge variant="outline" className="bg-card border-border text-muted-foreground font-bold px-3 uppercase text-[10px]">{activeAccount?.type} Mode</Badge>
