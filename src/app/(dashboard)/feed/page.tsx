@@ -83,7 +83,7 @@ function PostMedia({ images }: { images?: string[] }) {
   if (!images || images.length === 0) return null;
 
   // GESTURE ISOLATION: Mencegah event sentuh diteruskan ke carousel luar jika gambar > 1
-  const stopPropagation = (e: React.PointerEvent | React.TouchEvent | React.MouseEvent) => {
+  const handleIsolate = (e: React.PointerEvent | React.TouchEvent | React.MouseEvent) => {
     if (images.length > 1) {
       e.stopPropagation();
     }
@@ -92,11 +92,17 @@ function PostMedia({ images }: { images?: string[] }) {
   return (
     <div 
       className="relative group/carousel touch-pan-y" 
-      onPointerDownCapture={stopPropagation}
-      onTouchStartCapture={stopPropagation}
-      onMouseDownCapture={stopPropagation}
+      onPointerDownCapture={handleIsolate}
+      onTouchStartCapture={handleIsolate}
+      onMouseDownCapture={handleIsolate}
     >
-      <div className="overflow-hidden rounded-xl border border-border bg-muted/5" ref={emblaRef}>
+      <div 
+        className={cn(
+          "overflow-hidden rounded-xl border border-border bg-muted/5",
+          images.length > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+        )} 
+        ref={emblaRef}
+      >
         <div className="flex">
           {images.map((src, idx) => (
             <div key={idx} className="flex-[0_0_100%] min-w-0">
