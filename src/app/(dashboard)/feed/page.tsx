@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -18,7 +19,14 @@ import {
   ShieldCheck,
   RefreshCw,
   ArrowUpRight,
-  Bookmark
+  Bookmark,
+  Plus,
+  Image as ImageIcon,
+  Type,
+  X,
+  Smartphone,
+  Cloud,
+  CheckCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -26,6 +34,18 @@ import { translateText } from "@/ai/flows/translate-flow";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from 'embla-carousel-react';
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useRouter } from "next/navigation";
+import { useAccount } from "@/context/account-context";
 
 const CATEGORIES = [
   { id: 'for-you', label: 'For You', icon: Brain },
@@ -34,7 +54,7 @@ const CATEGORIES = [
   { id: 'trending', label: 'Trending', icon: TrendingUp },
 ];
 
-const MOCK_POSTS = [
+const INITIAL_POSTS = [
   {
     id: "p1",
     type: "insight",
@@ -79,10 +99,23 @@ const MOCK_POSTS = [
 export default function FeedPage() {
   const { language } = useLanguage();
   const { toast } = useToast();
+  const router = useRouter();
+  const { activeAccount } = useAccount();
+  
   const [activeCategory, setActiveCategory] = React.useState('for-you');
+  const [posts, setPosts] = React.useState(INITIAL_POSTS);
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean }>>({});
   const [savedPosts, setSavedPosts] = React.useState<string[]>([]);
   
+  const [isPostModalOpen, setIsPostModalOpen] = React.useState(false);
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = React.useState(false);
+  const [postType, setPostType] = React.useState<'text' | 'image'>('text');
+  const [postContent, setPostContent] = React.useState("");
+  const [postImage, setPostImage] = React.useState<string | null>(null);
+  const [goToProfile, setGoToProfile] = React.useState(false);
+  const [isCloudLoading, setIsCloudLoading] = React.useState(false);
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start' });
 
   const onSelect = React.useCallback(() => {
@@ -150,9 +183,63 @@ export default function FeedPage() {
     }
   };
 
+  const handleCreatePost = () => {
+    if (!postContent.trim() && !postImage) return;
+
+    const newPost = {
+      id: `p-${Date.now()}`,
+      type: "post",
+      author: activeAccount.name,
+      avatar: activeAccount.avatar,
+      category: "Baru",
+      content: postContent,
+      image: postImage || undefined,
+      time: "Baru saja",
+      stats: { likes: "0", comments: "0" },
+      verified: activeAccount.verificationStatus === 'Verified',
+    };
+
+    setPosts([newPost, ...posts]);
+    setIsPostModalOpen(false);
+    setPostContent("");
+    setPostImage(null);
+    toast({ title: "Postingan terbit!" });
+
+    if (goToProfile) {
+      router.push("/profile");
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPostImage(reader.result as string);
+        setIsMediaPickerOpen(false);
+        setPostType('image');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCloudSource = (source: 'drive' | 'photos') => {
+    setIsCloudLoading(true);
+    toast({ title: `Menghubungkan ${source}...` });
+    setTimeout(() => {
+      setPostImage(`https://picsum.photos/seed/post${Date.now()}/800/600`);
+      setIsCloudLoading(false);
+      setIsMediaPickerOpen(false);
+      setPostType('image');
+      toast({ title: "Gambar terimpor" });
+    }, 1200);
+  };
+
   return (
     <DashboardLayout>
       <div className="flex flex-col h-[calc(100vh-160px)] max-w-2xl mx-auto relative overflow-hidden">
+        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+        
         <div className="flex items-center justify-center gap-1 mb-6 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2">
           {CATEGORIES.map((cat, idx) => (
             <button
@@ -178,7 +265,7 @@ export default function FeedPage() {
                 key={cat.id} 
                 className="flex-[0_0_100%] min-w-0 h-full overflow-y-auto snap-y snap-mandatory no-scrollbar space-y-4 pb-10 px-1"
               >
-                {MOCK_POSTS.map((post) => {
+                {posts.map((post) => {
                   const trans = translations[post.id];
                   const isSaved = savedPosts.includes(post.id);
                   return (
@@ -219,7 +306,7 @@ export default function FeedPage() {
                           </p>
                           {post.image && (
                             <div className="rounded-3xl overflow-hidden border border-border mt-4">
-                              <img src={post.image} alt="Content" className="w-full h-auto object-cover max-h-[300px]" />
+                              <img src={post.image} alt="Content" className="w-full h-auto object-cover max-h-[500px]" />
                             </div>
                           )}
                           {post.locationLink && (
@@ -256,10 +343,112 @@ export default function FeedPage() {
           </div>
         </div>
 
-        <button onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))} className="absolute bottom-6 right-6 size-14 bg-accent text-accent-foreground rounded-2xl shadow-2xl flex items-center justify-center hover:scale-110 transition-all z-30 active:scale-95">
-          <Zap className="size-6 fill-current" />
-        </button>
+        {/* Action Buttons */}
+        <div className="absolute bottom-6 right-6 flex flex-col gap-4 items-center z-30">
+          <button 
+            onClick={() => setIsPostModalOpen(true)}
+            className="size-14 bg-accent text-accent-foreground rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all active:scale-95 border-4 border-background"
+          >
+            <Plus className="size-7" />
+          </button>
+          
+          <button 
+            onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))} 
+            className="size-14 bg-accent text-accent-foreground rounded-2xl shadow-2xl flex items-center justify-center hover:scale-110 transition-all active:scale-95"
+          >
+            <Zap className="size-6 fill-current" />
+          </button>
+        </div>
       </div>
+
+      {/* Post Creation Modal */}
+      <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
+        <DialogContent className="max-w-xl rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground">
+          <div className="p-8 space-y-6">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black flex items-center gap-3">
+                <div className="size-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center">
+                  <Plus className="size-6" />
+                </div>
+                Buat Postingan Baru
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-6">
+              <div className="flex gap-4 p-1 bg-muted rounded-2xl">
+                <button 
+                  onClick={() => setPostType('text')}
+                  className={cn("flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs transition-all", postType === 'text' ? "bg-card shadow-sm text-accent" : "text-muted-foreground")}
+                >
+                  <Type className="size-4" /> Threads
+                </button>
+                <button 
+                  onClick={() => setIsMediaPickerOpen(true)}
+                  className={cn("flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs transition-all", postType === 'image' ? "bg-card shadow-sm text-accent" : "text-muted-foreground")}
+                >
+                  <ImageIcon className="size-4" /> Facebook Style
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <Textarea 
+                  placeholder={postType === 'text' ? "Apa yang sedang Anda pikirkan?" : "Tulis keterangan foto..."}
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                  className="min-h-[140px] rounded-2xl border-none bg-muted/50 p-6 text-base font-medium focus-visible:ring-accent/10"
+                />
+
+                {postImage && (
+                  <div className="relative group rounded-2xl overflow-hidden border border-border bg-muted/30">
+                    <img src={postImage} className="w-full h-auto max-h-[300px] object-contain mx-auto" alt="Preview" />
+                    <button 
+                      onClick={() => setPostImage(null)}
+                      className="absolute top-2 right-2 size-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-rose-500 transition-colors"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center space-x-3 p-4 rounded-2xl bg-muted/30 border border-border/50">
+                <Checkbox id="go-profile" checked={goToProfile} onCheckedChange={(val) => setGoToProfile(val as boolean)} />
+                <Label htmlFor="go-profile" className="text-xs font-bold cursor-pointer text-muted-foreground">Masuk ke halaman profil setelah posting</Label>
+              </div>
+            </div>
+
+            <DialogFooter className="pt-4">
+              <Button 
+                onClick={handleCreatePost}
+                disabled={!postContent.trim() && !postImage}
+                className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 text-white font-black text-base shadow-xl shadow-accent/20"
+              >
+                Publikasikan Sekarang
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Media Picker for Post */}
+      <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
+        <DialogContent className="max-w-md rounded-[3rem] p-8 border-none shadow-2xl bg-card text-foreground">
+          <DialogHeader className="text-center sm:text-center">
+            <DialogTitle className="text-2xl font-black">Pilih Sumber Foto</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-8">
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
+              <Smartphone className="size-6 text-accent" /> <div className="text-left font-black text-sm uppercase">Perangkat</div>
+            </Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
+              <Cloud className="size-6 text-blue-500" /> <div className="text-left font-black text-sm uppercase">Google Drive {isCloudLoading && "..."}</div>
+            </Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('photos')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
+              <ImageIcon className="size-6 text-rose-500" /> <div className="text-left font-black text-sm uppercase">Google Photos {isCloudLoading && "..."}</div>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
