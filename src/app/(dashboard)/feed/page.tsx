@@ -67,7 +67,7 @@ const INITIAL_POSTS = [
     category: "Market Trend",
     content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
     time: "Baru saja",
-    stats: { likes: "1.2k", comments: "84" },
+    stats: { likes: 1200, comments: 84 },
     verified: true,
     tag: "Trending",
     locationLink: "https://maps.google.com/?q=Southeast+Asia"
@@ -80,7 +80,7 @@ const INITIAL_POSTS = [
     category: "Lokal",
     content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member.",
     time: "2 jam yang lalu",
-    stats: { likes: "452", comments: "12" },
+    stats: { likes: 452, comments: 12 },
     verified: true,
     image: "https://picsum.photos/seed/truck/800/400",
     locationLink: "https://maps.google.com/?q=Jakarta"
@@ -88,7 +88,7 @@ const INITIAL_POSTS = [
 ];
 
 export default function FeedPage() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { toast } = useToast();
   const router = useRouter();
   const { activeAccount, addPost } = useAccount();
@@ -98,6 +98,9 @@ export default function FeedPage() {
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean }>>({});
   const [savedPosts, setSavedPosts] = React.useState<string[]>([]);
   
+  // State for likes interaction
+  const [likes, setLikes] = React.useState<Record<string, { count: number, active: boolean }>>({});
+
   const [isPostModalOpen, setIsPostModalOpen] = React.useState(false);
   const [postContent, setPostContent] = React.useState("");
   const [postImage, setPostImage] = React.useState<string | null>(null);
@@ -129,10 +132,63 @@ export default function FeedPage() {
   React.useEffect(() => {
     const saved = localStorage.getItem('ontapp_saved_posts');
     if (saved) setSavedPosts(JSON.parse(saved));
+    
+    // Initialize likes from initial posts
+    const initialLikes: Record<string, { count: number, active: boolean }> = {};
+    INITIAL_POSTS.forEach(p => {
+      initialLikes[p.id] = { count: p.stats.likes, active: false };
+    });
+    setLikes(initialLikes);
   }, []);
 
   const scrollTo = (index: number) => {
     if (emblaApi) emblaApi.scrollTo(index);
+  };
+
+  const handleLike = (postId: string) => {
+    setLikes(prev => {
+      const current = prev[postId] || { count: 0, active: false };
+      const isActive = !current.active;
+      return {
+        ...prev,
+        [postId]: {
+          count: isActive ? current.count + 1 : Math.max(0, current.count - 1),
+          active: isActive
+        }
+      };
+    });
+  };
+
+  const handleComment = () => {
+    toast({
+      title: "Fitur Diskusi",
+      description: "Fitur komentar sedang dioptimalkan oleh AI OnTapp untuk menjamin kualitas interaksi B2B.",
+    });
+  };
+
+  const handleShare = (post: any) => {
+    const shareData = {
+      title: `OnTapp: ${post.author}`,
+      text: post.content,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => {
+        navigator.clipboard.writeText(window.location.href);
+        toast({ title: "Link Disalin", description: "Tautan postingan telah disalin ke clipboard." });
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({ title: "Link Disalin", description: "Tautan postingan telah disalin ke clipboard." });
+    }
+  };
+
+  const handleDetail = (postId: string) => {
+    toast({
+      title: "Membuka Detail",
+      description: "Menyiapkan analisis mendalam untuk postingan ini...",
+    });
   };
 
   const handleSavePost = (post: any) => {
@@ -192,7 +248,6 @@ export default function FeedPage() {
       visibility: 'public' as const,
     };
 
-    // Hanya simpan ke Central Context, biarkan combinedPosts yang menampilkannya
     addPost(newPostData);
 
     setIsPostModalOpen(false);
@@ -247,11 +302,10 @@ export default function FeedPage() {
         image: item.image,
         externalLink: item.externalLink,
         time: item.timestamp || "Baru saja",
-        stats: { likes: "0", comments: "0" },
+        stats: { likes: 0, comments: 0 },
         verified: activeAccount.verificationStatus === 'Verified'
       }));
     
-    // Gabungkan dengan deduplikasi ID
     const all = [...userPosts, ...posts];
     return all.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
   }, [activeAccount.items, activeAccount.name, activeAccount.avatar, activeAccount.verificationStatus, posts]);
@@ -290,6 +344,8 @@ export default function FeedPage() {
                 {combinedPosts.map((post) => {
                   const trans = translations[post.id];
                   const isSaved = savedPosts.includes(post.id);
+                  const postLike = likes[post.id] || { count: 0, active: false };
+                  
                   return (
                     <div key={`${cat.id}-${post.id}`} className="snap-start snap-always w-full min-h-[400px] flex flex-col mb-4">
                       <Card className="border border-border shadow-sm rounded-[2.5rem] overflow-hidden bg-card flex-1 flex flex-col hover:shadow-md transition-shadow">
@@ -345,16 +401,43 @@ export default function FeedPage() {
 
                         <div className="p-6 pt-0 mt-auto border-t border-border bg-muted/20 flex items-center justify-between">
                           <div className="flex items-center gap-6 text-muted-foreground">
-                            <button className="flex items-center gap-2 hover:text-rose-500 transition-colors"><Heart className="size-5" /><span className="text-xs font-black">{post.stats.likes}</span></button>
-                            <button className="flex items-center gap-2 hover:text-accent transition-colors"><MessageCircle className="size-5" /><span className="text-xs font-black">{post.stats.comments}</span></button>
+                            <button 
+                              onClick={() => handleLike(post.id)}
+                              className={cn("flex items-center gap-2 transition-all active:scale-125", postLike.active ? "text-rose-500" : "hover:text-rose-500")}
+                            >
+                              <Heart className={cn("size-5", postLike.active && "fill-rose-500")} />
+                              <span className="text-xs font-black">{postLike.count}</span>
+                            </button>
+                            
+                            <button 
+                              onClick={handleComment}
+                              className="flex items-center gap-2 hover:text-accent transition-colors"
+                            >
+                              <MessageCircle className="size-5" />
+                              <span className="text-xs font-black">{post.stats.comments}</span>
+                            </button>
+                            
                             <button onClick={() => handleTranslate(post.id, post.content)} disabled={trans?.loading} className="flex items-center gap-2 hover:text-accent transition-colors">
                               {trans?.loading ? <RefreshCw className="size-4 animate-spin" /> : <Globe className="size-4" />}
                               <span className="text-[10px] font-black uppercase">{trans?.show ? "Original" : "Translate"}</span>
                             </button>
                           </div>
+                          
                           <div className="flex gap-2">
-                            <button className="p-2 text-muted-foreground hover:text-foreground"><Share2 className="size-5" /></button>
-                            <Button variant="ghost" size="sm" className="font-black text-accent hover:bg-accent/10 rounded-xl text-xs gap-1">Detail <ArrowUpRight className="size-3.5" /></Button>
+                            <button 
+                              onClick={() => handleShare(post)}
+                              className="p-2 text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                            >
+                              <Share2 className="size-5" />
+                            </button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleDetail(post.id)}
+                              className="font-black text-accent hover:bg-accent/10 rounded-xl text-xs gap-1"
+                            >
+                              Detail <ArrowUpRight className="size-3.5" />
+                            </Button>
                           </div>
                         </div>
                       </Card>

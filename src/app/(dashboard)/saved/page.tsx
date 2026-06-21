@@ -13,7 +13,8 @@ import {
   Heart, 
   MessageCircle, 
   ArrowUpRight,
-  Brain
+  Brain,
+  Share2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -25,14 +26,54 @@ export default function SavedPostsPage() {
   const { language, t } = useLanguage();
   const [savedPosts, setSavedPosts] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  
+  // State for session likes
+  const [likes, setLikes] = React.useState<Record<string, { count: number, active: boolean }>>({});
 
   React.useEffect(() => {
     const saved = localStorage.getItem('ontapp_saved_posts_data');
     if (saved) {
-      setSavedPosts(JSON.parse(saved));
+      const parsed = JSON.parse(saved);
+      setSavedPosts(parsed);
+      
+      const initialLikes: Record<string, { count: number, active: boolean }> = {};
+      parsed.forEach((p: any) => {
+        initialLikes[p.id] = { count: p.stats?.likes || 0, active: false };
+      });
+      setLikes(initialLikes);
     }
     setLoading(false);
   }, []);
+
+  const handleLike = (postId: string) => {
+    setLikes(prev => {
+      const current = prev[postId] || { count: 0, active: false };
+      const isActive = !current.active;
+      return {
+        ...prev,
+        [postId]: {
+          count: isActive ? current.count + 1 : Math.max(0, current.count - 1),
+          active: isActive
+        }
+      };
+    });
+  };
+
+  const handleShare = (post: any) => {
+    if (navigator.share) {
+      navigator.share({
+        title: `OnTapp: ${post.author}`,
+        text: post.content,
+        url: window.location.href,
+      }).catch(() => {
+        navigator.clipboard.writeText(window.location.href);
+        toast({ title: "Link Disalin" });
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({ title: "Link Disalin" });
+    }
+  };
 
   const handleRemove = (postId: string) => {
     const updated = savedPosts.filter(p => p.id !== postId);
@@ -65,79 +106,91 @@ export default function SavedPostsPage() {
           </div>
         ) : savedPosts.length > 0 ? (
           <div className="grid gap-6">
-            {savedPosts.map((post) => (
-              <Card key={post.id} className="group rounded-[2.5rem] border-slate-100 shadow-sm hover:shadow-xl transition-all overflow-hidden bg-white">
-                <CardContent className="p-0">
-                  <div className="p-8 space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="size-12 border border-slate-100">
-                          <AvatarImage src={post.avatar} />
-                          <AvatarFallback className="bg-indigo-50 text-accent font-black">
-                            {post.author[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="flex items-center gap-2">
-                             <h4 className="font-black text-slate-900">{post.author}</h4>
-                             {post.verified && <ShieldCheck className="size-4 text-emerald-500 fill-emerald-50" />}
-                          </div>
-                          <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                             <Clock className="size-3" />
-                             {post.time}
+            {savedPosts.map((post) => {
+              const postLike = likes[post.id] || { count: 0, active: false };
+              return (
+                <Card key={post.id} className="group rounded-[2.5rem] border-slate-100 shadow-sm hover:shadow-xl transition-all overflow-hidden bg-white">
+                  <CardContent className="p-0">
+                    <div className="p-8 space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="size-12 border border-slate-100">
+                            <AvatarImage src={post.avatar} />
+                            <AvatarFallback className="bg-indigo-50 text-accent font-black">
+                              {post.author[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="flex items-center gap-2">
+                               <h4 className="font-black text-slate-900">{post.author}</h4>
+                               {post.verified && <ShieldCheck className="size-4 text-emerald-500 fill-emerald-50" />}
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                               <Clock className="size-3" />
+                               {post.time}
+                            </div>
                           </div>
                         </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleRemove(post.id)}
+                          className="size-10 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                        >
+                          <Trash2 className="size-5" />
+                        </Button>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => handleRemove(post.id)}
-                        className="size-10 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
-                      >
-                        <Trash2 className="size-5" />
-                      </Button>
-                    </div>
 
-                    <div className="space-y-4">
-                      {post.type === 'insight' && (
-                        <div className="inline-flex items-center gap-2 bg-indigo-50 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-indigo-100">
-                          <Brain className="size-2.5" />
-                          AI Analysis
-                        </div>
-                      )}
-                      <p className={cn(
-                        "text-slate-700 leading-relaxed font-medium",
-                        post.type === 'insight' ? "text-lg italic" : "text-base"
-                      )}>
-                        {post.content}
-                      </p>
-                      {post.image && (
-                        <div className="rounded-3xl overflow-hidden border border-slate-100">
-                          <img src={post.image} className="w-full h-auto object-cover max-h-[300px]" alt="Post Content" />
-                        </div>
-                      )}
-                    </div>
+                      <div className="space-y-4">
+                        {post.type === 'insight' && (
+                          <div className="inline-flex items-center gap-2 bg-indigo-50 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-indigo-100">
+                            <Brain className="size-2.5" />
+                            AI Analysis
+                          </div>
+                        )}
+                        <p className={cn(
+                          "text-slate-700 leading-relaxed font-medium",
+                          post.type === 'insight' ? "text-lg italic" : "text-base"
+                        )}>
+                          {post.content}
+                        </p>
+                        {post.image && (
+                          <div className="rounded-3xl overflow-hidden border border-slate-100">
+                            <img src={post.image} className="w-full h-auto object-cover max-h-[300px]" alt="Post Content" />
+                          </div>
+                        )}
+                      </div>
 
-                    <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
-                       <div className="flex items-center gap-6">
-                          <div className="flex items-center gap-2 text-slate-400">
-                             <Heart className="size-4" />
-                             <span className="text-xs font-black">{post.stats?.likes}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-slate-400">
-                             <MessageCircle className="size-4" />
-                             <span className="text-xs font-black">{post.stats?.comments}</span>
-                          </div>
-                       </div>
-                       <Button variant="ghost" className="rounded-xl h-10 px-6 font-black text-accent hover:bg-indigo-50 text-xs gap-2">
-                          {language === 'id' ? 'Lihat Postingan Asli' : 'View Original Post'}
-                          <ArrowUpRight className="size-4" />
-                       </Button>
+                      <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
+                         <div className="flex items-center gap-6">
+                            <button 
+                              onClick={() => handleLike(post.id)}
+                              className={cn("flex items-center gap-2 transition-all active:scale-125", postLike.active ? "text-rose-500" : "text-slate-400 hover:text-rose-500")}
+                            >
+                               <Heart className={cn("size-4", postLike.active && "fill-rose-500")} />
+                               <span className="text-xs font-black">{postLike.count}</span>
+                            </button>
+                            <div className="flex items-center gap-2 text-slate-400">
+                               <MessageCircle className="size-4" />
+                               <span className="text-xs font-black">{post.stats?.comments}</span>
+                            </div>
+                            <button 
+                              onClick={() => handleShare(post)}
+                              className="text-slate-400 hover:text-accent transition-colors"
+                            >
+                               <Share2 className="size-4" />
+                            </button>
+                         </div>
+                         <Button variant="ghost" className="rounded-xl h-10 px-6 font-black text-accent hover:bg-indigo-50 text-xs gap-2">
+                            {language === 'id' ? 'Lihat Postingan Asli' : 'View Original Post'}
+                            <ArrowUpRight className="size-4" />
+                         </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         ) : (
           <div className="py-24 text-center space-y-6 bg-slate-50/50 rounded-[4rem] border-2 border-dashed border-slate-200">
