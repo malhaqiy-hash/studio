@@ -125,6 +125,11 @@ export default function SavedPostsPage() {
                                <h4 className="font-black text-slate-900">{post.author}</h4>
                                {post.verified && <ShieldCheck className="size-4 text-emerald-500 fill-emerald-50" />}
                             </div>
+                            {post.extra && (
+                              <div className="text-[10px] font-black text-accent uppercase tracking-tight -mt-0.5">
+                                {post.extra}
+                              </div>
+                            )}
                             <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                                <Clock className="size-3" />
                                {post.time}

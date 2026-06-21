@@ -63,6 +63,7 @@ const INITIAL_POSTS = [
     id: "p1",
     type: "insight",
     author: "OnTapp Intelligence",
+    extra: "Enterprise AI Analyst",
     avatar: "",
     category: "Market Trend",
     content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
@@ -76,6 +77,7 @@ const INITIAL_POSTS = [
     id: "p2",
     type: "post",
     author: "Global Logistics Co.",
+    extra: "Logistics & Supply Chain",
     avatar: "https://picsum.photos/seed/log/100",
     category: "Lokal",
     content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member.",
@@ -135,7 +137,7 @@ export default function FeedPage() {
     
     // Initialize likes from initial posts
     const initialLikes: Record<string, { count: number, active: boolean }> = {};
-    INITIAL_POSTS.forEach(p => {
+    [...INITIAL_POSTS].forEach(p => {
       initialLikes[p.id] = { count: p.stats.likes, active: false };
     });
     setLikes(initialLikes);
@@ -296,6 +298,7 @@ export default function FeedPage() {
         id: item.id,
         type: "post",
         author: activeAccount.name,
+        extra: activeAccount.extra,
         avatar: activeAccount.avatar,
         category: "Koleksi",
         content: item.description || "",
@@ -308,7 +311,7 @@ export default function FeedPage() {
     
     const all = [...userPosts, ...posts];
     return all.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
-  }, [activeAccount.items, activeAccount.name, activeAccount.avatar, activeAccount.verificationStatus, posts]);
+  }, [activeAccount.items, activeAccount.name, activeAccount.avatar, activeAccount.extra, activeAccount.verificationStatus, posts]);
 
   return (
     <DashboardLayout>
@@ -360,6 +363,11 @@ export default function FeedPage() {
                                 <h3 className="font-black text-foreground text-sm">{post.author}</h3>
                                 {post.verified && <ShieldCheck className="size-3.5 text-emerald-500" />}
                               </div>
+                              {post.extra && (
+                                <div className="text-[10px] font-black text-accent uppercase tracking-tight -mt-0.5">
+                                  {post.extra}
+                                </div>
+                              )}
                               <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase">
                                 <Clock className="size-2.5" /> {post.time}
                               </div>
