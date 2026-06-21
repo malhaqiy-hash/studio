@@ -417,9 +417,13 @@ export default function FeedPage() {
                               <span className="text-xs font-black">{post.stats.comments}</span>
                             </button>
                             
-                            <button onClick={() => handleTranslate(post.id, post.content)} disabled={trans?.loading} className="flex items-center gap-2 hover:text-accent transition-colors">
-                              {trans?.loading ? <RefreshCw className="size-4 animate-spin" /> : <Globe className="size-4" />}
-                              <span className="text-[10px] font-black uppercase">{trans?.show ? "Original" : "Translate"}</span>
+                            <button 
+                              onClick={() => handleTranslate(post.id, post.content)} 
+                              disabled={trans?.loading} 
+                              className={cn("flex items-center transition-colors", trans?.show ? "text-accent" : "hover:text-accent")}
+                              title={trans?.show ? "Original" : "Translate"}
+                            >
+                              {trans?.loading ? <RefreshCw className="size-5 animate-spin" /> : <Globe className="size-5" />}
                             </button>
                           </div>
                           

@@ -179,9 +179,12 @@ export default function OpportunitiesPage() {
                       <div className="flex items-center gap-3 mt-1"><Badge variant="outline" className="text-[10px]">{opp.category}</Badge>{opp.whatsapp && <span className="text-xs text-slate-400 flex items-center gap-1"><Phone className="size-3" /> {opp.whatsapp}</span>}</div>
                       {opp.description && (
                         <div className="mt-2">
-                          <button onClick={() => handleTranslateOpp(opp.id, opp.description)} className="text-[9px] font-black uppercase text-accent flex items-center gap-1">
-                            {translationsMap[opp.id]?.loading ? <RefreshCw className="size-2.5 animate-spin" /> : <Globe className="size-2.5" />}
-                            {translationsMap[opp.id]?.show ? t('ai_original') : t('ai_translating')}
+                          <button 
+                            onClick={() => handleTranslateOpp(opp.id, opp.description)} 
+                            className={cn("transition-colors", translationsMap[opp.id]?.show ? "text-accent" : "text-slate-400 hover:text-accent")}
+                            title={translationsMap[opp.id]?.show ? t('ai_original') : t('ai_translating')}
+                          >
+                            {translationsMap[opp.id]?.loading ? <RefreshCw className="size-4 animate-spin" /> : <Globe className="size-4" />}
                           </button>
                           <p className="text-xs text-slate-500 mt-1 italic">{translationsMap[opp.id]?.show ? translationsMap[opp.id].description : opp.description}</p>
                         </div>

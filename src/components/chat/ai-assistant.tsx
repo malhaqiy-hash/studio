@@ -112,10 +112,10 @@ export function AIAssistant() {
                     <button 
                       onClick={() => handleTranslateMessage(i)} 
                       disabled={msg.isTranslating} 
-                      className="flex items-center gap-1 text-[8px] font-black uppercase text-slate-400 hover:text-accent"
+                      className={cn("flex items-center gap-1 transition-colors", msg.showTranslated ? "text-accent" : "text-slate-400 hover:text-accent")}
+                      title={msg.showTranslated ? t('ai_original') : t('ai_translating')}
                     >
-                      {msg.isTranslating ? <RefreshCw className="size-2 animate-spin" /> : <Globe className="size-2" />}
-                      {msg.showTranslated ? t('ai_original') : t('ai_translating')}
+                      {msg.isTranslating ? <RefreshCw className="size-3 animate-spin" /> : <Globe className="size-3" />}
                     </button>
                   </div>
                 </div>
