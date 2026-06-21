@@ -343,20 +343,13 @@ export default function FeedPage() {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="absolute bottom-6 right-6 flex flex-col gap-4 items-center z-30">
+        {/* Action Buttons: Centered "+" button positioned above AI chat icon */}
+        <div className="fixed bottom-36 left-1/2 -translate-x-1/2 z-[110] flex flex-col items-center">
           <button 
             onClick={() => setIsPostModalOpen(true)}
             className="size-14 bg-accent text-accent-foreground rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all active:scale-95 border-4 border-background"
           >
             <Plus className="size-7" />
-          </button>
-          
-          <button 
-            onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))} 
-            className="size-14 bg-accent text-accent-foreground rounded-2xl shadow-2xl flex items-center justify-center hover:scale-110 transition-all active:scale-95"
-          >
-            <Zap className="size-6 fill-current" />
           </button>
         </div>
       </div>
