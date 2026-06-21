@@ -304,25 +304,25 @@ export default function CariPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-6 py-2">
-        <div className="bg-card p-6 rounded-[2rem] border border-border shadow-sm space-y-5">
-          <form onSubmit={(e) => handleSearch(e)} className="space-y-4">
+      <div className="max-w-4xl mx-auto space-y-8 py-2">
+        <div className="bg-card p-8 rounded-[2.5rem] border border-border shadow-sm space-y-6">
+          <form onSubmit={(e) => handleSearch(e)} className="space-y-6">
             <div className="relative group w-full">
-              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                <Search className="size-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
+              <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                <Search className="size-6 text-muted-foreground group-focus-within:text-accent transition-colors" />
               </div>
               <Input 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('search_placeholder')}
-                className="h-16 pl-12 pr-52 rounded-2xl border-border bg-muted/30 shadow-inner text-base font-medium focus:bg-background transition-all focus:border-accent text-foreground"
+                className="h-20 pl-16 pr-52 rounded-[1.5rem] border-border bg-muted/20 shadow-inner text-lg font-medium focus:bg-background transition-all focus:border-accent text-foreground"
               />
-              <div className="absolute inset-y-3 right-3 flex items-center gap-1.5">
+              <div className="absolute inset-y-4 right-4 flex items-center gap-2">
                 {query && (
                   <button 
                     type="button"
                     onClick={() => setQuery("")}
-                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-muted-foreground hover:text-rose-500 border border-border shadow-sm transition-all"
+                    className="size-12 flex items-center justify-center rounded-2xl bg-card text-muted-foreground hover:text-rose-500 border border-border shadow-sm transition-all active:scale-90"
                   >
                     <X className="size-5" />
                   </button>
@@ -330,14 +330,14 @@ export default function CariPage() {
                 <button 
                   type="button" 
                   onClick={handleVoiceSearch} 
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-muted-foreground hover:text-accent border border-border shadow-sm transition-all"
+                  className="size-12 flex items-center justify-center rounded-2xl bg-card text-muted-foreground hover:text-accent border border-border shadow-sm transition-all active:scale-90"
                 >
                   <Mic className="size-5" />
                 </button>
                 <button 
                   type="button" 
                   onClick={() => setIsSourcePickerOpen(true)} 
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-muted-foreground hover:text-accent border border-border shadow-sm transition-all"
+                  className="size-12 flex items-center justify-center rounded-2xl bg-card text-muted-foreground hover:text-accent border border-border shadow-sm transition-all active:scale-90"
                 >
                   <Camera className="size-5" />
                 </button>
@@ -346,26 +346,26 @@ export default function CariPage() {
               <input type="file" ref={cameraInputRef} onChange={handleImageInput} className="hidden" accept="image/*" capture="environment" />
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full h-14 rounded-xl bg-accent text-accent-foreground font-black text-sm shadow-md transition-all flex gap-2">
-              {loading ? <RefreshCw className="size-4 animate-spin" /> : <><Search className="size-4" /> {t('search_now')}</>}
+            <Button type="submit" disabled={loading} className="w-full h-14 rounded-2xl bg-accent text-accent-foreground font-black text-sm shadow-xl transition-all flex gap-3 hover:bg-accent/90">
+              {loading ? <RefreshCw className="size-5 animate-spin" /> : <><Search className="size-5" /> {t('search_now')}</>}
             </Button>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full h-12 justify-between rounded-xl border-border bg-card text-foreground font-bold hover:bg-muted/50 px-4 text-xs">
-                    <div className="flex items-center gap-2">
-                      <Filter className="size-3.5 text-accent" />
+                  <Button variant="outline" className="w-full h-14 justify-between rounded-2xl border-border bg-card text-foreground font-black hover:bg-muted/50 px-6 text-[11px] uppercase tracking-widest">
+                    <div className="flex items-center gap-3">
+                      <Filter className="size-4 text-accent" />
                       {activeCategory || (language === 'id' ? "Kategori" : "Category")}
                     </div>
-                    <ChevronDown className="size-3.5 opacity-30" />
+                    <ChevronDown className="size-4 opacity-30" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-[280px] rounded-2xl p-2 shadow-2xl bg-card border-border">
-                  <DropdownMenuItem onClick={() => setActiveCategory(null)} className="font-bold text-muted-foreground p-2.5 rounded-lg text-xs">Semua Kategori</DropdownMenuItem>
+                <DropdownMenuContent align="start" className="w-[300px] rounded-[1.5rem] p-2 shadow-2xl bg-card border-border">
+                  <DropdownMenuItem onClick={() => setActiveCategory(null)} className="font-black text-muted-foreground p-3 rounded-xl text-[10px] uppercase tracking-widest">Semua Kategori</DropdownMenuItem>
                   {categories.map((cat) => (
-                    <DropdownMenuItem key={cat.id} onClick={() => setActiveCategory(cat.label)} className="flex items-center gap-3 py-2.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-xs text-foreground">
-                      <div className="size-7 bg-muted rounded flex items-center justify-center text-muted-foreground"><cat.icon className="size-3.5" /></div>{cat.label}
+                    <DropdownMenuItem key={cat.id} onClick={() => setActiveCategory(cat.label)} className="flex items-center gap-4 py-3 rounded-xl font-bold cursor-pointer hover:bg-muted text-sm text-foreground">
+                      <div className="size-9 bg-muted rounded-xl flex items-center justify-center text-muted-foreground shrink-0"><cat.icon className="size-4" /></div>{cat.label}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -373,29 +373,29 @@ export default function CariPage() {
 
               <Popover open={isLocationOpen} onOpenChange={setIsLocationOpen}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full h-12 justify-between rounded-xl border-border bg-card text-foreground font-bold hover:bg-muted/50 px-4 text-xs">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="size-3.5 text-rose-500" />
+                  <Button variant="outline" className="w-full h-14 justify-between rounded-2xl border-border bg-card text-foreground font-black hover:bg-muted/50 px-6 text-[11px] uppercase tracking-widest">
+                    <div className="flex items-center gap-3">
+                      <MapPin className="size-4 text-rose-500" />
                       {activeLocation}
                     </div>
-                    <ChevronDown className="size-3.5 opacity-30" />
+                    <ChevronDown className="size-4 opacity-30" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl bg-card border-border space-y-3">
-                  <Button type="button" variant="outline" onClick={handleNearbySearch} className="w-full h-11 rounded-xl border-accent/20 bg-accent/5 text-accent font-black text-xs gap-2">
-                    <LocateFixed className="size-4" /> {t('nearby')}
+                <PopoverContent align="center" className="w-[300px] rounded-[1.5rem] p-4 shadow-2xl bg-card border-border space-y-4">
+                  <Button type="button" variant="outline" onClick={handleNearbySearch} className="w-full h-12 rounded-xl border-accent/20 bg-accent/5 text-accent font-black text-xs gap-3 active:scale-95 transition-all">
+                    <LocateFixed className="size-5" /> {t('nearby')}
                   </Button>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-                    <Input placeholder="Cari lokasi..." value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} className="h-9 pl-9 rounded-xl bg-muted/50 text-[11px] border-none text-foreground" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input placeholder="Cari lokasi..." value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} className="h-10 pl-10 rounded-xl bg-muted/50 text-xs border-none text-foreground font-medium" />
                   </div>
-                  <div className="space-y-1 max-h-[200px] overflow-y-auto no-scrollbar">
+                  <div className="space-y-1 max-h-[220px] overflow-y-auto no-scrollbar">
                     {POPULAR_LOCATIONS.filter(l => l.toLowerCase().includes(locationSearch.toLowerCase())).map((loc) => (
                       <button 
                         key={loc} 
                         type="button" 
                         onClick={() => { setActiveLocation(loc); setIsLocationOpen(false); }} 
-                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-muted text-foreground"
+                        className="w-full text-left px-4 py-3 rounded-xl text-xs font-black uppercase tracking-tight hover:bg-muted text-foreground transition-colors"
                       >
                         {loc}
                       </button>
@@ -411,31 +411,31 @@ export default function CariPage() {
           <div className="space-y-4 px-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <History className="size-3 text-muted-foreground" />
-                <h4 className="text-[10px] font-black uppercase text-muted-foreground">{t('recent_searches')}</h4>
+                <History className="size-4 text-muted-foreground" />
+                <h4 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">{t('recent_searches')}</h4>
               </div>
-              <button onClick={handleClearHistory} className="text-[9px] font-black uppercase text-rose-500 hover:text-rose-600">
+              <button onClick={handleClearHistory} className="text-[10px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600 transition-colors">
                 {t('clear_all')}
               </button>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+            <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
               {history.map((item) => (
-                <Card key={item.id} onClick={() => handleHistoryClick(item)} className="shrink-0 w-64 rounded-2xl border-border bg-card shadow-sm hover:shadow-md transition-all relative group cursor-pointer">
-                  <CardContent className="p-4 space-y-2">
+                <Card key={item.id} onClick={() => handleHistoryClick(item)} className="shrink-0 w-72 rounded-[1.5rem] border-border bg-card shadow-sm hover:shadow-lg transition-all relative group cursor-pointer border hover:border-accent/20">
+                  <CardContent className="p-5 space-y-3">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <div className="size-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                      <div className="flex items-center gap-3">
+                        <div className="size-10 rounded-[0.75rem] bg-muted flex items-center justify-center shrink-0 shadow-inner group-hover:bg-accent/10 transition-colors">
                           {getTypeIcon(item.type)}
                         </div>
-                        <h5 className="text-xs font-black text-foreground truncate max-w-[140px]">{cleanTitle(item.name)}</h5>
+                        <h5 className="text-[13px] font-black text-foreground truncate max-w-[160px] leading-tight">{cleanTitle(item.name)}</h5>
                       </div>
-                      <span role="button" onClick={(e) => { e.stopPropagation(); handleRemoveHistoryItem(item.id); }} className="p-1.5 rounded-full bg-muted text-muted-foreground hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all">
-                        <X className="size-3" />
+                      <span role="button" onClick={(e) => { e.stopPropagation(); handleRemoveHistoryItem(item.id); }} className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all active:scale-75">
+                        <X className="size-3.5" />
                       </span>
                     </div>
-                    <div className="flex flex-col gap-1 text-[9px] font-bold text-muted-foreground">
-                      <div className="flex items-center gap-2"><MapPin className="size-2.5 text-rose-400" /><span>{item.location || 'Global'}</span></div>
-                      {item.category && <div className="flex items-center gap-2 text-accent"><Filter className="size-2.5" /><span>{item.category}</span></div>}
+                    <div className="flex flex-col gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
+                      <div className="flex items-center gap-2.5"><MapPin className="size-3 text-rose-400" /><span>{item.location || 'Global'}</span></div>
+                      {item.category && <div className="flex items-center gap-2.5 text-accent"><Filter className="size-3" /><span>{item.category}</span></div>}
                     </div>
                   </CardContent>
                 </Card>
@@ -444,41 +444,41 @@ export default function CariPage() {
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {loading && (
-            <div className="grid gap-4">
-              {[1, 2].map((i) => (<Card key={i} className="animate-pulse border-border rounded-[2rem] bg-card"><CardContent className="p-6 flex gap-4"><Skeleton className="size-14 rounded-xl" /><div className="flex-1 space-y-2"><Skeleton className="h-6 w-1/3 rounded" /><Skeleton className="h-4 w-2/3 rounded" /></div></CardContent></Card>))}
+            <div className="grid gap-6">
+              {[1, 2].map((i) => (<Card key={i} className="animate-pulse border-border rounded-[2.5rem] bg-card overflow-hidden"><CardContent className="p-8 flex gap-6"><Skeleton className="size-16 rounded-2xl" /><div className="flex-1 space-y-3"><Skeleton className="h-7 w-1/3 rounded-lg" /><Skeleton className="h-5 w-2/3 rounded-lg" /></div></CardContent></Card>))}
             </div>
           )}
 
           {results && (
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-2"><h3 className="font-black text-foreground text-base">{t('results')}</h3><Badge className="bg-accent/10 text-accent font-bold">{results.results.length}</Badge></div>
+                <div className="flex items-center gap-3"><h3 className="font-black text-foreground text-lg tracking-tight">{t('results')}</h3><Badge className="bg-accent/10 text-accent font-black px-3 py-1 rounded-lg text-xs border-none shadow-sm">{results.results.length}</Badge></div>
               </div>
-              <div className="grid gap-4">
+              <div className="grid gap-5">
                 {results.results.map((result, idx) => (
-                  <Card key={idx} className="group rounded-[1.5rem] border border-border shadow-sm bg-card overflow-hidden">
+                  <Card key={idx} className="group rounded-[2rem] border border-border shadow-sm bg-card overflow-hidden hover:shadow-xl transition-all duration-300">
                     <CardContent className="p-0 flex flex-col md:flex-row">
-                      <div className={cn("w-1 shrink-0", result.source.includes('ontapp') ? 'bg-accent' : 'bg-amber-400')} />
-                      <div className="p-6 flex-1 flex flex-col md:flex-row gap-5 items-start">
-                        <div className="size-14 rounded-2xl bg-muted text-foreground flex items-center justify-center shrink-0">{getTypeIcon(result.type)}</div>
-                        <div className="flex-1 space-y-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h4 className="text-lg font-black text-foreground">{cleanTitle(result.name)}</h4>
-                            <Badge className={cn("text-[10px] font-bold rounded-lg px-2", result.source === 'external' ? 'bg-amber-500/10 text-amber-500' : 'bg-accent/10 text-accent')}>
-                              {result.source === 'external' ? 'Eksternal' : 'Verified'}
+                      <div className={cn("w-1.5 shrink-0 transition-colors", result.source.includes('ontapp') ? 'bg-accent' : 'bg-amber-400')} />
+                      <div className="p-8 flex-1 flex flex-col md:flex-row gap-8 items-start">
+                        <div className="size-16 rounded-[1.25rem] bg-muted text-foreground flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">{getTypeIcon(result.type)}</div>
+                        <div className="flex-1 space-y-3">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <h4 className="text-xl font-black text-slate-900 group-hover:text-accent transition-colors">{cleanTitle(result.name)}</h4>
+                            <Badge className={cn("text-[9px] font-black uppercase tracking-widest rounded-full px-3 py-1 border-none", result.source === 'external' ? 'bg-amber-500/10 text-amber-500' : 'bg-accent/10 text-accent')}>
+                              {result.source === 'external' ? 'Eksternal' : 'Verified Member'}
                             </Badge>
                           </div>
-                          <p className="text-muted-foreground font-medium text-xs leading-relaxed">{result.description}</p>
-                          <div className="flex items-center gap-4 text-[10px] font-black text-muted-foreground uppercase">
-                            {result.location && <button onClick={() => openInGoogleMaps(result.name, result.location)} className="flex items-center gap-1 hover:text-accent transition-colors"><MapPin className="size-3 text-rose-400" />{result.location}</button>}
-                            <div className="flex items-center gap-1 text-accent"><Target className="size-3" />{result.matchScore}% Synergy</div>
+                          <p className="text-slate-500 font-medium text-sm leading-relaxed max-w-2xl">{result.description}</p>
+                          <div className="flex items-center gap-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            {result.location && <button onClick={() => openInGoogleMaps(result.name, result.location)} className="flex items-center gap-2 hover:text-rose-500 transition-colors"><MapPin className="size-3.5 text-rose-400" />{result.location}</button>}
+                            <div className="flex items-center gap-2 text-accent"><Target className="size-3.5" />{result.matchScore}% Synergy</div>
                           </div>
                         </div>
-                        <div className="md:w-32 shrink-0 flex flex-col gap-2">
-                          <Button variant="outline" size="sm" onClick={() => openInGoogleMaps(result.name, result.location)} className="w-full rounded-lg border-accent/20 text-accent text-[9px] font-black">Maps</Button>
-                          <Button className="w-full rounded-lg h-9 bg-accent text-accent-foreground text-[9px] font-black">{t('view_profile')}</Button>
+                        <div className="md:w-36 shrink-0 flex flex-col gap-3">
+                          <Button variant="outline" size="sm" onClick={() => openInGoogleMaps(result.name, result.location)} className="w-full rounded-xl border-accent/20 text-accent text-[10px] font-black uppercase h-10 tracking-widest">Maps</Button>
+                          <Button className="w-full rounded-xl h-11 bg-accent hover:bg-accent/90 text-accent-foreground text-[10px] font-black uppercase tracking-widest shadow-lg shadow-accent/10">{t('view_profile')}</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -489,39 +489,44 @@ export default function CariPage() {
           )}
 
           {!loading && !results && history.length === 0 && (
-            <div className="py-20 text-center space-y-6 bg-card rounded-[2rem] border border-dashed border-border">
-               <div className="size-20 rounded-full bg-muted flex items-center justify-center mx-auto"><Search className="size-10 text-muted-foreground/30" /></div>
-               <h3 className="text-xl font-black text-foreground">{t('start_search')}</h3>
-               <p className="text-xs text-muted-foreground max-w-sm mx-auto font-medium">{t('daily_limit_msg')}</p>
+            <div className="py-24 text-center space-y-8 bg-card rounded-[3rem] border-2 border-dashed border-border/50 animate-in fade-in duration-500">
+               <div className="size-24 rounded-[2rem] bg-muted flex items-center justify-center mx-auto shadow-inner"><Search className="size-12 text-muted-foreground/20" /></div>
+               <div className="space-y-2">
+                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">{t('start_search')}</h3>
+                 <p className="text-sm text-slate-500 max-w-sm mx-auto font-medium">{t('daily_limit_msg')}</p>
+               </div>
             </div>
           )}
         </div>
       </div>
 
       <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
-        <DialogContent className="max-w-[320px] rounded-[2.5rem] bg-card text-foreground p-8 border-none shadow-2xl">
-          <div className="space-y-8">
-            <h2 className="text-xl font-bold">Cari dengan Visual</h2>
+        <DialogContent className="max-w-[340px] rounded-[3rem] bg-card text-foreground p-10 border-none shadow-2xl overflow-hidden outline-none animate-in zoom-in-95 duration-200">
+          <div className="space-y-10">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black tracking-tight text-center">Cari Visual</h2>
+              <p className="text-xs text-center text-muted-foreground font-medium uppercase tracking-widest">Sintesis Objek AI</p>
+            </div>
             <div className="space-y-6">
-              <button disabled={isCloudLoading} onClick={() => cameraInputRef.current?.click()} className="w-full flex items-center gap-5 group">
-                <div className="size-12 rounded-full bg-muted flex items-center justify-center"><Camera className="size-6 text-accent" /></div>
-                <span className="font-bold">Ambil Foto</span>
+              <button disabled={isCloudLoading} onClick={() => cameraInputRef.current?.click()} className="w-full flex items-center gap-6 group text-left active:scale-95 transition-transform">
+                <div className="size-14 rounded-2xl bg-muted flex items-center justify-center shadow-inner group-hover:bg-accent/10 group-hover:text-accent transition-colors"><Camera className="size-7" /></div>
+                <div className="flex flex-col"><span className="font-black text-[16px] leading-none">Ambil Foto</span><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Kamera Langsung</span></div>
               </button>
-              <button disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-5 group">
-                <div className="size-12 rounded-full bg-muted flex items-center justify-center"><ImageIcon className="size-6 text-accent" /></div>
-                <span className="font-bold">Galeri</span>
+              <button disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-6 group text-left active:scale-95 transition-transform">
+                <div className="size-14 rounded-2xl bg-muted flex items-center justify-center shadow-inner group-hover:bg-accent/10 group-hover:text-accent transition-colors"><ImageIcon className="size-7" /></div>
+                <div className="flex flex-col"><span className="font-black text-[16px] leading-none">Galeri Media</span><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Pilih dari Penyimpanan</span></div>
               </button>
-              <div className="h-px bg-border w-full" />
-              <button disabled={isCloudLoading} onClick={() => handleCloudImageInput('drive')} className="w-full flex items-center gap-5 group">
-                <div className="size-12 rounded-full bg-muted flex items-center justify-center">{isCloudLoading ? <RefreshCw className="size-6 animate-spin" /> : <Cloud className="size-6 text-blue-500" />}</div>
-                <span className="font-bold">Google Drive</span>
+              <div className="h-px bg-border w-full opacity-50" />
+              <button disabled={isCloudLoading} onClick={() => handleCloudImageInput('drive')} className="w-full flex items-center gap-6 group text-left active:scale-95 transition-transform">
+                <div className="size-14 rounded-2xl bg-muted flex items-center justify-center shadow-inner group-hover:bg-blue-50 transition-colors">{isCloudLoading ? <RefreshCw className="size-7 animate-spin text-blue-500" /> : <Cloud className="size-7 text-blue-500" />}</div>
+                <div className="flex flex-col"><span className="font-black text-[16px] leading-none">Google Drive</span><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Impor Awan</span></div>
               </button>
-              <button disabled={isCloudLoading} onClick={() => handleCloudImageInput('photos')} className="w-full flex items-center gap-5 group">
-                <div className="size-12 rounded-full bg-muted flex items-center justify-center">{isCloudLoading ? <RefreshCw className="size-6 animate-spin" /> : <ImageIcon className="size-6 text-rose-500" />}</div>
-                <span className="font-bold">Google Photos</span>
+              <button disabled={isCloudLoading} onClick={() => handleCloudImageInput('photos')} className="w-full flex items-center gap-6 group text-left active:scale-95 transition-transform">
+                <div className="size-14 rounded-2xl bg-muted flex items-center justify-center shadow-inner group-hover:bg-rose-50 transition-colors">{isCloudLoading ? <RefreshCw className="size-7 animate-spin text-rose-500" /> : <ImageIcon className="size-7 text-rose-500" />}</div>
+                <div className="flex flex-col"><span className="font-black text-[16px] leading-none">Google Photos</span><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Arsip Foto</span></div>
               </button>
             </div>
-            <button onClick={() => setIsSourcePickerOpen(false)} className="w-full text-center text-sm font-bold text-muted-foreground hover:text-foreground">Batal</button>
+            <button onClick={() => setIsSourcePickerOpen(false)} className="w-full text-center text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-rose-500 transition-colors">Batal</button>
           </div>
         </DialogContent>
       </Dialog>

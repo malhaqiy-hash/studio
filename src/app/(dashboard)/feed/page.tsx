@@ -354,9 +354,9 @@ export default function FeedPage() {
                       <Card className="border border-border shadow-sm rounded-[2.5rem] overflow-hidden bg-card flex-1 flex flex-col hover:shadow-md transition-shadow">
                         <div className="p-6 pb-2 flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <Avatar className="size-10 border border-border">
+                            <Avatar className="size-11 border border-border shadow-sm">
                               <AvatarImage src={post.avatar} className="object-cover" />
-                              <AvatarFallback className="bg-accent/10 text-accent font-bold">{post.author[0]}</AvatarFallback>
+                              <AvatarFallback className="bg-accent/10 text-accent font-black">{post.author[0]}</AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2">
@@ -364,17 +364,17 @@ export default function FeedPage() {
                                 {post.verified && <ShieldCheck className="size-3.5 text-emerald-500" />}
                               </div>
                               {post.extra && (
-                                <div className="text-[10px] font-black text-accent uppercase tracking-tight -mt-0.5">
+                                <div className="text-[10px] font-black text-accent uppercase tracking-tight -mt-0.5 opacity-80">
                                   {post.extra}
                                 </div>
                               )}
-                              <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase">
+                              <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">
                                 <Clock className="size-2.5" /> {post.time}
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <button onClick={() => handleSavePost(post)} className={cn("p-2 rounded-full transition-all", isSaved ? "text-accent bg-accent/10" : "text-muted-foreground hover:bg-muted")}>
+                            <button onClick={() => handleSavePost(post)} className={cn("p-2.5 rounded-full transition-all active:scale-90", isSaved ? "text-accent bg-accent/5" : "text-muted-foreground hover:bg-muted")}>
                               <Bookmark className={cn("size-5", isSaved && "fill-accent")} />
                             </button>
                           </div>
@@ -389,34 +389,36 @@ export default function FeedPage() {
                           <div 
                             onClick={() => toggleExpand(post.id)}
                             className={cn(
-                              "cursor-pointer transition-all duration-300",
-                              !isExpanded && (post.image ? "line-clamp-5" : "max-h-[300px] overflow-hidden relative")
+                              "cursor-pointer transition-all duration-300 relative group/text",
+                              !isExpanded && (post.image ? "line-clamp-5" : "max-h-[300px] overflow-hidden")
                             )}
                           >
                             <p className={cn(
-                              "text-foreground/90 leading-relaxed font-medium",
-                              post.type === 'insight' ? "text-lg italic" : "text-base"
+                              "text-foreground/90 leading-relaxed font-medium transition-colors",
+                              post.type === 'insight' ? "text-lg italic" : "text-base",
+                              !isExpanded && "group-hover/text:text-foreground"
                             )}>
                               {trans?.show ? trans.text : post.content}
                             </p>
-                            {!isExpanded && !post.image && (
-                              <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card to-transparent pointer-events-none" />
+                            {!isExpanded && (
+                              <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-card to-transparent pointer-events-none opacity-80" />
                             )}
                           </div>
                           
                           {post.image && (
                             <div 
                               onClick={() => setExpandedImage(post.image!)}
-                              className="rounded-3xl overflow-hidden border border-border mt-4 cursor-zoom-in active:scale-[0.99] transition-transform"
+                              className="rounded-[2rem] overflow-hidden border border-border mt-4 cursor-zoom-in active:scale-[0.99] transition-all hover:shadow-lg shadow-sm"
                             >
                               <img src={post.image} alt="Content" className="w-full h-auto object-cover max-h-[500px]" />
                             </div>
                           )}
+                          
                           {post.externalLink && (
                             <div className="pt-2">
                               <button 
                                 onClick={() => window.open(post.externalLink, '_blank')} 
-                                className="flex items-center justify-center size-12 bg-accent/10 hover:bg-accent/20 rounded-2xl border border-accent/20 transition-all shadow-sm group"
+                                className="flex items-center justify-center size-12 bg-accent/5 hover:bg-accent/10 rounded-2xl border border-accent/10 transition-all shadow-sm active:scale-90"
                                 title="Buka Tautan"
                               >
                                 {getLinkIcon(post.externalLink)}
@@ -425,7 +427,7 @@ export default function FeedPage() {
                           )}
                         </CardContent>
 
-                        <div className="p-6 pt-0 mt-auto border-t border-border bg-muted/20 flex items-center justify-between">
+                        <div className="p-6 pt-0 mt-auto border-t border-border/50 bg-muted/5 flex items-center justify-between">
                           <div className="flex items-center gap-6 text-muted-foreground">
                             <button 
                               onClick={() => handleLike(post.id)}
@@ -437,7 +439,7 @@ export default function FeedPage() {
                             
                             <button 
                               onClick={handleComment}
-                              className="flex items-center gap-2 hover:text-accent transition-colors"
+                              className="flex items-center gap-2 hover:text-accent transition-colors active:scale-90"
                             >
                               <MessageCircle className="size-5" />
                               <span className="text-xs font-black">{post.stats.comments}</span>
@@ -446,8 +448,7 @@ export default function FeedPage() {
                             <button 
                               onClick={() => handleTranslate(post.id, post.content)} 
                               disabled={trans?.loading} 
-                              className={cn("flex items-center transition-colors", trans?.show ? "text-accent" : "hover:text-accent")}
-                              title={trans?.show ? "Original" : "Translate"}
+                              className={cn("flex items-center transition-all active:scale-90", trans?.show ? "text-accent" : "hover:text-accent")}
                             >
                               {trans?.loading ? <RefreshCw className="size-5 animate-spin" /> : <Globe className="size-5" />}
                             </button>
@@ -456,7 +457,7 @@ export default function FeedPage() {
                           <div className="flex gap-2">
                             <button 
                               onClick={() => handleShare(post)}
-                              className="p-2 text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                              className="p-2 text-muted-foreground hover:text-foreground transition-all active:scale-75"
                             >
                               <Share2 className="size-5" />
                             </button>
@@ -464,7 +465,7 @@ export default function FeedPage() {
                               variant="ghost" 
                               size="sm" 
                               onClick={() => handleDetail(post.id)}
-                              className="font-black text-accent hover:bg-accent/10 rounded-xl text-xs gap-1"
+                              className="font-black text-accent hover:bg-accent/5 rounded-xl text-xs gap-1 h-9"
                             >
                               Detail <ArrowUpRight className="size-3.5" />
                             </Button>
@@ -488,25 +489,25 @@ export default function FeedPage() {
             </DialogHeader>
 
             <div className="space-y-4">
-              <div className="relative rounded-[1.5rem] bg-muted/30 border border-border/50 p-2">
+              <div className="relative rounded-[2rem] bg-muted/30 border border-border/50 p-2">
                 <Textarea 
                   placeholder="Apa yang sedang Anda pikirkan?"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
-                  className="min-h-[140px] rounded-2xl border-none bg-transparent p-4 text-base font-medium focus-visible:ring-0 resize-none"
+                  className="min-h-[160px] rounded-2xl border-none bg-transparent p-4 text-base font-medium focus-visible:ring-0 resize-none"
                 />
 
                 <div className="flex items-center gap-2 px-4 py-2 border-t border-border/30">
                   <button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-2.5 rounded-xl hover:bg-accent/10 text-muted-foreground hover:text-accent transition-all"
+                    className="p-2.5 rounded-xl hover:bg-accent/10 text-muted-foreground hover:text-accent transition-all active:scale-90"
                     title="Tambah Galeri"
                   >
                     <ImageIcon className="size-5" />
                   </button>
                   <button 
                     onClick={() => cameraInputRef.current?.click()}
-                    className="p-2.5 rounded-xl hover:bg-accent/10 text-muted-foreground hover:text-accent transition-all"
+                    className="p-2.5 rounded-xl hover:bg-accent/10 text-muted-foreground hover:text-accent transition-all active:scale-90"
                     title="Ambil Foto"
                   >
                     <Camera className="size-5" />
@@ -514,7 +515,7 @@ export default function FeedPage() {
                   <button 
                     onClick={() => setIsLinkInputOpen(!isLinkInputOpen)}
                     className={cn(
-                      "p-2.5 rounded-xl transition-all",
+                      "p-2.5 rounded-xl transition-all active:scale-90",
                       isLinkInputOpen ? "bg-accent text-white" : "hover:bg-accent/10 text-muted-foreground hover:text-accent"
                     )}
                     title="Tambah Link"
@@ -526,41 +527,41 @@ export default function FeedPage() {
 
               {isLinkInputOpen && (
                 <div className="animate-in slide-in-from-top-2 duration-200">
-                  <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-4 h-12">
-                    {getLinkIcon(postLink) || <Link2 className="size-5 text-accent" />}
+                  <div className="flex items-center gap-2 bg-muted/50 rounded-2xl px-4 h-14 border border-border/50">
+                    {getLinkIcon(postLink) || <Link2 className="size-5 text-accent opacity-50" />}
                     <Input 
                       placeholder="Tempel tautan (WA, IG, Maps, dll)..."
                       value={postLink}
                       onChange={(e) => setPostLink(e.target.value)}
-                      className="border-none bg-transparent px-0 text-sm font-medium focus-visible:ring-0"
+                      className="border-none bg-transparent px-0 text-sm font-bold focus-visible:ring-0"
                     />
                   </div>
                 </div>
               )}
 
               {postImage && (
-                <div className="relative group rounded-2xl overflow-hidden border border-border bg-muted/30 animate-in zoom-in-95">
+                <div className="relative group rounded-[1.5rem] overflow-hidden border border-border bg-muted/30 animate-in zoom-in-95">
                   <img src={postImage} className="w-full h-auto max-h-[300px] object-contain mx-auto" alt="Preview" />
                   <button 
                     onClick={() => setPostImage(null)}
-                    className="absolute top-2 right-2 size-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-rose-500 transition-colors"
+                    className="absolute top-2 right-2 size-8 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-rose-500 transition-colors shadow-lg"
                   >
                     <X className="size-4" />
                   </button>
                 </div>
               )}
 
-              <div className="flex items-center space-x-3 p-3 rounded-xl bg-muted/20 border border-border/20">
+              <div className="flex items-center space-x-3 p-4 rounded-2xl bg-muted/10 border border-border/20">
                 <Checkbox id="go-profile" checked={goToProfile} onCheckedChange={(val) => setGoToProfile(val as boolean)} />
-                <Label htmlFor="go-profile" className="text-[11px] font-bold cursor-pointer text-muted-foreground uppercase tracking-tight">Lihat profil setelah posting</Label>
+                <Label htmlFor="go-profile" className="text-[10px] font-black cursor-pointer text-muted-foreground uppercase tracking-widest">Kunjungi profil setelah terbit</Label>
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="pt-2">
               <Button 
                 onClick={handleCreatePost}
                 disabled={!postContent.trim() && !postImage && !postLink}
-                className="w-full h-12 rounded-2xl bg-accent hover:bg-accent/90 text-white font-black text-sm shadow-xl shadow-accent/20 active:scale-[0.98] transition-all"
+                className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 text-white font-black text-sm shadow-xl shadow-accent/20 active:scale-[0.98] transition-all"
               >
                 Kirim Postingan
               </Button>
@@ -577,17 +578,17 @@ export default function FeedPage() {
 
       {/* Lightbox for Image Expansion */}
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
-        <DialogContent className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden">
+        <DialogContent className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none">
           {zoomedImage && (
             <div className="relative w-full h-full max-h-[90vh] flex items-center justify-center p-4">
               <img 
                 src={zoomedImage} 
                 alt="Expanded view" 
-                className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200"
+                className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 fade-in duration-300"
               />
               <button 
                 onClick={() => setExpandedImage(null)}
-                className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+                className="absolute top-4 right-4 p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all active:scale-90"
               >
                 <X className="size-6" />
               </button>
