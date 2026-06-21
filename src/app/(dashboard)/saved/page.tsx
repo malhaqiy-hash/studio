@@ -3,7 +3,6 @@
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Bookmark, 
@@ -75,18 +74,20 @@ export default function SavedPostsPage() {
   };
 
   const handleShare = (post: any) => {
+    const shareUrl = window.location.href;
+    
     if (navigator.share) {
       navigator.share({
-        title: `OnTapp: ${post.author}`,
-        text: post.content,
-        url: window.location.href,
-      }).catch(() => {
-        navigator.clipboard.writeText(window.location.href);
-        toast({ title: "Link Disalin" });
-      });
+        title: 'OnTapp - Jaringan Bisnis',
+        text: `Lihat koleksi menarik dari ${post.author} di OnTapp!`,
+        url: shareUrl
+      })
+      .then(() => console.log('Berhasil berbagi'))
+      .catch((error) => console.log('Batal berbagi', error));
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast({ title: "Link Disalin" });
+      // Fallback if native share is not available
+      navigator.clipboard.writeText(shareUrl);
+      toast({ title: "Tautan Berhasil Disalin", description: "Tautan koleksi telah disalin ke papan klip Anda." });
     }
   };
 

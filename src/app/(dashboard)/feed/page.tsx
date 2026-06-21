@@ -3,7 +3,6 @@
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   TrendingUp, 
@@ -18,7 +17,6 @@ import {
   RefreshCw,
   ArrowUpRight,
   Bookmark,
-  Plus,
   Image as ImageIcon,
   Camera,
   Link2,
@@ -50,7 +48,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
 import { useAccount } from "@/context/account-context";
-import { ShareSheet } from "@/components/share-sheet";
 
 const CATEGORIES = [
   { id: 'for-you', label: 'For You', icon: Brain },
@@ -112,7 +109,6 @@ export default function FeedPage() {
   const [goToProfile, setGoToProfile] = React.useState(false);
   
   const [zoomedImage, setExpandedImage] = React.useState<string | null>(null);
-  const [shareData, setShareData] = React.useState<{ isOpen: boolean; url: string }>({ isOpen: false, url: '' });
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
@@ -181,8 +177,21 @@ export default function FeedPage() {
   };
 
   const handleShare = (post: any) => {
-    const postUrl = `${window.location.origin}/post/${post.id}`;
-    setShareData({ isOpen: true, url: postUrl });
+    const shareUrl = `${window.location.origin}/feed`; // In a real app, this would be a per-post URL
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'OnTapp - Jaringan Bisnis',
+        text: `Lihat postingan menarik dari ${post.author} di OnTapp!`,
+        url: shareUrl
+      })
+      .then(() => console.log('Berhasil berbagi'))
+      .catch((error) => console.log('Batal berbagi', error));
+    } else {
+      // Fallback for older browsers
+      navigator.clipboard.writeText(shareUrl);
+      toast({ title: "Tautan Berhasil Disalin", description: "Browser Anda tidak mendukung berbagi asli, tautan disalin ke papan klip." });
+    }
   };
 
   const handleDetail = (postId: string) => {
@@ -569,12 +578,6 @@ export default function FeedPage() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <ShareSheet 
-        isOpen={shareData.isOpen} 
-        onOpenChange={(open) => setShareData(prev => ({ ...prev, isOpen: open }))} 
-        postUrl={shareData.url} 
-      />
 
       {/* Lightbox for Image Expansion */}
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
