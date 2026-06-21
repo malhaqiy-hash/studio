@@ -28,7 +28,8 @@ import {
   Music,
   ShoppingBag,
   MessageCircleCode,
-  Plus
+  Plus,
+  Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -43,6 +44,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -71,7 +79,8 @@ const INITIAL_POSTS = [
     stats: { likes: 1200, comments: 84 },
     verified: true,
     tag: "Trending",
-    locationLink: "https://maps.google.com/?q=Southeast+Asia"
+    locationLink: "https://maps.google.com/?q=Southeast+Asia",
+    visibility: 'public'
   },
   {
     id: "p2",
@@ -85,7 +94,8 @@ const INITIAL_POSTS = [
     stats: { likes: 452, comments: 12 },
     verified: true,
     image: "https://picsum.photos/seed/truck/800/400",
-    locationLink: "https://maps.google.com/?q=Jakarta"
+    locationLink: "https://maps.google.com/?q=Jakarta",
+    visibility: 'public'
   },
 ];
 
@@ -107,6 +117,7 @@ export default function FeedPage() {
   const [postContent, setPostContent] = React.useState("");
   const [postImage, setPostImage] = React.useState<string | null>(null);
   const [postLink, setPostLink] = React.useState("");
+  const [postVisibility, setPostVisibility] = React.useState<'public' | 'private'>('public');
   const [isLinkInputOpen, setIsLinkInputOpen] = React.useState(false);
   const [goToProfile, setGoToProfile] = React.useState(false);
   
@@ -260,12 +271,12 @@ export default function FeedPage() {
     if (!postContent.trim() && !postImage && !postLink) return;
 
     const newPostData = {
-      title: postContent.slice(0, 30) + "...",
+      title: postContent.slice(0, 30) + (postContent.length > 30 ? "..." : ""),
       description: postContent,
       image: postImage || undefined,
       externalLink: postLink || undefined,
       source: 'feed' as const,
-      visibility: 'public' as const,
+      visibility: postVisibility,
     };
 
     addPost(newPostData);
@@ -274,6 +285,7 @@ export default function FeedPage() {
     setPostContent("");
     setPostImage(null);
     setPostLink("");
+    setPostVisibility('public');
     setIsLinkInputOpen(false);
     toast({ title: "Postingan terbit!" });
 
@@ -324,10 +336,12 @@ export default function FeedPage() {
         externalLink: item.externalLink,
         time: item.timestamp || "Baru saja",
         stats: { likes: 0, comments: 0 },
-        verified: activeAccount.verificationStatus === 'Verified'
+        verified: activeAccount.verificationStatus === 'Verified',
+        visibility: item.visibility
       }));
     
-    const all = [...userPosts, ...posts];
+    // Only show user's private posts to themselves, and all public posts
+    const all = [...userPosts, ...posts].filter(p => p.visibility !== 'private' || p.author === activeAccount.name);
     return all.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
   }, [activeAccount.items, activeAccount.name, activeAccount.avatar, activeAccount.extra, activeAccount.verificationStatus, posts]);
 
@@ -386,6 +400,7 @@ export default function FeedPage() {
                                   <h3 className="font-black text-foreground text-sm">{post.author}</h3>
                                 </Link>
                                 {post.verified && <ShieldCheck className="size-3.5 text-emerald-500" />}
+                                {post.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
                               </div>
                               {post.extra && (
                                 <div className="text-[10px] font-black text-accent uppercase tracking-tight -mt-0.5 opacity-80">
@@ -509,7 +524,20 @@ export default function FeedPage() {
         <DialogContent className="max-w-xl rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground">
           <div className="p-8 space-y-6">
             <DialogHeader>
-              <DialogTitle className="text-xl font-black">Buat Postingan</DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-xl font-black">Buat Postingan</DialogTitle>
+                <div className="w-32">
+                   <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
+                    <SelectTrigger className="h-9 rounded-xl bg-muted/50 border-none text-[10px] font-black uppercase px-3">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">🌍 Publik</SelectItem>
+                      <SelectItem value="private">🔒 Privat</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </DialogHeader>
 
             <div className="space-y-4">

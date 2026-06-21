@@ -46,7 +46,8 @@ import {
   Youtube,
   Music,
   ShoppingBag,
-  MessageCircleCode
+  MessageCircleCode,
+  Globe
 } from 'lucide-react';
 import {
   Dialog,
@@ -56,6 +57,13 @@ import {
   DialogFooter,
   DialogDescription
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -381,7 +389,10 @@ export default function ProfilePage() {
                   )}
                   <button onClick={() => handleRemoveItem(item.id)} className="absolute top-4 right-4 z-10 size-10 bg-rose-500 text-white rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110"><Trash2 className="size-5" /></button>
                   <CardContent className="p-6 space-y-3">
-                    <h4 className="font-black text-foreground text-lg line-clamp-1">{item.title}</h4>
+                    <div className="flex items-center justify-between">
+                       <h4 className="font-black text-foreground text-lg line-clamp-1">{item.title}</h4>
+                       {item.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
+                    </div>
                     <p className="text-muted-foreground text-xs font-medium line-clamp-2">{item.description}</p>
                     <div className="pt-2 border-t border-border flex items-center gap-3">
                       {item.locationLink && (
@@ -529,6 +540,20 @@ export default function ProfilePage() {
               {newItem.image ? <img src={newItem.image} className="w-full h-full object-cover" alt="Preview" /> : <ImageIcon className="size-10 text-muted-foreground group-hover:scale-110 transition-transform" />}
             </div>
             <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Judul</Label><Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-2xl h-14 bg-muted/50 border-none px-6 text-foreground" /></div>
+            
+            <div className="space-y-2">
+              <Label className="font-black text-[10px] uppercase text-muted-foreground">Visibilitas</Label>
+              <Select value={newItem.visibility} onValueChange={(val: 'public' | 'private') => setNewItem({ ...newItem, visibility: val })}>
+                <SelectTrigger className="rounded-2xl h-14 bg-muted/50 border-none px-6 text-foreground">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">🌍 Publik</SelectItem>
+                  <SelectItem value="private">🔒 Privat (Hanya Saya)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Link (WA, Maps, Social Media)</Label><Input value={newItem.locationLink} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} className="rounded-2xl h-12 bg-muted/50 border-none px-6 text-foreground" placeholder="https://..." /></div>
           </div>
           <DialogFooter className="mt-10"><Button onClick={handleAddContent} className="w-full h-14 rounded-2xl bg-accent font-black text-white uppercase">Posting</Button></DialogFooter>
