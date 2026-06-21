@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -26,6 +27,7 @@ import {
   Magnet,
   BookOpen,
   TrendingUp,
+  Handshake,
   Map as MapIcon,
   Building2,
   Bookmark,
@@ -129,12 +131,25 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Bookmark, label: t('saved'), href: "/saved", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Users, label: t('communities'), href: "/communities", roles: ['pribadi', 'professional', 'bisnis'] },
+      
+      // AI Intelligence Menu (Differentiated by Account Type)
+      { icon: Radar, label: t('scout'), href: "/scout", roles: ['bisnis', 'professional'] },
+      { icon: Handshake, label: t('matchmaker'), href: "/matchmaker", roles: ['bisnis', 'professional'] },
+      { icon: TrendingUp, label: t('market_radar'), href: "/market-radar", roles: ['bisnis'] },
+      { icon: Magnet, label: t('reverse_discovery'), href: "/reverse-discovery", roles: ['bisnis'] },
+      { icon: MapIcon, label: t('opportunity_map'), href: "/opportunity-map", roles: ['bisnis'] },
+      { icon: Building2, label: t('registry'), href: "/registry", roles: ['bisnis', 'professional'] },
+      { icon: BookOpen, label: t('knowledge'), href: "/knowledge", roles: ['pribadi', 'professional', 'bisnis'] },
+
+      { icon: Briefcase, label: t('opportunities'), href: "/opportunities", roles: ['bisnis', 'professional'] },
+      { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
+      
+      // Hidden from drawer but part of role check for other locations
       { icon: Rss, label: t('feed'), href: "/feed", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Search, label: t('search'), href: "/cari", roles: ['pribadi', 'professional', 'bisnis'] },
-      { icon: Briefcase, label: t('opportunities'), href: "/opportunities", roles: ['bisnis'] },
-      { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
     ];
 
+    // Filter by role and exclude bottom nav items
     return baseItems.filter(item => 
       item.roles.includes(activeAccount?.type || 'pribadi') && 
       item.href !== "/feed" && 
@@ -370,3 +385,4 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
