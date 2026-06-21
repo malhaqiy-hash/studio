@@ -37,7 +37,7 @@ import { useAccount } from "@/context/account-context";
 import Link from "next/link";
 
 const CATEGORIES = [
-  { id: 'for-you', label: 'For You' },
+  { id: 'for-you', label: 'Saran' },
   { id: 'lokal', label: 'Lokal' },
   { id: 'global', label: 'Global' },
   { id: 'trending', label: 'Trending' },
