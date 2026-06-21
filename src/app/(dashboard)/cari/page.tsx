@@ -225,7 +225,7 @@ export default function CariPage() {
     if (file) {
       setIsSourcePickerOpen(false);
       toast({ title: "Visual AI Aktif", description: "Menganalisis objek dalam gambar..." });
-      handleSearch(undefined, "Analisis gambar");
+      handleSearch(undefined, "Analisis Gambar");
     }
   };
 
@@ -258,6 +258,10 @@ export default function CariPage() {
     });
   };
 
+  const handleVoiceSearch = () => {
+    toast({ title: "Voice Search Aktif", description: "Mendengarkan suara Anda..." });
+  };
+
   const getTypeIcon = (type: string) => {
     switch(type) {
       case 'product': return <Package className="size-5" />;
@@ -284,7 +288,7 @@ export default function CariPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('search_placeholder')}
-                className="h-16 pl-12 pr-44 rounded-2xl border-border bg-muted/30 shadow-inner text-base font-medium focus:bg-background transition-all focus:border-accent text-foreground"
+                className="h-16 pl-12 pr-52 rounded-2xl border-border bg-muted/30 shadow-inner text-base font-medium focus:bg-background transition-all focus:border-accent text-foreground"
               />
               <div className="absolute inset-y-3 right-3 flex items-center gap-1.5">
                 {query && (
@@ -296,7 +300,20 @@ export default function CariPage() {
                     <X className="size-5" />
                   </button>
                 )}
-                <button type="button" onClick={() => setIsSourcePickerOpen(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-muted-foreground hover:text-accent border border-border shadow-sm transition-all"><Camera className="size-5" /></button>
+                <button 
+                  type="button" 
+                  onClick={handleVoiceSearch} 
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-muted-foreground hover:text-accent border border-border shadow-sm transition-all"
+                >
+                  <Mic className="size-5" />
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setIsSourcePickerOpen(true)} 
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-card text-muted-foreground hover:text-accent border border-border shadow-sm transition-all"
+                >
+                  <Camera className="size-5" />
+                </button>
               </div>
               <input type="file" ref={fileInputRef} onChange={handleImageInput} className="hidden" accept="image/*" />
               <input type="file" ref={cameraInputRef} onChange={handleImageInput} className="hidden" accept="image/*" capture="environment" />
