@@ -54,7 +54,7 @@ const INITIAL_POSTS = [
     stats: { likes: 1200, comments: 84 },
     verified: true,
     visibility: 'public',
-    images: ["https://picsum.photos/seed/tech1/800/500", "https://picsum.photos/seed/tech2/800/600"]
+    images: ["https://picsum.photos/seed/tech1/800/500", "https://picsum.photos/seed/tech2/800/600", "https://picsum.photos/seed/tech3/800/700"]
   },
   {
     id: "p2",
@@ -115,7 +115,7 @@ function PostMedia({ images }: { images?: string[] }) {
       </div>
 
       {images.length > 1 && (
-        <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-bold z-10 text-white shadow-sm pointer-events-none">
+        <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black z-10 text-white shadow-sm pointer-events-none tracking-widest">
           {selectedIndex + 1} / {images.length}
         </div>
       )}
@@ -271,7 +271,7 @@ export default function FeedPage() {
               key={cat.id}
               onClick={() => scrollTo(idx)}
               className={cn(
-                "px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border shrink-0",
+                "px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border shrink-0",
                 activeCategory === cat.id 
                   ? "bg-black text-white border-black shadow-sm" 
                   : "bg-card text-muted-foreground hover:bg-muted border-border"
