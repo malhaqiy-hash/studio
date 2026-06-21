@@ -93,15 +93,19 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
-  // Stop propagation for inner carousel to prevent parent carousel from swiping
-  const handleCapture = (e: React.TouchEvent | React.MouseEvent) => {
+  // CRITICAL: Stop propagation to prevent nested carousel from triggering parent swipe
+  const handleInteraction = (e: React.TouchEvent | React.MouseEvent) => {
     if (images.length > 1) {
       e.stopPropagation();
     }
   };
 
   return (
-    <div className="relative group/carousel" onTouchStart={handleCapture} onMouseDown={handleCapture}>
+    <div 
+      className="relative group/carousel" 
+      onTouchStart={handleInteraction} 
+      onMouseDown={handleInteraction}
+    >
       <div className="overflow-hidden rounded-xl border border-border bg-muted/5" ref={emblaRef}>
         <div className="flex">
           {images.map((src, idx) => (
@@ -110,7 +114,10 @@ function PostMedia({ images }: { images?: string[] }) {
                 src={src} 
                 className="w-full h-auto object-contain cursor-zoom-in active:scale-[0.99] transition-transform max-h-[500px] md:max-h-[700px]" 
                 alt={`Content ${idx + 1}`}
-                onClick={() => setExpandedImage(src)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpandedImage(src);
+                }}
               />
             </div>
           ))}
@@ -271,7 +278,7 @@ export default function FeedPage() {
       <div className="flex flex-col max-w-2xl mx-auto relative px-1 md:px-0">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
-        <div className="flex items-center justify-center gap-1.5 mb-3 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 overflow-x-auto no-scrollbar">
+        <div className="flex items-center justify-center gap-1 mb-2 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 overflow-x-auto no-scrollbar">
           {CATEGORIES.map((cat, idx) => (
             <button
               key={cat.id}
@@ -313,7 +320,7 @@ export default function FeedPage() {
                           <div className="flex flex-col">
                             <div className="flex items-center gap-1">
                               <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[15px]">{post.author}</h3></Link>
-                              {post.verified && <ShieldCheck className="size-4 text-black" />}
+                              {post.verified && <ShieldCheck className="size-3.5 text-black" />}
                             </div>
                             <div className="flex items-center gap-1 text-[12px] text-muted-foreground font-medium uppercase tracking-tight">
                               {post.time}
