@@ -6,7 +6,8 @@ export type AccountType = 'pribadi' | 'professional' | 'bisnis';
 
 export interface ContentItem {
   id: string;
-  image?: string;
+  image?: string; // Fallback for old single image data
+  images?: string[]; // Array for multi-photo support
   title?: string;
   description?: string;
   price?: string;
