@@ -313,7 +313,6 @@ export default function FeedPage() {
                             <button onClick={() => handleSavePost(post)} className={cn("p-2 rounded-full transition-all", isSaved ? "text-accent bg-accent/10" : "text-muted-foreground hover:bg-muted")}>
                               <Bookmark className={cn("size-5", isSaved && "fill-accent")} />
                             </button>
-                            <Badge variant="outline" className="text-[9px] font-black uppercase text-muted-foreground">{cat.label}</Badge>
                           </div>
                         </div>
 
