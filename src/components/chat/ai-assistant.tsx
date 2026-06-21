@@ -146,7 +146,7 @@ export function AIAssistant() {
                       {msg.showTranslated ? msg.translatedContent : msg.content}
                     </div>
                     <button 
-                      onClick={() => handleTranslateMessage(i)} 
+                      onClick={() => handleTranslateMessage(index)} 
                       disabled={msg.isTranslating} 
                       className={cn(
                         "transition-all active:scale-75 flex items-center p-1 rounded-full bg-muted/20", 

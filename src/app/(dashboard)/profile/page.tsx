@@ -205,7 +205,7 @@ export default function ProfilePage() {
       </Dialog>
 
       <Dialog open={isContentModalOpen} onOpenChange={setIsContentModalOpen}>
-        <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-6 bg-card text-foreground outline-none">
+        <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden">
           <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle className="text-lg font-bold text-slate-900">Tambah Konten</DialogTitle>
             <div className="w-32">
@@ -235,7 +235,7 @@ export default function ProfilePage() {
       </Dialog>
 
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
-        <DialogContent className="w-[85%] md:max-w-xs rounded-2xl p-6 border-none shadow-2xl bg-card text-foreground outline-none">
+        <DialogContent className="w-[85%] md:max-w-xs rounded-2xl p-6 border-none shadow-2xl bg-card text-foreground outline-none [&>button]:hidden">
           <DialogHeader className="text-center"><DialogTitle className="text-lg font-bold text-slate-900">Impor Gambar</DialogTitle></DialogHeader>
           <div className="grid gap-3 py-5">
             <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-14 rounded-xl border-border bg-muted/30 hover:bg-accent/10 justify-start gap-4 px-5 shadow-inner">

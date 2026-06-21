@@ -31,7 +31,6 @@ import {
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
 import { useLanguage } from "@/context/language-context";
-import { useUser } from "@/firebase";
 import {
   DropdownMenu,
   DropdownMenuContent,

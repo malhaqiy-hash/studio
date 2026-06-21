@@ -55,9 +55,6 @@
   body {
     @apply bg-background text-foreground font-body;
   }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-headline;
-  }
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -72,9 +69,11 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Compact scale for mobile */
-@media (max-width: 768px) {
-  :root {
-    --radius: 0.75rem;
-  }
+/* Scroll indicator handle for sheets */
+.sheet-handle {
+  width: 40px;
+  height: 5px;
+  background-color: hsl(var(--muted));
+  border-radius: 99px;
+  margin: 10px auto;
 }
