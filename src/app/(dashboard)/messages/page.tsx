@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Send, Phone, Video, Info, MoreVertical, Globe, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/context/language-context";
+import { cn } from "@/lib/utils";
 
 const CHATS = [
   { id: 1, name: "Eco Packaging Co", avatar: "https://picsum.photos/seed/eco/100", lastMsg: "The shipment was sent this morning.", time: "10:30 AM", unread: 2, status: "online" },
