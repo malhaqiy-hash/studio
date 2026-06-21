@@ -10,7 +10,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import Link from 'next/link';
 import { 
   Pencil, 
   ShieldCheck, 
@@ -23,6 +22,11 @@ import {
   Smartphone,
   Cloud,
   MapPin,
+  Globe,
+  Instagram,
+  Linkedin,
+  Facebook,
+  Link as LinkIcon,
 } from 'lucide-react';
 import {
   Dialog,
@@ -39,6 +43,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
+
+function getSmartIcon(url: string) {
+  const lower = url.toLowerCase();
+  if (lower.includes('maps.google') || lower.includes('goo.gl/maps') || lower.includes('apple.com/maps')) return <MapPin className="size-3.5" />;
+  if (lower.includes('instagram.com')) return <Instagram className="size-3.5" />;
+  if (lower.includes('linkedin.com')) return <Linkedin className="size-3.5" />;
+  if (lower.includes('facebook.com') || lower.includes('fb.com')) return <Facebook className="size-3.5" />;
+  if (lower.includes('wa.me') || lower.includes('whatsapp.com')) return <Smartphone className="size-3.5" />;
+  return <Globe className="size-3.5" />;
+}
 
 export default function ProfilePage() {
   const { activeAccount, updateActiveAccount, addPost, removePost } = useAccount();
@@ -147,12 +161,20 @@ export default function ProfilePage() {
                 <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">{activeAccount.name}</h1>
                 {activeAccount.verificationStatus === 'Verified' && <Badge className="bg-emerald-500/10 text-emerald-500 border-none px-2 py-0.5 text-[10px] uppercase font-bold rounded-full"><ShieldCheck className="size-3" /> AI</Badge>}
               </div>
-              <div className="flex flex-wrap items-center gap-4 text-muted-foreground font-medium text-[13px] md:text-[15px]">
-                <span>{activeAccount.extra || 'OnTapp Member'}</span>
-                <div className="flex items-center gap-3 ml-auto">
-                   <div className="flex flex-col items-center"><span className="text-sm font-bold text-slate-900">1.2k</span><span className="text-[10px] font-bold uppercase opacity-60">Pengikut</span></div>
-                   <div className="flex flex-col items-center text-rose-500"><span className="text-sm font-bold">4.2k</span><span className="text-[10px] font-bold uppercase flex items-center gap-0.5"><Heart className="size-2.5 fill-rose-500" /> Suka</span></div>
+              <div className="flex flex-col gap-1">
+                <div className="flex flex-wrap items-center gap-4 text-muted-foreground font-medium text-[13px] md:text-[15px]">
+                  <span>{activeAccount.extra || 'OnTapp Member'}</span>
+                  <div className="flex items-center gap-3 ml-auto">
+                     <div className="flex flex-col items-center"><span className="text-sm font-bold text-slate-900">1.2k</span><span className="text-[10px] font-bold uppercase opacity-60">Pengikut</span></div>
+                     <div className="flex flex-col items-center text-rose-500"><span className="text-sm font-bold">4.2k</span><span className="text-[10px] font-bold uppercase flex items-center gap-0.5"><Heart className="size-2.5 fill-rose-500" /> Suka</span></div>
+                  </div>
                 </div>
+                {activeAccount.locationLink && (
+                  <a href={activeAccount.locationLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-accent font-bold text-[11px] uppercase tracking-widest hover:underline mt-1">
+                    {getSmartIcon(activeAccount.locationLink)}
+                    Tautan Profil
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -161,7 +183,7 @@ export default function ProfilePage() {
         <section className="px-4 md:px-6">
           <div className="flex items-center justify-between border-b border-border/40 pb-4">
             <p className="text-slate-700 leading-relaxed font-normal text-[14px] md:text-[15px]">"{activeAccount.bio || 'Membangun koneksi cerdas di OnTapp.'}"</p>
-            <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio }); setIsBioModalOpen(true); }} className="text-[11px] font-bold uppercase text-accent hover:bg-accent/10 px-3 h-8 rounded-lg border border-accent/20 shrink-0 ml-4"><Pencil className="size-3 mr-1" /> Edit</Button>
+            <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio, locationLink: activeAccount.locationLink }); setIsBioModalOpen(true); }} className="text-[11px] font-bold uppercase text-accent hover:bg-accent/10 px-3 h-8 rounded-lg border border-accent/20 shrink-0 ml-4"><Pencil className="size-3 mr-1" /> Edit</Button>
           </div>
         </section>
 
@@ -186,7 +208,7 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold text-slate-900 text-[14px] line-clamp-1">{item.title}</h4>
                       <div className="flex items-center gap-1.5">
-                        {item.locationLink && <MapPin className="size-3 text-muted-foreground" />}
+                        {item.locationLink && <div className="text-muted-foreground">{getSmartIcon(item.locationLink)}</div>}
                         {item.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
                       </div>
                     </div>
@@ -205,6 +227,13 @@ export default function ProfilePage() {
           <div className="space-y-5 py-4">
             <div className="space-y-2"><Label className="text-xs font-bold uppercase text-muted-foreground">Nama Tampilan</Label><Input value={tempAccount.name} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-xl h-12 bg-muted/20 border-none px-4 text-sm font-bold" /></div>
             <div className="space-y-2"><Label className="text-xs font-bold uppercase text-muted-foreground">Bio</Label><Textarea value={tempAccount.bio} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} className="rounded-xl bg-muted/20 border-none min-h-[100px] px-4 text-sm font-medium" /></div>
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">Link Alamat/Web</Label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{tempAccount.locationLink ? getSmartIcon(tempAccount.locationLink) : <LinkIcon className="size-4" />}</div>
+                <Input value={tempAccount.locationLink} onChange={(e) => setTempAccount({ ...tempAccount, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-xl h-11 bg-muted/20 border-none pl-10 text-sm font-medium shadow-inner" />
+              </div>
+            </div>
           </div>
           <DialogFooter><Button onClick={handleSaveBio} className="w-full h-12 rounded-xl bg-accent font-bold text-white text-sm uppercase tracking-widest shadow-lg active:scale-95 transition-all">Simpan</Button></DialogFooter>
         </DialogContent>
@@ -236,9 +265,9 @@ export default function ProfilePage() {
             <div className="space-y-2"><Label className="font-bold text-xs uppercase text-muted-foreground">Judul Item</Label><Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-xl h-12 bg-muted/20 border-none px-4 text-sm font-bold" /></div>
             <div className="space-y-2"><Label className="font-bold text-xs uppercase text-muted-foreground">Deskripsi</Label><Textarea value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="rounded-xl bg-muted/20 border-none min-h-[100px] px-4 text-sm font-medium" /></div>
             <div className="space-y-2">
-              <Label className="font-bold text-xs uppercase text-muted-foreground">Link Alamat</Label>
+              <Label className="font-bold text-xs uppercase text-muted-foreground">Link Alamat/Web</Label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{newItem.locationLink ? getSmartIcon(newItem.locationLink) : <LinkIcon className="size-4" />}</div>
                 <Input value={newItem.locationLink} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-xl h-11 bg-muted/20 border-none pl-10 text-sm font-medium shadow-inner" />
               </div>
             </div>
@@ -249,7 +278,7 @@ export default function ProfilePage() {
 
       <Dialog open={!!zoomedImage} onOpenChange={() => setZoomedImage(null)}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
+          className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
           onClick={() => setZoomedImage(null)}
         >
           {zoomedImage && <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4"><img src={zoomedImage} alt="Zoomed View" className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300 shadow-none border-none" /></div>}

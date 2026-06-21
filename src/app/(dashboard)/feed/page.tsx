@@ -17,6 +17,10 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
+  Instagram,
+  Linkedin,
+  Facebook,
+  Link as LinkIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -79,6 +83,16 @@ const INITIAL_POSTS = [
   },
 ];
 
+function getSmartIcon(url: string) {
+  const lower = url.toLowerCase();
+  if (lower.includes('maps.google') || lower.includes('goo.gl/maps') || lower.includes('apple.com/maps')) return <MapPin className="size-3.5" />;
+  if (lower.includes('instagram.com')) return <Instagram className="size-3.5" />;
+  if (lower.includes('linkedin.com')) return <Linkedin className="size-3.5" />;
+  if (lower.includes('facebook.com') || lower.includes('fb.com')) return <Facebook className="size-3.5" />;
+  if (lower.includes('wa.me') || lower.includes('whatsapp.com')) return <Smartphone className="size-3.5" />;
+  return <Globe className="size-3.5" />;
+}
+
 function PostMedia({ images }: { images?: string[] }) {
   const [activeIdx, setActiveIdx] = React.useState(0);
   const [isZoomOpen, setIsZoomOpen] = React.useState(false);
@@ -140,7 +154,7 @@ function PostMedia({ images }: { images?: string[] }) {
 
       <Dialog open={isZoomOpen} onOpenChange={setIsZoomOpen}>
         <DialogContent 
-          className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
+          className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
           onClick={() => setIsZoomOpen(false)}
         >
           <div className="w-full h-full relative flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
@@ -159,7 +173,7 @@ function PostMedia({ images }: { images?: string[] }) {
                         src={src} 
                         alt="Zoomed" 
                         className="max-w-full max-h-[90vh] object-contain rounded-lg animate-in zoom-in-95 duration-200" 
-                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image itself
+                        onClick={(e) => e.stopPropagation()}
                       />
                     </SwiperSlide>
                   ))}
@@ -204,6 +218,7 @@ export default function FeedPage() {
     const endX = e.changedTouches[0].clientX;
     const diff = endX - swipeStartX;
     
+    // Swipe right (from left to right) opens post modal
     if (diff > 120) {
       setIsPostModalOpen(true);
     }
@@ -341,7 +356,7 @@ export default function FeedPage() {
                           {post.verified && <ShieldCheck className="size-3.5 text-black" />}
                           {post.locationLink && (
                             <a href={post.locationLink} target="_blank" rel="noopener noreferrer" className="ml-1 text-muted-foreground hover:text-black transition-colors">
-                              <MapPin className="size-3.5" />
+                              {getSmartIcon(post.locationLink)}
                             </a>
                           )}
                         </div>
@@ -402,9 +417,9 @@ export default function FeedPage() {
               <Textarea placeholder="Apa yang Anda pikirkan? (Tarik ke bawah atau klik luar untuk batal)" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-0 resize-none shadow-inner" />
               
               <div className="relative group">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{postLocationLink ? getSmartIcon(postLocationLink) : <LinkIcon className="size-4" />}</div>
                 <Input 
-                  placeholder="Link Alamat (opsional)" 
+                  placeholder="Link Alamat/Web (opsional)" 
                   value={postLocationLink} 
                   onChange={(e) => setPostLocationLink(e.target.value)}
                   className="h-11 pl-10 rounded-xl border-none bg-muted/30 text-[14px] font-medium shadow-inner focus-visible:ring-0" 

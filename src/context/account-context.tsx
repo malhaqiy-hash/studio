@@ -34,6 +34,7 @@ export interface Account {
   contact?: string;
   extra?: string;
   links?: string[];
+  locationLink?: string; // Added for main profile location
   items?: ContentItem[];
   isNew?: boolean;
   verificationStatus?: 'Unverified' | 'Pending' | 'Verified';
@@ -117,7 +118,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
         : data.type === 'professional' 
           ? `https://picsum.photos/seed/pro${Date.now()}/100` 
           : `https://picsum.photos/seed/user${Date.now()}/100`,
-      links: [],
+      links: data.links || [],
       items: [],
       isNew: false,
       verificationStatus: data.type === 'pribadi' ? 'Verified' : 'Unverified',
