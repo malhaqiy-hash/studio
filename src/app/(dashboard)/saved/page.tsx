@@ -26,8 +26,8 @@ export default function SavedPostsPage() {
   const { language, t } = useLanguage();
   const [savedPosts, setSavedPosts] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [expandedPosts, setExpandedPosts] = React.useState<Set<string>>(new Set());
   
-  // State for session likes
   const [likes, setLikes] = React.useState<Record<string, { count: number, active: boolean }>>({});
 
   React.useEffect(() => {
@@ -44,6 +44,15 @@ export default function SavedPostsPage() {
     }
     setLoading(false);
   }, []);
+
+  const toggleExpand = (id: string) => {
+    setExpandedPosts(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const handleLike = (postId: string) => {
     setLikes(prev => {
@@ -108,6 +117,8 @@ export default function SavedPostsPage() {
           <div className="grid gap-6">
             {savedPosts.map((post) => {
               const postLike = likes[post.id] || { count: 0, active: false };
+              const isExpanded = expandedPosts.has(post.id);
+              
               return (
                 <Card key={post.id} className="group rounded-[2.5rem] border-slate-100 shadow-sm hover:shadow-xl transition-all overflow-hidden bg-white">
                   <CardContent className="p-0">
@@ -153,12 +164,23 @@ export default function SavedPostsPage() {
                             AI Analysis
                           </div>
                         )}
-                        <p className={cn(
-                          "text-slate-700 leading-relaxed font-medium",
-                          post.type === 'insight' ? "text-lg italic" : "text-base"
-                        )}>
-                          {post.content}
-                        </p>
+                        <div 
+                          onClick={() => toggleExpand(post.id)}
+                          className={cn(
+                            "cursor-pointer transition-all duration-300",
+                            !isExpanded && (post.image ? "line-clamp-5" : "max-h-[300px] overflow-hidden relative")
+                          )}
+                        >
+                          <p className={cn(
+                            "text-slate-700 leading-relaxed font-medium",
+                            post.type === 'insight' ? "text-lg italic" : "text-base"
+                          )}>
+                            {post.content}
+                          </p>
+                          {!isExpanded && !post.image && (
+                            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                          )}
+                        </div>
                         {post.image && (
                           <div className="rounded-3xl overflow-hidden border border-slate-100">
                             <img src={post.image} className="w-full h-auto object-cover max-h-[300px]" alt="Post Content" />

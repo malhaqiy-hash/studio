@@ -66,7 +66,7 @@ const INITIAL_POSTS = [
     extra: "Enterprise AI Analyst",
     avatar: "",
     category: "Market Trend",
-    content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
+    content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda. Pertumbuhan ini didorong oleh digitalisasi masif di koridor industri Vietnam dan Indonesia, menciptakan celah bagi penyedia perangkat keras IoT dan solusi analitik berbasis awan.",
     time: "Baru saja",
     stats: { likes: 1200, comments: 84 },
     verified: true,
@@ -80,7 +80,7 @@ const INITIAL_POSTS = [
     extra: "Logistics & Supply Chain",
     avatar: "https://picsum.photos/seed/log/100",
     category: "Lokal",
-    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member.",
+    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member OnTapp hari ini. Kami berkomitmen memberikan layanan terbaik untuk rantai pasok Anda dengan integrasi armada ramah lingkungan dan sistem pelacakan real-time tercanggih.",
     time: "2 jam yang lalu",
     stats: { likes: 452, comments: 12 },
     verified: true,
@@ -99,8 +99,8 @@ export default function FeedPage() {
   const [posts] = React.useState([...INITIAL_POSTS]);
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean }>>({});
   const [savedPosts, setSavedPosts] = React.useState<string[]>([]);
+  const [expandedPosts, setExpandedPosts] = React.useState<Set<string>>(new Set());
   
-  // State for likes interaction
   const [likes, setLikes] = React.useState<Record<string, { count: number, active: boolean }>>({});
 
   const [isPostModalOpen, setIsPostModalOpen] = React.useState(false);
@@ -135,7 +135,6 @@ export default function FeedPage() {
     const saved = localStorage.getItem('ontapp_saved_posts');
     if (saved) setSavedPosts(JSON.parse(saved));
     
-    // Initialize likes from initial posts
     const initialLikes: Record<string, { count: number, active: boolean }> = {};
     [...INITIAL_POSTS].forEach(p => {
       initialLikes[p.id] = { count: p.stats.likes, active: false };
@@ -145,6 +144,15 @@ export default function FeedPage() {
 
   const scrollTo = (index: number) => {
     if (emblaApi) emblaApi.scrollTo(index);
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedPosts(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   const handleLike = (postId: string) => {
@@ -348,6 +356,7 @@ export default function FeedPage() {
                   const trans = translations[post.id];
                   const isSaved = savedPosts.includes(post.id);
                   const postLike = likes[post.id] || { count: 0, active: false };
+                  const isExpanded = expandedPosts.has(post.id);
                   
                   return (
                     <div key={`${cat.id}-${post.id}`} className="snap-start snap-always w-full min-h-[400px] flex flex-col mb-4">
@@ -386,9 +395,24 @@ export default function FeedPage() {
                               <Brain className="size-2.5 animate-pulse" /> AI Analysis
                             </div>
                           )}
-                          <p className={cn("text-foreground/90 leading-relaxed font-medium", post.type === 'insight' ? "text-lg italic" : "text-base")}>
-                            {trans?.show ? trans.text : post.content}
-                          </p>
+                          <div 
+                            onClick={() => toggleExpand(post.id)}
+                            className={cn(
+                              "cursor-pointer transition-all duration-300",
+                              !isExpanded && (post.image ? "line-clamp-5" : "max-h-[300px] overflow-hidden relative")
+                            )}
+                          >
+                            <p className={cn(
+                              "text-foreground/90 leading-relaxed font-medium",
+                              post.type === 'insight' ? "text-lg italic" : "text-base"
+                            )}>
+                              {trans?.show ? trans.text : post.content}
+                            </p>
+                            {!isExpanded && !post.image && (
+                              <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card to-transparent pointer-events-none" />
+                            )}
+                          </div>
+                          
                           {post.image && (
                             <div className="rounded-3xl overflow-hidden border border-border mt-4">
                               <img src={post.image} alt="Content" className="w-full h-auto object-cover max-h-[500px]" />
