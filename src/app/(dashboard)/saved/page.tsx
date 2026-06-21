@@ -264,14 +264,18 @@ export default function SavedPostsPage() {
         )}
       </div>
 
-      {/* Lightbox for Image Expansion */}
+      {/* Lightbox for Image Expansion - Tap Outside to Close */}
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
-        <DialogContent className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden [&>button]:text-white [&>button]:bg-white/10 [&>button]:hover:bg-white/20 [&>button]:rounded-full [&>button]:size-10 [&>button]:top-6 [&>button]:right-6 [&>button]:p-0 [&>button_svg]:size-6">
+        <DialogContent className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden [&>button]:hidden">
           {zoomedImage && (
-            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4">
+            <div 
+              className="w-full h-full max-h-[90vh] flex items-center justify-center p-4 cursor-pointer"
+              onClick={() => setExpandedImage(null)}
+            >
               <img 
                 src={zoomedImage} 
                 alt="Expanded view" 
+                onClick={(e) => e.stopPropagation()}
                 className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200"
               />
             </div>

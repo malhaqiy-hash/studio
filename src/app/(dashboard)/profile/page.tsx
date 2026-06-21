@@ -544,14 +544,18 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Lightbox for Image Expansion */}
+      {/* Lightbox for Image Expansion - Tap Outside to Close */}
       <Dialog open={!!zoomedImage} onOpenChange={() => setZoomedImage(null)}>
-        <DialogContent className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:text-white [&>button]:bg-white/10 [&>button]:hover:bg-white/20 [&>button]:rounded-full [&>button]:size-10 [&>button]:top-6 [&>button]:right-6 [&>button]:p-0 [&>button_svg]:size-6">
+        <DialogContent className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden">
           {zoomedImage && (
-            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4">
+            <div 
+              className="w-full h-full max-h-[90vh] flex items-center justify-center p-4 cursor-pointer"
+              onClick={() => setZoomedImage(null)}
+            >
               <img 
                 src={zoomedImage} 
                 alt="Expanded profile view" 
+                onClick={(e) => e.stopPropagation()}
                 className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 fade-in duration-300"
               />
             </div>

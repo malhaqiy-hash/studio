@@ -325,7 +325,7 @@ export default function UserDashboardPage() {
         {/* Dynamic Context Banner */}
         <div className="p-12 rounded-[4rem] bg-teal-700 text-white shadow-2xl relative overflow-hidden group">
           <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
-            <div className="size-24 rounded-[2.5rem] bg-white/20 backdrop-blur-xl flex items-center justify-center rotate-6 group-hover:rotate-12 transition-transform duration-500">
+            <div className="size-24 rounded-2.5rem bg-white/20 backdrop-blur-xl flex items-center justify-center rotate-6 group-hover:rotate-12 transition-transform duration-500">
               {activeAccount.type === 'bisnis' ? <Zap className="size-12 text-white fill-white" /> : <Brain className="size-12 text-white" />}
             </div>
             <div className="space-y-3 flex-1 text-center md:text-left">
@@ -346,14 +346,18 @@ export default function UserDashboardPage() {
         </div>
       </div>
 
-      {/* Lightbox for Image Expansion */}
+      {/* Lightbox for Image Expansion - Tap Outside to Close */}
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
-        <DialogContent className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden [&>button]:text-white [&>button]:bg-white/10 [&>button]:hover:bg-white/20 [&>button]:rounded-full [&>button]:size-10 [&>button]:top-6 [&>button]:right-6 [&>button]:p-0 [&>button_svg]:size-6">
+        <DialogContent className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden [&>button]:hidden">
           {zoomedImage && (
-            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4">
+            <div 
+              className="w-full h-full max-h-[90vh] flex items-center justify-center p-4 cursor-pointer"
+              onClick={() => setExpandedImage(null)}
+            >
               <img 
                 src={zoomedImage} 
                 alt="Expanded view" 
+                onClick={(e) => e.stopPropagation()}
                 className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200"
               />
             </div>
