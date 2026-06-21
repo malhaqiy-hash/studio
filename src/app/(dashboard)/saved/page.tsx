@@ -76,18 +76,27 @@ export default function SavedPostsPage() {
   const handleShare = (post: any) => {
     const shareUrl = window.location.href;
     
-    if (navigator.share) {
+    if (typeof navigator !== 'undefined' && navigator.share) {
       navigator.share({
         title: 'OnTapp - Jaringan Bisnis',
         text: `Lihat koleksi menarik dari ${post.author} di OnTapp!`,
         url: shareUrl
       })
-      .then(() => console.log('Berhasil berbagi'))
-      .catch((error) => console.log('Batal berbagi', error));
+      .then(() => {
+        toast({ title: "Berhasil Berbagi" });
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') {
+          console.error('Error sharing:', error);
+        }
+      });
     } else {
       // Fallback if native share is not available
       navigator.clipboard.writeText(shareUrl);
-      toast({ title: "Tautan Berhasil Disalin", description: "Tautan koleksi telah disalin ke papan klip Anda." });
+      toast({ 
+        title: "Tautan Berhasil Disalin", 
+        description: "Laci berbagi sistem tidak didukung, tautan koleksi telah disalin ke papan klip Anda." 
+      });
     }
   };
 

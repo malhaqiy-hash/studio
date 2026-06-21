@@ -177,20 +177,29 @@ export default function FeedPage() {
   };
 
   const handleShare = (post: any) => {
-    const shareUrl = `${window.location.origin}/feed`; // In a real app, this would be a per-post URL
+    const shareUrl = `${window.location.origin}/feed`;
     
-    if (navigator.share) {
+    if (typeof navigator !== 'undefined' && navigator.share) {
       navigator.share({
         title: 'OnTapp - Jaringan Bisnis',
         text: `Lihat postingan menarik dari ${post.author} di OnTapp!`,
         url: shareUrl
       })
-      .then(() => console.log('Berhasil berbagi'))
-      .catch((error) => console.log('Batal berbagi', error));
+      .then(() => {
+        toast({ title: "Berbagi Berhasil" });
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') {
+          console.error('Error sharing:', error);
+        }
+      });
     } else {
-      // Fallback for older browsers
+      // Fallback for browsers that don't support Web Share API
       navigator.clipboard.writeText(shareUrl);
-      toast({ title: "Tautan Berhasil Disalin", description: "Browser Anda tidak mendukung berbagi asli, tautan disalin ke papan klip." });
+      toast({ 
+        title: "Tautan Berhasil Disalin", 
+        description: "Laci berbagi sistem tidak didukung, tautan telah disalin ke papan klip Anda." 
+      });
     }
   };
 
