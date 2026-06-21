@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from 'react';
-import { X, Send, Sparkles, Bot, User, Globe, RefreshCw, Mic } from 'lucide-react';
+import { Send, Sparkles, Bot, User, Globe, RefreshCw, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -110,22 +110,20 @@ export function AIAssistant() {
   return (
     <div className="fixed bottom-24 right-4 z-[200] flex flex-col items-end gap-4 animate-in slide-in-from-bottom-5 duration-300">
       <Card className="w-[320px] md:w-[400px] h-[550px] shadow-2xl rounded-[2.5rem] border-border flex flex-col overflow-hidden bg-card">
-        <CardHeader className="bg-slate-900 text-white p-6 flex flex-row items-center justify-between border-none">
+        <CardHeader className="bg-black text-white p-6 flex flex-row items-center justify-between border-none">
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-2xl bg-accent flex items-center justify-center shadow-lg shadow-accent/20">
-              <Sparkles className="size-5 text-white fill-white" />
+            <div className="size-10 rounded-2xl bg-white text-black flex items-center justify-center shadow-lg">
+              <Sparkles className="size-5 fill-black" />
             </div>
             <div className="flex flex-col">
               <CardTitle className="text-base font-black tracking-tight leading-none">OnTapp Intel</CardTitle>
               <div className="flex items-center gap-1.5 mt-1">
-                <div className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <div className="size-1.5 rounded-full bg-white animate-pulse" />
                 <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{t('ai_active')}</span>
               </div>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="text-white/40 hover:text-white hover:bg-white/10 rounded-xl active:scale-90">
-            <X className="size-5" />
-          </Button>
+          <button onClick={() => setIsOpen(false)} className="text-white/40 hover:text-white font-bold text-[10px] uppercase tracking-widest px-2 py-1">Tutup</button>
         </CardHeader>
         
         <CardContent className="flex-1 overflow-hidden p-0 bg-muted/5">
@@ -134,15 +132,15 @@ export function AIAssistant() {
               {messages.map((msg, i) => (
                 <div key={i} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}>
                   <Avatar className="size-8 border shadow-sm shrink-0">
-                    <AvatarFallback className={cn("text-[9px] font-black uppercase tracking-tighter", msg.role === 'user' ? "bg-slate-100" : "bg-accent/10 text-accent")}>
+                    <AvatarFallback className={cn("text-[9px] font-black uppercase tracking-tighter", msg.role === 'user' ? "bg-slate-100" : "bg-black text-white")}>
                       {msg.role === 'user' ? 'ME' : 'AI'}
                     </AvatarFallback>
                   </Avatar>
                   <div className={cn("flex flex-col gap-1.5", msg.role === 'user' ? "items-end" : "items-start", "max-w-[85%]")}>
                     <div className={cn(
-                      "p-4 rounded-2xl text-xs font-medium shadow-sm leading-relaxed", 
+                      "p-4 rounded-2xl text-[14px] md:text-[15px] font-medium shadow-sm leading-relaxed", 
                       msg.role === 'user' 
-                        ? "bg-accent text-white rounded-tr-none" 
+                        ? "bg-black text-white rounded-tr-none" 
                         : "bg-white text-slate-700 border border-border/50 rounded-tl-none"
                     )}>
                       {msg.showTranslated ? msg.translatedContent : msg.content}
@@ -152,7 +150,7 @@ export function AIAssistant() {
                       disabled={msg.isTranslating} 
                       className={cn(
                         "transition-all active:scale-75 flex items-center p-1 rounded-full bg-muted/20", 
-                        msg.showTranslated ? "text-accent" : "text-muted-foreground hover:text-accent"
+                        msg.showTranslated ? "text-black" : "text-muted-foreground hover:text-black"
                       )}
                     >
                       {msg.isTranslating ? <RefreshCw className="size-3.5 animate-spin" /> : <Globe className="size-3.5" />}
@@ -162,13 +160,13 @@ export function AIAssistant() {
               ))}
               {loading && (
                 <div className="flex gap-3">
-                  <Avatar className="size-8 border bg-accent/5">
-                    <AvatarFallback className="text-accent"><Bot className="size-4" /></AvatarFallback>
+                  <Avatar className="size-8 border bg-black/5">
+                    <AvatarFallback className="text-black"><Bot className="size-4" /></AvatarFallback>
                   </Avatar>
                   <div className="bg-white border border-border/50 p-4 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
-                    <div className="size-1 bg-accent/30 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                    <div className="size-1 bg-accent/30 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                    <div className="size-1 bg-accent/30 rounded-full animate-bounce" />
+                    <div className="size-1 bg-black/30 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                    <div className="size-1 bg-black/30 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                    <div className="size-1 bg-black/30 rounded-full animate-bounce" />
                   </div>
                 </div>
               )}
@@ -179,7 +177,7 @@ export function AIAssistant() {
         <CardFooter className="p-6 bg-white border-t border-border/50">
           <form 
             onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
-            className="flex w-full gap-2 bg-muted/20 p-1.5 rounded-[1.5rem] border border-border/50 items-center focus-within:border-accent/30 transition-all shadow-inner"
+            className="flex w-full gap-2 bg-muted/20 p-1.5 rounded-[1.5rem] border border-border/50 items-center focus-within:border-black/30 transition-all shadow-inner"
           >
             <Input 
               value={input} 
@@ -193,7 +191,7 @@ export function AIAssistant() {
                 variant="ghost"
                 size="icon" 
                 onClick={handleVoiceInput}
-                className="size-10 rounded-2xl text-muted-foreground hover:text-accent hover:bg-accent/10 shrink-0 transition-all active:scale-90"
+                className="size-10 rounded-2xl text-muted-foreground hover:text-black hover:bg-black/5 shrink-0 transition-all active:scale-90"
               >
                 <Mic className="size-5" />
               </Button>
@@ -201,7 +199,7 @@ export function AIAssistant() {
                 type="submit" 
                 size="icon" 
                 disabled={loading || !input.trim()} 
-                className="size-10 rounded-2xl bg-accent hover:bg-accent/90 text-white shrink-0 shadow-lg shadow-accent/10 transition-all active:scale-90"
+                className="size-10 rounded-2xl bg-black hover:bg-black/90 text-white shrink-0 shadow-lg transition-all active:scale-90"
               >
                 <Send className="size-5" />
               </Button>
