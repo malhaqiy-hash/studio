@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Send, Phone, Video, Info, MoreVertical, Globe, X } from "lucide-react";
+import { Search, Send, Phone, Video, Info, MoreVertical, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/context/language-context";
 import { cn } from "@/lib/utils";
@@ -26,20 +26,10 @@ export default function MessagesPage() {
   return (
     <DashboardLayout>
       <div className="h-[calc(100vh-12rem)] flex overflow-hidden bg-card rounded-3xl border border-border shadow-xl relative text-foreground">
-        <button 
-          onClick={() => router.back()}
-          className="absolute top-4 right-4 z-50 p-2 bg-muted hover:bg-accent/10 text-muted-foreground hover:text-accent rounded-full transition-all active:scale-90 md:hidden"
-        >
-          <X className="size-5" />
-        </button>
-
         <div className="w-full md:w-80 lg:w-96 border-r border-border flex flex-col bg-muted/5">
           <div className="p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-black">{t('global_pulse')}</h2>
-              <button onClick={() => router.back()} className="hidden md:flex p-1.5 hover:bg-muted text-muted-foreground hover:text-rose-500 rounded-lg">
-                <X className="size-5" />
-              </button>
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />

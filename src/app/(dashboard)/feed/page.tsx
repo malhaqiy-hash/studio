@@ -36,6 +36,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAccount } from "@/context/account-context";
 import Link from "next/link";
 
+// Swiper imports for nested isolation
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+
 const CATEGORIES = [
   { id: 'for-you', label: 'Saran' },
   { id: 'lokal', label: 'Lokal' },
@@ -71,59 +75,35 @@ const INITIAL_POSTS = [
 ];
 
 function PostMedia({ images }: { images?: string[] }) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [activeIdx, setActiveIdx] = React.useState(0);
   const [zoomedImage, setExpandedImage] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (!emblaApi) return;
-    emblaApi.on('select', () => setSelectedIndex(emblaApi.selectedScrollSnap()));
-  }, [emblaApi]);
 
   if (!images || images.length === 0) return null;
 
-  // GESTURE ISOLATION: Menghentikan propagasi agar tidak menggeser halaman beranda
-  const handleIsolate = (e: React.PointerEvent | React.TouchEvent | React.MouseEvent) => {
-    if (images.length > 1) {
-      e.stopPropagation();
-    }
-  };
-
   return (
-    <div 
-      className={cn(
-        "relative group/carousel touch-pan-x select-none",
-        images.length > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
-      )} 
-      onPointerDown={handleIsolate}
-      onTouchStart={handleIsolate}
-      onTouchMove={handleIsolate}
-      onMouseDown={handleIsolate}
-    >
-      <div 
-        className="overflow-hidden rounded-xl border border-border bg-muted/5" 
-        ref={emblaRef}
+    <div className="relative group/carousel w-full overflow-hidden rounded-xl border border-border bg-muted/5">
+      <Swiper
+        nested={true}
+        touchStartPreventDefault={false}
+        className="w-full touch-pan-x"
+        onSlideChange={(swiper) => setActiveIdx(swiper.activeIndex)}
+        slidesPerView={1}
       >
-        <div className="flex">
-          {images.map((src, idx) => (
-            <div key={idx} className="flex-[0_0_100%] min-w-0">
-              <img 
-                src={src} 
-                className="w-full h-auto object-contain cursor-zoom-in active:scale-[0.99] transition-transform max-h-[500px] md:max-h-[700px]" 
-                alt={`Content ${idx + 1}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setExpandedImage(src);
-                }}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+        {images.map((src, idx) => (
+          <SwiperSlide key={idx}>
+            <img 
+              src={src} 
+              className="w-full h-auto object-contain cursor-grab active:cursor-grabbing max-h-[500px] md:max-h-[700px]" 
+              alt={`Content ${idx + 1}`}
+              onClick={() => setExpandedImage(src)}
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
       {images.length > 1 && (
         <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black z-10 text-white shadow-sm pointer-events-none tracking-widest">
-          {selectedIndex + 1} / {images.length}
+          {activeIdx + 1} / {images.length}
         </div>
       )}
 
