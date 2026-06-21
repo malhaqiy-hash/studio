@@ -106,7 +106,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     const touchEnd = e.changedTouches[0].clientY;
     const distance = touchEnd - touchStart;
     
-    // Swipe down gesture to close
+    // Swipe down gesture to close (70px threshold)
     if (distance > 70) {
       setIsMoreMenuOpen(false);
     }

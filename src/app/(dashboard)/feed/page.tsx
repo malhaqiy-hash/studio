@@ -82,7 +82,7 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
-  // GESTURE ISOLATION: Menggunakan bubbling event dan stopPropagation agar embla slider internal tetap bisa bekerja
+  // GESTURE ISOLATION: Menghentikan propagasi agar tidak menggeser halaman beranda
   const handleIsolate = (e: React.PointerEvent | React.TouchEvent | React.MouseEvent) => {
     if (images.length > 1) {
       e.stopPropagation();

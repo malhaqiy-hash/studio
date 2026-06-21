@@ -15,7 +15,6 @@ import { Switch } from "@/components/ui/switch";
 import { 
   Palette, 
   Languages,
-  Globe,
   Lock,
   ChevronRight,
   Cpu,
@@ -73,7 +72,6 @@ export default function SettingsPage() {
     setMounted(true);
   }, []);
 
-  // AUTO-SAVE: Langsung simpan tema
   const handleThemeChange = (val: string) => {
     const newSettings = { ...settings, theme: val };
     setSettings(newSettings);
@@ -82,13 +80,11 @@ export default function SettingsPage() {
     toast({ title: "Tema Diperbarui" });
   };
 
-  // AUTO-SAVE: Langsung simpan bahasa
   const handleLanguageChange = (val: any) => {
     setLanguage(val);
     toast({ title: "Bahasa Diperbarui" });
   };
 
-  // AUTO-SAVE: Langsung simpan preferensi privasi
   const updatePreference = (key: string, value: boolean) => {
     updateActiveAccount({
       preferences: {
