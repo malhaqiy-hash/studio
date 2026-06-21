@@ -102,6 +102,9 @@ export default function CariPage() {
 
   const cleanTitle = (text: string) => text.replace(/^Informasi Terkait:\s*/i, '').trim();
 
+  // Helper to get specific storage key for active account
+  const getHistoryKey = React.useCallback(() => `ontapp_discovery_history_${activeAccount.id}`, [activeAccount.id]);
+
   const categories = React.useMemo(() => {
     if (activeAccount.type === 'bisnis') return [...BASE_CATEGORIES, ...PREMIUM_CATEGORIES];
     if (activeAccount.type === 'professional') return [...BASE_CATEGORIES, PREMIUM_CATEGORIES.find(c => c.id === 'opportunity')!];
@@ -109,19 +112,25 @@ export default function CariPage() {
   }, [activeAccount.type]);
 
   React.useEffect(() => {
-    const saved = localStorage.getItem('ontapp_discovery_history');
+    const saved = localStorage.getItem(getHistoryKey());
     if (saved) {
       const parsedHistory = JSON.parse(saved).map((item: any) => ({
         ...item,
         name: cleanTitle(item.name)
       }));
       setHistory(parsedHistory);
+    } else {
+      setHistory([]);
     }
-  }, []);
+    // Clear results when account switches
+    setResults(null);
+    setQuery("");
+  }, [activeAccount.id, getHistoryKey]);
 
   const updateVisualHistory = (newResults: any[]) => {
     if (typeof window === 'undefined') return;
-    const currentHistory = JSON.parse(localStorage.getItem('ontapp_discovery_history') || '[]');
+    const storageKey = getHistoryKey();
+    const currentHistory = JSON.parse(localStorage.getItem(storageKey) || '[]');
     const newItems = newResults.map(r => ({
       ...r,
       name: cleanTitle(r.name),
@@ -138,7 +147,7 @@ export default function CariPage() {
       )
     );
     const updatedHistory = [...newItems, ...filteredHistory].slice(0, 50);
-    localStorage.setItem('ontapp_discovery_history', JSON.stringify(updatedHistory));
+    localStorage.setItem(storageKey, JSON.stringify(updatedHistory));
     setHistory(updatedHistory);
   };
 
@@ -185,15 +194,16 @@ export default function CariPage() {
   };
 
   const handleClearHistory = () => {
-    localStorage.removeItem('ontapp_discovery_history');
+    localStorage.removeItem(getHistoryKey());
     setHistory([]);
     toast({ title: language === 'id' ? "Riwayat Dihapus" : "History Cleared" });
   };
 
   const handleRemoveHistoryItem = (id: string) => {
+    const storageKey = getHistoryKey();
     const updated = history.filter(item => item.id !== id);
     setHistory(updated);
-    localStorage.setItem('ontapp_discovery_history', JSON.stringify(updated));
+    localStorage.setItem(storageKey, JSON.stringify(updated));
   };
 
   const handleHistoryClick = (item: any) => {
@@ -326,7 +336,7 @@ export default function CariPage() {
                     </div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
-                </PopoverTrigger>
+                </DropdownMenuTrigger>
                 <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl bg-card border-border space-y-3">
                   <Button type="button" variant="outline" onClick={handleNearbySearch} className="w-full h-11 rounded-xl border-accent/20 bg-accent/5 text-accent font-black text-xs gap-2">
                     <LocateFixed className="size-4" /> {t('nearby')}

@@ -17,31 +17,39 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/language-context";
+import { useAccount } from "@/context/account-context";
 
 export default function DiscoveryHistoryPage() {
   const { toast } = useToast();
   const { language, t } = useLanguage();
+  const { activeAccount } = useAccount();
   const [history, setHistory] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
 
+  const getHistoryKey = React.useCallback(() => `ontapp_discovery_history_${activeAccount.id}`, [activeAccount.id]);
+
   React.useEffect(() => {
-    const saved = localStorage.getItem('ontapp_discovery_history');
+    const storageKey = getHistoryKey();
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       setHistory(JSON.parse(saved));
+    } else {
+      setHistory([]);
     }
     setLoading(false);
-  }, []);
+  }, [activeAccount.id, getHistoryKey]);
 
   const handleClearHistory = () => {
-    localStorage.removeItem('ontapp_discovery_history');
+    localStorage.removeItem(getHistoryKey());
     setHistory([]);
     toast({ title: language === 'id' ? "Riwayat Dihapus" : "History Cleared" });
   };
 
   const handleRemoveItem = (id: string) => {
+    const storageKey = getHistoryKey();
     const updated = history.filter(item => item.id !== id);
     setHistory(updated);
-    localStorage.setItem('ontapp_discovery_history', JSON.stringify(updated));
+    localStorage.setItem(storageKey, JSON.stringify(updated));
   };
 
   const openInGoogleMaps = (name: string, location?: string) => {
