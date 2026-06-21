@@ -23,7 +23,7 @@
     --border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 173 80% 40%;
-    --radius: 1.25rem;
+    --radius: 1rem;
   }
   .dark {
     --background: 224 71% 4%;
@@ -68,7 +68,13 @@
   scrollbar-width: none;
 }
 
-/* Fix for overlapping issues on mobile */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Compact scale for mobile */
+@media (max-width: 768px) {
+  :root {
+    --radius: 0.75rem;
+  }
 }

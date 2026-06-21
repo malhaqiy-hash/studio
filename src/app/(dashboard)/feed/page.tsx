@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -190,7 +189,7 @@ export default function FeedPage() {
     if (saved) setSavedPosts(JSON.parse(saved));
     
     const initialLikes: Record<string, { count: number, active: boolean }> = {};
-    [...INITIAL_POSTS].forEach(p => {
+    INITIAL_POSTS.forEach(p => {
       initialLikes[p.id] = { count: p.stats.likes, active: false };
     });
     setLikes(initialLikes);
