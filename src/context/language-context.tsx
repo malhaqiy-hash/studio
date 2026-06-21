@@ -73,6 +73,8 @@ export const translations = {
   knowledge_desc: { en: 'Personalized global trade insights.', id: 'Wawasan perdagangan global personal.' },
   scout: { en: 'AI Scout', id: 'Pemandu AI' },
   scout_desc: { en: 'Detecting unmet demand and market gaps.', id: 'Deteksi permintaan tak terpenuhi & celah pasar.' },
+  communities: { en: 'Communities', id: 'Komunitas' },
+  communities_desc: { en: 'Connect with industry-specific groups.', id: 'Terhubung dengan grup spesifik industri.' },
   
   // Scout Detailed
   scout_market_intel: { en: 'Market Intelligence', id: 'Intelijen Pasar' },
