@@ -5,10 +5,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
-  TrendingUp, 
   Globe, 
-  MapPin, 
-  Brain,
   Heart, 
   MessageCircle, 
   Share2, 
@@ -17,6 +14,9 @@ import {
   Bookmark,
   Plus,
   Lock,
+  Brain,
+  MapPin,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -93,8 +93,8 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
-  // CRITICAL: Stop propagation to prevent nested carousel from triggering parent swipe
-  const handleInteraction = (e: React.TouchEvent | React.MouseEvent) => {
+  // CRITICAL: Stop propagation at capture phase to lock outer swipe
+  const handleInteraction = (e: React.PointerEvent) => {
     if (images.length > 1) {
       e.stopPropagation();
     }
@@ -102,9 +102,8 @@ function PostMedia({ images }: { images?: string[] }) {
 
   return (
     <div 
-      className="relative group/carousel" 
-      onTouchStart={handleInteraction} 
-      onMouseDown={handleInteraction}
+      className="relative group/carousel touch-pan-y" 
+      onPointerDownCapture={handleInteraction}
     >
       <div className="overflow-hidden rounded-xl border border-border bg-muted/5" ref={emblaRef}>
         <div className="flex">
@@ -392,7 +391,7 @@ export default function FeedPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-12 rounded-xl bg-black font-bold text-white shadow-lg active:scale-95 transition-all">Posting</Button>
+              <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-12 rounded-xl bg-black font-bold text-white shadow-lg active:scale-[0.98] transition-all">Posting</Button>
             </DialogFooter>
           </div>
         </DialogContent>
