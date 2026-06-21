@@ -82,7 +82,7 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
-  // GESTURE ISOLATION: Mencegah event sentuh diteruskan ke carousel luar jika gambar > 1
+  // GESTURE ISOLATION: Menggunakan bubbling event dan stopPropagation agar embla slider internal tetap bisa bekerja
   const handleIsolate = (e: React.PointerEvent | React.TouchEvent | React.MouseEvent) => {
     if (images.length > 1) {
       e.stopPropagation();
@@ -91,16 +91,17 @@ function PostMedia({ images }: { images?: string[] }) {
 
   return (
     <div 
-      className="relative group/carousel touch-pan-y" 
-      onPointerDownCapture={handleIsolate}
-      onTouchStartCapture={handleIsolate}
-      onMouseDownCapture={handleIsolate}
+      className={cn(
+        "relative group/carousel touch-pan-x select-none",
+        images.length > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+      )} 
+      onPointerDown={handleIsolate}
+      onTouchStart={handleIsolate}
+      onTouchMove={handleIsolate}
+      onMouseDown={handleIsolate}
     >
       <div 
-        className={cn(
-          "overflow-hidden rounded-xl border border-border bg-muted/5",
-          images.length > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
-        )} 
+        className="overflow-hidden rounded-xl border border-border bg-muted/5" 
         ref={emblaRef}
       >
         <div className="flex">

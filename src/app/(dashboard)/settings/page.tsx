@@ -187,7 +187,7 @@ export default function SettingsPage() {
               <CardHeader className="bg-muted/10 border-b border-border p-4">
                 <div className="flex items-center gap-3">
                   <div className="size-9 rounded-xl bg-black text-white flex items-center justify-center">
-                    <Globe className="size-4.5" />
+                    <Languages className="size-4.5" />
                   </div>
                   <CardTitle className="text-[14px] font-bold">Lokalisasi</CardTitle>
                 </div>
