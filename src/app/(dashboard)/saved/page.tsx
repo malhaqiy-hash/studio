@@ -24,6 +24,7 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
+import Link from "next/link";
 
 export default function SavedPostsPage() {
   const { toast } = useToast();
@@ -86,8 +87,6 @@ export default function SavedPostsPage() {
         toast({ title: "Berbagi Berhasil" });
       } catch (error: any) {
         if (error.name === 'AbortError') return;
-        
-        // Fallback if native share fails due to permission or context
         navigator.clipboard.writeText(shareUrl);
         toast({ 
           title: "Tautan Berhasil Disalin", 
@@ -95,7 +94,6 @@ export default function SavedPostsPage() {
         });
       }
     } else {
-      // Fallback if native share is not available
       navigator.clipboard.writeText(shareUrl);
       toast({ 
         title: "Tautan Berhasil Disalin", 
@@ -145,7 +143,10 @@ export default function SavedPostsPage() {
                     <div className="p-8 space-y-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <Avatar className="size-12 border border-slate-100">
+                          <Avatar 
+                            className="size-12 border border-slate-100 cursor-zoom-in hover:opacity-80 transition-opacity"
+                            onClick={() => post.avatar && setExpandedImage(post.avatar)}
+                          >
                             <AvatarImage src={post.avatar} />
                             <AvatarFallback className="bg-indigo-50 text-accent font-black">
                               {post.author[0]}
@@ -153,7 +154,9 @@ export default function SavedPostsPage() {
                           </Avatar>
                           <div>
                             <div className="flex items-center gap-2">
-                               <h4 className="font-black text-slate-900">{post.author}</h4>
+                               <Link href="/profile" className="hover:underline decoration-accent/50 underline-offset-2">
+                                 <h4 className="font-black text-slate-900">{post.author}</h4>
+                               </Link>
                                {post.verified && <ShieldCheck className="size-4 text-emerald-500 fill-emerald-50" />}
                             </div>
                             {post.extra && (

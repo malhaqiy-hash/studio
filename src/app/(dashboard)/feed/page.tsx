@@ -48,6 +48,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
 import { useAccount } from "@/context/account-context";
+import Link from "next/link";
 
 const CATEGORIES = [
   { id: 'for-you', label: 'For You', icon: Brain },
@@ -62,7 +63,7 @@ const INITIAL_POSTS = [
     type: "insight",
     author: "OnTapp Intelligence",
     extra: "Enterprise AI Analyst",
-    avatar: "",
+    avatar: "https://picsum.photos/seed/ontapp/200",
     category: "Market Trend",
     content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda. Pertumbuhan ini didorong oleh digitalisasi masif di koridor industri Vietnam dan Indonesia, menciptakan celah bagi penyedia perangkat keras IoT dan solusi analitik berbasis awan.",
     time: "Baru saja",
@@ -189,8 +190,6 @@ export default function FeedPage() {
         toast({ title: "Berbagi Berhasil" });
       } catch (error: any) {
         if (error.name === 'AbortError') return;
-        
-        // Robust Fallback: In case of Permission Denied (NotAllowedError) or other failures
         navigator.clipboard.writeText(shareUrl);
         toast({ 
           title: "Tautan Berhasil Disalin", 
@@ -198,7 +197,6 @@ export default function FeedPage() {
         });
       }
     } else {
-      // Fallback for browsers that don't support Web Share API
       navigator.clipboard.writeText(shareUrl);
       toast({ 
         title: "Tautan Berhasil Disalin", 
@@ -376,13 +374,18 @@ export default function FeedPage() {
                       <Card className="border border-border shadow-sm rounded-[2.5rem] overflow-hidden bg-card flex-1 flex flex-col hover:shadow-md transition-shadow">
                         <div className="p-6 pb-2 flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <Avatar className="size-11 border border-border shadow-sm">
+                            <Avatar 
+                              className="size-11 border border-border shadow-sm cursor-zoom-in hover:opacity-80 transition-opacity"
+                              onClick={() => post.avatar && setExpandedImage(post.avatar)}
+                            >
                               <AvatarImage src={post.avatar} className="object-cover" />
                               <AvatarFallback className="bg-accent/10 text-accent font-black">{post.author[0]}</AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2">
-                                <h3 className="font-black text-foreground text-sm">{post.author}</h3>
+                                <Link href="/profile" className="hover:underline decoration-accent/50 underline-offset-2">
+                                  <h3 className="font-black text-foreground text-sm">{post.author}</h3>
+                                </Link>
                                 {post.verified && <ShieldCheck className="size-3.5 text-emerald-500" />}
                               </div>
                               {post.extra && (

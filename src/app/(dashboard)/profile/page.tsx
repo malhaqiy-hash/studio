@@ -88,6 +88,8 @@ export default function ProfilePage() {
   const [newLinkUrl, setNewLinkUrl] = React.useState('');
   const [userListTitle, setUserListTitle] = React.useState('');
   
+  const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
+  
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSaveBio = () => {
@@ -254,7 +256,10 @@ export default function ProfilePage() {
 
           <div className="px-6 md:px-10 -mt-16 md:-mt-20 flex flex-col items-start gap-4">
             <div className="relative group/avatar">
-              <Avatar className="size-32 md:size-44 border-[8px] border-background dark:border-card shadow-2xl overflow-hidden rounded-[2.5rem]">
+              <Avatar 
+                className="size-32 md:size-44 border-[8px] border-background dark:border-card shadow-2xl overflow-hidden rounded-[2.5rem] cursor-zoom-in hover:opacity-95 transition-opacity"
+                onClick={() => setZoomedImage(activeAccount.avatar)}
+              >
                 <AvatarImage src={activeAccount.avatar} className="object-cover" />
                 <AvatarFallback className="bg-accent/10 text-accent"><UserIcon size={56} /></AvatarFallback>
               </Avatar>
@@ -367,7 +372,10 @@ export default function ProfilePage() {
               <div key={item.id} className="relative group">
                 <Card className="rounded-[2.5rem] border-border shadow-sm overflow-hidden group hover:shadow-2xl transition-all bg-card border-none">
                   {item.image && (
-                    <div className="aspect-video w-full overflow-hidden relative">
+                    <div 
+                      className="aspect-video w-full overflow-hidden relative cursor-zoom-in"
+                      onClick={() => setZoomedImage(item.image!)}
+                    >
                       <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.title} />
                     </div>
                   )}
@@ -408,12 +416,17 @@ export default function ProfilePage() {
               {MOCK_USERS.map((u, i) => (
                 <div key={i} className="flex items-center justify-between p-3 rounded-2xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border">
                   <div className="flex items-center gap-4">
-                    <Avatar className="size-10 border border-background shadow-sm">
+                    <Avatar 
+                      className="size-10 border border-background shadow-sm cursor-zoom-in"
+                      onClick={() => setZoomedImage(u.avatar)}
+                    >
                       <AvatarImage src={u.avatar} className="object-cover" />
                       <AvatarFallback>{u.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                      <span className="text-sm font-black text-foreground">{u.name}</span>
+                      <Link href="/profile">
+                        <span className="text-sm font-black text-foreground hover:underline decoration-accent/50">{u.name}</span>
+                      </Link>
                       <span className="text-[10px] font-bold text-muted-foreground uppercase">{u.role}</span>
                     </div>
                   </div>
@@ -528,6 +541,27 @@ export default function ProfilePage() {
              <QrCode className="size-56 text-foreground" />
              <Button onClick={() => { navigator.clipboard.writeText(`https://ontapp.network/p/${activeAccount.id}`); toast({ title: "Link disalin" }); }} className="w-full h-14 rounded-[2rem] bg-foreground text-background font-black uppercase text-xs tracking-widest">Salin Link Profil</Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lightbox for Image Expansion */}
+      <Dialog open={!!zoomedImage} onOpenChange={() => setZoomedImage(null)}>
+        <DialogContent className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none">
+          {zoomedImage && (
+            <div className="relative w-full h-full max-h-[90vh] flex items-center justify-center p-4">
+              <img 
+                src={zoomedImage} 
+                alt="Expanded profile view" 
+                className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 fade-in duration-300"
+              />
+              <button 
+                onClick={() => setZoomedImage(null)}
+                className="absolute top-4 right-4 p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all active:scale-90"
+              >
+                <X className="size-6" />
+              </button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </DashboardLayout>
