@@ -120,16 +120,15 @@ function PostMedia({ images }: { images?: string[] }) {
 
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
+          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
           onClick={() => setExpandedImage(null)}
         >
           {zoomedImage && (
-            <div className="w-full h-full max-h-[95vh] flex items-center justify-center p-4 cursor-pointer">
+            <div className="w-full h-full max-h-[95vh] flex items-center justify-center p-4">
               <img 
                 src={zoomedImage} 
                 alt="Expanded" 
-                onClick={(e) => e.stopPropagation()}
-                className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200"
+                className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200 shadow-none border-none"
               />
             </div>
           )}
@@ -157,9 +156,7 @@ export default function FeedPage() {
   const [zoomedAvatar, setExpandedAvatar] = React.useState<string | null>(null);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const emblaRef = React.useRef<HTMLDivElement>(null);
 
-  // Swipe gesture to open post modal
   const [swipeStartX, setSwipeStartX] = React.useState<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -173,7 +170,6 @@ export default function FeedPage() {
     const endX = e.changedTouches[0].clientX;
     const diff = endX - swipeStartX;
     
-    // Swipe Right (Left -> Right) to open posting screen
     if (diff > 120) {
       setIsPostModalOpen(true);
     }
@@ -398,12 +394,12 @@ export default function FeedPage() {
 
       <Dialog open={!!zoomedAvatar} onOpenChange={() => setExpandedAvatar(null)}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
+          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
           onClick={() => setExpandedAvatar(null)}
         >
           {zoomedAvatar && (
-            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4 cursor-pointer">
-              <img src={zoomedAvatar} alt="Expanded Avatar" onClick={(e) => e.stopPropagation()} className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300" />
+            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4">
+              <img src={zoomedAvatar} alt="Expanded Avatar" className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300 shadow-none border-none" />
             </div>
           )}
         </DialogContent>

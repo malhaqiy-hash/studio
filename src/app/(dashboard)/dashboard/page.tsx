@@ -92,16 +92,15 @@ export default function UserDashboardPage() {
 
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
+          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
           onClick={() => setExpandedImage(null)}
         >
           {zoomedImage && (
-            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4 cursor-pointer">
+            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4">
               <img 
                 src={zoomedImage} 
                 alt="Zoomed" 
-                onClick={(e) => e.stopPropagation()} 
-                className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200" 
+                className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200 shadow-none border-none" 
               />
             </div>
           )}

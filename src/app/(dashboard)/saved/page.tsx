@@ -55,10 +55,10 @@ function PostMedia({ images }: { images?: string[] }) {
       )}
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
+          className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
           onClick={() => setExpandedImage(null)}
         >
-          {zoomedImage && <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4 cursor-pointer" onClick={() => setExpandedImage(null)}><img src={zoomedImage} alt="Expanded" onClick={(e) => e.stopPropagation()} className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300" /></div>}
+          {zoomedImage && <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4"><img src={zoomedImage} alt="Expanded" className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300 shadow-none border-none" /></div>}
         </DialogContent>
       </Dialog>
     </div>
@@ -140,12 +140,12 @@ export default function SavedPostsPage() {
 
       <Dialog open={!!zoomedAvatar} onOpenChange={() => setExpandedAvatar(null)}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
+          className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
           onClick={() => setExpandedAvatar(null)}
         >
           {zoomedAvatar && (
-            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4 cursor-pointer">
-              <img src={zoomedAvatar} alt="Avatar" className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300" />
+            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4">
+              <img src={zoomedAvatar} alt="Avatar" className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300 shadow-none border-none" />
             </div>
           )}
         </DialogContent>
