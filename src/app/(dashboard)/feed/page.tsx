@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -110,13 +109,13 @@ function PostMedia({ images }: { images?: string[] }) {
 
   return (
     <div className="relative group/carousel">
-      <div className="overflow-hidden rounded-[1.5rem] md:rounded-[2rem] border border-border bg-muted/10 shadow-sm" ref={emblaRef}>
+      <div className="overflow-hidden rounded-[1.25rem] md:rounded-[2rem] border border-border bg-muted/10 shadow-sm" ref={emblaRef}>
         <div className="flex">
           {images.map((src, idx) => (
             <div key={idx} className="flex-[0_0_100%] min-w-0">
               <img 
                 src={src} 
-                className="w-full h-auto object-contain cursor-zoom-in active:scale-[0.99] transition-transform max-h-[500px] md:max-h-[700px]" 
+                className="w-full h-auto object-contain cursor-zoom-in active:scale-[0.99] transition-transform max-h-[400px] md:max-h-[700px]" 
                 alt={`Content ${idx + 1}`}
                 onClick={() => setExpandedImage(src)}
               />
@@ -129,17 +128,17 @@ function PostMedia({ images }: { images?: string[] }) {
         <>
           <button 
             onClick={() => emblaApi?.scrollPrev()} 
-            className="absolute left-3 top-1/2 -translate-y-1/2 size-8 rounded-full bg-background/60 backdrop-blur-md text-foreground flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity z-10 shadow-lg"
+            className="absolute left-2 top-1/2 -translate-y-1/2 size-7 md:size-8 rounded-full bg-background/60 backdrop-blur-md text-foreground flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity z-10 shadow-lg"
           >
-            <ChevronLeft className="size-5" />
+            <ChevronLeft className="size-4 md:size-5" />
           </button>
           <button 
             onClick={() => emblaApi?.scrollNext()} 
-            className="absolute right-3 top-1/2 -translate-y-1/2 size-8 rounded-full bg-background/60 backdrop-blur-md text-foreground flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity z-10 shadow-lg"
+            className="absolute right-2 top-1/2 -translate-y-1/2 size-7 md:size-8 rounded-full bg-background/60 backdrop-blur-md text-foreground flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity z-10 shadow-lg"
           >
-            <ChevronRight className="size-5" />
+            <ChevronRight className="size-4 md:size-5" />
           </button>
-          <div className="absolute top-3 right-3 bg-background/60 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[9px] font-black z-10 shadow-sm">
+          <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-background/60 backdrop-blur-md px-2 py-0.5 rounded-full text-[8px] md:text-[9px] font-black z-10 shadow-sm">
             {selectedIndex + 1} / {images.length}
           </div>
         </>
@@ -366,29 +365,29 @@ export default function FeedPage() {
         verified: activeAccount.verificationStatus === 'Verified',
         visibility: item.visibility
       }));
-    const all = [...userPosts, ...INITIAL_POSTPosts].filter(p => p.visibility !== 'private' || p.author === activeAccount.name);
+    const all = [...userPosts, ...INITIAL_POSTS].filter(p => p.visibility !== 'private' || p.author === activeAccount.name);
     return all.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
   }, [activeAccount.items, activeAccount.name, activeAccount.avatar, activeAccount.extra, activeAccount.verificationStatus]);
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-[calc(100vh-140px)] max-w-2xl mx-auto relative overflow-hidden">
+      <div className="flex flex-col h-[calc(100vh-100px)] max-w-2xl mx-auto relative overflow-hidden">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         <input type="file" multiple ref={cameraInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleFileChange} />
         
-        <div className="flex items-center justify-center gap-1.5 mb-4 md:mb-6 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-1.5">
+        <div className="flex items-center justify-center gap-1 mb-3 md:mb-6 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-1.5">
           {CATEGORIES.map((cat, idx) => (
             <button
               key={cat.id}
               onClick={() => scrollTo(idx)}
               className={cn(
-                "px-3.5 py-1.5 rounded-full text-[10px] md:text-xs font-bold transition-all flex items-center gap-1.5",
+                "px-3 py-1 rounded-full text-[9px] md:text-xs font-bold transition-all flex items-center gap-1",
                 activeCategory === cat.id 
                   ? "bg-accent text-accent-foreground shadow-md scale-105" 
                   : "bg-card text-muted-foreground hover:bg-muted border border-border"
               )}
             >
-              <cat.icon className="size-3" />
+              <cat.icon className="size-2.5 md:size-3" />
               {cat.label}
             </button>
           ))}
@@ -399,7 +398,7 @@ export default function FeedPage() {
             {CATEGORIES.map((cat) => (
               <div 
                 key={cat.id} 
-                className="flex-[0_0_100%] min-w-0 h-full overflow-y-auto snap-y snap-mandatory no-scrollbar space-y-3 pb-8 px-0.5"
+                className="flex-[0_0_100%] min-w-0 h-full overflow-y-auto snap-y snap-mandatory no-scrollbar space-y-2 md:space-y-3 pb-8 px-0.5"
               >
                 {combinedPosts.map((post) => {
                   const trans = translations[post.id];
@@ -408,81 +407,81 @@ export default function FeedPage() {
                   const isExpanded = expandedPosts.has(post.id);
                   
                   return (
-                    <div key={`${cat.id}-${post.id}`} className="snap-start snap-always w-full min-h-[350px] flex flex-col mb-2">
-                      <Card className="border border-border shadow-sm rounded-[1.75rem] md:rounded-[2.5rem] overflow-hidden bg-card flex-1 flex flex-col hover:shadow-md transition-shadow">
-                        <div className="p-4 md:p-6 pb-1 flex items-center justify-between">
-                          <div className="flex items-center gap-2.5">
+                    <div key={`${cat.id}-${post.id}`} className="snap-start snap-always w-full min-h-[300px] flex flex-col mb-1 md:mb-2">
+                      <Card className="border border-border shadow-sm rounded-[1.25rem] md:rounded-[2.5rem] overflow-hidden bg-card flex-1 flex flex-col hover:shadow-md transition-shadow">
+                        <div className="p-3 md:p-6 pb-1 flex items-center justify-between">
+                          <div className="flex items-center gap-2 md:gap-2.5">
                             <Avatar 
-                              className="size-9 md:size-11 border border-border shadow-sm cursor-zoom-in hover:opacity-80 transition-opacity"
+                              className="size-8 md:size-11 border border-border shadow-sm cursor-zoom-in hover:opacity-80 transition-opacity"
                               onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
                             >
                               <AvatarImage src={post.avatar} className="object-cover" />
-                              <AvatarFallback className="bg-accent/10 text-accent font-black text-[10px]">{post.author[0]}</AvatarFallback>
+                              <AvatarFallback className="bg-accent/10 text-accent font-black text-[9px]">{post.author[0]}</AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
-                              <div className="flex items-center gap-1.5">
+                              <div className="flex items-center gap-1 md:gap-1.5">
                                 <Link href="/profile" className="hover:underline decoration-accent/50 underline-offset-2">
-                                  <h3 className="font-black text-foreground text-[13px] md:text-sm">{post.author}</h3>
+                                  <h3 className="font-black text-foreground text-[11px] md:text-sm">{post.author}</h3>
                                 </Link>
-                                {post.verified && <ShieldCheck className="size-3.5 text-emerald-500" />}
-                                {post.visibility === 'private' && <Lock className="size-2.5 text-muted-foreground" />}
+                                {post.verified && <ShieldCheck className="size-3 md:size-3.5 text-emerald-500" />}
+                                {post.visibility === 'private' && <Lock className="size-2 md:size-2.5 text-muted-foreground" />}
                               </div>
                               {post.extra && (
-                                <div className="text-[9px] font-black text-accent uppercase tracking-tight -mt-0.5 opacity-80">
+                                <div className="text-[8px] md:text-[9px] font-black text-accent uppercase tracking-tight -mt-0.5 opacity-80">
                                   {post.extra}
                                 </div>
                               )}
-                              <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">
-                                <Clock className="size-2.5" /> {post.time}
+                              <div className="flex items-center gap-1 text-[7px] md:text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">
+                                <Clock className="size-2 md:size-2.5" /> {post.time}
                               </div>
                             </div>
                           </div>
-                          <button onClick={() => handleSavePost(post)} className={cn("p-2 rounded-full transition-all active:scale-90", isSaved ? "text-accent bg-accent/5" : "text-muted-foreground hover:bg-muted")}>
-                            <Bookmark className={cn("size-4 md:size-5", isSaved && "fill-accent")} />
+                          <button onClick={() => handleSavePost(post)} className={cn("p-1.5 md:p-2 rounded-full transition-all active:scale-90", isSaved ? "text-accent bg-accent/5" : "text-muted-foreground hover:bg-muted")}>
+                            <Bookmark className={cn("size-3.5 md:size-5", isSaved && "fill-accent")} />
                           </button>
                         </div>
 
-                        <CardContent className="px-5 md:px-8 py-3 flex-1 space-y-3">
+                        <CardContent className="px-4 md:px-8 py-2 md:py-3 flex-1 space-y-2 md:space-y-3">
                           {post.type === 'insight' && (
-                            <div className="inline-flex items-center gap-1.5 bg-accent/10 text-accent px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase border border-accent/20">
-                              <Brain className="size-2.5 animate-pulse" /> AI Analysis
+                            <div className="inline-flex items-center gap-1 bg-accent/10 text-accent px-2 py-0.5 rounded-full text-[7px] md:text-[8px] font-black uppercase border border-accent/20">
+                              <Brain className="size-2 md:size-2.5 animate-pulse" /> AI Analysis
                             </div>
                           )}
                           <div 
                             onClick={() => toggleExpand(post.id)}
-                            className={cn("cursor-pointer transition-all duration-300 relative group/text", !isExpanded && "line-clamp-4 max-h-[200px] overflow-hidden")}
+                            className={cn("cursor-pointer transition-all duration-300 relative group/text", !isExpanded && "line-clamp-3 md:line-clamp-4 max-h-[150px] md:max-h-[200px] overflow-hidden")}
                           >
-                            <p className="text-foreground/90 leading-relaxed font-medium transition-colors text-[14px] md:text-base">
+                            <p className="text-foreground/90 leading-relaxed font-medium transition-colors text-[12px] md:text-base">
                               {trans?.show ? trans.text : post.content}
                             </p>
-                            {!isExpanded && <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none opacity-80" />}
+                            {!isExpanded && <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-card to-transparent pointer-events-none opacity-80" />}
                           </div>
                           
                           <PostMedia images={post.images} />
                           
                           {post.externalLink && (
                             <div className="pt-1">
-                              <button onClick={() => window.open(post.externalLink, '_blank')} className="flex items-center justify-center size-10 bg-accent/5 hover:bg-accent/10 rounded-xl border border-accent/10 transition-all shadow-sm active:scale-90">
-                                <Link2 className="size-4.5 text-accent" />
+                              <button onClick={() => window.open(post.externalLink, '_blank')} className="flex items-center justify-center size-8 md:size-10 bg-accent/5 hover:bg-accent/10 rounded-lg md:rounded-xl border border-accent/10 transition-all shadow-sm active:scale-90">
+                                <Link2 className="size-3.5 md:size-4.5 text-accent" />
                               </button>
                             </div>
                           )}
                         </CardContent>
 
-                        <div className="p-4 md:p-6 pt-0 mt-auto border-t border-border/50 bg-muted/5 flex items-center justify-between">
-                          <div className="flex items-center gap-5 md:gap-6 text-muted-foreground">
-                            <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1.5 transition-all active:scale-125", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
-                              <Heart className={cn("size-4.5 md:size-5", postLike.active && "fill-rose-500")} />
-                              <span className="text-[11px] md:text-xs font-black">{postLike.count}</span>
+                        <div className="p-3 md:p-6 pt-0 mt-auto border-t border-border/50 bg-muted/5 flex items-center justify-between">
+                          <div className="flex items-center gap-4 md:gap-6 text-muted-foreground">
+                            <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1 md:gap-1.5 transition-all active:scale-125", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
+                              <Heart className={cn("size-3.5 md:size-5", postLike.active && "fill-rose-500")} />
+                              <span className="text-[9px] md:text-xs font-black">{postLike.count}</span>
                             </button>
-                            <button className="flex items-center gap-1.5 hover:text-accent transition-colors active:scale-90"><MessageCircle className="size-4.5 md:size-5" /><span className="text-[11px] md:text-xs font-black">{post.stats.comments}</span></button>
+                            <button className="flex items-center gap-1 md:gap-1.5 hover:text-accent transition-colors active:scale-90"><MessageCircle className="size-3.5 md:size-5" /><span className="text-[9px] md:text-xs font-black">{post.stats.comments}</span></button>
                             <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center transition-all active:scale-90", trans?.show ? "text-accent" : "hover:text-accent")}>
-                              {trans?.loading ? <RefreshCw className="size-4.5 md:size-5 animate-spin" /> : <Globe className="size-4.5 md:size-5" />}
+                              {trans?.loading ? <RefreshCw className="size-3.5 md:size-5 animate-spin" /> : <Globe className="size-3.5 md:size-5" />}
                             </button>
                           </div>
-                          <div className="flex gap-1.5">
-                            <button onClick={() => handleShare(post)} className="p-1.5 text-muted-foreground hover:text-foreground transition-all active:scale-75"><Share2 className="size-4.5 md:size-5" /></button>
-                            <Button variant="ghost" size="sm" className="font-black text-accent hover:bg-accent/5 rounded-lg text-[10px] gap-1 h-8 px-2.5">Detail <ArrowUpRight className="size-3" /></Button>
+                          <div className="flex gap-1">
+                            <button onClick={() => handleShare(post)} className="p-1 text-muted-foreground hover:text-foreground transition-all active:scale-75"><Share2 className="size-3.5 md:size-5" /></button>
+                            <Button variant="ghost" size="sm" className="font-black text-accent hover:bg-accent/5 rounded-lg text-[8px] md:text-[10px] gap-1 h-7 md:h-8 px-2">Detail <ArrowUpRight className="size-2.5 md:size-3" /></Button>
                           </div>
                         </div>
                       </Card>
@@ -496,59 +495,59 @@ export default function FeedPage() {
       </div>
 
       <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
-        <DialogContent className="max-w-xl rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground">
-          <div className="p-6 md:p-8 space-y-5 md:space-y-6">
+        <DialogContent className="max-w-xl rounded-[2rem] md:rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground">
+          <div className="p-5 md:p-8 space-y-4 md:space-y-6">
             <DialogHeader>
               <div className="flex items-center justify-between">
-                <DialogTitle className="text-lg md:text-xl font-black">Buat Postingan</DialogTitle>
-                <div className="w-28 md:w-32">
+                <DialogTitle className="text-base md:text-xl font-black">Buat Postingan</DialogTitle>
+                <div className="w-24 md:w-32">
                    <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
-                    <SelectTrigger className="h-8 md:h-9 rounded-xl bg-muted/50 border-none text-[9px] font-black uppercase px-2 md:px-3"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-7 md:h-9 rounded-lg md:rounded-xl bg-muted/50 border-none text-[8px] md:text-[9px] font-black uppercase px-2"><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
                   </Select>
                 </div>
               </div>
             </DialogHeader>
 
-            <div className="space-y-4">
-              <div className="relative rounded-[1.5rem] md:rounded-[2rem] bg-muted/30 border border-border/50 p-1.5">
-                <Textarea placeholder="Apa yang sedang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[140px] md:min-h-[160px] rounded-2xl border-none bg-transparent p-3.5 md:p-4 text-sm md:text-base font-medium focus-visible:ring-0 resize-none" />
-                <div className="flex items-center gap-1.5 px-3 py-1.5 border-t border-border/30">
-                  <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-xl hover:bg-accent/10 text-muted-foreground hover:text-accent transition-all active:scale-90" title="Tambah Galeri"><ImageIcon className="size-4.5" /></button>
-                  <button onClick={() => cameraInputRef.current?.click()} className="p-2 rounded-xl hover:bg-accent/10 text-muted-foreground hover:text-accent transition-all active:scale-90" title="Ambil Foto"><Camera className="size-4.5" /></button>
-                  <button onClick={() => setIsLinkInputOpen(!isLinkInputOpen)} className={cn("p-2 rounded-xl transition-all active:scale-90", isLinkInputOpen ? "bg-accent text-white" : "hover:bg-accent/10 text-muted-foreground hover:text-accent")} title="Tambah Link"><Link2 className="size-4.5" /></button>
+            <div className="space-y-3 md:space-y-4">
+              <div className="relative rounded-[1.25rem] md:rounded-[2rem] bg-muted/30 border border-border/50 p-1.5">
+                <Textarea placeholder="Apa yang sedang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] md:min-h-[160px] rounded-xl md:rounded-2xl border-none bg-transparent p-3 md:p-4 text-[13px] md:text-base font-medium focus-visible:ring-0 resize-none" />
+                <div className="flex items-center gap-1 px-2 py-1 border-t border-border/30">
+                  <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-accent/10 text-muted-foreground hover:text-accent transition-all active:scale-90" title="Tambah Galeri"><ImageIcon className="size-4 md:size-4.5" /></button>
+                  <button onClick={() => cameraInputRef.current?.click()} className="p-2 rounded-lg hover:bg-accent/10 text-muted-foreground hover:text-accent transition-all active:scale-90" title="Ambil Foto"><Camera className="size-4 md:size-4.5" /></button>
+                  <button onClick={() => setIsLinkInputOpen(!isLinkInputOpen)} className={cn("p-2 rounded-lg transition-all active:scale-90", isLinkInputOpen ? "bg-accent text-white" : "hover:bg-accent/10 text-muted-foreground hover:text-accent")} title="Tambah Link"><Link2 className="size-4 md:size-4.5" /></button>
                 </div>
               </div>
 
               {isLinkInputOpen && (
                 <div className="animate-in slide-in-from-top-2 duration-200">
-                  <div className="flex items-center gap-2 bg-muted/50 rounded-xl md:rounded-2xl px-3.5 h-12 md:h-14 border border-border/50">
-                    <Link2 className="size-4.5 text-accent opacity-50" />
-                    <Input placeholder="Tempel tautan..." value={postLink} onChange={(e) => setPostLink(e.target.value)} className="border-none bg-transparent px-0 text-[13px] font-bold focus-visible:ring-0" />
+                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg md:rounded-2xl px-3 h-10 md:h-14 border border-border/50">
+                    <Link2 className="size-4 text-accent opacity-50" />
+                    <Input placeholder="Tempel tautan..." value={postLink} onChange={(e) => setPostLink(e.target.value)} className="border-none bg-transparent px-0 text-[12px] md:text-[13px] font-bold focus-visible:ring-0" />
                   </div>
                 </div>
               )}
 
               {postImages.length > 0 && (
-                <div className="grid grid-cols-3 gap-2.5 max-h-[180px] overflow-y-auto no-scrollbar p-0.5">
+                <div className="grid grid-cols-3 gap-2 max-h-[150px] overflow-y-auto no-scrollbar p-0.5">
                   {postImages.map((src, i) => (
-                    <div key={i} className="relative group rounded-lg md:rounded-xl overflow-hidden aspect-square border border-border bg-muted">
+                    <div key={i} className="relative group rounded-lg overflow-hidden aspect-square border border-border bg-muted">
                       <img src={src} className="w-full h-full object-cover" alt="Preview" />
                       <button onClick={() => setPostImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 size-5 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-rose-500 transition-colors opacity-0 group-hover:opacity-100"><X className="size-2.5" /></button>
                     </div>
                   ))}
-                  <button onClick={() => fileInputRef.current?.click()} className="rounded-lg md:rounded-xl border-2 border-dashed border-border flex items-center justify-center hover:bg-accent/5 hover:border-accent transition-colors"><Plus className="size-5 text-muted-foreground" /></button>
+                  <button onClick={() => fileInputRef.current?.click()} className="rounded-lg border-2 border-dashed border-border flex items-center justify-center hover:bg-accent/5 hover:border-accent transition-colors"><Plus className="size-4 md:size-5 text-muted-foreground" /></button>
                 </div>
               )}
 
-              <div className="flex items-center space-x-2.5 p-3 rounded-xl md:rounded-2xl bg-muted/10 border border-border/20">
+              <div className="flex items-center space-x-2 p-2 rounded-lg md:rounded-2xl bg-muted/10 border border-border/20">
                 <Checkbox id="go-profile" checked={goToProfile} onCheckedChange={(val) => setGoToProfile(val as boolean)} />
-                <Label htmlFor="go-profile" className="text-[9px] font-black cursor-pointer text-muted-foreground uppercase tracking-widest leading-none">Kunjungi profil setelah terbit</Label>
+                <Label htmlFor="go-profile" className="text-[8px] md:text-[9px] font-black cursor-pointer text-muted-foreground uppercase tracking-widest leading-none">Kunjungi profil setelah terbit</Label>
               </div>
             </div>
 
-            <DialogFooter className="pt-1.5">
-              <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0 && !postLink} className="w-full h-12 md:h-14 rounded-xl md:rounded-2xl bg-accent hover:bg-accent/90 text-white font-black text-sm md:text-base shadow-xl shadow-accent/20 active:scale-[0.98] transition-all">Kirim Postingan</Button>
+            <DialogFooter className="pt-1">
+              <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0 && !postLink} className="w-full h-11 md:h-14 rounded-xl md:rounded-2xl bg-accent hover:bg-accent/90 text-white font-black text-[13px] md:text-base shadow-xl shadow-accent/20 active:scale-[0.98] transition-all">Kirim Postingan</Button>
             </DialogFooter>
           </div>
         </DialogContent>
