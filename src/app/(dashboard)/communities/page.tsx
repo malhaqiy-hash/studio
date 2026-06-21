@@ -24,7 +24,7 @@ import { useLanguage } from "@/context/language-context";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const MOCK_COMMUNITIES = [
   { id: "c1", name: "Global Halal Trade", description: "Jaringan eksportir dan importir produk halal dunia.", members: "12.4k", category: "Trade", verified: true, image: "https://picsum.photos/seed/halal/400/200" },
@@ -42,7 +42,7 @@ export default function CommunitiesPage() {
 
   const toggleJoin = (id: string) => {
     setJoinedGroups(prev => 
-      prev.includes(id) ? prev.filter(gid => fid !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter(gid => gid !== id) : [...prev, id]
     );
     const isJoining = !joinedGroups.includes(id);
     toast({ 
