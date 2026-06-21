@@ -73,6 +73,38 @@ export function AIAssistant() {
     }
   };
 
+  const handleVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      toast({ 
+        variant: "destructive", 
+        title: "Browser Tidak Mendukung", 
+        description: "Gunakan Chrome atau Safari untuk fitur Voice Search." 
+      });
+      return;
+    }
+
+    const recognition = new (window as any).webkitSpeechRecognition();
+    recognition.lang = language === 'id' ? 'id-ID' : 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      toast({ title: "Asisten Mendengarkan...", description: "Silakan sampaikan pesan Anda." });
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      toast({ title: "Pesan Diterima", description: `"${transcript}"` });
+    };
+
+    recognition.onerror = () => {
+      toast({ variant: "destructive", title: "Gagal Mendengar Suara" });
+    };
+
+    recognition.start();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -139,7 +171,7 @@ export function AIAssistant() {
         <CardFooter className="p-4 bg-white border-t">
           <form 
             onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
-            className="flex w-full gap-2 bg-slate-50 p-1 rounded-2xl border"
+            className="flex w-full gap-2 bg-slate-50 p-1 rounded-2xl border items-center"
           >
             <Input 
               value={input} 
@@ -147,14 +179,25 @@ export function AIAssistant() {
               placeholder={t('ai_ask_strategy')} 
               className="border-none bg-transparent focus-visible:ring-0 text-xs" 
             />
-            <Button 
-              type="submit" 
-              size="icon" 
-              disabled={loading || !input.trim()} 
-              className="rounded-xl bg-slate-900 text-white shrink-0"
-            >
-              <Send className="size-4" />
-            </Button>
+            <div className="flex items-center gap-1.5 pr-1">
+              <Button 
+                type="button" 
+                variant="ghost"
+                size="icon" 
+                onClick={handleVoiceInput}
+                className="size-8 rounded-xl text-muted-foreground hover:text-accent hover:bg-accent/10 shrink-0"
+              >
+                <Mic className="size-4" />
+              </Button>
+              <Button 
+                type="submit" 
+                size="icon" 
+                disabled={loading || !input.trim()} 
+                className="size-8 rounded-xl bg-slate-900 text-white shrink-0"
+              >
+                <Send className="size-4" />
+              </Button>
+            </div>
           </form>
         </CardFooter>
       </Card>

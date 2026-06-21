@@ -102,7 +102,6 @@ export default function CariPage() {
 
   const cleanTitle = (text: string) => text.replace(/^Informasi Terkait:\s*/i, '').trim();
 
-  // Helper to get specific storage key for active account
   const getHistoryKey = React.useCallback(() => `ontapp_discovery_history_${activeAccount.id}`, [activeAccount.id]);
 
   const categories = React.useMemo(() => {
@@ -122,7 +121,6 @@ export default function CariPage() {
     } else {
       setHistory([]);
     }
-    // Clear results when account switches
     setResults(null);
     setQuery("");
   }, [activeAccount.id, getHistoryKey]);
@@ -259,7 +257,36 @@ export default function CariPage() {
   };
 
   const handleVoiceSearch = () => {
-    toast({ title: "Voice Search Aktif", description: "Mendengarkan suara Anda..." });
+    if (!('webkitSpeechRecognition' in window)) {
+      toast({ 
+        variant: "destructive", 
+        title: "Browser Tidak Mendukung", 
+        description: "Gunakan Chrome atau Safari untuk fitur Voice Search." 
+      });
+      return;
+    }
+
+    const recognition = new (window as any).webkitSpeechRecognition();
+    recognition.lang = language === 'id' ? 'id-ID' : 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      toast({ title: "Mendengarkan...", description: "Silakan mulai berbicara." });
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setQuery(transcript);
+      toast({ title: "Suara Terdeteksi", description: `Mencari: "${transcript}"` });
+      handleSearch(undefined, transcript);
+    };
+
+    recognition.onerror = () => {
+      toast({ variant: "destructive", title: "Gagal Mengenali Suara" });
+    };
+
+    recognition.start();
   };
 
   const getTypeIcon = (type: string) => {
