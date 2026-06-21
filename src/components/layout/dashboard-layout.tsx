@@ -60,6 +60,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -175,11 +176,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     });
 
     setIsRegModalOpen(false);
-    router.push("/profile");
-  };
-
-  const handleSwitchAccount = (accountId: string) => {
-    switchAccount(accountId);
     router.push("/profile");
   };
 
