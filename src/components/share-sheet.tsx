@@ -103,19 +103,24 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-0 border-none bg-[#1c1f24] text-white rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden outline-none shadow-2xl">
-        <div className="p-6 space-y-6">
+      <DialogContent className="max-w-md p-0 border-none bg-[#1c1f24] text-white rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden outline-none shadow-2xl h-[85vh] flex flex-col">
+        <div className="p-6 space-y-6 flex-1 flex flex-col overflow-hidden">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-black text-white/90">Bagikan</h3>
-              {selectedFriends.length > 0 && (
-                <Button 
-                  onClick={handleSendToFriends}
-                  className="h-8 bg-accent hover:bg-accent/90 text-white rounded-full font-black text-[10px] uppercase tracking-widest px-4 animate-in fade-in zoom-in"
-                >
-                  Kirim ({selectedFriends.length})
-                </Button>
-              )}
+              <h3 className="text-xl font-black text-white/90">Bagikan</h3>
+              <div className="flex items-center gap-2">
+                {selectedFriends.length > 0 && (
+                  <Button 
+                    onClick={handleSendToFriends}
+                    className="h-8 bg-accent hover:bg-accent/90 text-white rounded-full font-black text-[10px] uppercase tracking-widest px-4 animate-in fade-in zoom-in"
+                  >
+                    Kirim ({selectedFriends.length})
+                  </Button>
+                )}
+                <button onClick={() => onOpenChange(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                  <X className="size-5" />
+                </button>
+              </div>
             </div>
             
             <div className="relative flex items-center bg-[#2d3239] rounded-2xl p-1.5 pl-5 border border-gray-700/30">
@@ -131,7 +136,7 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 flex flex-col overflow-hidden">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-gray-500" />
               <Input 
@@ -142,26 +147,26 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
               />
             </div>
 
-            <ScrollArea className="h-[320px] pr-2">
-              <div className="grid grid-cols-3 gap-y-6 gap-x-2 pt-2">
+            <ScrollArea className="flex-1 pr-2">
+              <div className="grid grid-cols-3 gap-y-8 gap-x-2 pt-4">
                 {filteredFriends.map((friend) => {
                   const isSelected = selectedFriends.includes(friend.id);
                   return (
                     <button 
                       key={friend.id} 
                       onClick={() => toggleFriendSelection(friend.id)}
-                      className="flex flex-col items-center gap-2 group relative active:scale-95 transition-all"
+                      className="flex flex-col items-center gap-3 group relative active:scale-95 transition-all"
                     >
                       <div className="relative">
                         <Avatar className={cn(
                           "size-16 border-2 transition-all duration-300",
-                          isSelected ? "border-accent scale-105" : "border-transparent"
+                          isSelected ? "border-accent scale-105 shadow-[0_0_15px_rgba(var(--accent),0.3)]" : "border-transparent"
                         )}>
                           <AvatarImage src={friend.avatar} className="object-cover" />
                           <AvatarFallback className="bg-[#3e444d] font-bold">{friend.name[0]}</AvatarFallback>
                         </Avatar>
                         {friend.status === 'online' && (
-                          <div className="absolute bottom-0 right-1 size-3.5 bg-emerald-500 rounded-full border-2 border-[#1c1f24]" />
+                          <div className="absolute bottom-0 right-1 size-4 bg-emerald-500 rounded-full border-2 border-[#1c1f24] shadow-sm" />
                         )}
                         {friend.active && (
                           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-[#1c1f24] px-2 rounded-full border border-gray-800">
@@ -177,7 +182,7 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
                         )}
                       </div>
                       <span className={cn(
-                        "text-[10px] font-bold truncate w-full text-center px-1 transition-colors",
+                        "text-[11px] font-bold truncate w-full text-center px-1 transition-colors leading-tight",
                         isSelected ? "text-accent" : "text-gray-300 group-hover:text-white"
                       )}>
                         {friend.name}
@@ -190,27 +195,27 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
           </div>
         </div>
 
-        <div className="bg-[#121418] p-6 pb-10 border-t border-gray-800/50">
-          <div className="mb-4 flex items-center gap-2 px-1">
+        <div className="bg-[#121418] p-6 pb-12 border-t border-gray-800/50">
+          <div className="mb-6 flex items-center gap-2 px-1">
              <div className="h-px flex-1 bg-gray-800" />
-             <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest">Bagikan ke Aplikasi</span>
+             <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Bagikan ke Aplikasi</span>
              <div className="h-px flex-1 bg-gray-800" />
           </div>
           <ScrollArea orientation="horizontal" className="w-full">
-            <div className="flex gap-4 pb-4 px-1">
+            <div className="flex gap-5 pb-4 px-1">
               {EXTERNAL_APPS.map((app, i) => (
                 <button 
                   key={i} 
                   onClick={() => handleOpenApp(app)}
-                  className="flex flex-col items-center gap-2 min-w-[72px] group active:scale-90 transition-all"
+                  className="flex flex-col items-center gap-3 min-w-[72px] group active:scale-90 transition-all"
                 >
                   <div className={cn(
-                    "size-14 rounded-[1.25rem] flex items-center justify-center shadow-xl transition-all group-hover:-translate-y-1 group-hover:shadow-accent/10",
+                    "size-14 rounded-[1.5rem] flex items-center justify-center shadow-xl transition-all group-hover:-translate-y-1.5 group-hover:shadow-accent/10",
                     app.color
                   )}>
                     <app.icon className="size-6 text-white" />
                   </div>
-                  <span className="text-[9px] font-black text-gray-500 uppercase tracking-tight group-hover:text-gray-300 transition-colors">
+                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-tight group-hover:text-gray-300 transition-colors">
                     {app.name}
                   </span>
                 </button>
