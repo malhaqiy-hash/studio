@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { 
   Select, 
@@ -15,7 +15,6 @@ import { Switch } from "@/components/ui/switch";
 import { 
   Palette, 
   Languages,
-  Monitor,
   Globe,
   Lock,
   ChevronRight,

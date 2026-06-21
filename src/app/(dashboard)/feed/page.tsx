@@ -82,7 +82,7 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
-  // ISOLASI GESTURE: Mengunci swipe horizontal pada foto jika > 1 gambar
+  // GESTURE ISOLATION: Mencegah event sentuh diteruskan ke carousel luar jika gambar > 1
   const stopPropagation = (e: React.PointerEvent | React.TouchEvent | React.MouseEvent) => {
     if (images.length > 1) {
       e.stopPropagation();
