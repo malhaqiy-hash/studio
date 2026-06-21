@@ -31,7 +31,9 @@ import {
   Youtube,
   ShoppingBag,
   Linkedin,
-  Link2
+  Link2,
+  Image as ImageIcon,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -46,6 +48,10 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } f
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 
 const RECENT_ACTIVITY = [
   { id: 1, type: 'match', title: 'Sinergi Baru Ditemukan', desc: 'EcoPack Solutions (98%)', time: '10m yang lalu' },
@@ -72,6 +78,7 @@ const chartConfig = {
 export default function UserDashboardPage() {
   const { t, language } = useLanguage();
   const { activeAccount, removePost } = useAccount();
+  const [zoomedImage, setExpandedImage] = React.useState<string | null>(null);
 
   const getStats = () => {
     if (activeAccount.type === 'bisnis') {
@@ -174,7 +181,7 @@ export default function UserDashboardPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={PERFORMANCE_DATA}>
                       <defs>
-                        <linearGradient id="colorAct" x1="0" x1="0" x2="0" y2="1">
+                        <linearGradient id="colorAct" x1="0" x1="0" x2="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3}/>
                           <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0}/>
                         </linearGradient>
@@ -247,7 +254,10 @@ export default function UserDashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {(activeAccount.items || []).map((item) => (
               <Card key={item.id} className="rounded-[2.5rem] border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col group">
-                <div className="aspect-video relative overflow-hidden bg-slate-100">
+                <div 
+                  className="aspect-video relative overflow-hidden bg-slate-100 cursor-zoom-in"
+                  onClick={() => item.image && setExpandedImage(item.image)}
+                >
                   {item.image ? (
                     <img src={item.image} className="w-full h-full object-cover" alt="Content" />
                   ) : (
@@ -263,12 +273,12 @@ export default function UserDashboardPage() {
                       {item.source === 'feed' ? 'Beranda' : 'Profil'}
                     </Badge>
                   </div>
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 pointer-events-none">
                     <Button 
                       variant="destructive" 
                       size="sm" 
-                      onClick={() => removePost(item.id)}
-                      className="rounded-xl h-12 px-6 font-black uppercase text-xs gap-2"
+                      onClick={(e) => { e.stopPropagation(); removePost(item.id); }}
+                      className="rounded-xl h-12 px-6 font-black uppercase text-xs gap-2 pointer-events-auto"
                     >
                       <Trash2 className="size-4" /> Hapus
                     </Button>
@@ -335,6 +345,27 @@ export default function UserDashboardPage() {
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[120px] -mr-96 -mt-96" />
         </div>
       </div>
+
+      {/* Lightbox for Image Expansion */}
+      <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
+        <DialogContent className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden">
+          {zoomedImage && (
+            <div className="relative w-full h-full max-h-[90vh] flex items-center justify-center p-4">
+              <img 
+                src={zoomedImage} 
+                alt="Expanded view" 
+                className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200"
+              />
+              <button 
+                onClick={() => setExpandedImage(null)}
+                className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+              >
+                <X className="size-6" />
+              </button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

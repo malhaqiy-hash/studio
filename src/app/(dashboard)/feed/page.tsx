@@ -109,6 +109,8 @@ export default function FeedPage() {
   const [postLink, setPostLink] = React.useState("");
   const [isLinkInputOpen, setIsLinkInputOpen] = React.useState(false);
   const [goToProfile, setGoToProfile] = React.useState(false);
+  
+  const [zoomedImage, setExpandedImage] = React.useState<string | null>(null);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
@@ -414,7 +416,10 @@ export default function FeedPage() {
                           </div>
                           
                           {post.image && (
-                            <div className="rounded-3xl overflow-hidden border border-border mt-4">
+                            <div 
+                              onClick={() => setExpandedImage(post.image!)}
+                              className="rounded-3xl overflow-hidden border border-border mt-4 cursor-zoom-in active:scale-[0.99] transition-transform"
+                            >
                               <img src={post.image} alt="Content" className="w-full h-auto object-cover max-h-[500px]" />
                             </div>
                           )}
@@ -572,6 +577,27 @@ export default function FeedPage() {
               </Button>
             </DialogFooter>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lightbox for Image Expansion */}
+      <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
+        <DialogContent className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden">
+          {zoomedImage && (
+            <div className="relative w-full h-full max-h-[90vh] flex items-center justify-center p-4">
+              <img 
+                src={zoomedImage} 
+                alt="Expanded view" 
+                className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200"
+              />
+              <button 
+                onClick={() => setExpandedImage(null)}
+                className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+              >
+                <X className="size-6" />
+              </button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </DashboardLayout>

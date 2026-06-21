@@ -14,12 +14,17 @@ import {
   MessageCircle, 
   ArrowUpRight,
   Brain,
-  Share2
+  Share2,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/language-context";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 
 export default function SavedPostsPage() {
   const { toast } = useToast();
@@ -27,6 +32,7 @@ export default function SavedPostsPage() {
   const [savedPosts, setSavedPosts] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [expandedPosts, setExpandedPosts] = React.useState<Set<string>>(new Set());
+  const [zoomedImage, setExpandedImage] = React.useState<string | null>(null);
   
   const [likes, setLikes] = React.useState<Record<string, { count: number, active: boolean }>>({});
 
@@ -182,7 +188,10 @@ export default function SavedPostsPage() {
                           )}
                         </div>
                         {post.image && (
-                          <div className="rounded-3xl overflow-hidden border border-slate-100">
+                          <div 
+                            onClick={() => setExpandedImage(post.image)}
+                            className="rounded-3xl overflow-hidden border border-slate-100 cursor-zoom-in active:scale-[0.99] transition-transform"
+                          >
                             <img src={post.image} className="w-full h-auto object-cover max-h-[300px]" alt="Post Content" />
                           </div>
                         )}
@@ -239,6 +248,27 @@ export default function SavedPostsPage() {
           </div>
         )}
       </div>
+
+      {/* Lightbox for Image Expansion */}
+      <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
+        <DialogContent className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden">
+          {zoomedImage && (
+            <div className="relative w-full h-full max-h-[90vh] flex items-center justify-center p-4">
+              <img 
+                src={zoomedImage} 
+                alt="Expanded view" 
+                className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200"
+              />
+              <button 
+                onClick={() => setExpandedImage(null)}
+                className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+              >
+                <X className="size-6" />
+              </button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
