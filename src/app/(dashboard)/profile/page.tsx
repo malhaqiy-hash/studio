@@ -22,6 +22,7 @@ import {
   Lock,
   Smartphone,
   Cloud,
+  MapPin,
 } from 'lucide-react';
 import {
   Dialog,
@@ -52,7 +53,8 @@ export default function ProfilePage() {
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
   const [newItem, setNewItem] = React.useState<Partial<ContentItem>>({
     visibility: 'public',
-    images: []
+    images: [],
+    locationLink: ''
   });
   
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
@@ -111,10 +113,11 @@ export default function ProfilePage() {
       title: newItem.title || 'Katalog Baru',
       description: newItem.description || '',
       visibility: newItem.visibility || 'public',
+      locationLink: newItem.locationLink,
       source: 'profile'
     });
     setIsContentModalOpen(false);
-    setNewItem({ visibility: 'public', images: [] });
+    setNewItem({ visibility: 'public', images: [], locationLink: '' });
     toast({ title: 'Konten dipublikasikan' });
   };
 
@@ -180,7 +183,13 @@ export default function ProfilePage() {
                   )}
                   <button onClick={() => removePost(item.id)} className="absolute top-1 right-1 size-8 bg-rose-500 text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg"><Trash2 className="size-4" /></button>
                   <CardContent className="p-3 space-y-1">
-                    <div className="flex items-center justify-between"><h4 className="font-bold text-slate-900 text-[14px] line-clamp-1">{item.title}</h4>{item.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}</div>
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-slate-900 text-[14px] line-clamp-1">{item.title}</h4>
+                      <div className="flex items-center gap-1.5">
+                        {item.locationLink && <MapPin className="size-3 text-muted-foreground" />}
+                        {item.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
+                      </div>
+                    </div>
                     <p className="text-muted-foreground text-[12px] font-normal line-clamp-2 leading-snug">{item.description}</p>
                   </CardContent>
                 </Card>
@@ -191,7 +200,7 @@ export default function ProfilePage() {
       </div>
 
       <Dialog open={isBioModalOpen} onOpenChange={setIsBioModalOpen}>
-        <DialogContent className="w-[90%] md:max-w-sm rounded-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden">
+        <DialogContent className="w-[90%] md:max-sm rounded-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden">
           <DialogHeader><DialogTitle className="text-lg font-bold text-slate-900">Ubah Profil</DialogTitle></DialogHeader>
           <div className="space-y-5 py-4">
             <div className="space-y-2"><Label className="text-xs font-bold uppercase text-muted-foreground">Nama Tampilan</Label><Input value={tempAccount.name} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-xl h-12 bg-muted/20 border-none px-4 text-sm font-bold" /></div>
@@ -226,6 +235,13 @@ export default function ProfilePage() {
             </div>
             <div className="space-y-2"><Label className="font-bold text-xs uppercase text-muted-foreground">Judul Item</Label><Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-xl h-12 bg-muted/20 border-none px-4 text-sm font-bold" /></div>
             <div className="space-y-2"><Label className="font-bold text-xs uppercase text-muted-foreground">Deskripsi</Label><Textarea value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="rounded-xl bg-muted/20 border-none min-h-[100px] px-4 text-sm font-medium" /></div>
+            <div className="space-y-2">
+              <Label className="font-bold text-xs uppercase text-muted-foreground">Link Alamat</Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input value={newItem.locationLink} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-xl h-11 bg-muted/20 border-none pl-10 text-sm font-medium shadow-inner" />
+              </div>
+            </div>
           </div>
           <DialogFooter className="mt-6"><Button onClick={handleAddContent} disabled={!newItem.images?.length} className="w-full h-12 rounded-xl bg-accent font-bold text-white text-sm uppercase shadow-lg active:scale-95 transition-all">Posting</Button></DialogFooter>
         </DialogContent>

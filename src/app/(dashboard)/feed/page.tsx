@@ -14,12 +14,12 @@ import {
   Bookmark,
   Plus,
   Lock,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
 import { translateText } from "@/ai/flows/translate-flow";
 import { cn } from "@/lib/utils";
-import useEmblaCarousel from 'embla-carousel-react';
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { useAccount } from "@/context/account-context";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -56,7 +57,8 @@ const INITIAL_POSTS = [
     stats: { likes: 1200, comments: 84 },
     verified: true,
     visibility: 'public',
-    images: ["https://picsum.photos/seed/tech1/800/500", "https://picsum.photos/seed/tech2/800/600", "https://picsum.photos/seed/tech3/800/700"]
+    images: ["https://picsum.photos/seed/tech1/800/500", "https://picsum.photos/seed/tech2/800/600", "https://picsum.photos/seed/tech3/800/700"],
+    locationLink: "https://maps.google.com"
   },
   {
     id: "p2",
@@ -149,12 +151,13 @@ export default function FeedPage() {
   const [isPostModalOpen, setIsPostModalOpen] = React.useState(false);
   const [postContent, setPostContent] = React.useState("");
   const [postImages, setPostImages] = React.useState<string[]>([]);
+  const [postLocationLink, setPostLocationLink] = React.useState("");
   const [postVisibility, setPostVisibility] = React.useState<'public' | 'private'>('public');
   
   const [zoomedAvatar, setExpandedAvatar] = React.useState<string | null>(null);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [emblaMainRef, emblaMainApi] = useEmblaCarousel({ loop: false, align: 'start' });
+  const emblaRef = React.useRef<HTMLDivElement>(null);
 
   // Swipe gesture to open post modal
   const [swipeStartX, setSwipeStartX] = React.useState<number | null>(null);
@@ -177,17 +180,6 @@ export default function FeedPage() {
     setSwipeStartX(null);
   };
 
-  const onMainSelect = React.useCallback(() => {
-    if (!emblaMainApi) return;
-    const index = emblaMainApi.selectedScrollSnap();
-    setActiveCategory(CATEGORIES[index].id);
-  }, [emblaMainApi]);
-
-  React.useEffect(() => {
-    if (!emblaMainApi) return;
-    emblaMainApi.on('select', onMainSelect);
-  }, [emblaMainApi, onMainSelect]);
-
   React.useEffect(() => {
     const initialLikes: Record<string, { count: number, active: boolean }> = {};
     INITIAL_POSTS.forEach(p => {
@@ -195,10 +187,6 @@ export default function FeedPage() {
     });
     setLikes(initialLikes);
   }, []);
-
-  const scrollTo = (index: number) => {
-    if (emblaMainApi) emblaMainApi.scrollTo(index);
-  };
 
   const handleLike = (postId: string) => {
     setLikes(prev => {
@@ -235,11 +223,13 @@ export default function FeedPage() {
       description: postContent,
       images: postImages,
       visibility: postVisibility,
+      locationLink: postLocationLink,
       source: 'feed'
     });
     setIsPostModalOpen(false);
     setPostContent("");
     setPostImages([]);
+    setPostLocationLink("");
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -265,7 +255,8 @@ export default function FeedPage() {
         time: item.timestamp || "Baru saja",
         stats: { likes: 0, comments: 0 },
         verified: activeAccount.verificationStatus === 'Verified',
-        visibility: item.visibility
+        visibility: item.visibility,
+        locationLink: item.locationLink
       }));
     const all = [...userPosts, ...INITIAL_POSTS].filter(p => p.visibility !== 'private' || p.author === activeAccount.name);
     return all.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
@@ -281,10 +272,10 @@ export default function FeedPage() {
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
         <div className="flex items-center justify-center gap-1 mb-2 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 overflow-x-auto no-scrollbar">
-          {CATEGORIES.map((cat, idx) => (
+          {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => scrollTo(idx)}
+              onClick={() => setActiveCategory(cat.id)}
               className={cn(
                 "px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border shrink-0",
                 activeCategory === cat.id 
@@ -297,72 +288,70 @@ export default function FeedPage() {
           ))}
         </div>
 
-        <div className="flex-1 overflow-hidden" ref={emblaMainRef}>
-          <div className="flex h-full">
-            {CATEGORIES.map((cat) => (
-              <div 
-                key={cat.id} 
-                className="flex-[0_0_100%] min-w-0 space-y-3 pb-20"
-              >
-                {combinedPosts.map((post) => {
-                  const trans = translations[post.id];
-                  const postLike = likes[post.id] || { count: 0, active: false };
-                  
-                  return (
-                    <Card key={`${cat.id}-${post.id}`} className="border-border shadow-sm rounded-xl overflow-hidden bg-card">
-                      <div className="p-3 md:p-4 pb-2 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Avatar 
-                            className="size-10 border border-border cursor-zoom-in"
-                            onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
-                          >
-                            <AvatarImage src={post.avatar} className="object-cover" />
-                            <AvatarFallback className="bg-black/5 text-black font-black text-xs">{post.author[0]}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-1">
-                              <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[15px]">{post.author}</h3></Link>
-                              {post.verified && <ShieldCheck className="size-3.5 text-black" />}
-                            </div>
-                            <div className="flex items-center gap-1 text-[12px] text-muted-foreground font-medium uppercase tracking-tight">
-                              {post.time}
-                            </div>
-                          </div>
-                        </div>
+        <div className="flex-1 overflow-hidden">
+          <div className="space-y-3 pb-20">
+            {combinedPosts.map((post) => {
+              const trans = translations[post.id];
+              const postLike = likes[post.id] || { count: 0, active: false };
+              
+              return (
+                <Card key={post.id} className="border-border shadow-sm rounded-xl overflow-hidden bg-card">
+                  <div className="p-3 md:p-4 pb-2 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar 
+                        className="size-10 border border-border cursor-zoom-in"
+                        onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
+                      >
+                        <AvatarImage src={post.avatar} className="object-cover" />
+                        <AvatarFallback className="bg-black/5 text-black font-black text-xs">{post.author[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
                         <div className="flex items-center gap-1">
-                           {post.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
-                           <button className="p-2 rounded-full text-muted-foreground hover:bg-muted"><Bookmark className="size-5" /></button>
+                          <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[15px]">{post.author}</h3></Link>
+                          {post.verified && <ShieldCheck className="size-3.5 text-black" />}
+                          {post.locationLink && (
+                            <a href={post.locationLink} target="_blank" rel="noopener noreferrer" className="ml-1 text-muted-foreground hover:text-black transition-colors">
+                              <MapPin className="size-3.5" />
+                            </a>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-[12px] text-muted-foreground font-medium uppercase tracking-tight">
+                          {post.time}
                         </div>
                       </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        {post.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
+                        <button className="p-2 rounded-full text-muted-foreground hover:bg-muted"><Bookmark className="size-5" /></button>
+                    </div>
+                  </div>
 
-                      <CardContent className="px-3 md:px-4 py-2 space-y-3">
-                        <p className="text-slate-800 leading-normal font-normal text-[14px] md:text-[15px] whitespace-pre-wrap">
-                          {trans?.show ? trans.text : post.content}
-                        </p>
-                        <PostMedia images={post.images} />
-                      </CardContent>
+                  <CardContent className="px-3 md:px-4 py-2 space-y-3">
+                    <p className="text-slate-800 leading-normal font-normal text-[14px] md:text-[15px] whitespace-pre-wrap">
+                      {trans?.show ? trans.text : post.content}
+                    </p>
+                    <PostMedia images={post.images} />
+                  </CardContent>
 
-                      <div className="p-2 md:p-3 pt-1 border-t border-border/40 bg-muted/5 flex items-center justify-between">
-                        <div className="flex items-center gap-6 text-muted-foreground">
-                          <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1.5 py-1 transition-all", postLike.active ? "text-black" : "hover:text-black")}>
-                            <Heart className={cn("size-5", postLike.active && "fill-black")} />
-                            <span className="text-xs font-bold">{postLike.count > 0 ? postLike.count : 'Suka'}</span>
-                          </button>
-                          <button className="flex items-center gap-1.5 py-1 hover:text-black">
-                            <MessageCircle className="size-5" />
-                            <span className="text-xs font-bold">{post.stats.comments > 0 ? post.stats.comments : 'Komentar'}</span>
-                          </button>
-                          <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center py-1", trans?.show ? "text-black" : "hover:text-black")}>
-                            {trans?.loading ? <RefreshCw className="size-5 animate-spin" /> : <Globe className="size-5" />}
-                          </button>
-                        </div>
-                        <button className="p-2 text-muted-foreground hover:text-foreground"><Share2 className="size-5" /></button>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            ))}
+                  <div className="p-2 md:p-3 pt-1 border-t border-border/40 bg-muted/5 flex items-center justify-between">
+                    <div className="flex items-center gap-6 text-muted-foreground">
+                      <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1.5 py-1 transition-all", postLike.active ? "text-black" : "hover:text-black")}>
+                        <Heart className={cn("size-5", postLike.active && "fill-black")} />
+                        <span className="text-xs font-bold">{postLike.count > 0 ? postLike.count : 'Suka'}</span>
+                      </button>
+                      <button className="flex items-center gap-1.5 py-1 hover:text-black">
+                        <MessageCircle className="size-5" />
+                        <span className="text-xs font-bold">{post.stats.comments > 0 ? post.stats.comments : 'Komentar'}</span>
+                      </button>
+                      <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center py-1", trans?.show ? "text-black" : "hover:text-black")}>
+                        {trans?.loading ? <RefreshCw className="size-5 animate-spin" /> : <Globe className="size-5" />}
+                      </button>
+                    </div>
+                    <button className="p-2 text-muted-foreground hover:text-foreground"><Share2 className="size-5" /></button>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -381,6 +370,17 @@ export default function FeedPage() {
             </div>
             <div className="space-y-3">
               <Textarea placeholder="Apa yang Anda pikirkan? (Tarik ke bawah atau klik luar untuk batal)" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-0 resize-none shadow-inner" />
+              
+              <div className="relative group">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Link Alamat (opsional)" 
+                  value={postLocationLink} 
+                  onChange={(e) => setPostLocationLink(e.target.value)}
+                  className="h-11 pl-10 rounded-xl border-none bg-muted/30 text-[14px] font-medium shadow-inner focus-visible:ring-0" 
+                />
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 {postImages.map((src, i) => (
                   <div key={i} className="relative size-16 rounded-lg overflow-hidden border">
