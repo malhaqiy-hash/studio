@@ -212,6 +212,15 @@ export default function ProfilePage() {
     if (url) window.open(url, '_blank');
   };
 
+  const getExtraLabel = () => {
+    switch (activeAccount.type) {
+      case 'pribadi': return 'Status';
+      case 'professional': return 'Keahlian';
+      case 'bisnis': return 'Jenis Usaha';
+      default: return 'Informasi Tambahan';
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-3xl mx-auto space-y-12 pb-24">
@@ -238,7 +247,7 @@ export default function ProfilePage() {
             <div className="flex justify-end px-10 mt-2">
               <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-600 uppercase tracking-[0.25em] opacity-80">
                 <CheckCircle2 className="size-2.5" />
-                Verified by OnTapp
+                Official OnTapp Recognition
               </div>
             </div>
           )}
@@ -442,10 +451,39 @@ export default function ProfilePage() {
         <DialogContent className="max-w-xl rounded-[3rem] p-10 bg-card text-foreground">
           <DialogHeader><DialogTitle className="text-2xl font-black text-foreground">Edit Profil</DialogTitle></DialogHeader>
           <div className="space-y-6 pt-6">
-            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Nama</Label><Input value={tempAccount.name} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-2xl h-14 bg-muted/50 border-none px-6 text-foreground" /></div>
-            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Bio</Label><Textarea value={tempAccount.bio} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} className="rounded-2xl bg-muted/50 border-none min-h-[140px] px-6 py-4 text-foreground" /></div>
+            <div className="space-y-2">
+              <Label className="font-black text-[10px] uppercase text-muted-foreground">Nama</Label>
+              <Input 
+                value={tempAccount.name} 
+                onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} 
+                className="rounded-2xl h-14 bg-muted/50 border-none px-6 text-foreground" 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="font-black text-[10px] uppercase text-muted-foreground">{getExtraLabel()}</Label>
+              <Input 
+                value={tempAccount.extra} 
+                onChange={(e) => setTempAccount({ ...tempAccount, extra: e.target.value })} 
+                placeholder={`Masukkan ${getExtraLabel().toLowerCase()}...`}
+                className="rounded-2xl h-14 bg-muted/50 border-none px-6 text-foreground" 
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="font-black text-[10px] uppercase text-muted-foreground">Bio</Label>
+              <Textarea 
+                value={tempAccount.bio} 
+                onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} 
+                className="rounded-2xl bg-muted/50 border-none min-h-[140px] px-6 py-4 text-foreground" 
+              />
+            </div>
           </div>
-          <DialogFooter className="mt-10"><Button onClick={handleSaveBio} className="rounded-2xl bg-accent h-14 px-12 font-black text-white w-full sm:w-auto">Simpan</Button></DialogFooter>
+          <DialogFooter className="mt-10">
+            <Button onClick={handleSaveBio} className="rounded-2xl bg-accent h-14 px-12 font-black text-white w-full sm:w-auto">
+              Simpan
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
