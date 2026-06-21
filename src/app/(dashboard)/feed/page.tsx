@@ -20,8 +20,6 @@ import {
   X,
   Plus,
   Lock,
-  ChevronLeft,
-  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -63,12 +61,11 @@ const INITIAL_POSTS = [
     extra: "Enterprise AI Analyst",
     avatar: "https://picsum.photos/seed/ontapp/200",
     category: "Market Trend",
-    content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda. Pertumbuhan ini didorong oleh digitalisasi masif di koridor industri Vietnam dan Indonesia, menciptakan celah bagi penyedia perangkat keras IoT dan solusi analitik berbasis awan.",
+    content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
     time: "Baru saja",
     stats: { likes: 1200, comments: 84 },
     verified: true,
     tag: "Trending",
-    locationLink: "https://maps.google.com/?q=Southeast+Asia",
     visibility: 'public',
     images: ["https://picsum.photos/seed/tech1/800/500", "https://picsum.photos/seed/tech2/800/600"]
   },
@@ -79,12 +76,11 @@ const INITIAL_POSTS = [
     extra: "Logistics & Supply Chain",
     avatar: "https://picsum.photos/seed/log/100",
     category: "Lokal",
-    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member OnTapp hari ini. Kami berkomitmen memberikan layanan terbaik untuk rantai pasok Anda dengan integrasi armada ramah lingkungan dan sistem pelacakan real-time tercanggih.",
+    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member OnTapp hari ini.",
     time: "2 jam yang lalu",
     stats: { likes: 452, comments: 12 },
     verified: true,
     images: ["https://picsum.photos/seed/truck/800/400"],
-    locationLink: "https://maps.google.com/?q=Jakarta",
     visibility: 'public'
   },
 ];
@@ -148,7 +144,6 @@ function PostMedia({ images }: { images?: string[] }) {
 export default function FeedPage() {
   const { language, t } = useLanguage();
   const { toast } = useToast();
-  const router = useRouter();
   const { activeAccount, addPost } = useAccount();
   
   const [activeCategory, setActiveCategory] = React.useState('for-you');
@@ -185,9 +180,6 @@ export default function FeedPage() {
   }, [emblaMainApi, onMainSelect]);
 
   React.useEffect(() => {
-    const saved = localStorage.getItem('ontapp_saved_posts');
-    if (saved) setSavedPosts(JSON.parse(saved));
-    
     const initialLikes: Record<string, { count: number, active: boolean }> = {};
     INITIAL_POSTS.forEach(p => {
       initialLikes[p.id] = { count: p.stats.likes, active: false };
@@ -197,15 +189,6 @@ export default function FeedPage() {
 
   const scrollTo = (index: number) => {
     if (emblaMainApi) emblaMainApi.scrollTo(index);
-  };
-
-  const toggleExpand = (id: string) => {
-    setExpandedPosts(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
   };
 
   const handleLike = (postId: string) => {
@@ -220,33 +203,6 @@ export default function FeedPage() {
         }
       };
     });
-  };
-
-  const handleShare = async (post: any) => {
-    const shareUrl = `${window.location.origin}/feed`;
-    try {
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        await navigator.share({ title: 'OnTapp', text: `Lihat postingan ${post.author}`, url: shareUrl });
-      } else {
-        throw new Error('Share not supported');
-      }
-    } catch (err) {
-      navigator.clipboard.writeText(shareUrl);
-      toast({ title: "Tautan Disalin" });
-    }
-  };
-
-  const handleSavePost = (post: any) => {
-    let newSaved;
-    if (savedPosts.includes(post.id)) {
-      newSaved = savedPosts.filter(id => id !== post.id);
-      toast({ title: "Dihapus dari simpanan" });
-    } else {
-      newSaved = [...savedPosts, post.id];
-      toast({ title: "Berhasil disimpan" });
-    }
-    setSavedPosts(newSaved);
-    localStorage.setItem('ontapp_saved_posts', JSON.stringify(newSaved));
   };
 
   const handleTranslate = async (postId: string, content: string) => {
@@ -291,14 +247,13 @@ export default function FeedPage() {
 
   const combinedPosts = React.useMemo(() => {
     const userPosts = (activeAccount.items || [])
-      .filter(item => item.source === 'feed')
       .map(item => ({
         id: item.id,
         type: "post",
         author: activeAccount.name,
         extra: activeAccount.extra,
         avatar: activeAccount.avatar,
-        category: "Koleksi",
+        category: "Profil Saya",
         content: item.description || "",
         images: item.images || [],
         time: item.timestamp || "Baru saja",
@@ -341,9 +296,7 @@ export default function FeedPage() {
               >
                 {combinedPosts.map((post) => {
                   const trans = translations[post.id];
-                  const isSaved = savedPosts.includes(post.id);
                   const postLike = likes[post.id] || { count: 0, active: false };
-                  const isExpanded = expandedPosts.has(post.id);
                   
                   return (
                     <div key={`${cat.id}-${post.id}`} className="snap-start snap-always w-full flex flex-col mb-1.5 md:mb-3">
@@ -367,22 +320,16 @@ export default function FeedPage() {
                               </div>
                             </div>
                           </div>
-                          <button onClick={() => handleSavePost(post)} className={cn("p-1.5 md:p-2 rounded-full transition-all", isSaved ? "text-accent" : "text-muted-foreground")}>
-                            <Bookmark className={cn("size-3.5 md:size-5", isSaved && "fill-accent")} />
-                          </button>
+                          <div className="flex items-center gap-2">
+                             {post.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
+                             <button className="p-1.5 md:p-2 rounded-full text-muted-foreground hover:bg-muted"><Bookmark className="size-3.5 md:size-5" /></button>
+                          </div>
                         </div>
 
                         <CardContent className="px-3 md:px-5 py-2 flex-1 space-y-2">
-                          <div 
-                            onClick={() => toggleExpand(post.id)}
-                            className={cn("cursor-pointer relative", !isExpanded && "line-clamp-3 max-h-[100px] md:max-h-[160px] overflow-hidden")}
-                          >
-                            <p className="text-foreground/90 leading-relaxed font-medium text-[11px] md:text-sm">
-                              {trans?.show ? trans.text : post.content}
-                            </p>
-                            {!isExpanded && post.content.length > 150 && <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-card to-transparent pointer-events-none" />}
-                          </div>
-                          
+                          <p className="text-foreground/90 leading-relaxed font-medium text-[11px] md:text-sm">
+                            {trans?.show ? trans.text : post.content}
+                          </p>
                           <PostMedia images={post.images} />
                         </CardContent>
 
@@ -397,7 +344,7 @@ export default function FeedPage() {
                               {trans?.loading ? <RefreshCw className="size-4 md:size-5 animate-spin" /> : <Globe className="size-4 md:size-5" />}
                             </button>
                           </div>
-                          <button onClick={() => handleShare(post)} className="p-1.5 text-muted-foreground hover:text-foreground"><Share2 className="size-4 md:size-5" /></button>
+                          <button className="p-1.5 text-muted-foreground hover:text-foreground"><Share2 className="size-4 md:size-5" /></button>
                         </div>
                       </Card>
                     </div>
@@ -410,21 +357,21 @@ export default function FeedPage() {
       </div>
 
       <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
-        <DialogContent className="w-[95%] md:max-w-lg rounded-[1.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground">
+        <DialogContent className="w-[95%] md:max-w-lg rounded-[1.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none">
           <div className="p-5 md:p-6 space-y-4">
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-sm md:text-lg font-black">Buat Postingan</DialogTitle>
-                <div className="w-24 md:w-28">
+                <div className="w-24 md:w-32">
                    <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
-                    <SelectTrigger className="h-8 rounded-lg bg-muted/50 border-none text-[8px] font-black uppercase px-2"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-8 md:h-10 rounded-lg bg-muted/50 border-none text-[10px] font-black uppercase px-3 shadow-inner"><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
                   </Select>
                 </div>
               </div>
             </DialogHeader>
             <div className="space-y-3">
-              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[100px] md:min-h-[140px] rounded-xl border-none bg-muted/30 p-3 text-xs md:text-base focus-visible:ring-0 resize-none" />
+              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[100px] md:min-h-[140px] rounded-xl border-none bg-muted/30 p-3 text-xs md:text-base focus-visible:ring-0 resize-none shadow-inner" />
               <div className="flex flex-wrap gap-2">
                 {postImages.map((src, i) => (
                   <div key={i} className="relative size-12 md:size-16 rounded-lg overflow-hidden border">
@@ -436,7 +383,7 @@ export default function FeedPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-10 md:h-12 rounded-xl bg-accent font-black text-white shadow-lg">Posting</Button>
+              <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-10 md:h-12 rounded-xl bg-accent font-black text-white shadow-lg active:scale-95 transition-all">Posting</Button>
             </DialogFooter>
           </div>
         </DialogContent>
