@@ -23,8 +23,6 @@ import {
   Camera,
   Link2,
   X,
-  Smartphone,
-  Cloud,
   Youtube,
   Linkedin,
   Instagram,
@@ -96,7 +94,7 @@ export default function FeedPage() {
   const { activeAccount, addPost } = useAccount();
   
   const [activeCategory, setActiveCategory] = React.useState('for-you');
-  const [posts, setPosts] = React.useState([...INITIAL_POSTS]);
+  const [posts] = React.useState([...INITIAL_POSTS]);
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean }>>({});
   const [savedPosts, setSavedPosts] = React.useState<string[]>([]);
   
@@ -194,24 +192,9 @@ export default function FeedPage() {
       visibility: 'public' as const,
     };
 
-    // Simpan ke Central Context
+    // Hanya simpan ke Central Context, biarkan combinedPosts yang menampilkannya
     addPost(newPostData);
 
-    const feedDisplayPost = {
-      id: `p-${Date.now()}`,
-      type: "post",
-      author: activeAccount.name,
-      avatar: activeAccount.avatar,
-      category: "Baru",
-      content: postContent,
-      image: postImage || undefined,
-      externalLink: postLink || undefined,
-      time: "Baru saja",
-      stats: { likes: "0", comments: "0" },
-      verified: activeAccount.verificationStatus === 'Verified',
-    };
-
-    setPosts([feedDisplayPost, ...posts]);
     setIsPostModalOpen(false);
     setPostContent("");
     setPostImage(null);
@@ -239,16 +222,16 @@ export default function FeedPage() {
   const getLinkIcon = (url?: string) => {
     if (!url) return null;
     const l = url.toLowerCase();
-    if (l.includes('maps.google') || l.includes('goo.gl/maps')) return <MapPin className="size-4 text-rose-500" />;
-    if (l.includes('wa.me') || l.includes('whatsapp')) return <MessageCircleCode className="size-4 text-emerald-500" />;
-    if (l.includes('instagram')) return <Instagram className="size-4 text-pink-500" />;
-    if (l.includes('facebook') || l.includes('fb.com')) return <Facebook className="size-4 text-blue-600" />;
-    if (l.includes('tiktok')) return <Music className="size-4 text-foreground" />;
-    if (l.includes('youtube') || l.includes('youtu.be')) return <Youtube className="size-4 text-red-600" />;
-    if (l.includes('shopee')) return <ShoppingBag className="size-4 text-orange-500" />;
-    if (l.includes('tokopedia')) return <ShoppingBag className="size-4 text-green-500" />;
-    if (l.includes('linkedin')) return <Linkedin className="size-4 text-blue-700" />;
-    return <Link2 className="size-4 text-accent" />;
+    if (l.includes('maps.google') || l.includes('goo.gl/maps')) return <MapPin className="size-5 text-rose-500" />;
+    if (l.includes('wa.me') || l.includes('whatsapp')) return <MessageCircleCode className="size-5 text-emerald-500" />;
+    if (l.includes('instagram')) return <Instagram className="size-5 text-pink-500" />;
+    if (l.includes('facebook') || l.includes('fb.com')) return <Facebook className="size-5 text-blue-600" />;
+    if (l.includes('tiktok')) return <Music className="size-5 text-foreground" />;
+    if (l.includes('youtube') || l.includes('youtu.be')) return <Youtube className="size-5 text-red-600" />;
+    if (l.includes('shopee')) return <ShoppingBag className="size-5 text-orange-500" />;
+    if (l.includes('tokopedia')) return <ShoppingBag className="size-5 text-green-500" />;
+    if (l.includes('linkedin')) return <Linkedin className="size-5 text-blue-700" />;
+    return <Link2 className="size-5 text-accent" />;
   };
 
   const combinedPosts = React.useMemo(() => {
@@ -268,9 +251,9 @@ export default function FeedPage() {
         verified: activeAccount.verificationStatus === 'Verified'
       }));
     
-    // Merge user posts with initial mock posts, avoiding duplicates by ID
-    const uniquePosts = [...userPosts, ...posts].filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
-    return uniquePosts;
+    // Gabungkan dengan deduplikasi ID
+    const all = [...userPosts, ...posts];
+    return all.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
   }, [activeAccount.items, activeAccount.name, activeAccount.avatar, activeAccount.verificationStatus, posts]);
 
   return (
@@ -349,10 +332,15 @@ export default function FeedPage() {
                             </div>
                           )}
                           {post.externalLink && (
-                            <button onClick={() => window.open(post.externalLink, '_blank')} className="flex items-center gap-2 text-[10px] font-black uppercase text-accent bg-accent/5 px-3 py-2 rounded-xl border border-accent/10 w-fit">
-                              {getLinkIcon(post.externalLink)}
-                              <span className="truncate max-w-[200px]">{post.externalLink.replace(/^https?:\/\/(www\.)?/, '')}</span>
-                            </button>
+                            <div className="pt-2">
+                              <button 
+                                onClick={() => window.open(post.externalLink, '_blank')} 
+                                className="flex items-center justify-center size-12 bg-accent/10 hover:bg-accent/20 rounded-2xl border border-accent/20 transition-all shadow-sm group"
+                                title="Buka Tautan"
+                              >
+                                {getLinkIcon(post.externalLink)}
+                              </button>
+                            </div>
                           )}
                         </CardContent>
 
@@ -366,9 +354,6 @@ export default function FeedPage() {
                             </button>
                           </div>
                           <div className="flex gap-2">
-                            <div className="flex items-center mr-1">
-                               {post.externalLink && getLinkIcon(post.externalLink)}
-                            </div>
                             <button className="p-2 text-muted-foreground hover:text-foreground"><Share2 className="size-5" /></button>
                             <Button variant="ghost" size="sm" className="font-black text-accent hover:bg-accent/10 rounded-xl text-xs gap-1">Detail <ArrowUpRight className="size-3.5" /></Button>
                           </div>
@@ -430,7 +415,7 @@ export default function FeedPage() {
               {isLinkInputOpen && (
                 <div className="animate-in slide-in-from-top-2 duration-200">
                   <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-4 h-12">
-                    {getLinkIcon(postLink)}
+                    {getLinkIcon(postLink) || <Link2 className="size-5 text-accent" />}
                     <Input 
                       placeholder="Tempel tautan (WA, IG, Maps, dll)..."
                       value={postLink}

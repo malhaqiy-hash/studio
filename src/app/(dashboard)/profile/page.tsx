@@ -197,15 +197,15 @@ export default function ProfilePage() {
 
   const getLinkIcon = (url: string) => {
     const l = url.toLowerCase();
-    if (l.includes('instagram')) return <Instagram className="size-4" />;
-    if (l.includes('linkedin')) return <Linkedin className="size-4" />;
-    if (l.includes('facebook') || l.includes('fb.com')) return <Facebook className="size-4" />;
-    if (l.includes('maps.google') || l.includes('goo.gl/maps')) return <MapPin className="size-4" />;
-    if (l.includes('wa.me') || l.includes('whatsapp')) return <MessageCircleCode className="size-4" />;
-    if (l.includes('youtube') || l.includes('youtu.be')) return <Youtube className="size-4" />;
-    if (l.includes('tiktok')) return <Music className="size-4" />;
-    if (l.includes('shopee') || l.includes('tokopedia')) return <ShoppingBag className="size-4" />;
-    return <Link2 className="size-4" />;
+    if (l.includes('instagram')) return <Instagram className="size-5" />;
+    if (l.includes('linkedin')) return <Linkedin className="size-5" />;
+    if (l.includes('facebook') || l.includes('fb.com')) return <Facebook className="size-5" />;
+    if (l.includes('maps.google') || l.includes('goo.gl/maps')) return <MapPin className="size-5" />;
+    if (l.includes('wa.me') || l.includes('whatsapp')) return <MessageCircleCode className="size-5" />;
+    if (l.includes('youtube') || l.includes('youtu.be')) return <Youtube className="size-5" />;
+    if (l.includes('tiktok')) return <Music className="size-5" />;
+    if (l.includes('shopee') || l.includes('tokopedia')) return <ShoppingBag className="size-5" />;
+    return <Link2 className="size-5" />;
   };
 
   const openInMaps = (url?: string) => {
@@ -329,9 +329,8 @@ export default function ProfilePage() {
           </div>
           <div className="flex flex-wrap gap-3">
             {(activeAccount.links || []).map((link, idx) => (
-              <a key={idx} href={link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-5 py-2.5 rounded-2xl border border-border bg-card text-xs font-black text-foreground/70 hover:border-accent hover:text-accent transition-all shadow-sm">
+              <a key={idx} href={link} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center size-12 rounded-2xl border border-border bg-card text-foreground/70 hover:border-accent hover:text-accent transition-all shadow-sm">
                 {getLinkIcon(link)}
-                <span className="max-w-[140px] truncate uppercase tracking-tighter">{new URL(link).hostname.replace('www.', '')}</span>
               </a>
             ))}
           </div>
@@ -367,14 +366,16 @@ export default function ProfilePage() {
                   <CardContent className="p-6 space-y-3">
                     <h4 className="font-black text-foreground text-lg line-clamp-1">{item.title}</h4>
                     <p className="text-muted-foreground text-xs font-medium line-clamp-2">{item.description}</p>
-                    <div className="pt-2 border-t border-border flex items-center justify-between">
+                    <div className="pt-2 border-t border-border flex items-center gap-3">
                       {item.locationLink && (
-                        <button onClick={() => openInMaps(item.locationLink)} className="flex items-center gap-2 text-[10px] font-black uppercase text-rose-500 hover:text-rose-600 transition-colors">
-                          {getLinkIcon(item.locationLink)} Lokasi Bisnis
+                        <button onClick={() => openInMaps(item.locationLink)} className="flex items-center justify-center size-10 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all">
+                          {getLinkIcon(item.locationLink)}
                         </button>
                       )}
                       {item.externalLink && (
-                         <div className="text-muted-foreground">{getLinkIcon(item.externalLink)}</div>
+                         <button onClick={() => openInMaps(item.externalLink)} className="flex items-center justify-center size-10 rounded-xl bg-accent/10 text-accent hover:bg-accent/20 transition-all">
+                            {getLinkIcon(item.externalLink)}
+                         </button>
                       )}
                     </div>
                   </CardContent>
