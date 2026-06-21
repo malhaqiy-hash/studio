@@ -39,7 +39,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 
 const CATEGORIES = [
-  { id: 'for-you', label: 'Saran' },
+  { id: 'saran', label: 'Saran' },
   { id: 'lokal', label: 'Lokal' },
   { id: 'global', label: 'Global' },
   { id: 'trending', label: 'Trending' },
@@ -86,7 +86,7 @@ function PostMedia({ images }: { images?: string[] }) {
 
   return (
     <div 
-      className="relative group/carousel w-full overflow-hidden rounded-xl border border-border bg-muted/5 touch-pan-x select-none"
+      className="relative group/carousel w-full overflow-hidden rounded-xl border border-border bg-muted/5 touch-pan-x select-none cursor-grab active:cursor-grabbing"
       onPointerDown={handleIsolate}
       onTouchStart={handleIsolate}
       onTouchMove={handleIsolate}
@@ -102,7 +102,7 @@ function PostMedia({ images }: { images?: string[] }) {
           <SwiperSlide key={idx}>
             <img 
               src={src} 
-              className="w-full h-auto object-contain cursor-grab active:cursor-grabbing max-h-[500px] md:max-h-[700px]" 
+              className="w-full h-auto object-contain max-h-[500px] md:max-h-[700px]" 
               alt={`Content ${idx + 1}`}
               onClick={() => setExpandedImage(src)}
             />
@@ -142,7 +142,7 @@ export default function FeedPage() {
   const { toast } = useToast();
   const { activeAccount, addPost } = useAccount();
   
-  const [activeCategory, setActiveCategory] = React.useState('for-you');
+  const [activeCategory, setActiveCategory] = React.useState('saran');
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean }>>({});
   const [likes, setLikes] = React.useState<Record<string, { count: number, active: boolean }>>({});
 
@@ -156,11 +156,26 @@ export default function FeedPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [emblaMainRef, emblaMainApi] = useEmblaCarousel({ loop: false, align: 'start' });
 
-  React.useEffect(() => {
-    const handleOpen = () => setIsPostModalOpen(true);
-    window.addEventListener('open-post-modal', handleOpen);
-    return () => window.removeEventListener('open-post-modal', handleOpen);
-  }, []);
+  // Swipe gesture to open post modal
+  const [swipeStartX, setSwipeStartX] = React.useState<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (activeCategory === 'saran') {
+      setSwipeStartX(e.targetTouches[0].clientX);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (swipeStartX === null) return;
+    const endX = e.changedTouches[0].clientX;
+    const diff = endX - swipeStartX;
+    
+    // Swipe Right (Left -> Right) to open posting screen
+    if (diff > 120) {
+      setIsPostModalOpen(true);
+    }
+    setSwipeStartX(null);
+  };
 
   const onMainSelect = React.useCallback(() => {
     if (!emblaMainApi) return;
@@ -258,7 +273,11 @@ export default function FeedPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col max-w-2xl mx-auto relative px-1 md:px-0">
+      <div 
+        className="flex flex-col max-w-2xl mx-auto relative px-1 md:px-0 min-h-[calc(100vh-8rem)]"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
         <div className="flex items-center justify-center gap-1 mb-2 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 overflow-x-auto no-scrollbar">
@@ -361,7 +380,7 @@ export default function FeedPage() {
               </div>
             </div>
             <div className="space-y-3">
-              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-0 resize-none shadow-inner" />
+              <Textarea placeholder="Apa yang Anda pikirkan? (Tarik ke bawah atau klik luar untuk batal)" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-0 resize-none shadow-inner" />
               <div className="flex flex-wrap gap-2">
                 {postImages.map((src, i) => (
                   <div key={i} className="relative size-16 rounded-lg overflow-hidden border">
@@ -373,7 +392,6 @@ export default function FeedPage() {
               </div>
             </div>
             <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-12 rounded-xl bg-black font-bold text-white shadow-lg active:scale-[0.98] transition-all">Posting</Button>
-            <button onClick={() => setIsPostModalOpen(false)} className="w-full text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground pt-2">Batal</button>
           </div>
         </DialogContent>
       </Dialog>

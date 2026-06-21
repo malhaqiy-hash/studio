@@ -286,9 +286,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <Search className="size-5 md:size-6" /><span>{t('search')}</span>
           </Link>
           <div className="relative w-full h-full flex flex-col items-center justify-center">
-            {pathname === '/feed' && (
-              <button onClick={() => window.dispatchEvent(new CustomEvent('open-post-modal'))} className="absolute bottom-24 size-9 md:size-10 bg-black rounded-full flex items-center justify-center text-white shadow-xl hover:bg-black/80 transition active:scale-95 z-[96] ring-4 ring-background"><Plus className="size-5 md:size-6" /></button>
-            )}
             <button onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))} className="absolute bottom-12 size-9 md:size-10 bg-black rounded-full flex items-center justify-center text-white shadow-xl hover:bg-black/80 transition active:scale-95 z-[95] ring-4 ring-background"><div className="size-5 md:size-6 flex items-center justify-center bg-white rounded-full text-[10px] font-black text-black">AI</div></button>
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild><button className="flex flex-col items-center gap-1 hover:text-black w-full py-2 outline-none"><Menu className="size-5 md:size-6" /><span>{t('more')}</span></button></SheetTrigger>
