@@ -40,7 +40,8 @@ import {
   Smartphone,
   Cloud,
   Image as ImageIcon,
-  RefreshCw
+  RefreshCw,
+  Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -191,13 +192,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     });
 
     setIsRegModalOpen(false);
-    // Langsung masuk ke profil setelah registrasi akun baru
     router.push("/profile");
   };
 
   const handleSwitchAccount = (accountId: string) => {
     switchAccount(accountId);
-    // Langsung masuk ke profil saat beralih akun
     router.push("/profile");
   };
 
@@ -375,6 +374,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </Link>
 
           <div className="relative w-full h-full flex flex-col items-center justify-center">
+            {/* Tumpukan Tombol di Atas Menu Lainnya */}
+            {/* Icon Tambah (+) - Hanya tampil di Halaman Feed */}
+            {pathname === '/feed' && (
+              <button 
+                onClick={() => window.dispatchEvent(new CustomEvent('open-post-modal'))}
+                className="absolute bottom-36 w-12 h-12 bg-accent rounded-full flex items-center justify-center text-white shadow-xl hover:bg-accent/80 transition active:scale-95 z-[96] ring-4 ring-background"
+              >
+                <Plus className="size-6" />
+              </button>
+            )}
+
+            {/* AI Assistant Button (Chat Bubble) */}
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
               className="absolute bottom-20 w-12 h-12 bg-accent rounded-full flex items-center justify-center text-white shadow-xl hover:bg-accent/80 transition active:scale-95 z-[95] ring-4 ring-background"

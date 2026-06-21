@@ -10,7 +10,6 @@ import {
   TrendingUp, 
   Globe, 
   MapPin, 
-  Zap, 
   Brain,
   Heart, 
   MessageCircle, 
@@ -25,8 +24,7 @@ import {
   Type,
   X,
   Smartphone,
-  Cloud,
-  CheckCircle2
+  Cloud
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -117,6 +115,13 @@ export default function FeedPage() {
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start' });
+
+  // Listen to open post modal event from DashboardLayout
+  React.useEffect(() => {
+    const handleOpen = () => setIsPostModalOpen(true);
+    window.addEventListener('open-post-modal', handleOpen);
+    return () => window.removeEventListener('open-post-modal', handleOpen);
+  }, []);
 
   const onSelect = React.useCallback(() => {
     if (!emblaApi) return;
@@ -341,16 +346,6 @@ export default function FeedPage() {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Action Buttons: Centered "+" button positioned above AI chat icon */}
-        <div className="fixed bottom-36 left-1/2 -translate-x-1/2 z-[110] flex flex-col items-center">
-          <button 
-            onClick={() => setIsPostModalOpen(true)}
-            className="size-14 bg-accent text-accent-foreground rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all active:scale-95 border-4 border-background"
-          >
-            <Plus className="size-7" />
-          </button>
         </div>
       </div>
 
