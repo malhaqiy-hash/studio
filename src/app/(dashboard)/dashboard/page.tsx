@@ -20,7 +20,18 @@ import {
   Star,
   Brain,
   Bookmark,
-  Search
+  Search,
+  Trash2,
+  ExternalLink,
+  MapPin,
+  MessageCircleCode,
+  Instagram,
+  Facebook,
+  Music,
+  Youtube,
+  ShoppingBag,
+  Linkedin,
+  Link2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -60,9 +71,8 @@ const chartConfig = {
 
 export default function UserDashboardPage() {
   const { t, language } = useLanguage();
-  const { activeAccount } = useAccount();
+  const { activeAccount, removePost } = useAccount();
 
-  // Konfigurasi Statistik Berdasarkan Tipe Akun
   const getStats = () => {
     if (activeAccount.type === 'bisnis') {
       return [
@@ -80,13 +90,27 @@ export default function UserDashboardPage() {
         { label: "Keahlian", val: activeAccount.extra || "Umum", icon: Zap, color: "text-amber-500", bg: "bg-amber-50" }
       ];
     }
-    // Default / Pribadi
     return [
       { label: "Disimpan", val: "12", icon: Bookmark, color: "text-teal-600", bg: "bg-teal-50" },
       { label: "Koneksi", val: "84", icon: Users, color: "text-accent", bg: "bg-accent/10" },
       { label: "Pencarian", val: "128", icon: Search, color: "text-emerald-600", bg: "bg-emerald-50" },
       { label: "Voucher AI", val: "5", icon: Zap, color: "text-amber-500", bg: "bg-amber-50" }
     ];
+  };
+
+  const getLinkIcon = (url?: string) => {
+    if (!url) return <Link2 className="size-4" />;
+    const l = url.toLowerCase();
+    if (l.includes('maps.google') || l.includes('goo.gl/maps')) return <MapPin className="size-4 text-rose-500" />;
+    if (l.includes('wa.me') || l.includes('whatsapp')) return <MessageCircleCode className="size-4 text-emerald-500" />;
+    if (l.includes('instagram')) return <Instagram className="size-4 text-pink-500" />;
+    if (l.includes('facebook') || l.includes('fb.com')) return <Facebook className="size-4 text-blue-600" />;
+    if (l.includes('tiktok')) return <Music className="size-4 text-foreground" />;
+    if (l.includes('youtube') || l.includes('youtu.be')) return <Youtube className="size-4 text-red-600" />;
+    if (l.includes('shopee')) return <ShoppingBag className="size-4 text-orange-500" />;
+    if (l.includes('tokopedia')) return <ShoppingBag className="size-4 text-green-500" />;
+    if (l.includes('linkedin')) return <Linkedin className="size-4 text-blue-700" />;
+    return <Link2 className="size-4 text-accent" />;
   };
 
   const stats = getStats();
@@ -128,7 +152,6 @@ export default function UserDashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main Chart - Always show, but with different label */}
           <Card className="lg:col-span-8 rounded-[3rem] border-slate-100 shadow-xl overflow-hidden bg-white">
             <CardHeader className="p-10 pb-0">
               <div className="flex items-center justify-between">
@@ -181,7 +204,6 @@ export default function UserDashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Activity Sidebar */}
           <Card className="lg:col-span-4 rounded-[3rem] border-slate-100 shadow-xl bg-slate-900 text-white overflow-hidden relative">
             <CardHeader className="p-8 relative z-10">
               <div className="flex items-center gap-3">
@@ -213,6 +235,81 @@ export default function UserDashboardPage() {
             </CardContent>
             <div className="absolute top-0 right-0 w-48 h-48 bg-accent/20 rounded-full blur-3xl -mr-24 -mt-24" />
           </Card>
+        </div>
+
+        {/* New Management Section: Manage All Posts */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Manajemen Postingan</h2>
+            <Badge variant="secondary" className="font-black text-[10px] uppercase">{activeAccount.items?.length || 0} Total Konten</Badge>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(activeAccount.items || []).map((item) => (
+              <Card key={item.id} className="rounded-[2.5rem] border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col group">
+                <div className="aspect-video relative overflow-hidden bg-slate-100">
+                  {item.image ? (
+                    <img src={item.image} className="w-full h-full object-cover" alt="Content" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-300">
+                      <ImageIcon className="size-12" />
+                    </div>
+                  )}
+                  <div className="absolute top-4 left-4">
+                    <Badge className={cn(
+                      "font-black text-[9px] uppercase border-none",
+                      item.source === 'feed' ? "bg-accent text-white" : "bg-teal-500 text-white"
+                    )}>
+                      {item.source === 'feed' ? 'Beranda' : 'Profil'}
+                    </Badge>
+                  </div>
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                    <Button 
+                      variant="destructive" 
+                      size="sm" 
+                      onClick={() => removePost(item.id)}
+                      className="rounded-xl h-12 px-6 font-black uppercase text-xs gap-2"
+                    >
+                      <Trash2 className="size-4" /> Hapus
+                    </Button>
+                  </div>
+                </div>
+                <CardContent className="p-6 flex-1 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <h4 className="font-black text-slate-900 text-lg line-clamp-1">{item.title}</h4>
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>
+                  </div>
+                  <div className="pt-4 mt-4 border-t border-slate-50 flex items-center justify-between">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.timestamp}</span>
+                    <div className="flex gap-2">
+                      {item.externalLink && (
+                        <button onClick={() => window.open(item.externalLink, '_blank')} className="p-2 bg-slate-50 rounded-lg text-slate-400 hover:text-accent transition-colors">
+                          {getLinkIcon(item.externalLink)}
+                        </button>
+                      )}
+                      {item.locationLink && (
+                        <button onClick={() => window.open(item.locationLink, '_blank')} className="p-2 bg-slate-50 rounded-lg text-slate-400 hover:text-rose-500 transition-colors">
+                          <MapPin className="size-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {(!activeAccount.items || activeAccount.items.length === 0) && (
+              <div className="col-span-full py-20 text-center border-2 border-dashed border-slate-200 rounded-[3rem] bg-slate-50/50 space-y-4">
+                <div className="size-20 rounded-full bg-white shadow-lg mx-auto flex items-center justify-center text-slate-200">
+                  <Zap className="size-10" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-black text-slate-900">Belum Ada Postingan</h3>
+                  <p className="text-sm text-slate-400 max-w-xs mx-auto">Postingan yang Anda tambahkan di Beranda atau Profil akan muncul di sini.</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Dynamic Context Banner */}

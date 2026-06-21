@@ -13,6 +13,8 @@ export interface ContentItem {
   visibility?: 'public' | 'private';
   timestamp?: string;
   locationLink?: string;
+  externalLink?: string;
+  source: 'profile' | 'feed';
 }
 
 export interface AccountPreferences {
@@ -43,6 +45,8 @@ interface AccountContextProps {
   switchAccount: (id: string) => void;
   registerAccount: (data: Omit<Account, 'id' | 'avatar' | 'items'>) => void;
   updateActiveAccount: (data: Partial<Account>) => void;
+  addPost: (post: Omit<ContentItem, 'id' | 'timestamp'>) => void;
+  removePost: (id: string) => void;
   hasInitialized: boolean;
 }
 
@@ -60,7 +64,8 @@ const DEFAULT_PRIBADI: Account = {
   avatar: 'https://picsum.photos/seed/temp/100',
   bio: 'Akun sementara sebelum onboarding.',
   isNew: true,
-  preferences: DEFAULT_PREFERENCES
+  preferences: DEFAULT_PREFERENCES,
+  items: []
 };
 
 const AccountContext = createContext<AccountContextProps | undefined>(undefined);
@@ -80,7 +85,8 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
         if (parsed.length > 0) {
           const migratedAccounts = parsed.map((acc: Account) => ({
             ...acc,
-            preferences: acc.preferences || DEFAULT_PREFERENCES
+            preferences: acc.preferences || DEFAULT_PREFERENCES,
+            items: acc.items || []
           }));
           setAccounts(migratedAccounts);
           if (savedActive && migratedAccounts.some((a: any) => a.id === savedActive)) {
@@ -133,10 +139,40 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('ontapp_user_accounts', JSON.stringify(updatedAccounts));
   };
 
+  const addPost = (post: Omit<ContentItem, 'id' | 'timestamp'>) => {
+    const newItem: ContentItem = {
+      ...post,
+      id: `post-${Date.now()}`,
+      timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' hari ini'
+    };
+    
+    const updatedAccounts = accounts.map(acc => {
+      if (acc.id === activeAccountId) {
+        return { ...acc, items: [newItem, ...(acc.items || [])] };
+      }
+      return acc;
+    });
+    
+    setAccounts(updatedAccounts);
+    localStorage.setItem('ontapp_user_accounts', JSON.stringify(updatedAccounts));
+  };
+
+  const removePost = (id: string) => {
+    const updatedAccounts = accounts.map(acc => {
+      if (acc.id === activeAccountId) {
+        return { ...acc, items: (acc.items || []).filter(item => item.id !== id) };
+      }
+      return acc;
+    });
+    
+    setAccounts(updatedAccounts);
+    localStorage.setItem('ontapp_user_accounts', JSON.stringify(updatedAccounts));
+  };
+
   const activeAccount = accounts.find(a => a.id === activeAccountId) || accounts[0];
 
   return (
-    <AccountContext.Provider value={{ activeAccount, availableAccounts: accounts, switchAccount, registerAccount, updateActiveAccount, hasInitialized }}>
+    <AccountContext.Provider value={{ activeAccount, availableAccounts: accounts, switchAccount, registerAccount, updateActiveAccount, addPost, removePost, hasInitialized }}>
       {children}
     </AccountContext.Provider>
   );

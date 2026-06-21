@@ -42,7 +42,11 @@ import {
   Heart,
   Users,
   Lock,
-  CheckCircle2
+  CheckCircle2,
+  Youtube,
+  Music,
+  ShoppingBag,
+  MessageCircleCode
 } from 'lucide-react';
 import {
   Dialog,
@@ -64,7 +68,7 @@ const MOCK_USERS = [
 ];
 
 export default function ProfilePage() {
-  const { activeAccount, updateActiveAccount } = useAccount();
+  const { activeAccount, updateActiveAccount, addPost, removePost } = useAccount();
   const { toast } = useToast();
 
   const [isBioModalOpen, setIsBioModalOpen] = React.useState(false);
@@ -120,7 +124,6 @@ export default function ProfilePage() {
           updateActiveAccount({ avatar: result });
           toast({ title: "Foto profil diperbarui" });
         } else if (mediaTarget === 'cover') {
-          // Update cover image simulation
           toast({ title: "Foto sampul diperbarui" });
         } else if (mediaTarget === 'post') {
           setNewItem(prev => ({ ...prev, image: result }));
@@ -139,7 +142,6 @@ export default function ProfilePage() {
     setTimeout(() => {
       const simulatedUrl = `https://picsum.photos/seed/cloud${Date.now()}/800/600`;
       if (mediaTarget === 'avatar') updateActiveAccount({ avatar: simulatedUrl });
-      // In a real app we'd handle cover too
       setIsCloudLoading(false);
       setIsMediaPickerOpen(false);
       toast({ title: "Gambar berhasil diimpor" });
@@ -160,27 +162,23 @@ export default function ProfilePage() {
   };
 
   const handleAddContent = () => {
-    const item: ContentItem = {
-      id: `item-${Date.now()}`,
+    const postData = {
       image: newItem.image || `https://picsum.photos/seed/${Date.now()}/600/400`,
       title: newItem.title || 'Tanpa Judul',
       description: newItem.description || '',
       visibility: newItem.visibility || 'public',
-      timestamp: 'Baru saja',
-      locationLink: newItem.locationLink
+      locationLink: newItem.locationLink,
+      source: 'profile' as const
     };
-    updateActiveAccount({
-      items: [item, ...(activeAccount.items || [])]
-    });
+    
+    addPost(postData);
     setIsContentModalOpen(false);
     setNewItem({ visibility: 'public', locationLink: '' });
     toast({ title: 'Konten dipublikasikan' });
   };
 
   const handleRemoveItem = (id: string) => {
-    updateActiveAccount({
-      items: (activeAccount.items || []).filter(item => item.id !== id)
-    });
+    removePost(id);
     toast({ title: 'Konten dihapus' });
   };
 
@@ -198,10 +196,15 @@ export default function ProfilePage() {
   };
 
   const getLinkIcon = (url: string) => {
-    const lowerUrl = url.toLowerCase();
-    if (lowerUrl.includes('instagram')) return <Instagram className="size-4" />;
-    if (lowerUrl.includes('linkedin')) return <Linkedin className="size-4" />;
-    if (lowerUrl.includes('facebook')) return <Facebook className="size-4" />;
+    const l = url.toLowerCase();
+    if (l.includes('instagram')) return <Instagram className="size-4" />;
+    if (l.includes('linkedin')) return <Linkedin className="size-4" />;
+    if (l.includes('facebook') || l.includes('fb.com')) return <Facebook className="size-4" />;
+    if (l.includes('maps.google') || l.includes('goo.gl/maps')) return <MapPin className="size-4" />;
+    if (l.includes('wa.me') || l.includes('whatsapp')) return <MessageCircleCode className="size-4" />;
+    if (l.includes('youtube') || l.includes('youtu.be')) return <Youtube className="size-4" />;
+    if (l.includes('tiktok')) return <Music className="size-4" />;
+    if (l.includes('shopee') || l.includes('tokopedia')) return <ShoppingBag className="size-4" />;
     return <Link2 className="size-4" />;
   };
 
@@ -231,7 +234,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Minimalist Verification Label exactly below cover */}
           {activeAccount.verificationStatus === 'Verified' && (
             <div className="flex justify-end px-10 mt-2">
               <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-600 uppercase tracking-[0.25em] opacity-80">
@@ -353,7 +355,7 @@ export default function ProfilePage() {
           </div>
 
           <div className={cn(activeAccount.type === 'pribadi' ? "space-y-8" : "grid grid-cols-1 md:grid-cols-2 gap-8")}>
-            {(activeAccount.items || []).map((item) => (
+            {(activeAccount.items || []).filter(i => i.source === 'profile').map((item) => (
               <div key={item.id} className="relative group">
                 <Card className="rounded-[2.5rem] border-border shadow-sm overflow-hidden group hover:shadow-2xl transition-all bg-card border-none">
                   {item.image && (
@@ -365,13 +367,16 @@ export default function ProfilePage() {
                   <CardContent className="p-6 space-y-3">
                     <h4 className="font-black text-foreground text-lg line-clamp-1">{item.title}</h4>
                     <p className="text-muted-foreground text-xs font-medium line-clamp-2">{item.description}</p>
-                    {item.locationLink && (
-                      <div className="pt-2 border-t border-border">
+                    <div className="pt-2 border-t border-border flex items-center justify-between">
+                      {item.locationLink && (
                         <button onClick={() => openInMaps(item.locationLink)} className="flex items-center gap-2 text-[10px] font-black uppercase text-rose-500 hover:text-rose-600 transition-colors">
-                          <MapPin className="size-3" /> Lokasi Bisnis
+                          {getLinkIcon(item.locationLink)} Lokasi Bisnis
                         </button>
-                      </div>
-                    )}
+                      )}
+                      {item.externalLink && (
+                         <div className="text-muted-foreground">{getLinkIcon(item.externalLink)}</div>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -472,7 +477,7 @@ export default function ProfilePage() {
               {newItem.image ? <img src={newItem.image} className="w-full h-full object-cover" alt="Preview" /> : <ImageIcon className="size-10 text-muted-foreground group-hover:scale-110 transition-transform" />}
             </div>
             <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Judul</Label><Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-2xl h-14 bg-muted/50 border-none px-6 text-foreground" /></div>
-            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Link Lokasi</Label><Input value={newItem.locationLink} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} className="rounded-2xl h-12 bg-muted/50 border-none px-6 text-foreground" placeholder="https://maps..." /></div>
+            <div className="space-y-2"><Label className="font-black text-[10px] uppercase text-muted-foreground">Link (WA, Maps, Social Media)</Label><Input value={newItem.locationLink} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} className="rounded-2xl h-12 bg-muted/50 border-none px-6 text-foreground" placeholder="https://..." /></div>
           </div>
           <DialogFooter className="mt-10"><Button onClick={handleAddContent} className="w-full h-14 rounded-2xl bg-accent font-black text-white uppercase">Posting</Button></DialogFooter>
         </DialogContent>
