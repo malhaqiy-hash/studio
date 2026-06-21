@@ -15,13 +15,14 @@ import {
   MessageCircle, 
   Share2, 
   Clock, 
-  ShieldCheck,
+  ShieldCheck, 
   RefreshCw,
   ArrowUpRight,
   Bookmark,
   Plus,
   Image as ImageIcon,
-  Type,
+  Camera,
+  Link2,
   X,
   Smartphone,
   Cloud
@@ -40,6 +41,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
@@ -106,17 +108,16 @@ export default function FeedPage() {
   const [savedPosts, setSavedPosts] = React.useState<string[]>([]);
   
   const [isPostModalOpen, setIsPostModalOpen] = React.useState(false);
-  const [isMediaPickerOpen, setIsMediaPickerOpen] = React.useState(false);
-  const [postType, setPostType] = React.useState<'text' | 'image'>('text');
   const [postContent, setPostContent] = React.useState("");
   const [postImage, setPostImage] = React.useState<string | null>(null);
+  const [postLink, setPostLink] = React.useState("");
+  const [isLinkInputOpen, setIsLinkInputOpen] = React.useState(false);
   const [goToProfile, setGoToProfile] = React.useState(false);
-  const [isCloudLoading, setIsCloudLoading] = React.useState(false);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const cameraInputRef = React.useRef<HTMLInputElement>(null);
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start' });
 
-  // Listen to open post modal event from DashboardLayout
   React.useEffect(() => {
     const handleOpen = () => setIsPostModalOpen(true);
     window.addEventListener('open-post-modal', handleOpen);
@@ -189,7 +190,7 @@ export default function FeedPage() {
   };
 
   const handleCreatePost = () => {
-    if (!postContent.trim() && !postImage) return;
+    if (!postContent.trim() && !postImage && !postLink) return;
 
     const newPost = {
       id: `p-${Date.now()}`,
@@ -199,6 +200,7 @@ export default function FeedPage() {
       category: "Baru",
       content: postContent,
       image: postImage || undefined,
+      externalLink: postLink || undefined,
       time: "Baru saja",
       stats: { likes: "0", comments: "0" },
       verified: activeAccount.verificationStatus === 'Verified',
@@ -208,6 +210,8 @@ export default function FeedPage() {
     setIsPostModalOpen(false);
     setPostContent("");
     setPostImage(null);
+    setPostLink("");
+    setIsLinkInputOpen(false);
     toast({ title: "Postingan terbit!" });
 
     if (goToProfile) {
@@ -221,29 +225,17 @@ export default function FeedPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPostImage(reader.result as string);
-        setIsMediaPickerOpen(false);
-        setPostType('image');
+        toast({ title: "Gambar siap" });
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleCloudSource = (source: 'drive' | 'photos') => {
-    setIsCloudLoading(true);
-    toast({ title: `Menghubungkan ${source}...` });
-    setTimeout(() => {
-      setPostImage(`https://picsum.photos/seed/post${Date.now()}/800/600`);
-      setIsCloudLoading(false);
-      setIsMediaPickerOpen(false);
-      setPostType('image');
-      toast({ title: "Gambar terimpor" });
-    }, 1200);
   };
 
   return (
     <DashboardLayout>
       <div className="flex flex-col h-[calc(100vh-160px)] max-w-2xl mx-auto relative overflow-hidden">
         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+        <input type="file" ref={cameraInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleFileChange} />
         
         <div className="flex items-center justify-center gap-1 mb-6 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2">
           {CATEGORIES.map((cat, idx) => (
@@ -339,101 +331,100 @@ export default function FeedPage() {
                     </div>
                   );
                 })}
-                <div className="py-20 text-center space-y-4 opacity-50">
-                   <div className="size-8 border-2 border-muted border-t-accent rounded-full animate-spin mx-auto" />
-                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Memuat...</p>
-                </div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Post Creation Modal */}
+      {/* Post Creation Modal - Minimalist */}
       <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
         <DialogContent className="max-w-xl rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground">
           <div className="p-8 space-y-6">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black flex items-center gap-3">
-                <div className="size-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center">
-                  <Plus className="size-6" />
-                </div>
-                Buat Postingan Baru
-              </DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-xl font-black">Buat Postingan</DialogTitle>
+                <button onClick={() => setIsPostModalOpen(false)} className="p-2 hover:bg-muted rounded-full transition-colors">
+                  <X className="size-5 text-muted-foreground" />
+                </button>
+              </div>
             </DialogHeader>
 
-            <div className="space-y-6">
-              <div className="flex gap-4 p-1 bg-muted rounded-2xl">
-                <button 
-                  onClick={() => setPostType('text')}
-                  className={cn("flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs transition-all", postType === 'text' ? "bg-card shadow-sm text-accent" : "text-muted-foreground")}
-                >
-                  <Type className="size-4" /> Threads
-                </button>
-                <button 
-                  onClick={() => setIsMediaPickerOpen(true)}
-                  className={cn("flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs transition-all", postType === 'image' ? "bg-card shadow-sm text-accent" : "text-muted-foreground")}
-                >
-                  <ImageIcon className="size-4" /> Facebook Style
-                </button>
-              </div>
-
-              <div className="space-y-4">
+            <div className="space-y-4">
+              <div className="relative rounded-[1.5rem] bg-muted/30 border border-border/50 p-2">
                 <Textarea 
-                  placeholder={postType === 'text' ? "Apa yang sedang Anda pikirkan?" : "Tulis keterangan foto..."}
+                  placeholder="Apa yang sedang Anda pikirkan?"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
-                  className="min-h-[140px] rounded-2xl border-none bg-muted/50 p-6 text-base font-medium focus-visible:ring-accent/10"
+                  className="min-h-[140px] rounded-2xl border-none bg-transparent p-4 text-base font-medium focus-visible:ring-0 resize-none"
                 />
 
-                {postImage && (
-                  <div className="relative group rounded-2xl overflow-hidden border border-border bg-muted/30">
-                    <img src={postImage} className="w-full h-auto max-h-[300px] object-contain mx-auto" alt="Preview" />
-                    <button 
-                      onClick={() => setPostImage(null)}
-                      className="absolute top-2 right-2 size-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-rose-500 transition-colors"
-                    >
-                      <X className="size-4" />
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 px-4 py-2 border-t border-border/30">
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2.5 rounded-xl hover:bg-accent/10 text-muted-foreground hover:text-accent transition-all"
+                    title="Tambah Galeri"
+                  >
+                    <ImageIcon className="size-5" />
+                  </button>
+                  <button 
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="p-2.5 rounded-xl hover:bg-accent/10 text-muted-foreground hover:text-accent transition-all"
+                    title="Ambil Foto"
+                  >
+                    <Camera className="size-5" />
+                  </button>
+                  <button 
+                    onClick={() => setIsLinkInputOpen(!isLinkInputOpen)}
+                    className={cn(
+                      "p-2.5 rounded-xl transition-all",
+                      isLinkInputOpen ? "bg-accent text-white" : "hover:bg-accent/10 text-muted-foreground hover:text-accent"
+                    )}
+                    title="Tambah Link"
+                  >
+                    <Link2 className="size-5" />
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center space-x-3 p-4 rounded-2xl bg-muted/30 border border-border/50">
+              {isLinkInputOpen && (
+                <div className="animate-in slide-in-from-top-2 duration-200">
+                  <Input 
+                    placeholder="Tempel tautan di sini..."
+                    value={postLink}
+                    onChange={(e) => setPostLink(e.target.value)}
+                    className="h-12 rounded-xl bg-muted/50 border-none px-4 text-sm font-medium"
+                  />
+                </div>
+              )}
+
+              {postImage && (
+                <div className="relative group rounded-2xl overflow-hidden border border-border bg-muted/30 animate-in zoom-in-95">
+                  <img src={postImage} className="w-full h-auto max-h-[300px] object-contain mx-auto" alt="Preview" />
+                  <button 
+                    onClick={() => setPostImage(null)}
+                    className="absolute top-2 right-2 size-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-rose-500 transition-colors"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              )}
+
+              <div className="flex items-center space-x-3 p-3 rounded-xl bg-muted/20 border border-border/20">
                 <Checkbox id="go-profile" checked={goToProfile} onCheckedChange={(val) => setGoToProfile(val as boolean)} />
-                <Label htmlFor="go-profile" className="text-xs font-bold cursor-pointer text-muted-foreground">Masuk ke halaman profil setelah posting</Label>
+                <Label htmlFor="go-profile" className="text-[11px] font-bold cursor-pointer text-muted-foreground uppercase tracking-tight">Lihat profil setelah posting</Label>
               </div>
             </div>
 
-            <DialogFooter className="pt-4">
+            <DialogFooter>
               <Button 
                 onClick={handleCreatePost}
-                disabled={!postContent.trim() && !postImage}
-                className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 text-white font-black text-base shadow-xl shadow-accent/20"
+                disabled={!postContent.trim() && !postImage && !postLink}
+                className="w-full h-12 rounded-2xl bg-accent hover:bg-accent/90 text-white font-black text-sm shadow-xl shadow-accent/20 active:scale-95 transition-all"
               >
-                Publikasikan Sekarang
+                Kirim Postingan
               </Button>
             </DialogFooter>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Media Picker for Post */}
-      <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
-        <DialogContent className="max-w-md rounded-[3rem] p-8 border-none shadow-2xl bg-card text-foreground">
-          <DialogHeader className="text-center sm:text-center">
-            <DialogTitle className="text-2xl font-black">Pilih Sumber Foto</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-8">
-            <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
-              <Smartphone className="size-6 text-accent" /> <div className="text-left font-black text-sm uppercase">Perangkat</div>
-            </Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
-              <Cloud className="size-6 text-blue-500" /> <div className="text-left font-black text-sm uppercase">Google Drive {isCloudLoading && "..."}</div>
-            </Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('photos')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
-              <ImageIcon className="size-6 text-rose-500" /> <div className="text-left font-black text-sm uppercase">Google Photos {isCloudLoading && "..."}</div>
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
