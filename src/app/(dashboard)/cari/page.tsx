@@ -157,7 +157,7 @@ export default function CariPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-xl mx-auto space-y-4 py-2">
+      <div className="max-w-xl mx-auto space-y-4 py-2 px-1 md:px-0">
         <div className="bg-card p-4 rounded-2xl border border-border shadow-sm space-y-3">
           <form onSubmit={(e) => handleSearch(e)} className="space-y-3">
             <div className="relative group w-full">
@@ -171,8 +171,8 @@ export default function CariPage() {
                 className="h-11 pl-10 pr-24 rounded-xl border-border bg-muted/20 text-[14px] font-medium focus:bg-background transition-all focus:border-black"
               />
               <div className="absolute inset-y-1.5 right-2 flex items-center gap-1">
-                <button type="button" onClick={handleVoiceSearch} className="size-8 flex items-center justify-center rounded-lg bg-card text-muted-foreground border border-border shadow-sm"><Mic className="size-3.5" /></button>
-                <button type="button" onClick={() => setIsSourcePickerOpen(true)} className="size-8 flex items-center justify-center rounded-lg bg-card text-muted-foreground border border-border shadow-sm"><Camera className="size-3.5" /></button>
+                <button type="button" onClick={handleVoiceSearch} className="size-8 flex items-center justify-center rounded-lg bg-card text-muted-foreground border border-border shadow-sm active:scale-90 transition-transform"><Mic className="size-3.5" /></button>
+                <button type="button" onClick={() => setIsSourcePickerOpen(true)} className="size-8 flex items-center justify-center rounded-lg bg-card text-muted-foreground border border-border shadow-sm active:scale-90 transition-transform"><Camera className="size-3.5" /></button>
               </div>
             </div>
 
@@ -204,7 +204,7 @@ export default function CariPage() {
                     <div className="flex items-center gap-2"><MapPin className="size-3" />{activeLocation}</div>
                     <ChevronDown className="size-3 opacity-30" />
                   </Button>
-                </DropdownMenuTrigger>
+                </PopoverTrigger>
                 <PopoverContent align="center" className="w-[240px] rounded-xl p-2 shadow-2xl bg-card border-border space-y-2">
                   <Button variant="outline" onClick={() => { setIsLocationOpen(false); setActiveLocation("Lokasi GPS"); handleSearch(undefined, query, activeCategory, "Lokasi GPS"); }} className="w-full h-10 rounded-lg border-black/10 bg-black/5 text-black font-black text-[10px] gap-2">
                     <LocateFixed className="size-4" /> {t('nearby')}
@@ -223,29 +223,29 @@ export default function CariPage() {
         {results && (
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-2"><h3 className="font-black text-foreground text-[14px] uppercase tracking-widest">{t('results')}</h3><Badge className="bg-black/5 text-black font-black px-2 py-0.5 rounded-lg text-[10px] border-none">{results.results.length}</Badge></div>
+              <div className="flex items-center gap-2"><h3 className="font-black text-foreground text-[13px] uppercase tracking-widest">{t('results')}</h3><Badge className="bg-black/5 text-black font-black px-2 py-0.5 rounded-lg text-[10px] border-none">{results.results.length}</Badge></div>
             </div>
             <div className="grid gap-3">
               {results.results.map((result, idx) => (
                 <Card key={idx} className="rounded-xl border border-border shadow-sm bg-card overflow-hidden hover:shadow-md transition-all">
                   <CardContent className="p-0 flex flex-col">
-                    <div className="p-4 flex gap-4 items-start">
-                      <div className="size-12 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0 shadow-inner">{getTypeIcon(result.type)}</div>
-                      <div className="flex-1 space-y-1">
+                    <div className="p-3 md:p-4 flex gap-4 items-start">
+                      <div className="size-11 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0 shadow-inner">{getTypeIcon(result.type)}</div>
+                      <div className="flex-1 space-y-0.5">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h4 className="text-[15px] font-bold text-slate-900">{cleanTitle(result.name)}</h4>
+                          <h4 className="text-[14px] font-bold text-slate-900 leading-none">{cleanTitle(result.name)}</h4>
                           <Badge className={cn("text-[9px] font-black uppercase tracking-widest rounded-full px-2 py-0 border-none", result.source === 'external' ? 'bg-black/10 text-black' : 'bg-black text-white')}>
                             {result.source === 'external' ? 'Eksternal' : 'Verified'}
                           </Badge>
                         </div>
-                        <p className="text-slate-500 font-medium text-[14px] leading-snug line-clamp-2">{result.description}</p>
-                        <div className="flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <p className="text-slate-500 font-medium text-[13px] leading-snug line-clamp-2">{result.description}</p>
+                        <div className="flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pt-1">
                           {result.location && <div className="flex items-center gap-1"><MapPin className="size-3" />{result.location}</div>}
                           <div className="flex items-center gap-1 text-black"><Target className="size-3" />{result.matchScore}% Synergy</div>
                         </div>
                       </div>
-                      <div className="shrink-0 pt-1">
-                        <Button className="rounded-lg h-9 bg-black text-white text-[10px] font-black uppercase tracking-widest">{t('view_profile')}</Button>
+                      <div className="shrink-0 pt-0.5">
+                        <Button className="rounded-lg h-8 bg-black text-white text-[9px] font-black uppercase tracking-widest">{t('view_profile')}</Button>
                       </div>
                     </div>
                   </CardContent>
@@ -257,10 +257,10 @@ export default function CariPage() {
 
         {!loading && !results && (
           <div className="py-12 text-center space-y-4 bg-card rounded-2xl border-2 border-dashed border-border/50">
-             <div className="size-12 rounded-xl bg-muted flex items-center justify-center mx-auto"><Search className="size-6 text-muted-foreground/20" /></div>
+             <div className="size-11 rounded-xl bg-muted flex items-center justify-center mx-auto"><Search className="size-5 text-muted-foreground/20" /></div>
              <div className="space-y-1 px-4">
-               <h3 className="text-[14px] font-black text-slate-900 uppercase tracking-widest">{t('start_search')}</h3>
-               <p className="text-[12px] text-slate-500 max-w-xs mx-auto font-medium">{t('daily_limit_msg')}</p>
+               <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">{t('start_search')}</h3>
+               <p className="text-[11px] text-slate-500 max-w-xs mx-auto font-medium">{t('daily_limit_msg')}</p>
              </div>
           </div>
         )}
@@ -270,17 +270,17 @@ export default function CariPage() {
         <DialogContent className="max-w-[280px] rounded-[1.5rem] bg-card text-foreground p-6 border-none shadow-2xl overflow-hidden outline-none [&>button]:hidden">
           <div className="space-y-6">
             <div className="space-y-1">
-              <h2 className="text-base font-black tracking-tight text-center">Cari Visual</h2>
-              <p className="text-[9px] text-center text-muted-foreground font-bold uppercase tracking-widest">Sintesis Objek AI</p>
+              <h2 className="text-base font-black tracking-tight text-center uppercase">Cari Visual</h2>
+              <p className="text-[9px] text-center text-muted-foreground font-black uppercase tracking-widest">Sintesis Objek AI</p>
             </div>
             <div className="space-y-4">
               <button onClick={() => cameraInputRef.current?.click()} className="w-full flex items-center gap-4 group text-left active:scale-95 transition-transform">
                 <div className="size-10 rounded-xl bg-muted flex items-center justify-center shadow-inner group-hover:bg-black group-hover:text-white transition-colors"><Camera className="size-5" /></div>
-                <div className="flex flex-col"><span className="font-bold text-[14px] leading-none">Ambil Foto</span><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Kamera</span></div>
+                <div className="flex flex-col"><span className="font-black text-[14px] leading-none uppercase">Kamera</span><span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Ambil Foto</span></div>
               </button>
               <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-4 group text-left active:scale-95 transition-transform">
                 <div className="size-10 rounded-xl bg-muted flex items-center justify-center shadow-inner group-hover:bg-black group-hover:text-white transition-colors"><ImageIcon className="size-5" /></div>
-                <div className="flex flex-col"><span className="font-bold text-[14px] leading-none">Galeri Media</span><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Lokal</span></div>
+                <div className="flex flex-col"><span className="font-black text-[14px] leading-none uppercase">Galeri</span><span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Media Lokal</span></div>
               </button>
             </div>
             <button onClick={() => setIsSourcePickerOpen(false)} className="w-full text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-black transition-colors">Batal</button>

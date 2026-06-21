@@ -12,11 +12,9 @@ import {
   Heart, 
   MessageCircle, 
   Share2, 
-  Clock, 
   ShieldCheck, 
   RefreshCw,
   Bookmark,
-  X,
   Plus,
   Lock,
 } from "lucide-react";
@@ -95,8 +93,15 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
+  // Stop propagation for inner carousel to prevent parent carousel from swiping
+  const handleCapture = (e: React.TouchEvent | React.MouseEvent) => {
+    if (images.length > 1) {
+      e.stopPropagation();
+    }
+  };
+
   return (
-    <div className="relative group/carousel">
+    <div className="relative group/carousel" onTouchStart={handleCapture} onMouseDown={handleCapture}>
       <div className="overflow-hidden rounded-xl border border-border bg-muted/5" ref={emblaRef}>
         <div className="flex">
           {images.map((src, idx) => (
@@ -263,16 +268,16 @@ export default function FeedPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col max-w-2xl mx-auto relative">
+      <div className="flex flex-col max-w-2xl mx-auto relative px-1 md:px-0">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
-        <div className="flex items-center justify-center gap-2 mb-3 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 overflow-x-auto no-scrollbar">
+        <div className="flex items-center justify-center gap-1.5 mb-3 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 overflow-x-auto no-scrollbar">
           {CATEGORIES.map((cat, idx) => (
             <button
               key={cat.id}
               onClick={() => scrollTo(idx)}
               className={cn(
-                "px-3 py-1.5 rounded-full text-[12px] font-black uppercase tracking-widest transition-all border shrink-0",
+                "px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border shrink-0",
                 activeCategory === cat.id 
                   ? "bg-black text-white border-black shadow-sm" 
                   : "bg-card text-muted-foreground hover:bg-muted border-border"
@@ -368,15 +373,15 @@ export default function FeedPage() {
               </div>
             </DialogHeader>
             <div className="space-y-3">
-              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[140px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-0 resize-none shadow-inner" />
+              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-0 resize-none shadow-inner" />
               <div className="flex flex-wrap gap-2">
                 {postImages.map((src, i) => (
                   <div key={i} className="relative size-16 rounded-lg overflow-hidden border">
                     <img src={src} className="w-full h-full object-cover" />
-                    <button onClick={() => setPostImages(postImages.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5"><X size={10} /></button>
+                    <button onClick={() => setPostImages(postImages.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5"><Plus className="size-2.5 rotate-45" /></button>
                   </div>
                 ))}
-                <button onClick={() => fileInputRef.current?.click()} className="size-16 rounded-lg bg-muted/50 border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-black hover:text-black transition-colors"><Plus size={24} /></button>
+                <button onClick={() => fileInputRef.current?.click()} className="size-16 rounded-lg bg-muted/50 border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-black hover:text-black transition-colors"><Plus size={20} /></button>
               </div>
             </div>
             <DialogFooter>
