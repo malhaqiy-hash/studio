@@ -473,17 +473,19 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </nav>
 
       <Dialog open={isRegModalOpen} onOpenChange={(open) => { if (activeAccount?.isNew) return; setIsRegModalOpen(open); }}>
-        <DialogContent className="w-full md:max-w-md p-6 md:p-0 border-none shadow-none md:shadow-2xl overflow-y-auto max-h-screen bg-card text-foreground rounded-none md:rounded-[2.5rem] outline-none">
-          <form onSubmit={handleRegisterSubmit} className="flex flex-col h-full space-y-8 md:space-y-0">
-            <div className="flex flex-col items-center justify-center text-center space-y-4 mb-2 pt-4 md:pt-10 md:pb-6 md:bg-muted md:border-b md:border-border">
-              <div className="size-20 rounded-full bg-accent text-white flex items-center justify-center font-black text-3xl shadow-2xl shadow-accent/20 animate-in zoom-in-50 duration-500">O</div>
-              <div className="space-y-1">
+        <DialogContent className="w-full md:max-w-md p-0 border-none shadow-none md:shadow-2xl overflow-y-auto max-h-screen h-screen md:h-auto bg-card text-foreground rounded-none md:rounded-[2.5rem] outline-none no-scrollbar">
+          <form onSubmit={handleRegisterSubmit} className="flex flex-col min-h-screen md:min-h-0">
+            {/* Header / Welcome Section */}
+            <div className="flex flex-col items-center justify-center text-center space-y-4 pt-24 pb-8 md:pt-12 md:pb-8 md:bg-muted md:border-b md:border-border px-6">
+              <div className="size-20 rounded-full bg-accent text-white flex items-center justify-center font-black text-4xl shadow-2xl shadow-accent/30 animate-in zoom-in-50 duration-700">O</div>
+              <div className="space-y-2">
                 <DialogTitle className="text-3xl font-black tracking-tight">Selamat Datang</DialogTitle>
-                <DialogDescription className="font-semibold text-muted-foreground text-base">Pilih jenis profil untuk mulai terhubung.</DialogDescription>
+                <DialogDescription className="font-bold text-muted-foreground text-lg">Pilih jenis profil untuk mulai terhubung.</DialogDescription>
               </div>
             </div>
 
-            <div className="flex-1 space-y-6 md:p-10 pb-20">
+            {/* Form Section */}
+            <div className="flex-1 px-6 space-y-8 md:p-10">
               {!pendingType ? (
                 <div className="grid gap-4 animate-in fade-in zoom-in-95 duration-300">
                   {['pribadi', 'professional', 'bisnis'].map((type) => (
@@ -499,20 +501,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   ))}
                 </div>
               ) : (
-                <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 pb-32">
+                  <div className="flex items-center justify-between">
                     <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-10 px-4 font-black text-xs uppercase tracking-widest text-muted-foreground hover:text-accent">← Kembali</Button>
-                    <Badge className="px-4 py-1.5 font-black text-[10px] uppercase border-none ml-auto bg-accent text-white shadow-lg shadow-accent/20">{pendingType}</Badge>
+                    <Badge className="px-5 py-2 font-black text-[10px] uppercase border-none bg-accent text-white shadow-lg shadow-accent/20 rounded-full">{pendingType}</Badge>
                   </div>
                   
                   <div className="flex flex-col items-center gap-3">
-                    <div onClick={() => setIsMediaPickerOpen(true)} className="size-28 rounded-full bg-muted border-4 border-dashed border-border flex items-center justify-center text-muted-foreground group cursor-pointer hover:border-accent hover:bg-accent/5 transition-all overflow-hidden shadow-inner">
+                    <div onClick={() => setIsMediaPickerOpen(true)} className="size-32 rounded-full bg-muted border-4 border-dashed border-border flex items-center justify-center text-muted-foreground group cursor-pointer hover:border-accent hover:bg-accent/5 transition-all overflow-hidden shadow-inner">
                       {regFormData.avatar ? <img src={regFormData.avatar} className="w-full h-full object-cover" alt="Profile" /> : <Camera className="size-10 group-hover:scale-110 transition-transform" />}
                     </div>
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Pilih Foto Profil (Opsional)</span>
                   </div>
 
-                  <div className="space-y-5">
+                  <div className="space-y-6">
                     <div className="space-y-2">
                       <Label className="font-black text-xs uppercase tracking-widest text-slate-500 ml-1">Nama Tampilan *</Label>
                       <Input 
@@ -520,7 +522,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         placeholder="Nama Lengkap atau Bisnis"
                         value={regFormData.name} 
                         onChange={(e) => setRegFormData({...regFormData, name: e.target.value})} 
-                        className="rounded-2xl h-14 bg-muted/30 border-border focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-bold px-6 text-lg" 
+                        className="rounded-2xl h-16 bg-muted/30 border-border focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-bold px-6 text-lg" 
                       />
                     </div>
                     <div className="space-y-2">
@@ -529,7 +531,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         placeholder="Ceritakan sedikit tentang Anda..."
                         value={regFormData.bio} 
                         onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})} 
-                        className="rounded-2xl border-border min-h-[100px] bg-muted/30 focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-medium px-6 py-4" 
+                        className="rounded-2xl border-border min-h-[120px] bg-muted/30 focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-medium px-6 py-4 text-base" 
                       />
                     </div>
                     {pendingType === 'professional' && (
@@ -539,7 +541,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                           value={regFormData.extra} 
                           onChange={(e) => setRegFormData({...regFormData, extra: e.target.value})} 
                           placeholder="e.g. UI/UX Designer, Architect" 
-                          className="rounded-2xl h-14 bg-muted/30 border-border focus:bg-white font-bold px-6" 
+                          className="rounded-2xl h-16 bg-muted/30 border-border focus:bg-white font-bold px-6 text-base" 
                         />
                       </div>
                     )}
@@ -547,7 +549,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       <div className="space-y-2">
                         <Label className="font-black text-xs uppercase tracking-widest text-slate-500 ml-1">Sektor Industri</Label>
                         <Select value={regFormData.extra} onValueChange={(v) => setRegFormData({...regFormData, extra: v})}>
-                          <SelectTrigger className="rounded-2xl h-14 bg-muted/30 border-border focus:bg-white font-bold px-6">
+                          <SelectTrigger className="rounded-2xl h-16 bg-muted/30 border-border focus:bg-white font-bold px-6 text-base">
                             <SelectValue placeholder="Pilih Sektor" />
                           </SelectTrigger>
                           <SelectContent className="rounded-2xl">
@@ -562,13 +564,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     )}
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    disabled={!regFormData.name.trim()}
-                    className="w-full h-16 rounded-[1.5rem] bg-accent hover:bg-accent/90 text-white font-black text-lg shadow-xl shadow-accent/20 active:scale-[0.98] transition-all mt-4"
-                  >
-                    Selesaikan Pendaftaran
-                  </Button>
+                  <div className="pt-4">
+                    <Button 
+                      type="submit" 
+                      disabled={!regFormData.name.trim()}
+                      className="w-full h-16 rounded-[1.5rem] bg-accent hover:bg-accent/90 text-white font-black text-xl shadow-xl shadow-accent/20 active:scale-[0.98] transition-all"
+                    >
+                      Selesaikan Pendaftaran
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
