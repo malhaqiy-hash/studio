@@ -106,7 +106,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     const touchEnd = e.changedTouches[0].clientY;
     const distance = touchEnd - touchStart;
     
-    // Swipe down gesture to close (70px threshold)
+    // Swipe down gesture to close
     if (distance > 70) {
       setIsMoreMenuOpen(false);
     }
@@ -301,7 +301,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild><button className="flex flex-col items-center gap-1 hover:text-black w-full py-2 outline-none"><Menu className="size-5 md:size-6" /><span>{t('more')}</span></button></SheetTrigger>
               <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 h-[80vh] bg-card overflow-hidden [&>button]:hidden outline-none" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-                <div className="w-full flex flex-col items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing"><div className="w-12 h-1.5 bg-muted rounded-full" /></div>
+                <div className="w-full flex flex-col items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing"><div className="sheet-handle" /></div>
                 <SheetHeader className="p-5 pt-1 pb-4 bg-muted/20 border-b border-border">
                   <div className="flex items-center justify-between"><SheetTitle className="text-base font-black flex items-center gap-2 uppercase tracking-tight"><LayoutGrid className="size-4" />OnTapp Hub</SheetTitle><Badge variant="outline" className="bg-card border-border text-muted-foreground font-black px-3 py-0.5 uppercase text-[9px]">{activeAccount?.type}</Badge></div>
                 </SheetHeader>

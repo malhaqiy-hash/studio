@@ -82,8 +82,8 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
-  // ISOLASI TOUCH EVENT: Mencegah bubling ke wrapper kategori beranda
-  const handleGestureStop = (e: React.TouchEvent | React.MouseEvent) => {
+  // ISOLASI GESTURE: Mengunci swipe horizontal pada foto jika > 1 gambar
+  const stopPropagation = (e: React.PointerEvent | React.TouchEvent | React.MouseEvent) => {
     if (images.length > 1) {
       e.stopPropagation();
     }
@@ -92,10 +92,9 @@ function PostMedia({ images }: { images?: string[] }) {
   return (
     <div 
       className="relative group/carousel touch-pan-y" 
-      onTouchStart={handleGestureStop}
-      onTouchMove={handleGestureStop}
-      onTouchEnd={handleGestureStop}
-      onMouseDown={handleGestureStop}
+      onPointerDownCapture={stopPropagation}
+      onTouchStartCapture={stopPropagation}
+      onMouseDownCapture={stopPropagation}
     >
       <div className="overflow-hidden rounded-xl border border-border bg-muted/5" ref={emblaRef}>
         <div className="flex">
@@ -116,7 +115,7 @@ function PostMedia({ images }: { images?: string[] }) {
       </div>
 
       {images.length > 1 && (
-        <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-bold z-10 text-white shadow-sm">
+        <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-bold z-10 text-white shadow-sm pointer-events-none">
           {selectedIndex + 1} / {images.length}
         </div>
       )}

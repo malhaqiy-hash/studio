@@ -69,11 +69,10 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Scroll indicator handle for sheets */
 .sheet-handle {
   width: 40px;
   height: 5px;
-  background-color: hsl(var(--muted));
+  background-color: hsl(var(--muted-foreground) / 0.3);
   border-radius: 99px;
   margin: 10px auto;
 }
