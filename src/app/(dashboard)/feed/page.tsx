@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -15,11 +16,8 @@ import {
   Clock, 
   ShieldCheck, 
   RefreshCw,
-  ArrowUpRight,
   Bookmark,
   Image as ImageIcon,
-  Camera,
-  Link2,
   X,
   Plus,
   Lock,
@@ -47,9 +45,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
 import { useAccount } from "@/context/account-context";
 import Link from "next/link";
@@ -109,13 +104,13 @@ function PostMedia({ images }: { images?: string[] }) {
 
   return (
     <div className="relative group/carousel">
-      <div className="overflow-hidden rounded-xl md:rounded-[2rem] border border-border bg-muted/10 shadow-sm" ref={emblaRef}>
+      <div className="overflow-hidden rounded-xl border border-border bg-muted/5" ref={emblaRef}>
         <div className="flex">
           {images.map((src, idx) => (
             <div key={idx} className="flex-[0_0_100%] min-w-0">
               <img 
                 src={src} 
-                className="w-full h-auto object-contain cursor-zoom-in active:scale-[0.99] transition-transform max-h-[350px] md:max-h-[700px]" 
+                className="w-full h-auto object-contain cursor-zoom-in active:scale-[0.99] transition-transform max-h-[400px] md:max-h-[600px]" 
                 alt={`Content ${idx + 1}`}
                 onClick={() => setExpandedImage(src)}
               />
@@ -125,23 +120,23 @@ function PostMedia({ images }: { images?: string[] }) {
       </div>
 
       {images.length > 1 && (
-        <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-full text-[7px] md:text-[9px] font-black z-10 shadow-sm text-white">
+        <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full text-[7px] md:text-[8px] font-black z-10 text-white shadow-sm">
           {selectedIndex + 1} / {images.length}
         </div>
       )}
 
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
+          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
           onClick={() => setExpandedImage(null)}
         >
           {zoomedImage && (
-            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4 cursor-pointer">
+            <div className="w-full h-full max-h-[95vh] flex items-center justify-center p-4 cursor-pointer">
               <img 
                 src={zoomedImage} 
                 alt="Expanded" 
                 onClick={(e) => e.stopPropagation()}
-                className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300"
+                className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200"
               />
             </div>
           )}
@@ -166,14 +161,11 @@ export default function FeedPage() {
   const [isPostModalOpen, setIsPostModalOpen] = React.useState(false);
   const [postContent, setPostContent] = React.useState("");
   const [postImages, setPostImages] = React.useState<string[]>([]);
-  const [postLink, setPostLink] = React.useState("");
   const [postVisibility, setPostVisibility] = React.useState<'public' | 'private'>('public');
-  const [isLinkInputOpen, setIsLinkInputOpen] = React.useState(false);
   
   const [zoomedAvatar, setExpandedAvatar] = React.useState<string | null>(null);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const cameraInputRef = React.useRef<HTMLInputElement>(null);
   const [emblaMainRef, emblaMainApi] = useEmblaCarousel({ loop: false, align: 'start' });
 
   React.useEffect(() => {
@@ -273,7 +265,7 @@ export default function FeedPage() {
   };
 
   const handleCreatePost = () => {
-    if (!postContent.trim() && postImages.length === 0 && !postLink) return;
+    if (!postContent.trim() && postImages.length === 0) return;
     addPost({
       title: postContent.slice(0, 30),
       description: postContent,
@@ -324,15 +316,15 @@ export default function FeedPage() {
       <div className="flex flex-col h-[calc(100vh-100px)] max-w-2xl mx-auto relative overflow-hidden">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
-        <div className="flex items-center justify-center gap-1.5 mb-3 md:mb-6 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2">
+        <div className="flex items-center justify-center gap-1.5 mb-2 md:mb-4 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2">
           {CATEGORIES.map((cat, idx) => (
             <button
               key={cat.id}
               onClick={() => scrollTo(idx)}
               className={cn(
-                "px-3 py-1 rounded-full text-[10px] md:text-xs font-bold transition-all border",
+                "px-2.5 py-1 rounded-full text-[9px] md:text-xs font-bold transition-all border",
                 activeCategory === cat.id 
-                  ? "bg-accent text-accent-foreground border-accent shadow-md scale-105" 
+                  ? "bg-accent text-accent-foreground border-accent shadow-sm" 
                   : "bg-card text-muted-foreground hover:bg-muted border-border"
               )}
             >
@@ -355,58 +347,58 @@ export default function FeedPage() {
                   const isExpanded = expandedPosts.has(post.id);
                   
                   return (
-                    <div key={`${cat.id}-${post.id}`} className="snap-start snap-always w-full flex flex-col mb-1 md:mb-2">
-                      <Card className="border border-border shadow-sm rounded-xl md:rounded-[2.5rem] overflow-hidden bg-card flex-1 flex flex-col">
-                        <div className="p-3 md:p-6 pb-1 flex items-center justify-between">
-                          <div className="flex items-center gap-2 md:gap-3">
+                    <div key={`${cat.id}-${post.id}`} className="snap-start snap-always w-full flex flex-col mb-1.5 md:mb-3">
+                      <Card className="border border-border shadow-sm rounded-xl md:rounded-[2rem] overflow-hidden bg-card flex-1 flex flex-col">
+                        <div className="p-3 md:p-5 pb-1 flex items-center justify-between">
+                          <div className="flex items-center gap-2.5 md:gap-3">
                             <Avatar 
-                              className="size-9 md:size-11 border border-border cursor-zoom-in"
+                              className="size-8 md:size-10 border border-border cursor-zoom-in"
                               onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
                             >
                               <AvatarImage src={post.avatar} className="object-cover" />
-                              <AvatarFallback className="bg-accent/10 text-accent font-black text-[9px]">{post.author[0]}</AvatarFallback>
+                              <AvatarFallback className="bg-accent/10 text-accent font-black text-[8px]">{post.author[0]}</AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
                               <div className="flex items-center gap-1">
-                                <Link href="/profile" className="hover:underline"><h3 className="font-black text-foreground text-xs md:text-sm">{post.author}</h3></Link>
+                                <Link href="/profile" className="hover:underline"><h3 className="font-black text-foreground text-[11px] md:text-sm">{post.author}</h3></Link>
                                 {post.verified && <ShieldCheck className="size-3 md:size-3.5 text-emerald-500" />}
                               </div>
-                              <div className="flex items-center gap-1 text-[8px] md:text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-70">
+                              <div className="flex items-center gap-1 text-[7px] md:text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">
                                 <Clock className="size-2.5" /> {post.time}
                               </div>
                             </div>
                           </div>
-                          <button onClick={() => handleSavePost(post)} className={cn("p-2 rounded-full transition-all", isSaved ? "text-accent" : "text-muted-foreground")}>
-                            <Bookmark className={cn("size-4 md:size-5", isSaved && "fill-accent")} />
+                          <button onClick={() => handleSavePost(post)} className={cn("p-1.5 md:p-2 rounded-full transition-all", isSaved ? "text-accent" : "text-muted-foreground")}>
+                            <Bookmark className={cn("size-3.5 md:size-5", isSaved && "fill-accent")} />
                           </button>
                         </div>
 
-                        <CardContent className="px-4 md:px-8 py-2 md:py-3 flex-1 space-y-2 md:space-y-3">
+                        <CardContent className="px-3 md:px-5 py-2 flex-1 space-y-2">
                           <div 
                             onClick={() => toggleExpand(post.id)}
-                            className={cn("cursor-pointer relative", !isExpanded && "line-clamp-4 max-h-[140px] md:max-h-[200px] overflow-hidden")}
+                            className={cn("cursor-pointer relative", !isExpanded && "line-clamp-3 max-h-[100px] md:max-h-[160px] overflow-hidden")}
                           >
-                            <p className="text-foreground/90 leading-relaxed font-medium text-xs md:text-base">
+                            <p className="text-foreground/90 leading-relaxed font-medium text-[11px] md:text-sm">
                               {trans?.show ? trans.text : post.content}
                             </p>
-                            {!isExpanded && <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none" />}
+                            {!isExpanded && post.content.length > 150 && <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-card to-transparent pointer-events-none" />}
                           </div>
                           
                           <PostMedia images={post.images} />
                         </CardContent>
 
-                        <div className="p-3 md:p-6 pt-0 mt-auto border-t border-border/50 bg-muted/5 flex items-center justify-between">
+                        <div className="p-2.5 md:p-4 pt-0 mt-auto border-t border-border/40 bg-muted/5 flex items-center justify-between">
                           <div className="flex items-center gap-4 md:gap-6 text-muted-foreground">
                             <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1 transition-all", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
                               <Heart className={cn("size-4 md:size-5", postLike.active && "fill-rose-500")} />
-                              <span className="text-[9px] md:text-xs font-black">{postLike.count}</span>
+                              <span className="text-[8px] md:text-xs font-black">{postLike.count}</span>
                             </button>
-                            <button className="flex items-center gap-1 hover:text-accent"><MessageCircle className="size-4 md:size-5" /><span className="text-[9px] md:text-xs font-black">{post.stats.comments}</span></button>
+                            <button className="flex items-center gap-1 hover:text-accent"><MessageCircle className="size-4 md:size-5" /><span className="text-[8px] md:text-xs font-black">{post.stats.comments}</span></button>
                             <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center", trans?.show ? "text-accent" : "hover:text-accent")}>
                               {trans?.loading ? <RefreshCw className="size-4 md:size-5 animate-spin" /> : <Globe className="size-4 md:size-5" />}
                             </button>
                           </div>
-                          <button onClick={() => handleShare(post)} className="p-2 text-muted-foreground hover:text-foreground"><Share2 className="size-4 md:size-5" /></button>
+                          <button onClick={() => handleShare(post)} className="p-1.5 text-muted-foreground hover:text-foreground"><Share2 className="size-4 md:size-5" /></button>
                         </div>
                       </Card>
                     </div>
@@ -418,29 +410,34 @@ export default function FeedPage() {
         </div>
       </div>
 
-      {/* Visibility Modal Restored */}
       <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
-        <DialogContent className="w-[95%] md:max-w-xl rounded-[2rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground">
-          <div className="p-6 md:p-8 space-y-4 md:space-y-6">
+        <DialogContent className="w-[95%] md:max-w-lg rounded-[1.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground">
+          <div className="p-5 md:p-6 space-y-4">
             <DialogHeader>
               <div className="flex items-center justify-between">
-                <DialogTitle className="text-base md:text-xl font-black">Buat Postingan</DialogTitle>
-                <div className="w-24 md:w-32">
+                <DialogTitle className="text-sm md:text-lg font-black">Buat Postingan</DialogTitle>
+                <div className="w-24 md:w-28">
                    <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
-                    <SelectTrigger className="h-8 md:h-10 rounded-xl bg-muted/50 border-none text-[9px] font-black uppercase px-2"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-8 rounded-lg bg-muted/50 border-none text-[8px] font-black uppercase px-2"><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
                   </Select>
                 </div>
               </div>
             </DialogHeader>
-            <div className="space-y-4">
-              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-sm md:text-base focus-visible:ring-0 resize-none" />
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="rounded-xl h-10 gap-2 font-bold text-[10px]"><ImageIcon className="size-4" /> Foto</Button>
+            <div className="space-y-3">
+              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[100px] md:min-h-[140px] rounded-xl border-none bg-muted/30 p-3 text-xs md:text-base focus-visible:ring-0 resize-none" />
+              <div className="flex flex-wrap gap-2">
+                {postImages.map((src, i) => (
+                  <div key={i} className="relative size-12 md:size-16 rounded-lg overflow-hidden border">
+                    <img src={src} className="w-full h-full object-cover" />
+                    <button onClick={() => setPostImages(postImages.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5"><X size={10} /></button>
+                  </div>
+                ))}
+                <button onClick={() => fileInputRef.current?.click()} className="size-12 md:size-16 rounded-lg bg-muted/50 border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-accent hover:text-accent transition-colors"><Plus size={20} /></button>
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-12 md:h-14 rounded-xl md:rounded-2xl bg-accent font-black text-white shadow-xl">Posting</Button>
+              <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-10 md:h-12 rounded-xl bg-accent font-black text-white shadow-lg">Posting</Button>
             </DialogFooter>
           </div>
         </DialogContent>
@@ -448,7 +445,7 @@ export default function FeedPage() {
 
       <Dialog open={!!zoomedAvatar} onOpenChange={() => setExpandedAvatar(null)}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
+          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
           onClick={() => setExpandedAvatar(null)}
         >
           {zoomedAvatar && (

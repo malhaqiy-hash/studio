@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -17,30 +18,22 @@ import {
   Store,
   Hotel,
   User,
-  MoreHorizontal,
   Camera,
   LocateFixed,
-  Map as MapIcon,
   Package,
   Headphones,
   Truck,
   Layers,
   Users,
-  Zap,
-  History,
   X,
   Image as ImageIcon,
-  Brain,
   Target,
   Briefcase,
-  Smartphone,
-  Cloud
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
 import { useLanguage } from "@/context/language-context";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useFirestore, useUser } from "@/firebase";
+import { useUser } from "@/firebase";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -85,15 +78,11 @@ export default function CariPage() {
   
   const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [isCloudLoading, setIsCloudLoading] = React.useState(false);
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
-  const [history, setHistory] = React.useState<any[]>([]);
   
   const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
   const [activeLocation, setActiveLocation] = React.useState(language === 'id' ? "Pilih Lokasi" : "Choose Location");
   const [isLocationOpen, setIsLocationOpen] = React.useState(false);
-  const [locationSearch, setLocationSearch] = React.useState("");
-  const [coords, setCoords] = React.useState<{lat?: number, lng?: number}>({});
   
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
   
@@ -102,50 +91,11 @@ export default function CariPage() {
 
   const cleanTitle = (text: string) => text.replace(/^Informasi Terkait:\s*/i, '').trim();
 
-  const getHistoryKey = React.useCallback(() => `ontapp_discovery_history_${activeAccount.id}`, [activeAccount.id]);
-
   const categories = React.useMemo(() => {
     if (activeAccount.type === 'bisnis') return [...BASE_CATEGORIES, ...PREMIUM_CATEGORIES];
     if (activeAccount.type === 'professional') return [...BASE_CATEGORIES, PREMIUM_CATEGORIES.find(c => c.id === 'opportunity')!];
     return BASE_CATEGORIES;
   }, [activeAccount.type]);
-
-  React.useEffect(() => {
-    const saved = localStorage.getItem(getHistoryKey());
-    if (saved) {
-      const parsedHistory = JSON.parse(saved).map((item: any) => ({
-        ...item,
-        name: cleanTitle(item.name)
-      }));
-      setHistory(parsedHistory);
-    } else {
-      setHistory([]);
-    }
-  }, [activeAccount.id, getHistoryKey]);
-
-  const updateVisualHistory = (newResults: any[]) => {
-    if (typeof window === 'undefined') return;
-    const storageKey = getHistoryKey();
-    const currentHistory = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    const newItems = newResults.map(r => ({
-      ...r,
-      name: cleanTitle(r.name),
-      category: activeCategory,
-      location: activeLocation,
-      id: `h-${Date.now()}-${Math.random()}`,
-      date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-    }));
-    const filteredHistory = currentHistory.filter((oldItem: any) => 
-      !newItems.some(newItem => 
-        newItem.name.toLowerCase().trim() === oldItem.name.toLowerCase().trim() && 
-        (newItem.location || '').toLowerCase().trim() === (oldItem.location || '').toLowerCase().trim() &&
-        (newItem.category || '').toLowerCase().trim() === (oldItem.category || '').toLowerCase().trim()
-      )
-    );
-    const updatedHistory = [...newItems, ...filteredHistory].slice(0, 50);
-    localStorage.setItem(storageKey, JSON.stringify(updatedHistory));
-    setHistory(updatedHistory);
-  };
 
   const handleSearch = async (
     e?: React.FormEvent, 
@@ -171,16 +121,13 @@ export default function CariPage() {
         query: finalQuery || (finalCategory ? `Cari ${finalCategory}` : "Analisis Gambar"), 
         filters: {
           category: finalCategory || undefined,
-          location: (finalLocation.includes('Lokasi') || finalLocation.includes('Location')) ? undefined : finalLocation,
-          lat: coords?.lat,
-          lng: coords?.lng
+          location: (finalLocation.includes('Lokasi') || finalLocation.includes('Location')) ? undefined : finalLocation
         } 
       });
 
       if (output) {
         output.results = output.results.map(r => ({ ...r, name: cleanTitle(r.name) }));
         setResults(output);
-        updateVisualHistory(output.results);
       }
     } catch (err: any) {
       toast({ variant: "destructive", title: "Gagal Mencari", description: "Terjadi gangguan jaringan AI." });
@@ -206,59 +153,58 @@ export default function CariPage() {
 
   const getTypeIcon = (type: string) => {
     switch(type) {
-      case 'product': return <Package className="size-4 md:size-5" />;
-      case 'service': return <Headphones className="size-4 md:size-5" />;
-      case 'supplier': return <Truck className="size-4 md:size-5" />;
-      case 'professional': return <User className="size-4 md:size-5" />;
-      case 'opportunity': return <Briefcase className="size-4 md:size-5" />;
-      case 'shop': return <Store className="size-4 md:size-5" />;
-      case 'hotel': return <Hotel className="size-4 md:size-5" />;
-      default: return <Building2 className="size-4 md:size-5" />;
+      case 'product': return <Package className="size-4 md:size-6" />;
+      case 'service': return <Headphones className="size-4 md:size-6" />;
+      case 'supplier': return <Truck className="size-4 md:size-6" />;
+      case 'professional': return <User className="size-4 md:size-6" />;
+      case 'opportunity': return <Briefcase className="size-4 md:size-6" />;
+      case 'shop': return <Store className="size-4 md:size-6" />;
+      case 'hotel': return <Hotel className="size-4 md:size-6" />;
+      default: return <Building2 className="size-4 md:size-6" />;
     }
   };
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-6 md:space-y-8 py-2">
-        <div className="bg-card p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-border shadow-sm space-y-4 md:space-y-6">
-          <form onSubmit={(e) => handleSearch(e)} className="space-y-4 md:space-y-6">
+      <div className="max-w-3xl mx-auto space-y-4 md:space-y-8 py-1 md:py-4">
+        <div className="bg-card p-4 md:p-8 rounded-[1.25rem] md:rounded-[2.5rem] border border-border shadow-sm space-y-3 md:space-y-6">
+          <form onSubmit={(e) => handleSearch(e)} className="space-y-3 md:space-y-6">
             <div className="relative group w-full">
               <div className="absolute inset-y-0 left-0 pl-4 md:pl-6 flex items-center pointer-events-none">
-                <Search className="size-5 md:size-6 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                <Search className="size-4 md:size-6 text-muted-foreground transition-colors" />
               </div>
               <Input 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('search_placeholder')}
-                className="h-14 md:h-20 pl-12 md:pl-16 pr-32 md:pr-52 rounded-[1.25rem] md:rounded-[1.5rem] border-border bg-muted/20 shadow-inner text-sm md:text-lg font-medium focus:bg-background transition-all focus:border-accent"
+                className="h-11 md:h-16 pl-10 md:pl-16 pr-28 md:pr-48 rounded-xl md:rounded-[1.5rem] border-border bg-muted/20 shadow-inner text-xs md:text-lg font-medium focus:bg-background transition-all focus:border-accent"
               />
-              <div className="absolute inset-y-2 md:inset-y-4 right-2 md:right-4 flex items-center gap-1.5 md:gap-2">
+              <div className="absolute inset-y-1.5 md:inset-y-3 right-2 md:right-3 flex items-center gap-1 md:gap-2">
                 {query && (
-                  <button type="button" onClick={() => setQuery("")} className="size-10 md:size-12 flex items-center justify-center rounded-xl md:rounded-2xl bg-card text-muted-foreground hover:text-rose-500 border border-border shadow-sm transition-all"><X className="size-4 md:size-5" /></button>
+                  <button type="button" onClick={() => setQuery("")} className="size-8 md:size-10 flex items-center justify-center rounded-lg md:rounded-xl bg-card text-muted-foreground border border-border shadow-sm transition-all"><X className="size-3.5 md:size-5" /></button>
                 )}
-                <button type="button" onClick={handleVoiceSearch} className="size-10 md:size-12 flex items-center justify-center rounded-xl md:rounded-2xl bg-card text-muted-foreground hover:text-accent border border-border shadow-sm transition-all"><Mic className="size-4 md:size-5" /></button>
-                <button type="button" onClick={() => setIsSourcePickerOpen(true)} className="size-10 md:size-12 flex items-center justify-center rounded-xl md:rounded-2xl bg-card text-muted-foreground hover:text-accent border border-border shadow-sm transition-all"><Camera className="size-4 md:size-5" /></button>
+                <button type="button" onClick={handleVoiceSearch} className="size-8 md:size-10 flex items-center justify-center rounded-lg md:rounded-xl bg-card text-muted-foreground border border-border shadow-sm transition-all"><Mic className="size-3.5 md:size-5" /></button>
+                <button type="button" onClick={() => setIsSourcePickerOpen(true)} className="size-8 md:size-10 flex items-center justify-center rounded-lg md:rounded-xl bg-card text-muted-foreground border border-border shadow-sm transition-all"><Camera className="size-3.5 md:size-5" /></button>
               </div>
-              <input type="file" ref={fileInputRef} onChange={(e) => { if(e.target.files?.[0]) handleSearch(undefined, "Analisis Gambar"); }} className="hidden" accept="image/*" />
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full h-12 md:h-14 rounded-xl md:rounded-2xl bg-accent text-accent-foreground font-black text-xs md:text-sm shadow-xl transition-all flex gap-3">
-              {loading ? <RefreshCw className="size-4 md:size-5 animate-spin" /> : <><Search className="size-4 md:size-5" /> {t('search_now')}</>}
+            <Button type="submit" disabled={loading} className="w-full h-11 md:h-14 rounded-xl md:rounded-2xl bg-accent text-white font-black text-[11px] md:text-sm shadow-lg flex gap-2">
+              {loading ? <RefreshCw className="size-4 animate-spin" /> : <><Search className="size-4" /> {t('search_now')}</>}
             </Button>
 
-            <div className="grid grid-cols-2 gap-2 md:gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full h-11 md:h-14 justify-between rounded-xl md:rounded-2xl border-border bg-card text-foreground font-black hover:bg-muted/50 px-4 md:px-6 text-[9px] md:text-[11px] uppercase tracking-widest">
-                    <div className="flex items-center gap-2 md:gap-3"><Filter className="size-3.5 md:size-4 text-accent" />{activeCategory || "Kategori"}</div>
-                    <ChevronDown className="size-3.5 md:size-4 opacity-30" />
+                  <Button variant="outline" className="w-full h-10 md:h-12 justify-between rounded-lg md:rounded-xl border-border bg-card text-foreground font-bold hover:bg-muted/50 px-3 md:px-5 text-[9px] md:text-[11px] uppercase tracking-widest">
+                    <div className="flex items-center gap-2"><Filter className="size-3 text-accent" />{activeCategory || "Kategori"}</div>
+                    <ChevronDown className="size-3 opacity-30" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-[260px] md:w-[300px] rounded-[1.25rem] md:rounded-[1.5rem] p-2 shadow-2xl bg-card border-border">
-                  <DropdownMenuItem onClick={() => setActiveCategory(null)} className="font-black text-muted-foreground p-3 rounded-xl text-[9px] md:text-[10px] uppercase">Semua Kategori</DropdownMenuItem>
+                <DropdownMenuContent align="start" className="w-[240px] md:w-[280px] rounded-xl p-1 shadow-2xl bg-card border-border">
+                  <DropdownMenuItem onClick={() => setActiveCategory(null)} className="font-black text-muted-foreground p-2 rounded-lg text-[8px] md:text-[10px] uppercase">Semua Kategori</DropdownMenuItem>
                   {categories.map((cat) => (
-                    <DropdownMenuItem key={cat.id} onClick={() => setActiveCategory(cat.label)} className="flex items-center gap-3 md:gap-4 py-2.5 md:py-3 rounded-xl font-bold cursor-pointer hover:bg-muted text-xs md:text-sm text-foreground">
-                      <div className="size-8 md:size-9 bg-muted rounded-lg md:rounded-xl flex items-center justify-center text-muted-foreground shrink-0"><cat.icon className="size-3.5 md:size-4" /></div>{cat.label}
+                    <DropdownMenuItem key={cat.id} onClick={() => setActiveCategory(cat.label)} className="flex items-center gap-3 py-2 rounded-lg font-bold cursor-pointer hover:bg-muted text-xs">
+                      <div className="size-7 bg-muted rounded-md flex items-center justify-center text-muted-foreground shrink-0"><cat.icon className="size-3.5" /></div>{cat.label}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -266,18 +212,18 @@ export default function CariPage() {
 
               <Popover open={isLocationOpen} onOpenChange={setIsLocationOpen}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full h-11 md:h-14 justify-between rounded-xl md:rounded-2xl border-border bg-card text-foreground font-black hover:bg-muted/50 px-4 md:px-6 text-[9px] md:text-[11px] uppercase tracking-widest">
-                    <div className="flex items-center gap-2 md:gap-3"><MapPin className="size-3.5 md:size-4 text-rose-500" />{activeLocation}</div>
-                    <ChevronDown className="size-3.5 md:size-4 opacity-30" />
+                  <Button variant="outline" className="w-full h-10 md:h-12 justify-between rounded-lg md:rounded-xl border-border bg-card text-foreground font-bold hover:bg-muted/50 px-3 md:px-5 text-[9px] md:text-[11px] uppercase tracking-widest">
+                    <div className="flex items-center gap-2"><MapPin className="size-3 text-rose-500" />{activeLocation}</div>
+                    <ChevronDown className="size-3 opacity-30" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="center" className="w-[260px] md:w-[300px] rounded-[1.25rem] md:rounded-[1.5rem] p-3 md:p-4 shadow-2xl bg-card border-border space-y-3 md:space-y-4">
-                  <Button variant="outline" onClick={() => { setIsLocationOpen(false); setActiveLocation("Lokasi GPS"); handleSearch(undefined, query, activeCategory, "Lokasi GPS"); }} className="w-full h-10 md:h-12 rounded-lg md:rounded-xl border-accent/20 bg-accent/5 text-accent font-black text-[10px] md:text-xs gap-3">
-                    <LocateFixed className="size-4 md:size-5" /> {t('nearby')}
+                <PopoverContent align="center" className="w-[240px] md:w-[280px] rounded-xl p-2 shadow-2xl bg-card border-border space-y-2">
+                  <Button variant="outline" onClick={() => { setIsLocationOpen(false); setActiveLocation("Lokasi GPS"); handleSearch(undefined, query, activeCategory, "Lokasi GPS"); }} className="w-full h-10 rounded-lg border-accent/20 bg-accent/5 text-accent font-black text-[10px] gap-2">
+                    <LocateFixed className="size-4" /> {t('nearby')}
                   </Button>
-                  <div className="space-y-1 max-h-[180px] md:max-h-[220px] overflow-y-auto no-scrollbar">
+                  <div className="space-y-1 max-h-[160px] overflow-y-auto no-scrollbar">
                     {POPULAR_LOCATIONS.map((loc) => (
-                      <button key={loc} type="button" onClick={() => { setActiveLocation(loc); setIsLocationOpen(false); }} className="w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black uppercase hover:bg-muted transition-colors">{loc}</button>
+                      <button key={loc} type="button" onClick={() => { setActiveLocation(loc); setIsLocationOpen(false); }} className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-muted transition-colors">{loc}</button>
                     ))}
                   </div>
                 </PopoverContent>
@@ -287,33 +233,33 @@ export default function CariPage() {
         </div>
 
         {results && (
-          <div className="space-y-4 md:space-y-6">
+          <div className="space-y-3 md:space-y-6">
             <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-2 md:gap-3"><h3 className="font-black text-foreground text-base md:text-lg tracking-tight">{t('results')}</h3><Badge className="bg-accent/10 text-accent font-black px-2 py-0.5 md:px-3 md:py-1 rounded-lg text-[10px] md:text-xs border-none shadow-sm">{results.results.length}</Badge></div>
+              <div className="flex items-center gap-2"><h3 className="font-black text-foreground text-sm md:text-lg tracking-tight">{t('results')}</h3><Badge className="bg-accent/10 text-accent font-black px-2 py-0.5 rounded-lg text-[9px] border-none shadow-sm">{results.results.length}</Badge></div>
             </div>
-            <div className="grid gap-4 md:gap-5">
+            <div className="grid gap-3 md:gap-5">
               {results.results.map((result, idx) => (
-                <Card key={idx} className="rounded-[1.5rem] md:rounded-[2rem] border border-border shadow-sm bg-card overflow-hidden hover:shadow-xl transition-all duration-300">
+                <Card key={idx} className="rounded-xl md:rounded-[2rem] border border-border shadow-sm bg-card overflow-hidden hover:shadow-lg transition-all duration-300">
                   <CardContent className="p-0 flex flex-col md:flex-row">
                     <div className={cn("w-full md:w-1.5 h-1 md:h-auto shrink-0 transition-colors", result.source.includes('ontapp') ? 'bg-accent' : 'bg-amber-400')} />
-                    <div className="p-5 md:p-8 flex-1 flex flex-col md:flex-row gap-5 md:gap-8 items-start">
-                      <div className="size-12 md:size-16 rounded-xl md:rounded-[1.25rem] bg-muted text-foreground flex items-center justify-center shrink-0 shadow-inner">{getTypeIcon(result.type)}</div>
-                      <div className="flex-1 space-y-2 md:space-y-3">
-                        <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                          <h4 className="text-lg md:text-xl font-black text-slate-900">{cleanTitle(result.name)}</h4>
-                          <Badge className={cn("text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-full px-2 py-0.5 md:px-3 md:py-1 border-none", result.source === 'external' ? 'bg-amber-500/10 text-amber-500' : 'bg-accent/10 text-accent')}>
+                    <div className="p-4 md:p-8 flex-1 flex flex-col md:flex-row gap-4 md:gap-8 items-start">
+                      <div className="size-10 md:size-16 rounded-lg md:rounded-[1.25rem] bg-muted text-foreground flex items-center justify-center shrink-0 shadow-inner">{getTypeIcon(result.type)}</div>
+                      <div className="flex-1 space-y-1 md:space-y-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="text-sm md:text-xl font-black text-slate-900">{cleanTitle(result.name)}</h4>
+                          <Badge className={cn("text-[7px] md:text-[9px] font-black uppercase tracking-widest rounded-full px-1.5 py-0 md:px-3 md:py-1 border-none", result.source === 'external' ? 'bg-amber-500/10 text-amber-500' : 'bg-accent/10 text-accent')}>
                             {result.source === 'external' ? 'Eksternal' : 'Verified'}
                           </Badge>
                         </div>
-                        <p className="text-slate-500 font-medium text-xs md:text-sm leading-relaxed">{result.description}</p>
-                        <div className="flex items-center gap-4 md:gap-6 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                          {result.location && <div className="flex items-center gap-1.5"><MapPin className="size-3 md:size-3.5 text-rose-400" />{result.location}</div>}
-                          <div className="flex items-center gap-1.5 text-accent"><Target className="size-3 md:size-3.5" />{result.matchScore}% Synergy</div>
+                        <p className="text-slate-500 font-medium text-[10px] md:text-sm leading-tight md:leading-relaxed line-clamp-2 md:line-clamp-none">{result.description}</p>
+                        <div className="flex items-center gap-3 md:gap-6 text-[7px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          {result.location && <div className="flex items-center gap-1"><MapPin className="size-2.5 md:size-3.5 text-rose-400" />{result.location}</div>}
+                          <div className="flex items-center gap-1 text-accent"><Target className="size-2.5 md:size-3.5" />{result.matchScore}% Synergy</div>
                         </div>
                       </div>
-                      <div className="w-full md:w-36 shrink-0 flex flex-col gap-2 md:gap-3 pt-2 md:pt-0">
-                        <Button variant="outline" size="sm" onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(result.name + ' ' + (result.location || ''))}`, '_blank')} className="w-full rounded-lg md:rounded-xl border-accent/20 text-accent text-[9px] md:text-[10px] font-black uppercase h-9 md:h-10 tracking-widest">Maps</Button>
-                        <Button className="w-full rounded-lg md:rounded-xl h-10 md:h-11 bg-accent hover:bg-accent/90 text-accent-foreground text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-lg shadow-accent/10">{t('view_profile')}</Button>
+                      <div className="w-full md:w-32 shrink-0 flex gap-2 md:flex-col pt-1 md:pt-0">
+                        <Button variant="outline" size="sm" onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(result.name + ' ' + (result.location || ''))}`, '_blank')} className="flex-1 md:w-full rounded-lg border-accent/20 text-accent text-[8px] md:text-[10px] font-black uppercase h-8 md:h-10 tracking-widest">Maps</Button>
+                        <Button className="flex-1 md:w-full rounded-lg h-8 md:h-11 bg-accent text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest shadow-lg shadow-accent/10">{t('view_profile')}</Button>
                       </div>
                     </div>
                   </CardContent>
@@ -323,35 +269,35 @@ export default function CariPage() {
           </div>
         )}
 
-        {!loading && !results && history.length === 0 && (
-          <div className="py-16 md:py-24 text-center space-y-6 md:space-y-8 bg-card rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-border/50">
-             <div className="size-16 md:size-24 rounded-[1.5rem] md:rounded-[2rem] bg-muted flex items-center justify-center mx-auto shadow-inner"><Search className="size-8 md:size-12 text-muted-foreground/20" /></div>
-             <div className="space-y-1.5 md:space-y-2 px-6">
-               <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">{t('start_search')}</h3>
-               <p className="text-xs md:text-sm text-slate-500 max-w-sm mx-auto font-medium">{t('daily_limit_msg')}</p>
+        {!loading && !results && (
+          <div className="py-12 md:py-24 text-center space-y-4 md:space-y-8 bg-card rounded-2xl md:rounded-[3rem] border-2 border-dashed border-border/50">
+             <div className="size-12 md:size-24 rounded-xl md:rounded-[2rem] bg-muted flex items-center justify-center mx-auto shadow-inner"><Search className="size-6 md:size-12 text-muted-foreground/20" /></div>
+             <div className="space-y-1 px-4">
+               <h3 className="text-sm md:text-2xl font-black text-slate-900 tracking-tight">{t('start_search')}</h3>
+               <p className="text-[9px] md:text-sm text-slate-500 max-w-xs mx-auto font-medium">{t('daily_limit_msg')}</p>
              </div>
           </div>
         )}
       </div>
 
       <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
-        <DialogContent className="max-w-[320px] rounded-[2rem] md:rounded-[3rem] bg-card text-foreground p-8 md:p-10 border-none shadow-2xl overflow-hidden outline-none animate-in zoom-in-95 duration-200">
-          <div className="space-y-8 md:space-y-10">
-            <div className="space-y-1.5 md:space-y-2">
-              <h2 className="text-xl md:text-2xl font-black tracking-tight text-center">Cari Visual</h2>
-              <p className="text-[9px] md:text-[10px] text-center text-muted-foreground font-medium uppercase tracking-widest">Sintesis Objek AI</p>
+        <DialogContent className="max-w-[280px] rounded-[1.5rem] bg-card text-foreground p-6 border-none shadow-2xl overflow-hidden outline-none">
+          <div className="space-y-6">
+            <div className="space-y-1">
+              <h2 className="text-base font-black tracking-tight text-center">Cari Visual</h2>
+              <p className="text-[8px] text-center text-muted-foreground font-medium uppercase tracking-widest">Sintesis Objek AI</p>
             </div>
-            <div className="space-y-5 md:space-y-6">
-              <button onClick={() => cameraInputRef.current?.click()} className="w-full flex items-center gap-5 md:gap-6 group text-left active:scale-95 transition-transform">
-                <div className="size-11 md:size-14 rounded-xl md:rounded-2xl bg-muted flex items-center justify-center shadow-inner group-hover:bg-accent/10 group-hover:text-accent transition-colors"><Camera className="size-5 md:size-7" /></div>
-                <div className="flex flex-col"><span className="font-black text-sm md:text-[16px] leading-none">Ambil Foto</span><span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Kamera</span></div>
+            <div className="space-y-4">
+              <button onClick={() => cameraInputRef.current?.click()} className="w-full flex items-center gap-4 group text-left active:scale-95 transition-transform">
+                <div className="size-10 rounded-xl bg-muted flex items-center justify-center shadow-inner group-hover:bg-accent/10 group-hover:text-accent transition-colors"><Camera className="size-5" /></div>
+                <div className="flex flex-col"><span className="font-black text-sm leading-none">Ambil Foto</span><span className="text-[7px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Kamera</span></div>
               </button>
-              <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-5 md:gap-6 group text-left active:scale-95 transition-transform">
-                <div className="size-11 md:size-14 rounded-xl md:rounded-2xl bg-muted flex items-center justify-center shadow-inner group-hover:bg-accent/10 group-hover:text-accent transition-colors"><ImageIcon className="size-5 md:size-7" /></div>
-                <div className="flex flex-col"><span className="font-black text-sm md:text-[16px] leading-none">Galeri Media</span><span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Lokal</span></div>
+              <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-4 group text-left active:scale-95 transition-transform">
+                <div className="size-10 rounded-xl bg-muted flex items-center justify-center shadow-inner group-hover:bg-accent/10 group-hover:text-accent transition-colors"><ImageIcon className="size-5" /></div>
+                <div className="flex flex-col"><span className="font-black text-sm leading-none">Galeri Media</span><span className="text-[7px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Lokal</span></div>
               </button>
             </div>
-            <button onClick={() => setIsSourcePickerOpen(false)} className="w-full text-center text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-rose-500 transition-colors">Batal</button>
+            <button onClick={() => setIsSourcePickerOpen(false)} className="w-full text-center text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-rose-500 transition-colors">Batal</button>
           </div>
         </DialogContent>
       </Dialog>
