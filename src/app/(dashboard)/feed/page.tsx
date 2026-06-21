@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -201,11 +202,6 @@ export default function FeedPage() {
         });
       } catch (error: any) {
         if (error.name === 'AbortError') return;
-        if (error.name === 'NotAllowedError') {
-          navigator.clipboard.writeText(shareUrl);
-          toast({ title: "Tautan Berhasil Disalin", description: "Izin berbagi ditolak, tautan disalin ke papan klip." });
-          return;
-        }
         navigator.clipboard.writeText(shareUrl);
         toast({ title: "Tautan Berhasil Disalin" });
       }
@@ -340,7 +336,6 @@ export default function FeedPage() {
         visibility: item.visibility
       }));
     
-    // Only show user's private posts to themselves, and all public posts
     const all = [...userPosts, ...posts].filter(p => p.visibility !== 'private' || p.author === activeAccount.name);
     return all.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
   }, [activeAccount.items, activeAccount.name, activeAccount.avatar, activeAccount.extra, activeAccount.verificationStatus, posts]);
@@ -622,7 +617,6 @@ export default function FeedPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Lightbox for Image Expansion - Tap Outside to Close */}
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
         <DialogContent className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden">
           {zoomedImage && (

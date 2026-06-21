@@ -93,7 +93,7 @@ import { useAccount, AccountType } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
-export function DashboardLayout({ children }: { children: React.Node }) {
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading } = useUser();
@@ -103,7 +103,6 @@ export function DashboardLayout({ children }: { children: React.Node }) {
   const { activeAccount, availableAccounts, switchAccount, registerAccount, hasInitialized } = useAccount();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
   
-  // Swipe to close logic for More Menu
   const [touchStart, setTouchStart] = React.useState<number | null>(null);
   
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -115,11 +114,9 @@ export function DashboardLayout({ children }: { children: React.Node }) {
     const touchEnd = e.changedTouches[0].clientY;
     const distance = touchEnd - touchStart;
     
-    // Detect scroll position to ensure we only close when at the top
     const scrollContainer = e.currentTarget.querySelector('.overflow-y-auto');
     const isAtTop = scrollContainer ? scrollContainer.scrollTop <= 0 : true;
 
-    // Threshold: swipe down more than 100px and must be at top of content
     if (distance > 100 && isAtTop) {
       setIsMoreMenuOpen(false);
     }
@@ -397,8 +394,6 @@ export function DashboardLayout({ children }: { children: React.Node }) {
           </Link>
 
           <div className="relative w-full h-full flex flex-col items-center justify-center">
-            {/* Tumpukan Tombol di Atas Menu Lainnya */}
-            {/* Icon Tambah (+) - Hanya tampil di Halaman Feed */}
             {pathname === '/feed' && (
               <button 
                 onClick={() => window.dispatchEvent(new CustomEvent('open-post-modal'))}
@@ -408,7 +403,6 @@ export function DashboardLayout({ children }: { children: React.Node }) {
               </button>
             )}
 
-            {/* AI Assistant Button (Chat Bubble) */}
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))}
               className="absolute bottom-20 w-12 h-12 bg-accent rounded-full flex items-center justify-center text-white shadow-xl hover:bg-accent/80 transition active:scale-95 z-[95] ring-4 ring-background"
@@ -426,7 +420,6 @@ export function DashboardLayout({ children }: { children: React.Node }) {
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
               >
-                {/* Visual Handle for swipe to close */}
                 <div className="w-full flex justify-center pt-4 pb-2">
                   <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
                 </div>
