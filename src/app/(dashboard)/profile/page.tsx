@@ -64,6 +64,7 @@ export default function ProfilePage() {
   const [isContentModalOpen, setIsContentModalOpen] = React.useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = React.useState(false);
   const [isShareSheetOpen, setIsShareSheetOpen] = React.useState(false);
+  const [shareUrl, setShareUrl] = React.useState("");
 
   const [mediaTarget, setMediaTarget] = React.useState<'avatar' | 'cover' | 'post'>('avatar');
   const [isCloudLoading, setIsCloudLoading] = React.useState(false);
@@ -139,23 +140,33 @@ export default function ProfilePage() {
     toast({ title: 'Konten dipublikasikan' });
   };
 
+  const handleShareProfile = () => {
+    setShareUrl(`https://ontapp.network/profile/${activeAccount.id}`);
+    setIsShareSheetOpen(true);
+  };
+
+  const handleSharePost = (id: string) => {
+    setShareUrl(`https://ontapp.network/post/${id}`);
+    setIsShareSheetOpen(true);
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-xl mx-auto space-y-4 md:space-y-6 pb-20">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
 
         <section className="relative group">
-          <div className="aspect-[9/16] w-full bg-muted border-b border-border relative overflow-hidden rounded-xl md:rounded-2xl">
+          <div className="aspect-[3/9] w-full bg-muted border-b border-border relative overflow-hidden rounded-xl md:rounded-2xl">
             <img src={activeAccount.cover || `https://picsum.photos/seed/${activeAccount.id}_cover/1200/400`} alt="Cover" className="w-full h-full object-cover opacity-60" />
             <div className="absolute top-4 right-4 flex flex-col gap-2">
               <Button onClick={() => openMediaPicker('cover')} variant="outline" className="bg-background/80 backdrop-blur text-foreground rounded-lg border-none font-bold text-xs uppercase tracking-widest gap-1.5 shadow-sm h-8 px-3"><Camera className="size-3.5 text-accent" /> Edit Sampul</Button>
-              <Button onClick={() => setIsShareSheetOpen(true)} variant="outline" className="bg-background/80 backdrop-blur text-foreground rounded-lg border-none font-bold text-xs uppercase tracking-widest gap-1.5 shadow-sm h-8 px-3"><Share2 className="size-3.5 text-accent" /> Bagi Profil</Button>
+              <Button onClick={handleShareProfile} variant="outline" className="bg-background/80 backdrop-blur text-foreground rounded-lg border-none font-bold text-xs uppercase tracking-widest gap-1.5 shadow-sm h-8 px-3"><Share2 className="size-3.5 text-accent" /> Bagi Profil</Button>
             </div>
           </div>
 
           <div className="px-4 md:px-6 -mt-12 md:-mt-14 flex flex-col items-start gap-3">
             <div className="relative group/avatar">
-              <Avatar className="size-24 md:size-32 border-[4px] border-background dark:border-card shadow-lg rounded-2xl cursor-zoom-in" onClick={() => setExpandedAvatar(activeAccount.avatar)}>
+              <Avatar className="size-24 md:size-32 border-[4px] border-background dark:border-card shadow-lg rounded-2xl cursor-zoom-in">
                 <AvatarImage src={activeAccount.avatar} className="object-cover" />
                 <AvatarFallback className="bg-accent/10 text-accent font-bold text-xl">{activeAccount.name[0]}</AvatarFallback>
               </Avatar>
@@ -208,7 +219,10 @@ export default function ProfilePage() {
                       {item.images.length > 1 && <div className="absolute bottom-1 right-1 bg-black/60 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">{item.images.length} Foto</div>}
                     </div>
                   )}
-                  <button onClick={() => removePost(item.id)} className="absolute top-1 right-1 size-8 bg-rose-500 text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg"><Trash2 className="size-4" /></button>
+                  <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button onClick={() => handleSharePost(item.id)} className="size-8 bg-black/60 text-white rounded-lg flex items-center justify-center shadow-lg"><Share2 className="size-4" /></button>
+                    <button onClick={() => removePost(item.id)} className="size-8 bg-rose-500 text-white rounded-lg flex items-center justify-center shadow-lg"><Trash2 className="size-4" /></button>
+                  </div>
                   <CardContent className="p-3 space-y-1">
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold text-slate-900 text-[14px] line-clamp-1">{item.title}</h4>
@@ -290,7 +304,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <ShareSheet isOpen={isShareSheetOpen} onOpenChange={setIsShareSheetOpen} postUrl={`https://ontapp.network/profile/${activeAccount.id}`} />
+      <ShareSheet isOpen={isShareSheetOpen} onOpenChange={setIsShareSheetOpen} postUrl={shareUrl} />
     </DashboardLayout>
   );
 }
