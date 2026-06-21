@@ -12,17 +12,23 @@ import {
   Globe,
   Trash2,
   Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
 
 export default function UserDashboardPage() {
   const { t, language } = useLanguage();
   const { activeAccount, removePost } = useAccount();
-  const [zoomedImage, setExpandedImage] = React.useState<string | null>(null);
+  const [zoomData, setZoomData] = React.useState<{ images: string[], initial: number } | null>(null);
 
   const stats = [
     { label: t('active_opps'), val: "24", icon: Briefcase, color: "text-teal-600", bg: "bg-teal-50" },
@@ -67,7 +73,10 @@ export default function UserDashboardPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
             {(activeAccount.items || []).map((item) => (
               <Card key={item.id} className="rounded-xl md:rounded-[2rem] border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col group">
-                <div className="aspect-video relative overflow-hidden bg-slate-50 cursor-zoom-in" onClick={() => item.images?.[0] && setExpandedImage(item.images[0])}>
+                <div 
+                  className="aspect-video relative overflow-hidden bg-slate-50 cursor-pointer" 
+                  onClick={() => item.images && item.images.length > 0 && setZoomData({ images: item.images, initial: 0 })}
+                >
                   {item.images?.[0] ? (
                     <img src={item.images[0]} className="w-full h-full object-cover" alt="Content" />
                   ) : (
@@ -90,18 +99,34 @@ export default function UserDashboardPage() {
         </div>
       </div>
 
-      <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
+      <Dialog open={!!zoomData} onOpenChange={() => setZoomData(null)}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
-          onClick={() => setExpandedImage(null)}
+          className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
+          onClick={() => setZoomData(null)}
         >
-          {zoomedImage && (
-            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4">
-              <img 
-                src={zoomedImage} 
-                alt="Zoomed" 
-                className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200 shadow-none border-none" 
-              />
+          {zoomData && (
+            <div className="w-full h-full relative flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+               <div className="absolute inset-0 z-0" onClick={() => setZoomData(null)} />
+               <div className="relative z-10 w-full max-w-4xl px-4 flex items-center justify-center">
+                  <Swiper
+                    modules={[Navigation]}
+                    navigation={zoomData.images.length > 1}
+                    initialSlide={zoomData.initial}
+                    className="w-full h-full flex items-center justify-center"
+                    slidesPerView={1}
+                  >
+                    {zoomData.images.map((src, idx) => (
+                      <SwiperSlide key={idx} className="flex items-center justify-center">
+                        <img 
+                          src={src} 
+                          alt="Zoomed" 
+                          className="max-w-full max-h-[90vh] object-contain rounded-lg animate-in zoom-in-95 duration-200 shadow-none border-none" 
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+               </div>
             </div>
           )}
         </DialogContent>

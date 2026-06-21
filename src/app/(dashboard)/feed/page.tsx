@@ -15,6 +15,8 @@ import {
   Plus,
   Lock,
   MapPin,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -37,7 +39,10 @@ import { Input } from "@/components/ui/input";
 import { useAccount } from "@/context/account-context";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from 'swiper/react';
+import type { Swiper as SwiperType } from 'swiper';
+import { Navigation } from 'swiper/modules';
 import 'swiper/css';
+import 'swiper/css/navigation';
 
 const CATEGORIES = [
   { id: 'saran', label: 'Saran' },
@@ -76,7 +81,8 @@ const INITIAL_POSTS = [
 
 function PostMedia({ images }: { images?: string[] }) {
   const [activeIdx, setActiveIdx] = React.useState(0);
-  const [zoomedImage, setExpandedImage] = React.useState<string | null>(null);
+  const [isZoomOpen, setIsZoomOpen] = React.useState(false);
+  const swiperRef = React.useRef<SwiperType | null>(null);
 
   if (!images || images.length === 0) return null;
 
@@ -88,50 +94,78 @@ function PostMedia({ images }: { images?: string[] }) {
 
   return (
     <div 
-      className="relative group/carousel w-full overflow-hidden rounded-xl border border-border bg-muted/5 touch-pan-x select-none cursor-grab active:cursor-grabbing"
+      className="relative group/carousel w-full overflow-hidden rounded-xl border border-border bg-muted/5 touch-pan-x select-none"
       onPointerDown={handleIsolate}
       onTouchStart={handleIsolate}
-      onTouchMove={handleIsolate}
     >
       <Swiper
+        modules={[Navigation]}
         nested={true}
-        touchStartPreventDefault={false}
-        className="w-full"
+        onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => setActiveIdx(swiper.activeIndex)}
+        className="w-full"
         slidesPerView={1}
       >
         {images.map((src, idx) => (
           <SwiperSlide key={idx}>
             <img 
               src={src} 
-              className="w-full h-auto object-contain max-h-[500px] md:max-h-[700px]" 
+              className="w-full h-auto object-contain max-h-[500px] cursor-pointer" 
               alt={`Content ${idx + 1}`}
-              onClick={() => setExpandedImage(src)}
+              onClick={() => setIsZoomOpen(true)}
             />
           </SwiperSlide>
         ))}
       </Swiper>
 
       {images.length > 1 && (
-        <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black z-10 text-white shadow-sm pointer-events-none tracking-widest">
-          {activeIdx + 1} / {images.length}
-        </div>
+        <>
+          <button 
+            onClick={(e) => { e.stopPropagation(); swiperRef.current?.slidePrev(); }}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
+          >
+            <ChevronLeft className="size-5" />
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); swiperRef.current?.slideNext(); }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
+          >
+            <ChevronRight className="size-5" />
+          </button>
+          <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black z-10 text-white shadow-sm pointer-events-none tracking-widest">
+            {activeIdx + 1} / {images.length}
+          </div>
+        </>
       )}
 
-      <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
+      <Dialog open={isZoomOpen} onOpenChange={setIsZoomOpen}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
-          onClick={() => setExpandedImage(null)}
+          className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
+          onClick={() => setIsZoomOpen(false)}
         >
-          {zoomedImage && (
-            <div className="w-full h-full max-h-[95vh] flex items-center justify-center p-4">
-              <img 
-                src={zoomedImage} 
-                alt="Expanded" 
-                className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200 shadow-none border-none"
-              />
-            </div>
-          )}
+          <div className="w-full h-full relative flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+             {/* Backdrop click area for closing */}
+             <div className="absolute inset-0 z-0" onClick={() => setIsZoomOpen(false)} />
+             
+             <div className="relative z-10 w-full max-w-4xl px-4 flex items-center justify-center">
+                <Swiper
+                  initialSlide={activeIdx}
+                  className="w-full h-full flex items-center justify-center"
+                  slidesPerView={1}
+                >
+                  {images.map((src, idx) => (
+                    <SwiperSlide key={idx} className="flex items-center justify-center">
+                      <img 
+                        src={src} 
+                        alt="Zoomed" 
+                        className="max-w-full max-h-[90vh] object-contain rounded-lg animate-in zoom-in-95 duration-200" 
+                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image itself
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+             </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
@@ -295,7 +329,7 @@ export default function FeedPage() {
                   <div className="p-3 md:p-4 pb-2 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Avatar 
-                        className="size-10 border border-border cursor-zoom-in"
+                        className="size-10 border border-border cursor-pointer"
                         onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
                       >
                         <AvatarImage src={post.avatar} className="object-cover" />

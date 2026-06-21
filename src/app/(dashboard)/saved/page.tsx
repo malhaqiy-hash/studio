@@ -9,56 +9,94 @@ import {
   Trash2, 
   Clock, 
   ShieldCheck, 
-  Heart, 
-  MessageCircle, 
-  ArrowUpRight,
-  Brain,
-  Share2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/language-context";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Link from "next/link";
-import useEmblaCarousel from 'embla-carousel-react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import type { Swiper as SwiperType } from 'swiper';
+import { Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
 
 function PostMedia({ images }: { images?: string[] }) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
-  const [zoomedImage, setExpandedImage] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (!emblaApi) return;
-    emblaApi.on('select', () => setSelectedIndex(emblaApi.selectedScrollSnap()));
-  }, [emblaApi]);
+  const [activeIdx, setActiveIdx] = React.useState(0);
+  const [isZoomOpen, setIsZoomOpen] = React.useState(false);
+  const swiperRef = React.useRef<SwiperType | null>(null);
 
   if (!images || images.length === 0) return null;
 
   return (
-    <div className="relative group/carousel">
-      <div className="overflow-hidden rounded-xl md:rounded-3xl border border-slate-100 bg-slate-50 shadow-sm" ref={emblaRef}>
-        <div className="flex">
-          {images.map((src, idx) => (
-            <div key={idx} className="flex-[0_0_100%] min-w-0">
-              <img src={src} className="w-full h-auto object-contain cursor-zoom-in max-h-[350px] md:max-h-[600px]" alt={`Saved ${idx + 1}`} onClick={() => setExpandedImage(src)} />
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className="relative group/carousel w-full overflow-hidden rounded-xl md:rounded-3xl border border-slate-100 bg-slate-50">
+      <Swiper
+        modules={[Navigation]}
+        onSwiper={(swiper) => (swiperRef.current = swiper)}
+        onSlideChange={(swiper) => setActiveIdx(swiper.activeIndex)}
+        className="w-full"
+        slidesPerView={1}
+      >
+        {images.map((src, idx) => (
+          <SwiperSlide key={idx}>
+            <img 
+              src={src} 
+              className="w-full h-auto object-contain cursor-pointer max-h-[350px] md:max-h-[600px]" 
+              alt={`Saved ${idx + 1}`} 
+              onClick={() => setIsZoomOpen(true)} 
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+
       {images.length > 1 && (
-        <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-black/60 text-white px-2 py-0.5 rounded-full text-[8px] md:text-[10px] font-black z-10 shadow-sm">
-          {selectedIndex + 1} / {images.length}
-        </div>
+        <>
+          <button 
+            onClick={() => swiperRef.current?.slidePrev()}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
+          >
+            <ChevronLeft className="size-5" />
+          </button>
+          <button 
+            onClick={() => swiperRef.current?.slideNext()}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
+          >
+            <ChevronRight className="size-5" />
+          </button>
+          <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-black/60 text-white px-2 py-0.5 rounded-full text-[8px] md:text-[10px] font-black z-10 shadow-sm">
+            {activeIdx + 1} / {images.length}
+          </div>
+        </>
       )}
-      <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
+
+      <Dialog open={isZoomOpen} onOpenChange={setIsZoomOpen}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
-          onClick={() => setExpandedImage(null)}
+          className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden"
+          onClick={() => setIsZoomOpen(false)}
         >
-          {zoomedImage && <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4"><img src={zoomedImage} alt="Expanded" className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300 shadow-none border-none" /></div>}
+          <div className="w-full h-full relative flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+             <div className="absolute inset-0 z-0" onClick={() => setIsZoomOpen(false)} />
+             <div className="relative z-10 w-full max-w-4xl px-4 flex items-center justify-center">
+                <Swiper
+                  initialSlide={activeIdx}
+                  className="w-full h-full flex items-center justify-center"
+                  slidesPerView={1}
+                >
+                  {images.map((src, idx) => (
+                    <SwiperSlide key={idx} className="flex items-center justify-center">
+                      <img 
+                        src={src} 
+                        alt="Zoomed" 
+                        className="max-w-full max-h-[90vh] object-contain rounded-lg animate-in zoom-in-95 duration-200" 
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+             </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
@@ -104,7 +142,7 @@ export default function SavedPostsPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 md:gap-4">
                       <Avatar 
-                        className="size-10 md:size-12 border border-slate-100 cursor-zoom-in"
+                        className="size-10 md:size-12 border border-slate-100 cursor-pointer"
                         onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
                       >
                         <AvatarImage src={post.avatar} />
@@ -133,7 +171,7 @@ export default function SavedPostsPage() {
           <div className="py-16 md:py-24 text-center space-y-6 bg-slate-50/50 rounded-[2rem] md:rounded-[4rem] border-2 border-dashed border-slate-200">
              <div className="size-16 md:size-24 rounded-full bg-white flex items-center justify-center mx-auto shadow-xl"><Bookmark className="size-8 md:size-10 text-slate-200" /></div>
              <h3 className="text-xl md:text-2xl font-black text-slate-900">{language === 'id' ? 'Belum Ada Koleksi' : 'Empty Collection'}</h3>
-             <Button onClick={() => router.push('/feed')} className="rounded-xl md:rounded-2xl bg-slate-900 hover:bg-black px-8 md:px-10 h-11 md:h-14 font-black shadow-lg text-white text-xs md:text-sm">Explore Feed</Button>
+             <Button onClick={() => (window.location.href = '/feed')} className="rounded-xl md:rounded-2xl bg-slate-900 hover:bg-black px-8 md:px-10 h-11 md:h-14 font-black shadow-lg text-white text-xs md:text-sm">Explore Feed</Button>
           </div>
         )}
       </div>
