@@ -60,7 +60,6 @@ export function AIAssistant() {
     const newX = e.clientX - dragStart.x;
     const newY = e.clientY - dragStart.y;
     
-    // Batasan layar agar tidak keluar
     const boundedX = Math.min(Math.max(10, newX), window.innerWidth - 70);
     const boundedY = Math.min(Math.max(10, newY), window.innerHeight - 70);
     
@@ -126,7 +125,6 @@ export function AIAssistant() {
 
   return (
     <>
-      {/* Floating Draggable Bubble Icon */}
       <div 
         style={{ 
           left: `${position.x}px`, 
@@ -147,7 +145,6 @@ export function AIAssistant() {
         </div>
       </div>
 
-      {/* Pop-up Chat Window */}
       {isOpen && (
         <div 
           className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/20 backdrop-blur-[2px] animate-in fade-in duration-200"
@@ -184,8 +181,8 @@ export function AIAssistant() {
                   {messages.map((msg, i) => (
                     <div key={i} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}>
                       <Avatar className="size-9 border border-border shadow-sm shrink-0 rounded-xl">
-                        <AvatarFallback className={cn("text-[10px] font-black uppercase tracking-tighter rounded-xl", msg.role === 'user' ? "bg-slate-100 text-slate-900" : "bg-black text-white")}>
-                          {msg.role === 'user' ? 'ME' : 'AI'}
+                        <AvatarFallback className={cn("flex items-center justify-center rounded-xl", msg.role === 'user' ? "bg-slate-100 text-slate-900" : "bg-black text-white")}>
+                          <User className="size-4" />
                         </AvatarFallback>
                       </Avatar>
                       <div className={cn("flex flex-col gap-2", msg.role === 'user' ? "items-end" : "items-start", "max-w-[80%]")}>
@@ -212,7 +209,7 @@ export function AIAssistant() {
                   {loading && (
                     <div className="flex gap-3">
                       <Avatar className="size-9 border bg-black/5 rounded-xl">
-                        <AvatarFallback className="text-black rounded-xl"><Sparkles className="size-5" /></AvatarFallback>
+                        <AvatarFallback className="text-black rounded-xl"><User className="size-4" /></AvatarFallback>
                       </Avatar>
                       <div className="bg-white border border-border/50 p-5 rounded-[1.25rem] rounded-tl-none flex gap-2 items-center shadow-sm">
                         <div className="size-1.5 bg-black/30 rounded-full animate-bounce [animation-delay:-0.3s]" />
