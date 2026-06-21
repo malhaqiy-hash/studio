@@ -16,7 +16,6 @@ import {
   ShieldCheck, 
   RefreshCw,
   Bookmark,
-  Image as ImageIcon,
   X,
   Plus,
   Lock,
@@ -42,7 +41,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useRouter } from "next/navigation";
 import { useAccount } from "@/context/account-context";
 import Link from "next/link";
 
@@ -105,7 +103,7 @@ function PostMedia({ images }: { images?: string[] }) {
             <div key={idx} className="flex-[0_0_100%] min-w-0">
               <img 
                 src={src} 
-                className="w-full h-auto object-contain cursor-zoom-in active:scale-[0.99] transition-transform max-h-[400px] md:max-h-[600px]" 
+                className="w-full h-auto object-contain cursor-zoom-in active:scale-[0.99] transition-transform max-h-[500px] md:max-h-[700px]" 
                 alt={`Content ${idx + 1}`}
                 onClick={() => setExpandedImage(src)}
               />
@@ -115,7 +113,7 @@ function PostMedia({ images }: { images?: string[] }) {
       </div>
 
       {images.length > 1 && (
-        <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full text-[7px] md:text-[8px] font-black z-10 text-white shadow-sm">
+        <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-bold z-10 text-white shadow-sm">
           {selectedIndex + 1} / {images.length}
         </div>
       )}
@@ -148,8 +146,6 @@ export default function FeedPage() {
   
   const [activeCategory, setActiveCategory] = React.useState('for-you');
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean }>>({});
-  const [savedPosts, setSavedPosts] = React.useState<string[]>([]);
-  const [expandedPosts, setExpandedPosts] = React.useState<Set<string>>(new Set());
   const [likes, setLikes] = React.useState<Record<string, { count: number, active: boolean }>>({});
 
   const [isPostModalOpen, setIsPostModalOpen] = React.useState(false);
@@ -267,18 +263,18 @@ export default function FeedPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-[calc(100vh-100px)] max-w-2xl mx-auto relative overflow-hidden">
+      <div className="flex flex-col max-w-xl mx-auto relative">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
-        <div className="flex items-center justify-center gap-1.5 mb-2 md:mb-4 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2">
+        <div className="flex items-center justify-center gap-2 mb-4 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2">
           {CATEGORIES.map((cat, idx) => (
             <button
               key={cat.id}
               onClick={() => scrollTo(idx)}
               className={cn(
-                "px-2.5 py-1 rounded-full text-[9px] md:text-xs font-bold transition-all border",
+                "px-3 py-1.5 rounded-full text-xs font-bold transition-all border",
                 activeCategory === cat.id 
-                  ? "bg-accent text-accent-foreground border-accent shadow-sm" 
+                  ? "bg-accent text-white border-accent shadow-sm" 
                   : "bg-card text-muted-foreground hover:bg-muted border-border"
               )}
             >
@@ -292,62 +288,63 @@ export default function FeedPage() {
             {CATEGORIES.map((cat) => (
               <div 
                 key={cat.id} 
-                className="flex-[0_0_100%] min-w-0 h-full overflow-y-auto snap-y snap-mandatory no-scrollbar space-y-3 pb-20 px-0.5"
+                className="flex-[0_0_100%] min-w-0 space-y-3 pb-20"
               >
                 {combinedPosts.map((post) => {
                   const trans = translations[post.id];
                   const postLike = likes[post.id] || { count: 0, active: false };
                   
                   return (
-                    <div key={`${cat.id}-${post.id}`} className="snap-start snap-always w-full flex flex-col mb-1.5 md:mb-3">
-                      <Card className="border border-border shadow-sm rounded-xl md:rounded-[2rem] overflow-hidden bg-card flex-1 flex flex-col">
-                        <div className="p-3 md:p-5 pb-1 flex items-center justify-between">
-                          <div className="flex items-center gap-2.5 md:gap-3">
-                            <Avatar 
-                              className="size-8 md:size-10 border border-border cursor-zoom-in"
-                              onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
-                            >
-                              <AvatarImage src={post.avatar} className="object-cover" />
-                              <AvatarFallback className="bg-accent/10 text-accent font-black text-[8px]">{post.author[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-1">
-                                <Link href="/profile" className="hover:underline"><h3 className="font-black text-foreground text-[11px] md:text-sm">{post.author}</h3></Link>
-                                {post.verified && <ShieldCheck className="size-3 md:size-3.5 text-emerald-500" />}
-                              </div>
-                              <div className="flex items-center gap-1 text-[7px] md:text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">
-                                <Clock className="size-2.5" /> {post.time}
-                              </div>
+                    <Card key={`${cat.id}-${post.id}`} className="border border-border shadow-sm rounded-xl overflow-hidden bg-card">
+                      <div className="p-3 md:p-4 pb-2 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar 
+                            className="size-10 border border-border cursor-zoom-in"
+                            onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
+                          >
+                            <AvatarImage src={post.avatar} className="object-cover" />
+                            <AvatarFallback className="bg-accent/10 text-accent font-bold text-xs">{post.author[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-1">
+                              <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[15px]">{post.author}</h3></Link>
+                              {post.verified && <ShieldCheck className="size-4 text-emerald-500" />}
+                            </div>
+                            <div className="flex items-center gap-1 text-[12px] text-muted-foreground font-medium">
+                              {post.time}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                             {post.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
-                             <button className="p-1.5 md:p-2 rounded-full text-muted-foreground hover:bg-muted"><Bookmark className="size-3.5 md:size-5" /></button>
-                          </div>
                         </div>
-
-                        <CardContent className="px-3 md:px-5 py-2 flex-1 space-y-2">
-                          <p className="text-foreground/90 leading-relaxed font-medium text-[11px] md:text-sm">
-                            {trans?.show ? trans.text : post.content}
-                          </p>
-                          <PostMedia images={post.images} />
-                        </CardContent>
-
-                        <div className="p-2.5 md:p-4 pt-0 mt-auto border-t border-border/40 bg-muted/5 flex items-center justify-between">
-                          <div className="flex items-center gap-4 md:gap-6 text-muted-foreground">
-                            <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1 transition-all", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
-                              <Heart className={cn("size-4 md:size-5", postLike.active && "fill-rose-500")} />
-                              <span className="text-[8px] md:text-xs font-black">{postLike.count}</span>
-                            </button>
-                            <button className="flex items-center gap-1 hover:text-accent"><MessageCircle className="size-4 md:size-5" /><span className="text-[8px] md:text-xs font-black">{post.stats.comments}</span></button>
-                            <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center", trans?.show ? "text-accent" : "hover:text-accent")}>
-                              {trans?.loading ? <RefreshCw className="size-4 md:size-5 animate-spin" /> : <Globe className="size-4 md:size-5" />}
-                            </button>
-                          </div>
-                          <button className="p-1.5 text-muted-foreground hover:text-foreground"><Share2 className="size-4 md:size-5" /></button>
+                        <div className="flex items-center gap-1">
+                           {post.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
+                           <button className="p-2 rounded-full text-muted-foreground hover:bg-muted"><Bookmark className="size-5" /></button>
                         </div>
-                      </Card>
-                    </div>
+                      </div>
+
+                      <CardContent className="px-3 md:px-4 py-2 space-y-3">
+                        <p className="text-slate-800 leading-normal font-normal text-[14px] md:text-[15px] whitespace-pre-wrap">
+                          {trans?.show ? trans.text : post.content}
+                        </p>
+                        <PostMedia images={post.images} />
+                      </CardContent>
+
+                      <div className="p-2 md:p-3 pt-1 border-t border-border/40 bg-muted/5 flex items-center justify-between">
+                        <div className="flex items-center gap-6 text-muted-foreground">
+                          <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1.5 py-1 transition-all", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
+                            <Heart className={cn("size-5", postLike.active && "fill-rose-500")} />
+                            <span className="text-xs font-bold">{postLike.count > 0 ? postLike.count : 'Suka'}</span>
+                          </button>
+                          <button className="flex items-center gap-1.5 py-1 hover:text-accent">
+                            <MessageCircle className="size-5" />
+                            <span className="text-xs font-bold">{post.stats.comments > 0 ? post.stats.comments : 'Komentar'}</span>
+                          </button>
+                          <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center py-1", trans?.show ? "text-accent" : "hover:text-accent")}>
+                            {trans?.loading ? <RefreshCw className="size-5 animate-spin" /> : <Globe className="size-5" />}
+                          </button>
+                        </div>
+                        <button className="p-2 text-muted-foreground hover:text-foreground"><Share2 className="size-5" /></button>
+                      </div>
+                    </Card>
                   );
                 })}
               </div>
@@ -357,33 +354,33 @@ export default function FeedPage() {
       </div>
 
       <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
-        <DialogContent className="w-[95%] md:max-w-lg rounded-[1.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none">
+        <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none">
           <div className="p-5 md:p-6 space-y-4">
             <DialogHeader>
               <div className="flex items-center justify-between">
-                <DialogTitle className="text-sm md:text-lg font-black">Buat Postingan</DialogTitle>
-                <div className="w-24 md:w-32">
+                <DialogTitle className="text-lg font-bold">Buat Postingan</DialogTitle>
+                <div className="w-32">
                    <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
-                    <SelectTrigger className="h-8 md:h-10 rounded-lg bg-muted/50 border-none text-[10px] font-black uppercase px-3 shadow-inner"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-9 rounded-lg bg-muted/50 border-none text-xs font-bold px-3 shadow-inner"><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
                   </Select>
                 </div>
               </div>
             </DialogHeader>
             <div className="space-y-3">
-              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[100px] md:min-h-[140px] rounded-xl border-none bg-muted/30 p-3 text-xs md:text-base focus-visible:ring-0 resize-none shadow-inner" />
+              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[140px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-0 resize-none shadow-inner" />
               <div className="flex flex-wrap gap-2">
                 {postImages.map((src, i) => (
-                  <div key={i} className="relative size-12 md:size-16 rounded-lg overflow-hidden border">
+                  <div key={i} className="relative size-16 rounded-lg overflow-hidden border">
                     <img src={src} className="w-full h-full object-cover" />
                     <button onClick={() => setPostImages(postImages.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5"><X size={10} /></button>
                   </div>
                 ))}
-                <button onClick={() => fileInputRef.current?.click()} className="size-12 md:size-16 rounded-lg bg-muted/50 border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-accent hover:text-accent transition-colors"><Plus size={20} /></button>
+                <button onClick={() => fileInputRef.current?.click()} className="size-16 rounded-lg bg-muted/50 border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-accent hover:text-accent transition-colors"><Plus size={24} /></button>
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-10 md:h-12 rounded-xl bg-accent font-black text-white shadow-lg active:scale-95 transition-all">Posting</Button>
+              <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-12 rounded-xl bg-accent font-bold text-white shadow-lg active:scale-95 transition-all">Posting</Button>
             </DialogFooter>
           </div>
         </DialogContent>

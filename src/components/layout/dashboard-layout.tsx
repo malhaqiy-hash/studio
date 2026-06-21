@@ -240,86 +240,86 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-body relative">
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       
-      <header className="sticky top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-11 flex items-center justify-between shadow-sm">
+      <header className="sticky top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-12 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <Link href="/feed" className="flex items-center gap-1.5 active:scale-95 transition-transform">
-            <div className="size-6 md:size-7 rounded-lg bg-accent flex items-center justify-center text-white font-black text-base shadow-lg shadow-accent/20">O</div>
-            <span className="font-headline font-black text-sm tracking-tight text-foreground">OnTapp</span>
+            <div className="size-7 rounded-lg bg-accent flex items-center justify-center text-white font-black text-lg shadow-lg shadow-accent/20">O</div>
+            <span className="font-headline font-black text-base tracking-tight text-foreground">OnTapp</span>
           </Link>
-          <Badge variant="outline" className="text-[7px] font-black uppercase tracking-tighter px-1.5 py-0 border-accent/30 text-accent bg-accent/5">{activeAccount?.type}</Badge>
+          <Badge variant="outline" className="text-[10px] font-bold uppercase px-2 py-0 border-accent/30 text-accent bg-accent/5">{activeAccount?.type}</Badge>
         </div>
         
-        <div className="flex items-center gap-2 md:gap-3">
-          <Link href="/messages"><Button variant="ghost" size="icon" className="size-8 text-foreground/70 hover:bg-accent/10 hover:text-accent rounded-full transition"><MessageSquare className="size-4" /></Button></Link>
-          <Link href="/notifications"><Button variant="ghost" size="icon" className="relative size-8 text-foreground/70 hover:bg-accent/10 hover:text-accent rounded-full transition"><Bell className="size-4" /><span className="absolute top-2 right-2 size-1.5 bg-rose-500 rounded-full ring-2 ring-background"></span></Button></Link>
+        <div className="flex items-center gap-3">
+          <Link href="/messages"><Button variant="ghost" size="icon" className="size-9 text-foreground/70 hover:bg-accent/10 hover:text-accent rounded-full transition"><MessageSquare className="size-5" /></Button></Link>
+          <Link href="/notifications"><Button variant="ghost" size="icon" className="relative size-9 text-foreground/70 hover:bg-accent/10 hover:text-accent rounded-full transition"><Bell className="size-5" /><span className="absolute top-2.5 right-2.5 size-2 bg-rose-500 rounded-full ring-2 ring-background"></span></Button></Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center rounded-full border-2 border-accent/20 hover:border-accent transition p-0.5 outline-none">
-                <Avatar className="h-6 w-6 md:h-7 md:w-7 rounded-full"><AvatarImage src={activeAccount.avatar} className="object-cover" /><AvatarFallback className="bg-accent text-white font-bold text-[8px]">{activeAccount.name[0]}</AvatarFallback></Avatar>
+                <Avatar className="h-7 w-7 md:h-8 md:w-8 rounded-full"><AvatarImage src={activeAccount.avatar} className="object-cover" /><AvatarFallback className="bg-accent text-white font-bold text-[10px]">{activeAccount.name[0]}</AvatarFallback></Avatar>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-60 rounded-2xl p-2 shadow-2xl border-border bg-card outline-none">
-              <DropdownMenuLabel className="px-3 py-1.5 text-[8px] font-black text-muted-foreground uppercase tracking-widest border-b mb-1">Akun Saya</DropdownMenuLabel>
+              <DropdownMenuLabel className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b mb-1">Akun Saya</DropdownMenuLabel>
               <DropdownMenuGroup>
-                <Link href="/profile"><DropdownMenuItem className="flex items-center gap-3 px-3 py-2 rounded-xl font-bold cursor-pointer hover:bg-accent/5"><div className="size-7 rounded-lg bg-accent/10 flex items-center justify-center text-accent"><User className="size-3.5" /></div><span className="text-xs">{t('view_profile')}</span></DropdownMenuItem></Link>
+                <Link href="/profile"><DropdownMenuItem className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold cursor-pointer hover:bg-accent/5"><div className="size-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent"><User className="size-4" /></div><span className="text-sm">{t('view_profile')}</span></DropdownMenuItem></Link>
                 <DropdownMenuSeparator className="my-1" />
                 {availableAccounts.filter(a => !a.isNew).map((acc) => (
-                  <DropdownMenuItem key={acc.id} onSelect={() => handleSwitchAccount(acc.id)} className={cn("flex items-center justify-between px-3 py-2 rounded-xl font-bold cursor-pointer mb-0.5", activeAccount.id === acc.id ? "bg-accent/10 text-accent" : "focus:bg-accent/5")}>
-                    <div className="flex items-center gap-3"><Avatar className="size-7 rounded-lg"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="text-[7px] bg-muted">{acc.name[0]}</AvatarFallback></Avatar><div className="flex flex-col"><span className="text-xs leading-none mb-0.5">{acc.name}</span><span className="text-[7px] uppercase opacity-60 font-black">{acc.type}</span></div></div>
-                    {activeAccount.id === acc.id && <Check className="size-3" />}
+                  <DropdownMenuItem key={acc.id} onSelect={() => handleSwitchAccount(acc.id)} className={cn("flex items-center justify-between px-3 py-2.5 rounded-xl font-bold cursor-pointer mb-0.5", activeAccount.id === acc.id ? "bg-accent/10 text-accent" : "focus:bg-accent/5")}>
+                    <div className="flex items-center gap-3"><Avatar className="size-8 rounded-lg"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="text-xs bg-muted">{acc.name[0]}</AvatarFallback></Avatar><div className="flex flex-col"><span className="text-sm leading-none mb-0.5">{acc.name}</span><span className="text-[10px] uppercase opacity-60 font-bold">{acc.type}</span></div></div>
+                    {activeAccount.id === acc.id && <Check className="size-3.5" />}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
               <DropdownMenuSeparator className="my-1" />
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="gap-3 px-3 py-2 rounded-xl font-bold text-xs"><UserPlus className="size-3.5" /> Tambah Profil</DropdownMenuSubTrigger>
-                <DropdownMenuPortal><DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card"><DropdownMenuItem onSelect={() => handleOpenRegistration('pribadi')} className="font-bold text-xs px-3 py-2 rounded-lg cursor-pointer">Pribadi</DropdownMenuItem><DropdownMenuItem onSelect={() => handleOpenRegistration('professional')} className="font-bold text-xs px-3 py-2 rounded-lg cursor-pointer">Professional</DropdownMenuItem><DropdownMenuItem onSelect={() => handleOpenRegistration('bisnis')} className="font-bold text-xs px-3 py-2 rounded-lg cursor-pointer">Bisnis</DropdownMenuItem></DropdownMenuSubContent></DropdownMenuPortal>
+                <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-sm"><UserPlus className="size-4" /> Tambah Profil</DropdownMenuSubTrigger>
+                <DropdownMenuPortal><DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card"><DropdownMenuItem onSelect={() => handleOpenRegistration('pribadi')} className="font-bold text-sm px-3 py-2 rounded-lg cursor-pointer">Pribadi</DropdownMenuItem><DropdownMenuItem onSelect={() => handleOpenRegistration('professional')} className="font-bold text-sm px-3 py-2 rounded-lg cursor-pointer">Professional</DropdownMenuItem><DropdownMenuItem onSelect={() => handleOpenRegistration('bisnis')} className="font-bold text-sm px-3 py-2 rounded-lg cursor-pointer">Bisnis</DropdownMenuItem></DropdownMenuSubContent></DropdownMenuPortal>
               </DropdownMenuSub>
               <DropdownMenuSeparator className="my-1" />
-              <DropdownMenuItem onClick={handleLogout} className="text-rose-500 font-bold text-xs px-3 py-2 rounded-xl focus:bg-rose-500/10 cursor-pointer flex gap-2.5"><LogOut className="size-3.5" /> Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="text-rose-500 font-bold text-sm px-3 py-2.5 rounded-xl focus:bg-rose-500/10 cursor-pointer flex gap-3"><LogOut className="size-4" /> Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
 
-      <main className="flex-1 pb-20 pt-1 px-4 w-full overflow-x-hidden relative max-w-4xl mx-auto">
+      <main className="flex-1 pb-20 pt-2 px-3 w-full overflow-x-hidden relative max-w-4xl mx-auto">
         {children}
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t bg-background/95 backdrop-blur-md pb-safe shadow-lg">
-        <div className="grid grid-cols-3 h-14 items-center justify-items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground relative">
-          <Link href="/feed" className={cn("flex flex-col items-center gap-1 w-full py-2 transition-colors", pathname === "/feed" ? "text-accent" : "hover:text-accent")}>
-            <Rss className="size-5" /><span>{t('feed')}</span>
+        <div className="grid grid-cols-3 h-16 items-center justify-items-center text-[11px] font-bold uppercase tracking-widest text-muted-foreground relative">
+          <Link href="/feed" className={cn("flex flex-col items-center gap-1.5 w-full py-2 transition-colors", pathname === "/feed" ? "text-accent" : "hover:text-accent")}>
+            <Rss className="size-6" /><span>{t('feed')}</span>
           </Link>
-          <Link href="/cari" className={cn("flex flex-col items-center gap-1 w-full py-2 transition-colors", pathname === "/cari" ? "text-accent" : "hover:text-accent")}>
-            <Search className="size-5" /><span>{t('search')}</span>
+          <Link href="/cari" className={cn("flex flex-col items-center gap-1.5 w-full py-2 transition-colors", pathname === "/cari" ? "text-accent" : "hover:text-accent")}>
+            <Search className="size-6" /><span>{t('search')}</span>
           </Link>
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             {pathname === '/feed' && (
-              <button onClick={() => window.dispatchEvent(new CustomEvent('open-post-modal'))} className="absolute bottom-20 size-9 bg-accent rounded-full flex items-center justify-center text-white shadow-xl hover:bg-accent/80 transition active:scale-95 z-[96] ring-4 ring-background"><Plus className="size-5" /></button>
+              <button onClick={() => window.dispatchEvent(new CustomEvent('open-post-modal'))} className="absolute bottom-24 size-10 bg-accent rounded-full flex items-center justify-center text-white shadow-xl hover:bg-accent/80 transition active:scale-95 z-[96] ring-4 ring-background"><Plus className="size-6" /></button>
             )}
-            <button onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))} className="absolute bottom-10 size-9 bg-slate-900 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-slate-800 transition active:scale-95 z-[95] ring-4 ring-background"><div className="size-5 flex items-center justify-center bg-accent rounded-full text-[10px] font-black">AI</div></button>
+            <button onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))} className="absolute bottom-12 size-10 bg-slate-900 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-slate-800 transition active:scale-95 z-[95] ring-4 ring-background"><div className="size-6 flex items-center justify-center bg-accent rounded-full text-[11px] font-black">AI</div></button>
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
-              <SheetTrigger asChild><button className="flex flex-col items-center gap-1 hover:text-accent w-full py-2 outline-none"><Menu className="size-5" /><span>{t('more')}</span></button></SheetTrigger>
-              <SheetContent side="bottom" className="rounded-t-[2rem] border-none p-0 h-[75vh] bg-card overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-                <div className="w-full flex flex-col items-center justify-center pt-3 pb-1"><div className="w-12 h-1.5 bg-muted rounded-full" /><p className="text-[7px] font-black text-muted-foreground uppercase mt-2 opacity-50">Swipe Down to Close</p></div>
-                <SheetHeader className="p-5 pt-2 pb-4 bg-muted/20 border-b border-border">
-                  <div className="flex items-center justify-between"><SheetTitle className="text-base font-black flex items-center gap-2"><LayoutGrid className="size-4 text-accent" />OnTapp Hub</SheetTitle><Badge variant="outline" className="bg-card border-border text-muted-foreground font-black px-2 py-0.5 uppercase text-[7px]">{activeAccount?.type} Mode</Badge></div>
+              <SheetTrigger asChild><button className="flex flex-col items-center gap-1.5 hover:text-accent w-full py-2 outline-none"><Menu className="size-6" /><span>{t('more')}</span></button></SheetTrigger>
+              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 h-[80vh] bg-card overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                <div className="w-full flex flex-col items-center justify-center pt-4 pb-2"><div className="w-12 h-1.5 bg-muted rounded-full" /><p className="text-[9px] font-bold text-muted-foreground uppercase mt-2 opacity-50">Swipe Down to Close</p></div>
+                <SheetHeader className="p-6 pt-2 pb-4 bg-muted/20 border-b border-border">
+                  <div className="flex items-center justify-between"><SheetTitle className="text-lg font-bold flex items-center gap-2"><LayoutGrid className="size-5 text-accent" />OnTapp Hub</SheetTitle><Badge variant="outline" className="bg-card border-border text-muted-foreground font-bold px-3 py-1 uppercase text-[10px]">{activeAccount?.type} Mode</Badge></div>
                 </SheetHeader>
-                <div className="overflow-y-auto h-full pb-28 no-scrollbar">
+                <div className="overflow-y-auto h-full pb-32 no-scrollbar">
                   <div className="flex flex-col divide-y divide-border/40">
                     {drawerItems.map((item) => (
-                      <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-6 py-3.5 transition-colors gap-4 group", pathname === item.href ? "bg-accent/5 text-accent" : "bg-transparent hover:bg-accent/10")}>
-                        <div className={cn("size-8 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", pathname === item.href ? "bg-accent text-white" : "bg-muted text-muted-foreground")}><item.icon className="size-4" /></div>
-                        <span className="text-[11px] font-black uppercase tracking-widest">{item.label}</span>
-                        <ChevronRight className="ml-auto size-3 text-muted-foreground/30" />
+                      <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-6 py-4 transition-colors gap-5 group", pathname === item.href ? "bg-accent/5 text-accent" : "bg-transparent hover:bg-accent/10")}>
+                        <div className={cn("size-10 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", pathname === item.href ? "bg-accent text-white" : "bg-muted text-muted-foreground")}><item.icon className="size-5" /></div>
+                        <span className="text-[13px] font-bold uppercase tracking-widest">{item.label}</span>
+                        <ChevronRight className="ml-auto size-4 text-muted-foreground/30" />
                       </Link>
                     ))}
-                    <div className="px-6 py-5 bg-muted/10"><div className="flex items-center gap-4 mb-3"><div className="size-8 rounded-xl bg-muted text-muted-foreground flex items-center justify-center"><Languages className="size-4" /></div><span className="text-[11px] font-black uppercase tracking-widest">Bahasa</span></div><LanguagePicker /></div>
-                    <button onClick={handleLogout} className="flex items-center px-6 py-5 bg-rose-500/5 hover:bg-rose-500/10 transition-colors gap-4 group text-rose-500 w-full text-left">
-                      <div className="size-8 rounded-xl bg-card border border-rose-500/20 flex items-center justify-center shadow-sm"><LogOut className="size-4" /></div>
-                      <span className="text-[11px] font-black uppercase tracking-widest">Logout</span>
-                      <ChevronRight className="ml-auto size-3 opacity-30" />
+                    <div className="px-6 py-6 bg-muted/10"><div className="flex items-center gap-5 mb-4"><div className="size-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center"><Languages className="size-5" /></div><span className="text-[13px] font-bold uppercase tracking-widest">Bahasa</span></div><LanguagePicker /></div>
+                    <button onClick={handleLogout} className="flex items-center px-6 py-6 bg-rose-500/5 hover:bg-rose-500/10 transition-colors gap-5 group text-rose-500 w-full text-left">
+                      <div className="size-10 rounded-xl bg-card border border-rose-500/20 flex items-center justify-center shadow-sm"><LogOut className="size-5" /></div>
+                      <span className="text-[13px] font-bold uppercase tracking-widest">Logout</span>
+                      <ChevronRight className="ml-auto size-4 opacity-30" />
                     </button>
                   </div>
                 </div>
@@ -333,11 +333,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <Dialog open={isRegModalOpen} onOpenChange={(open) => { if (activeAccount?.isNew) return; setIsRegModalOpen(open); }}>
         <DialogContent className="w-[95%] md:max-w-md p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground rounded-2xl outline-none">
           <form onSubmit={handleRegisterSubmit} className="flex flex-col max-h-[85vh] overflow-y-auto no-scrollbar">
-            <div className="flex flex-col items-center justify-center text-center space-y-2 pt-8 pb-6 px-6">
-              <div className="size-14 rounded-full bg-accent text-white flex items-center justify-center font-black text-2xl shadow-xl shadow-accent/20">O</div>
-              <div className="space-y-0.5">
-                <DialogTitle className="text-xl font-black tracking-tight">Selamat Datang</DialogTitle>
-                <DialogDescription className="font-bold text-muted-foreground text-xs">Pilih profil untuk mulai terhubung di OnTapp.</DialogDescription>
+            <div className="flex flex-col items-center justify-center text-center space-y-3 pt-10 pb-6 px-6">
+              <div className="size-16 rounded-full bg-accent text-white flex items-center justify-center font-black text-3xl shadow-xl shadow-accent/20">O</div>
+              <div className="space-y-1">
+                <DialogTitle className="text-2xl font-bold tracking-tight text-slate-900">Selamat Datang</DialogTitle>
+                <DialogDescription className="font-medium text-slate-500 text-sm px-4">Pilih jenis profil untuk mulai membangun jaringan bisnis Anda.</DialogDescription>
               </div>
             </div>
 
@@ -346,43 +346,43 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <div className="grid gap-3">
                   {['pribadi', 'professional', 'bisnis'].map((type) => (
                     <button key={type} type="button" onClick={() => setPendingType(type as AccountType)} className="flex items-center gap-4 p-4 rounded-2xl border-2 border-muted hover:border-accent hover:bg-accent/5 transition-all group text-left shadow-sm">
-                      <div className="size-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
-                        {type === 'pribadi' ? <User className="size-5" /> : type === 'professional' ? <ShieldCheck className="size-5" /> : <Briefcase className="size-5" />}
+                      <div className="size-12 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
+                        {type === 'pribadi' ? <User className="size-6" /> : type === 'professional' ? <ShieldCheck className="size-6" /> : <Briefcase className="size-6" />}
                       </div>
                       <div>
-                        <h4 className="font-black text-sm text-foreground capitalize">Profil {type}</h4>
-                        <p className="text-[10px] text-muted-foreground font-medium leading-none mt-1">{type === 'pribadi' ? 'Berbagi momen & inspirasi.' : type === 'professional' ? 'Tampilkan keahlian Anda.' : 'Akses data pasar eksklusif.'}</p>
+                        <h4 className="font-bold text-[15px] text-slate-900 capitalize">Profil {type}</h4>
+                        <p className="text-xs text-slate-500 font-medium leading-tight mt-1">{type === 'pribadi' ? 'Berbagi momen & inspirasi bisnis.' : type === 'professional' ? 'Tampilkan portofolio & keahlian.' : 'Akses data pasar & intelijen eksklusif.'}</p>
                       </div>
                     </button>
                   ))}
                 </div>
               ) : (
-                <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
+                <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                   <div className="flex items-center justify-between">
-                    <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-7 px-3 font-black text-[9px] uppercase tracking-widest text-muted-foreground hover:text-accent">← Kembali</Button>
-                    <Badge className="px-3 py-1 font-black text-[8px] uppercase border-none bg-accent text-white rounded-full">{pendingType}</Badge>
+                    <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-8 px-3 font-bold text-xs uppercase tracking-widest text-muted-foreground hover:text-accent">← Kembali</Button>
+                    <Badge className="px-4 py-1 font-bold text-[11px] uppercase border-none bg-accent text-white rounded-full">{pendingType}</Badge>
                   </div>
                   
-                  <div className="flex flex-col items-center gap-2">
-                    <div onClick={() => setIsMediaPickerOpen(true)} className="size-20 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center text-muted-foreground group cursor-pointer hover:border-accent transition-all overflow-hidden shadow-inner">
-                      {regFormData.avatar ? <img src={regFormData.avatar} className="w-full h-full object-cover" alt="Profile" /> : <Camera className="size-6" />}
+                  <div className="flex flex-col items-center gap-3">
+                    <div onClick={() => setIsMediaPickerOpen(true)} className="size-24 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center text-muted-foreground group cursor-pointer hover:border-accent transition-all overflow-hidden shadow-inner">
+                      {regFormData.avatar ? <img src={regFormData.avatar} className="w-full h-full object-cover" alt="Profile" /> : <Camera className="size-8" />}
                     </div>
-                    <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Atur Foto Profil</span>
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Atur Foto Profil</span>
                   </div>
 
                   <div className="space-y-4">
-                    <div className="space-y-1.5"><Label className="font-black text-[9px] uppercase tracking-widest text-slate-500">Nama Tampilan *</Label><Input required placeholder="Nama Lengkap atau Brand" value={regFormData.name} onChange={(e) => setRegFormData({...regFormData, name: e.target.value})} className="rounded-xl h-11 bg-muted/20 border-none focus:bg-white transition-all font-bold px-4 text-xs shadow-inner" /></div>
-                    <div className="space-y-1.5"><Label className="font-black text-[9px] uppercase tracking-widest text-slate-500">Bio Singkat</Label><Textarea placeholder="Ceritakan identitas Anda..." value={regFormData.bio} onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})} className="rounded-xl border-none min-h-[70px] bg-muted/20 focus:bg-white transition-all font-medium px-4 py-2 text-xs shadow-inner" /></div>
-                    <div className="space-y-1.5">
-                      <Label className="font-black text-[9px] uppercase tracking-widest text-slate-500">Visibilitas Akun</Label>
+                    <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-slate-500">Nama Tampilan *</Label><Input required placeholder="Nama Lengkap atau Brand" value={regFormData.name} onChange={(e) => setRegFormData({...regFormData, name: e.target.value})} className="rounded-xl h-12 bg-muted/20 border-none focus:bg-white transition-all font-bold px-4 text-sm shadow-inner" /></div>
+                    <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-slate-500">Bio Singkat</Label><Textarea placeholder="Ceritakan identitas atau visi Anda..." value={regFormData.bio} onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})} className="rounded-xl border-none min-h-[90px] bg-muted/20 focus:bg-white transition-all font-medium px-4 py-3 text-sm shadow-inner" /></div>
+                    <div className="space-y-2">
+                      <Label className="font-bold text-xs uppercase tracking-widest text-slate-500">Visibilitas Akun</Label>
                       <Select value={regFormData.visibility} onValueChange={(val: 'public' | 'private') => setRegFormData({...regFormData, visibility: val})}>
-                        <SelectTrigger className="h-10 rounded-xl bg-muted/20 border-none px-4 text-xs font-bold shadow-inner"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none px-4 text-sm font-bold shadow-inner"><SelectValue /></SelectTrigger>
                         <SelectContent><SelectItem value="public">🌍 Publik (Rekomendasi)</SelectItem><SelectItem value="private">🔒 Privat (Terbatas)</SelectItem></SelectContent>
                       </Select>
                     </div>
                   </div>
 
-                  <Button type="submit" disabled={!regFormData.name.trim()} className="w-full h-12 rounded-xl bg-accent hover:bg-accent/90 text-white font-black text-sm shadow-xl active:scale-[0.98] transition-all">Selesaikan Pendaftaran</Button>
+                  <Button type="submit" disabled={!regFormData.name.trim()} className="w-full h-14 rounded-xl bg-accent hover:bg-accent/90 text-white font-bold text-base shadow-xl active:scale-[0.98] transition-all">Selesaikan Pendaftaran</Button>
                 </div>
               )}
             </div>
@@ -391,13 +391,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </Dialog>
 
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
-        <DialogContent className="w-[85%] md:max-w-xs rounded-2xl p-5 border-none shadow-2xl bg-card text-foreground outline-none">
-          <DialogHeader className="text-center"><DialogTitle className="text-base font-black">Pilih Media</DialogTitle></DialogHeader>
-          <div className="grid gap-2 py-4">
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-12 rounded-xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-4 px-5"><Smartphone className="size-5 text-accent" /><p className="font-black text-[10px] uppercase tracking-widest">Galeri HP</p></Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-12 rounded-xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-4 px-5"><Cloud className="size-5 text-blue-500" /><p className="font-black text-[10px] uppercase tracking-widest">Layanan Cloud</p></Button>
+        <DialogContent className="w-[85%] md:max-w-xs rounded-2xl p-6 border-none shadow-2xl bg-card text-foreground outline-none">
+          <DialogHeader className="text-center"><DialogTitle className="text-lg font-bold text-slate-900">Pilih Media</DialogTitle></DialogHeader>
+          <div className="grid gap-3 py-5">
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-14 rounded-xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-5 px-6 shadow-inner"><Smartphone className="size-6 text-accent" /><p className="font-bold text-xs uppercase tracking-widest">Galeri HP</p></Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-14 rounded-xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-5 px-6 shadow-inner"><Cloud className="size-6 text-blue-500" /><p className="font-bold text-xs uppercase tracking-widest">Layanan Cloud</p></Button>
           </div>
-          <DialogFooter><Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-black text-[10px] uppercase text-muted-foreground hover:bg-transparent">Batal</Button></DialogFooter>
+          <DialogFooter><Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-bold text-xs uppercase text-muted-foreground hover:bg-transparent">Batal</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
