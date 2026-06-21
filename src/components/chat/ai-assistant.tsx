@@ -21,6 +21,8 @@ type Message = {
   showTranslated?: boolean;
 };
 
+const STORAGE_KEY = 'ontapp_assistant_pos';
+
 export function AIAssistant() {
   const { language, t } = useLanguage();
   const { toast } = useToast();
@@ -29,11 +31,23 @@ export function AIAssistant() {
   const [loading, setLoading] = React.useState(false);
   const [messages, setMessages] = React.useState<Message[]>([]);
 
-  // Draggable State
+  // Draggable State with Persistence
   const [position, setPosition] = React.useState({ x: 20, y: 150 });
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
   const [hasMoved, setHasMoved] = React.useState(false);
+
+  // Load saved position on mount
+  React.useEffect(() => {
+    const savedPos = localStorage.getItem(STORAGE_KEY);
+    if (savedPos) {
+      try {
+        setPosition(JSON.parse(savedPos));
+      } catch (e) {
+        console.error("Failed to load assistant position", e);
+      }
+    }
+  }, []);
 
   React.useEffect(() => {
     setMessages([{ role: 'model', content: t('ai_greet') }]);
@@ -60,6 +74,7 @@ export function AIAssistant() {
     const newX = e.clientX - dragStart.x;
     const newY = e.clientY - dragStart.y;
     
+    // Boundary check
     const boundedX = Math.min(Math.max(10, newX), window.innerWidth - 70);
     const boundedY = Math.min(Math.max(10, newY), window.innerHeight - 70);
     
@@ -72,7 +87,12 @@ export function AIAssistant() {
   const handlePointerUp = (e: React.PointerEvent) => {
     setIsDragging(false);
     (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-    if (!hasMoved) {
+    
+    if (hasMoved) {
+      // Save position to localStorage after drag ends
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(position));
+    } else {
+      // It was a tap, toggle open
       setIsOpen(!isOpen);
     }
   };
@@ -125,6 +145,7 @@ export function AIAssistant() {
 
   return (
     <>
+      {/* Floating Draggable Bubble */}
       <div 
         style={{ 
           left: `${position.x}px`, 
@@ -145,6 +166,7 @@ export function AIAssistant() {
         </div>
       </div>
 
+      {/* Chat Window */}
       {isOpen && (
         <div 
           className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/20 backdrop-blur-[2px] animate-in fade-in duration-200"
