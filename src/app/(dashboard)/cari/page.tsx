@@ -225,7 +225,7 @@ export default function CariPage() {
     if (file) {
       setIsSourcePickerOpen(false);
       toast({ title: "Visual AI Aktif", description: "Menganalisis objek dalam gambar..." });
-      handleSearch(undefined, "Analisis visual");
+      handleSearch(undefined, "Analisis gambar");
     }
   };
 
@@ -336,7 +336,7 @@ export default function CariPage() {
                     </div>
                     <ChevronDown className="size-3.5 opacity-30" />
                   </Button>
-                </DropdownMenuTrigger>
+                </PopoverTrigger>
                 <PopoverContent align="center" className="w-[280px] rounded-2xl p-3 shadow-2xl bg-card border-border space-y-3">
                   <Button type="button" variant="outline" onClick={handleNearbySearch} className="w-full h-11 rounded-xl border-accent/20 bg-accent/5 text-accent font-black text-xs gap-2">
                     <LocateFixed className="size-4" /> {t('nearby')}
@@ -346,7 +346,16 @@ export default function CariPage() {
                     <Input placeholder="Cari lokasi..." value={locationSearch} onChange={(e) => setLocationSearch(e.target.value)} className="h-9 pl-9 rounded-xl bg-muted/50 text-[11px] border-none text-foreground" />
                   </div>
                   <div className="space-y-1 max-h-[200px] overflow-y-auto no-scrollbar">
-                    {POPULAR_LOCATIONS.filter(l => l.toLowerCase().includes(locationSearch.toLowerCase())).map((loc) => (<button key={loc} type="button" onClick={() => { setActiveLocation(loc); setIsLocationOpen(false); }} className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-muted text-foreground">{loc}</button>))}
+                    {POPULAR_LOCATIONS.filter(l => l.toLowerCase().includes(locationSearch.toLowerCase())).map((loc) => (
+                      <button 
+                        key={loc} 
+                        type="button" 
+                        onClick={() => { setActiveLocation(loc); setIsLocationOpen(false); }} 
+                        className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold hover:bg-muted text-foreground"
+                      >
+                        {loc}
+                      </button>
+                    ))}
                   </div>
                 </PopoverContent>
               </Popover>
