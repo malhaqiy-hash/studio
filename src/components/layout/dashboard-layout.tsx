@@ -106,7 +106,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     const touchEnd = e.changedTouches[0].clientY;
     const distance = touchEnd - touchStart;
     
-    // Swipe down gesture to close (70px threshold)
+    // Swipe down gesture to close
     if (distance > 70) {
       setIsMoreMenuOpen(false);
     }
@@ -176,12 +176,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  };
-
-  const handleOpenRegistration = (type: AccountType) => {
-    setPendingType(type);
-    setRegFormData({ name: "", bio: "", extra: "", avatar: "", visibility: 'public' });
-    setIsRegModalOpen(true);
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
@@ -272,7 +266,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuSeparator className="my-1" />
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="gap-3 px-3 py-2.5 rounded-xl font-bold text-[13px]"><UserPlus className="size-4" /> Tambah Profil</DropdownMenuSubTrigger>
-                <DropdownMenuPortal><DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card"><DropdownMenuItem onSelect={() => handleOpenRegistration('pribadi')} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Pribadi</DropdownMenuItem><DropdownMenuItem onSelect={() => handleOpenRegistration('professional')} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Professional</DropdownMenuItem><DropdownMenuItem onSelect={() => handleOpenRegistration('bisnis')} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Bisnis</DropdownMenuItem></DropdownMenuSubContent></DropdownMenuPortal>
+                <DropdownMenuPortal><DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card"><DropdownMenuItem onSelect={() => setPendingType('pribadi'); setIsRegModalOpen(true)} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Pribadi</DropdownMenuItem><DropdownMenuItem onSelect={() => setPendingType('professional'); setIsRegModalOpen(true)} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Professional</DropdownMenuItem><DropdownMenuItem onSelect={() => setPendingType('bisnis'); setIsRegModalOpen(true)} className="font-bold text-[13px] px-3 py-2 rounded-lg cursor-pointer">Bisnis</DropdownMenuItem></DropdownMenuSubContent></DropdownMenuPortal>
               </DropdownMenuSub>
               <DropdownMenuSeparator className="my-1" />
               <DropdownMenuItem onClick={handleLogout} className="text-black font-bold text-[13px] px-3 py-2.5 rounded-xl focus:bg-black/5 cursor-pointer flex gap-3"><LogOut className="size-4" /> Keluar</DropdownMenuItem>
@@ -328,10 +322,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      {/* Profile Onboarding Modal */}
+      {/* Profile Onboarding Modal - No X, Tap Outside to Close or Complete Form */}
       <Dialog open={isRegModalOpen} onOpenChange={(open) => { if (activeAccount?.isNew) return; setIsRegModalOpen(open); }}>
         <DialogContent className="w-[95%] md:max-w-md p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground rounded-2xl outline-none [&>button]:hidden">
-          <form onSubmit={handleRegisterSubmit} className="flex flex-col max-h-[85vh] overflow-y-auto no-scrollbar">
+          <div className="flex flex-col max-h-[85vh] overflow-y-auto no-scrollbar">
             <div className="flex flex-col items-center justify-center text-center space-y-3 pt-8 pb-4 px-6">
               <div className="size-14 rounded-full bg-black text-white flex items-center justify-center font-black text-2xl shadow-xl">O</div>
               <div className="space-y-1">
@@ -381,11 +375,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
 
-                  <Button type="submit" disabled={!regFormData.name.trim()} className="w-full h-12 rounded-xl bg-black hover:bg-black/90 text-white font-black text-[14px] uppercase tracking-widest shadow-xl active:scale-[0.98] transition-all">Selesaikan</Button>
+                  <Button onClick={handleRegisterSubmit} disabled={!regFormData.name.trim()} className="w-full h-12 rounded-xl bg-black hover:bg-black/90 text-white font-black text-[14px] uppercase tracking-widest shadow-xl active:scale-[0.98] transition-all">Selesaikan</Button>
                 </div>
               )}
             </div>
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
 

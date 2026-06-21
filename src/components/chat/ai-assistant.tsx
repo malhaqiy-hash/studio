@@ -75,33 +75,13 @@ export function AIAssistant() {
 
   const handleVoiceInput = () => {
     if (!('webkitSpeechRecognition' in window)) {
-      toast({ 
-        variant: "destructive", 
-        title: "Browser Tidak Mendukung", 
-        description: "Gunakan Chrome atau Safari untuk fitur Voice Search." 
-      });
+      toast({ variant: "destructive", title: "Browser Tidak Mendukung", description: "Gunakan Chrome atau Safari untuk fitur Voice Search." });
       return;
     }
-
     const recognition = new (window as any).webkitSpeechRecognition();
     recognition.lang = language === 'id' ? 'id-ID' : 'en-US';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onstart = () => {
-      toast({ title: "Asisten Mendengarkan...", description: "Silakan sampaikan pesan Anda." });
-    };
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setInput(transcript);
-      toast({ title: "Pesan Diterima", description: `"${transcript}"` });
-    };
-
-    recognition.onerror = () => {
-      toast({ variant: "destructive", title: "Gagal Mendengar Suara" });
-    };
-
+    recognition.onstart = () => toast({ title: "Asisten Mendengarkan..." });
+    recognition.onresult = (event: any) => setInput(event.results[0][0].transcript);
     recognition.start();
   };
 
@@ -147,7 +127,6 @@ export function AIAssistant() {
                     </div>
                     <button 
                       onClick={() => handleTranslateMessage(i)} 
-                      disabled={msg.isTranslating} 
                       className={cn(
                         "transition-all active:scale-75 flex items-center p-1 rounded-full bg-muted/20", 
                         msg.showTranslated ? "text-black" : "text-muted-foreground hover:text-black"
@@ -186,23 +165,8 @@ export function AIAssistant() {
               className="border-none bg-transparent focus-visible:ring-0 text-[13px] font-medium h-9 px-3" 
             />
             <div className="flex items-center gap-1 pr-1">
-              <Button 
-                type="button" 
-                variant="ghost"
-                size="icon" 
-                onClick={handleVoiceInput}
-                className="size-9 rounded-xl text-muted-foreground hover:text-black hover:bg-black/5 shrink-0 transition-all active:scale-90"
-              >
-                <Mic className="size-4.5" />
-              </Button>
-              <Button 
-                type="submit" 
-                size="icon" 
-                disabled={loading || !input.trim()} 
-                className="size-9 rounded-xl bg-black hover:bg-black/90 text-white shrink-0 shadow-lg transition-all active:scale-90"
-              >
-                <Send className="size-4.5" />
-              </Button>
+              <Button type="button" variant="ghost" size="icon" onClick={handleVoiceInput} className="size-9 rounded-xl text-muted-foreground hover:text-black hover:bg-black/5 shrink-0 transition-all active:scale-90"><Mic className="size-4.5" /></Button>
+              <Button type="submit" size="icon" disabled={loading || !input.trim()} className="size-9 rounded-xl bg-black hover:bg-black/90 text-white shrink-0 shadow-lg transition-all active:scale-90"><Send className="size-4.5" /></Button>
             </div>
           </form>
         </CardFooter>

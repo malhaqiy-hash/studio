@@ -80,12 +80,24 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
+  // Isolasi Gesture: Mencegah event geser horizontal bocor ke navigasi Beranda
+  const handleIsolate = (e: React.PointerEvent | React.TouchEvent | React.MouseEvent) => {
+    if (images.length > 1) {
+      e.stopPropagation();
+    }
+  };
+
   return (
-    <div className="relative group/carousel w-full overflow-hidden rounded-xl border border-border bg-muted/5">
+    <div 
+      className="relative group/carousel w-full overflow-hidden rounded-xl border border-border bg-muted/5 touch-pan-x select-none"
+      onPointerDown={handleIsolate}
+      onTouchStart={handleIsolate}
+      onTouchMove={handleIsolate}
+    >
       <Swiper
         nested={true}
         touchStartPreventDefault={false}
-        className="w-full touch-pan-x"
+        className="w-full"
         onSlideChange={(swiper) => setActiveIdx(swiper.activeIndex)}
         slidesPerView={1}
       >
