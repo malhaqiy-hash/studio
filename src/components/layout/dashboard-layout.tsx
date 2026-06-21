@@ -31,9 +31,6 @@ import {
   Bookmark,
   Smartphone,
   Cloud,
-  Plus,
-  Handshake,
-  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +58,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -134,14 +130,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: Users, label: t('communities'), href: "/communities", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Rss, label: t('feed'), href: "/feed", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Search, label: t('search'), href: "/cari", roles: ['pribadi', 'professional', 'bisnis'] },
-      { icon: Handshake, label: t('matchmaker'), href: "/matchmaker", roles: ['professional', 'bisnis'] },
-      { icon: Target, label: t('matches'), href: "/matches", roles: ['professional', 'bisnis'] },
-      { icon: BookOpen, label: t('knowledge'), href: "/knowledge", roles: ['professional', 'bisnis'] },
-      { icon: TrendingUp, label: t('market_radar'), href: "/market-radar", roles: ['bisnis'] },
-      { icon: MapIcon, label: t('opportunity_map'), href: "/opportunity-map", roles: ['bisnis'] },
-      { icon: Building2, label: t('registry'), href: "/registry", roles: ['bisnis'] },
-      { icon: Radar, label: t('scout'), href: "/scout", roles: ['bisnis'] },
-      { icon: Magnet, label: t('reverse_discovery'), href: "/reverse-discovery", roles: ['bisnis'] },
       { icon: Briefcase, label: t('opportunities'), href: "/opportunities", roles: ['bisnis'] },
       { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
     ];
@@ -249,7 +237,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <Link href="/profile"><DropdownMenuItem className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold cursor-pointer hover:bg-black/5"><div className="size-8 rounded-lg bg-black/5 flex items-center justify-center text-black"><User className="size-4" /></div><span className="text-[13px]">{t('view_profile')}</span></DropdownMenuItem></Link>
                 <DropdownMenuSeparator className="my-1" />
                 {availableAccounts.filter(a => !a.isNew).map((acc) => (
-                  <DropdownMenuItem key={acc.id} onSelect={() => handleSwitchAccount(acc.id)} className={cn("flex items-center justify-between px-3 py-2.5 rounded-xl font-bold cursor-pointer mb-0.5", activeAccount.id === acc.id ? "bg-black/5 text-black" : "focus:bg-black/5")}>
+                  <DropdownMenuItem key={acc.id} onSelect={() => { switchAccount(acc.id); router.push("/profile"); }} className={cn("flex items-center justify-between px-3 py-2.5 rounded-xl font-bold cursor-pointer mb-0.5", activeAccount.id === acc.id ? "bg-black/5 text-black" : "focus:bg-black/5")}>
                     <div className="flex items-center gap-3"><Avatar className="size-8 rounded-lg"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="text-[10px] bg-muted">{acc.name[0]}</AvatarFallback></Avatar><div className="flex flex-col"><span className="text-[13px] leading-none mb-0.5">{acc.name}</span><span className="text-[9px] uppercase opacity-60 font-black">{acc.type}</span></div></div>
                     {activeAccount.id === acc.id && <Check className="size-3.5" />}
                   </DropdownMenuItem>
@@ -286,7 +274,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <Search className="size-5 md:size-6" /><span>{t('search')}</span>
           </Link>
           <div className="relative w-full h-full flex flex-col items-center justify-center">
-            <button onClick={() => window.dispatchEvent(new CustomEvent('open-ai-assistant'))} className="absolute bottom-12 size-9 md:size-10 bg-black rounded-full flex items-center justify-center text-white shadow-xl hover:bg-black/80 transition active:scale-95 z-[95] ring-4 ring-background"><div className="size-5 md:size-6 flex items-center justify-center bg-white rounded-full text-[10px] font-black text-black">AI</div></button>
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild><button className="flex flex-col items-center gap-1 hover:text-black w-full py-2 outline-none"><Menu className="size-5 md:size-6" /><span>{t('more')}</span></button></SheetTrigger>
               <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 h-[80vh] bg-card overflow-hidden [&>button]:hidden outline-none" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
