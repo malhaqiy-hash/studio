@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -128,7 +129,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [regFormData, setRegFormData] = React.useState({
     name: "",
     bio: "",
-    contact: "",
     extra: "",
     avatar: ""
   });
@@ -196,19 +196,27 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const handleOpenRegistration = (type: AccountType) => {
     setPendingType(type);
-    setRegFormData({ name: "", bio: "", contact: "", extra: "", avatar: "" });
+    setRegFormData({ name: "", bio: "", extra: "", avatar: "" });
     setIsRegModalOpen(true);
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!pendingType) return;
+
+    if (!regFormData.name.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Input Diperlukan",
+        description: "Nama Tampilan wajib diisi untuk melanjutkan."
+      });
+      return;
+    }
     
     registerAccount({
       name: regFormData.name,
       type: pendingType,
       bio: regFormData.bio,
-      contact: regFormData.contact,
       extra: regFormData.extra
     });
 
@@ -465,66 +473,141 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </nav>
 
       <Dialog open={isRegModalOpen} onOpenChange={(open) => { if (activeAccount?.isNew) return; setIsRegModalOpen(open); }}>
-        <DialogContent className="max-w-md rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground">
-          <form onSubmit={handleRegisterSubmit} className="flex flex-col h-full">
-            <DialogHeader className="p-8 pb-4 bg-muted border-b border-border text-center sm:text-center">
-              <div className="flex flex-col items-center gap-4 mb-2">
-                <div className="size-16 rounded-2xl bg-accent text-white flex items-center justify-center font-black text-2xl shadow-xl">O</div>
-                <DialogTitle className="text-2xl font-black tracking-tight">Selamat Datang</DialogTitle>
-                <DialogDescription className="font-medium text-muted-foreground">Pilih jenis profil untuk mulai terhubung.</DialogDescription>
+        <DialogContent className="w-full md:max-w-md p-6 md:p-0 border-none shadow-none md:shadow-2xl overflow-y-auto max-h-screen bg-card text-foreground rounded-none md:rounded-[2.5rem] outline-none">
+          <form onSubmit={handleRegisterSubmit} className="flex flex-col h-full space-y-8 md:space-y-0">
+            <div className="flex flex-col items-center justify-center text-center space-y-4 mb-2 pt-4 md:pt-10 md:pb-6 md:bg-muted md:border-b md:border-border">
+              <div className="size-20 rounded-full bg-accent text-white flex items-center justify-center font-black text-3xl shadow-2xl shadow-accent/20 animate-in zoom-in-50 duration-500">O</div>
+              <div className="space-y-1">
+                <DialogTitle className="text-3xl font-black tracking-tight">Selamat Datang</DialogTitle>
+                <DialogDescription className="font-semibold text-muted-foreground text-base">Pilih jenis profil untuk mulai terhubung.</DialogDescription>
               </div>
-            </DialogHeader>
-            <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh] no-scrollbar">
+            </div>
+
+            <div className="flex-1 space-y-6 md:p-10 pb-20">
               {!pendingType ? (
                 <div className="grid gap-4 animate-in fade-in zoom-in-95 duration-300">
                   {['pribadi', 'professional', 'bisnis'].map((type) => (
-                    <button key={type} type="button" onClick={() => setPendingType(type as AccountType)} className="flex items-center gap-6 p-6 rounded-3xl border-2 border-muted hover:border-accent hover:bg-accent/5 transition-all group text-left">
-                      <div className="size-12 rounded-2xl bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
-                        {type === 'pribadi' ? <User className="size-6" /> : type === 'professional' ? <ShieldCheck className="size-6" /> : <Briefcase className="size-6" />}
+                    <button key={type} type="button" onClick={() => setPendingType(type as AccountType)} className="flex items-center gap-6 p-6 rounded-[2rem] border-2 border-muted hover:border-accent hover:bg-accent/5 transition-all group text-left shadow-sm hover:shadow-md">
+                      <div className="size-14 rounded-2xl bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
+                        {type === 'pribadi' ? <User className="size-7" /> : type === 'professional' ? <ShieldCheck className="size-7" /> : <Briefcase className="size-7" />}
                       </div>
                       <div>
-                        <h4 className="font-black text-foreground capitalize">Profil {type}</h4>
-                        <p className="text-xs text-muted-foreground font-medium">{type === 'pribadi' ? 'Berbagi momen harian.' : type === 'professional' ? 'Pamerkan portofolio Anda.' : 'Akses intelijen pasar.'}</p>
+                        <h4 className="font-black text-lg text-foreground capitalize">Profil {type}</h4>
+                        <p className="text-sm text-muted-foreground font-medium">{type === 'pribadi' ? 'Berbagi momen harian.' : type === 'professional' ? 'Pamerkan portofolio Anda.' : 'Akses intelijen pasar.'}</p>
                       </div>
                     </button>
                   ))}
                 </div>
               ) : (
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-8 px-2 font-bold text-xs">← Kembali</Button>
-                    <Badge className="px-3 py-1 font-black text-[10px] uppercase border-none ml-auto bg-accent/10 text-accent">{pendingType}</Badge>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-10 px-4 font-black text-xs uppercase tracking-widest text-muted-foreground hover:text-accent">← Kembali</Button>
+                    <Badge className="px-4 py-1.5 font-black text-[10px] uppercase border-none ml-auto bg-accent text-white shadow-lg shadow-accent/20">{pendingType}</Badge>
                   </div>
-                  <div className="flex flex-col items-center gap-4">
-                    <div onClick={() => setIsMediaPickerOpen(true)} className="size-24 rounded-3xl bg-muted border-2 border-dashed border-border flex items-center justify-center text-muted-foreground group cursor-pointer hover:border-accent hover:bg-accent/5 transition-all overflow-hidden">
-                      {regFormData.avatar ? <img src={regFormData.avatar} className="w-full h-full object-cover" alt="Profile" /> : <Camera className="size-8 group-hover:scale-110 transition-transform" />}
+                  
+                  <div className="flex flex-col items-center gap-3">
+                    <div onClick={() => setIsMediaPickerOpen(true)} className="size-28 rounded-full bg-muted border-4 border-dashed border-border flex items-center justify-center text-muted-foreground group cursor-pointer hover:border-accent hover:bg-accent/5 transition-all overflow-hidden shadow-inner">
+                      {regFormData.avatar ? <img src={regFormData.avatar} className="w-full h-full object-cover" alt="Profile" /> : <Camera className="size-10 group-hover:scale-110 transition-transform" />}
                     </div>
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Foto Profil</span>
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Pilih Foto Profil (Opsional)</span>
                   </div>
-                  <div className="space-y-4">
-                    <div className="space-y-2"><Label className="font-bold">Nama Tampilan</Label><Input required value={regFormData.name} onChange={(e) => setRegFormData({...regFormData, name: e.target.value})} className="rounded-xl h-12 bg-muted/50 border-none" /></div>
-                    <div className="space-y-2"><Label className="font-bold">Bio</Label><Textarea required value={regFormData.bio} onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})} className="rounded-xl border-none min-h-[80px] bg-muted/50" /></div>
-                    <div className="space-y-2"><Label className="font-bold">WhatsApp</Label><Input required value={regFormData.contact} onChange={(e) => setRegFormData({...regFormData, contact: e.target.value})} placeholder="+62 8..." className="rounded-xl border-none h-12 bg-muted/50" /></div>
-                    {pendingType === 'professional' && <div className="space-y-2"><Label className="font-bold">Keahlian (Skills)</Label><Input required value={regFormData.extra} onChange={(e) => setRegFormData({...regFormData, extra: e.target.value})} placeholder="e.g. Designer" className="rounded-xl border-none h-12 bg-muted/50" /></div>}
-                    {pendingType === 'bisnis' && <div className="space-y-2"><Label className="font-bold">Kategori Industri</Label><Select value={regFormData.extra} onValueChange={(v) => setRegFormData({...regFormData, extra: v})}><SelectTrigger className="rounded-xl border-none h-12 bg-muted/50"><SelectValue placeholder="Sektor" /></SelectTrigger><SelectContent><SelectItem value="Tech">Tech</SelectItem><SelectItem value="Logistics">Logistics</SelectItem><SelectItem value="Retail">Retail</SelectItem><SelectItem value="F&B">F&B</SelectItem></SelectContent></Select></div>}
+
+                  <div className="space-y-5">
+                    <div className="space-y-2">
+                      <Label className="font-black text-xs uppercase tracking-widest text-slate-500 ml-1">Nama Tampilan *</Label>
+                      <Input 
+                        required 
+                        placeholder="Nama Lengkap atau Bisnis"
+                        value={regFormData.name} 
+                        onChange={(e) => setRegFormData({...regFormData, name: e.target.value})} 
+                        className="rounded-2xl h-14 bg-muted/30 border-border focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-bold px-6 text-lg" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-black text-xs uppercase tracking-widest text-slate-500 ml-1">Bio Singkat</Label>
+                      <Textarea 
+                        placeholder="Ceritakan sedikit tentang Anda..."
+                        value={regFormData.bio} 
+                        onChange={(e) => setRegFormData({...regFormData, bio: e.target.value})} 
+                        className="rounded-2xl border-border min-h-[100px] bg-muted/30 focus:bg-white focus:ring-2 focus:ring-accent/10 transition-all font-medium px-6 py-4" 
+                      />
+                    </div>
+                    {pendingType === 'professional' && (
+                      <div className="space-y-2">
+                        <Label className="font-black text-xs uppercase tracking-widest text-slate-500 ml-1">Keahlian (Skills)</Label>
+                        <Input 
+                          value={regFormData.extra} 
+                          onChange={(e) => setRegFormData({...regFormData, extra: e.target.value})} 
+                          placeholder="e.g. UI/UX Designer, Architect" 
+                          className="rounded-2xl h-14 bg-muted/30 border-border focus:bg-white font-bold px-6" 
+                        />
+                      </div>
+                    )}
+                    {pendingType === 'bisnis' && (
+                      <div className="space-y-2">
+                        <Label className="font-black text-xs uppercase tracking-widest text-slate-500 ml-1">Sektor Industri</Label>
+                        <Select value={regFormData.extra} onValueChange={(v) => setRegFormData({...regFormData, extra: v})}>
+                          <SelectTrigger className="rounded-2xl h-14 bg-muted/30 border-border focus:bg-white font-bold px-6">
+                            <SelectValue placeholder="Pilih Sektor" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-2xl">
+                            <SelectItem value="Tech">Teknologi & SaaS</SelectItem>
+                            <SelectItem value="Logistics">Logistik & Distribusi</SelectItem>
+                            <SelectItem value="Retail">Retail & E-commerce</SelectItem>
+                            <SelectItem value="F&B">Food & Beverage</SelectItem>
+                            <SelectItem value="Creative">Industri Kreatif</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
+
+                  <Button 
+                    type="submit" 
+                    disabled={!regFormData.name.trim()}
+                    className="w-full h-16 rounded-[1.5rem] bg-accent hover:bg-accent/90 text-white font-black text-lg shadow-xl shadow-accent/20 active:scale-[0.98] transition-all mt-4"
+                  >
+                    Selesaikan Pendaftaran
+                  </Button>
                 </div>
               )}
             </div>
-            {pendingType && <DialogFooter className="p-8 pt-4 bg-muted border-t border-border"><Button type="submit" className="w-full h-14 rounded-2xl bg-accent text-white font-black">Selesaikan</Button></DialogFooter>}
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
-        <DialogContent className="max-w-md rounded-[3rem] p-8 border-none shadow-2xl bg-card text-foreground">
-          <DialogHeader className="text-center sm:text-center"><DialogTitle className="text-2xl font-black">Impor Gambar</DialogTitle></DialogHeader>
+        <DialogContent className="w-[90%] md:max-w-md rounded-[3rem] p-8 border-none shadow-2xl bg-card text-foreground outline-none">
+          <DialogHeader className="text-center sm:text-center">
+            <DialogTitle className="text-2xl font-black tracking-tight">Impor Gambar</DialogTitle>
+            <DialogDescription className="font-medium">Pilih sumber foto profil Anda.</DialogDescription>
+          </DialogHeader>
           <div className="grid gap-4 py-8">
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6"><Smartphone className="size-6 text-accent" /><div className="text-left font-black text-sm uppercase">Perangkat</div></Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6"><Cloud className="size-6 text-blue-500" /><div className="text-left font-black text-sm uppercase">Google Drive</div></Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('photos')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6"><ImageIcon className="size-6 text-rose-500" /><div className="text-left font-black text-sm uppercase">Google Photos</div></Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
+              <Smartphone className="size-6 text-accent" />
+              <div className="text-left">
+                <p className="font-black text-sm uppercase tracking-widest">Perangkat</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Galeri Lokal</p>
+              </div>
+            </Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
+              <Cloud className="size-6 text-blue-500" />
+              <div className="text-left">
+                <p className="font-black text-sm uppercase tracking-widest">Google Drive</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Impor Cloud</p>
+              </div>
+            </Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('photos')} className="h-20 rounded-2xl border-border bg-muted/50 hover:bg-accent/10 justify-start gap-6 px-6">
+              <ImageIcon className="size-6 text-rose-500" />
+              <div className="text-left">
+                <p className="font-black text-sm uppercase tracking-widest">Google Photos</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Arsip Foto</p>
+              </div>
+            </Button>
           </div>
-          <DialogFooter><Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-bold text-muted-foreground">Batal</Button></DialogFooter>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-black text-xs uppercase tracking-widest text-muted-foreground">Batal</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
