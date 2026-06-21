@@ -173,7 +173,7 @@ export function AIAssistant() {
           onClick={() => setIsOpen(false)}
         >
           <Card 
-            className="w-full max-w-sm h-[550px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] rounded-[2.5rem] border-none flex flex-col overflow-hidden bg-card animate-in zoom-in-95 duration-300"
+            className="w-full max-sm h-[550px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] rounded-[2.5rem] border-none flex flex-col overflow-hidden bg-card animate-in zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             <CardHeader className="bg-black text-white p-6 flex flex-row items-center justify-between border-none">
@@ -182,7 +182,7 @@ export function AIAssistant() {
                   <User className="size-6" />
                 </div>
                 <div className="flex flex-col">
-                  <CardTitle className="text-[16px] font-black tracking-tight leading-none uppercase">Intel Hub</CardTitle>
+                  <CardTitle className="text-[16px] font-black tracking-tight leading-none uppercase">Tapp Assistant</CardTitle>
                   <div className="flex items-center gap-1.5 mt-1.5">
                     <div className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{t('ai_active')}</span>
