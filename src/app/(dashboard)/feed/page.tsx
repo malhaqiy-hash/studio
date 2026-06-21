@@ -176,29 +176,33 @@ export default function FeedPage() {
     });
   };
 
-  const handleShare = (post: any) => {
+  const handleShare = async (post: any) => {
     const shareUrl = `${window.location.origin}/feed`;
     
     if (typeof navigator !== 'undefined' && navigator.share) {
-      navigator.share({
-        title: 'OnTapp - Jaringan Bisnis',
-        text: `Lihat postingan menarik dari ${post.author} di OnTapp!`,
-        url: shareUrl
-      })
-      .then(() => {
+      try {
+        await navigator.share({
+          title: 'OnTapp - Jaringan Bisnis',
+          text: `Lihat postingan menarik dari ${post.author} di OnTapp!`,
+          url: shareUrl
+        });
         toast({ title: "Berbagi Berhasil" });
-      })
-      .catch((error) => {
-        if (error.name !== 'AbortError') {
-          console.error('Error sharing:', error);
-        }
-      });
+      } catch (error: any) {
+        if (error.name === 'AbortError') return;
+        
+        // Robust Fallback: In case of Permission Denied (NotAllowedError) or other failures
+        navigator.clipboard.writeText(shareUrl);
+        toast({ 
+          title: "Tautan Berhasil Disalin", 
+          description: "Laci berbagi sistem tidak dapat diakses, tautan disalin ke papan klip." 
+        });
+      }
     } else {
       // Fallback for browsers that don't support Web Share API
       navigator.clipboard.writeText(shareUrl);
       toast({ 
         title: "Tautan Berhasil Disalin", 
-        description: "Laci berbagi sistem tidak didukung, tautan telah disalin ke papan klip Anda." 
+        description: "Browser tidak mendukung fitur berbagi sistem, tautan telah disalin." 
       });
     }
   };
