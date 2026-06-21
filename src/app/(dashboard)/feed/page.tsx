@@ -14,9 +14,6 @@ import {
   Bookmark,
   Plus,
   Lock,
-  Brain,
-  MapPin,
-  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -43,35 +40,30 @@ import { useAccount } from "@/context/account-context";
 import Link from "next/link";
 
 const CATEGORIES = [
-  { id: 'for-you', label: 'For You', icon: Brain },
-  { id: 'lokal', label: 'Lokal', icon: MapPin },
-  { id: 'global', label: 'Global', icon: Globe },
-  { id: 'trending', label: 'Trending', icon: TrendingUp },
+  { id: 'for-you', label: 'For You' },
+  { id: 'lokal', label: 'Lokal' },
+  { id: 'global', label: 'Global' },
+  { id: 'trending', label: 'Trending' },
 ];
 
 const INITIAL_POSTS = [
   {
     id: "p1",
-    type: "insight",
     author: "OnTapp Intelligence",
     extra: "Enterprise AI Analyst",
     avatar: "https://picsum.photos/seed/ontapp/200",
-    category: "Market Trend",
     content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
     time: "Baru saja",
     stats: { likes: 1200, comments: 84 },
     verified: true,
-    tag: "Trending",
     visibility: 'public',
     images: ["https://picsum.photos/seed/tech1/800/500", "https://picsum.photos/seed/tech2/800/600"]
   },
   {
     id: "p2",
-    type: "post",
     author: "Global Logistics Co.",
     extra: "Logistics & Supply Chain",
     avatar: "https://picsum.photos/seed/log/100",
-    category: "Lokal",
     content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member OnTapp hari ini.",
     time: "2 jam yang lalu",
     stats: { likes: 452, comments: 12 },
@@ -93,7 +85,7 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
-  // CRITICAL: Stop propagation at capture phase to lock outer swipe
+  // CRITICAL: Stop propagation at capture phase to lock outer swipe exclusively for multi-photo
   const handleInteraction = (e: React.PointerEvent) => {
     if (images.length > 1) {
       e.stopPropagation();
@@ -256,11 +248,9 @@ export default function FeedPage() {
     const userPosts = (activeAccount.items || [])
       .map(item => ({
         id: item.id,
-        type: "post",
         author: activeAccount.name,
         extra: activeAccount.extra,
         avatar: activeAccount.avatar,
-        category: "Profil Saya",
         content: item.description || "",
         images: item.images || [],
         time: item.timestamp || "Baru saja",
