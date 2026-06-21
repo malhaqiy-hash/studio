@@ -48,6 +48,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = React.useState<SettingsState>(DEFAULT_SETTINGS);
 
   const applyTheme = (theme: string) => {
+    if (typeof window === 'undefined') return;
     const root = document.documentElement;
     if (theme === 'dark') {
       root.classList.add('dark');
@@ -73,21 +74,22 @@ export default function SettingsPage() {
     setMounted(true);
   }, []);
 
-  // Auto-save logic for Theme
+  // AUTO-SAVE: Langsung simpan tema
   const handleThemeChange = (val: string) => {
     const newSettings = { ...settings, theme: val };
     setSettings(newSettings);
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(newSettings));
     applyTheme(val);
-    toast({ title: "Tema Diperbarui", description: "Perubahan tampilan telah diterapkan secara otomatis." });
+    toast({ title: "Tema Diperbarui" });
   };
 
-  // Auto-save logic for Language
+  // AUTO-SAVE: Langsung simpan bahasa
   const handleLanguageChange = (val: any) => {
     setLanguage(val);
-    toast({ title: "Bahasa Diperbarui", description: "Format bahasa sistem telah disinkronkan." });
+    toast({ title: "Bahasa Diperbarui" });
   };
 
+  // AUTO-SAVE: Langsung simpan preferensi privasi
   const updatePreference = (key: string, value: boolean) => {
     updateActiveAccount({
       preferences: {
@@ -95,47 +97,46 @@ export default function SettingsPage() {
         [key]: value
       }
     });
-    toast({ title: "Privasi Diperbarui", description: "Perubahan visibilitas profil telah disimpan." });
+    toast({ title: "Privasi Diperbarui" });
   };
 
   if (!mounted) return <DashboardLayout><div className="max-w-5xl mx-auto py-4 animate-pulse h-96 bg-card rounded-3xl" /></DashboardLayout>;
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6 pb-20 pt-2">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card p-6 rounded-[2rem] border border-border shadow-sm">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-black text-foreground tracking-tight">{t('settings')}</h1>
-            <p className="text-muted-foreground font-medium text-xs md:text-sm">Preferensi sistem dan visibilitas jaringan Anda disimpan otomatis.</p>
+      <div className="max-w-5xl mx-auto space-y-4 pb-20 pt-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card p-5 rounded-2xl border border-border shadow-sm">
+          <div className="space-y-0.5">
+            <h1 className="text-xl font-black text-foreground tracking-tight uppercase">{t('settings')}</h1>
+            <p className="text-muted-foreground font-medium text-[11px] uppercase tracking-wider">Perubahan disimpan otomatis</p>
           </div>
         </div>
 
-        <div className="grid gap-6">
-          <Card className="border-border shadow-sm rounded-[2rem] overflow-hidden group">
-            <CardHeader className="bg-slate-900 text-white p-6 border-b border-white/5">
+        <div className="grid gap-4">
+          <Card className="border-border shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="bg-black text-white p-5">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Lock className="size-5 text-accent" />
+                <div className="size-9 rounded-xl bg-white/10 flex items-center justify-center">
+                  <Lock className="size-4.5 text-accent" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-black">Privasi & Visibilitas</CardTitle>
-                  <CardDescription className="text-slate-400 font-medium text-xs">Kontrol akses informasi profil Anda.</CardDescription>
+                  <CardTitle className="text-[15px] font-black uppercase tracking-tight">Privasi & Visibilitas</CardTitle>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6 bg-card">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="p-5 bg-card">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {activeAccount.type === 'pribadi' ? (
                   <>
-                    <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/10">
-                      <Label className="font-black text-xs uppercase tracking-tight flex items-center gap-2 text-foreground"><Users className="size-3.5 text-accent" /> Daftar Pengikut</Label>
+                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/5">
+                      <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Users className="size-3.5" /> Pengikut</Label>
                       <Switch 
                         checked={activeAccount.preferences?.publicFollowers} 
                         onCheckedChange={(val) => updatePreference('publicFollowers', val)}
                       />
                     </div>
-                    <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/10">
-                      <Label className="font-black text-xs uppercase tracking-tight flex items-center gap-2 text-foreground"><Users className="size-3.5 text-accent" /> Daftar Mengikuti</Label>
+                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/5">
+                      <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Users className="size-3.5" /> Mengikuti</Label>
                       <Switch 
                         checked={activeAccount.preferences?.publicFollowing} 
                         onCheckedChange={(val) => updatePreference('publicFollowing', val)}
@@ -143,16 +144,16 @@ export default function SettingsPage() {
                     </div>
                   </>
                 ) : (
-                  <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/10">
-                    <Label className="font-black text-xs uppercase tracking-tight flex items-center gap-2 text-foreground"><Eye className="size-3.5 text-accent" /> Daftar Penonton Profil</Label>
+                  <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/5">
+                    <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Eye className="size-3.5" /> Penonton Profil</Label>
                     <Switch 
                       checked={activeAccount.preferences?.publicViews} 
                       onCheckedChange={(val) => updatePreference('publicViews', val)}
                     />
                   </div>
                 )}
-                <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/10">
-                  <Label className="font-black text-xs uppercase tracking-tight flex items-center gap-2 text-foreground"><Heart className="size-3.5 text-rose-500" /> Daftar Penyukat</Label>
+                <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/5">
+                  <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Heart className="size-3.5" /> Penyukat</Label>
                   <Switch 
                     checked={activeAccount.preferences?.publicLikes} 
                     onCheckedChange={(val) => updatePreference('publicLikes', val)}
@@ -162,51 +163,41 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-border shadow-sm rounded-[2rem] overflow-hidden group hover:shadow-md transition-shadow bg-card">
-              <CardHeader className="bg-muted/20 border-b border-border p-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="border-border shadow-sm rounded-2xl overflow-hidden bg-card">
+              <CardHeader className="bg-muted/10 border-b border-border p-4">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Palette className="size-5" />
+                  <div className="size-9 rounded-xl bg-black text-white flex items-center justify-center">
+                    <Palette className="size-4.5" />
                   </div>
-                  <div>
-                    <CardTitle className="text-lg font-bold text-foreground">Tampilan</CardTitle>
-                    <CardDescription className="text-xs font-medium text-muted-foreground">Tema antarmuka sistem.</CardDescription>
-                  </div>
+                  <CardTitle className="text-[14px] font-bold">Tampilan</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="space-y-2">
-                  <Label className="font-bold text-xs flex items-center gap-2">
-                    <Monitor className="size-4 text-muted-foreground" /> Pilih Tema
-                  </Label>
+              <CardContent className="p-5 space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="font-black text-[10px] uppercase tracking-widest text-muted-foreground ml-1">Pilih Tema</Label>
                   <Select value={settings.theme} onValueChange={handleThemeChange}>
-                    <SelectTrigger className="rounded-xl h-11 bg-background text-foreground"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-11 bg-background text-[13px] font-bold shadow-inner"><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="light">Terang</SelectItem><SelectItem value="dark">Gelap</SelectItem><SelectItem value="system">Ikuti Sistem</SelectItem></SelectContent>
                   </Select>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-border shadow-sm rounded-[2rem] overflow-hidden group hover:shadow-md transition-shadow bg-card">
-              <CardHeader className="bg-muted/20 border-b border-border p-5">
+            <Card className="border-border shadow-sm rounded-2xl overflow-hidden bg-card">
+              <CardHeader className="bg-muted/10 border-b border-border p-4">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Globe className="size-5" />
+                  <div className="size-9 rounded-xl bg-black text-white flex items-center justify-center">
+                    <Globe className="size-4.5" />
                   </div>
-                  <div>
-                    <CardTitle className="text-lg font-bold text-foreground">Lokalisasi</CardTitle>
-                    <CardDescription className="text-xs font-medium text-muted-foreground">Format regional dan bahasa.</CardDescription>
-                  </div>
+                  <CardTitle className="text-[14px] font-bold">Lokalisasi</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="space-y-2">
-                  <Label className="font-bold text-xs flex items-center gap-2">
-                    <Globe className="size-4 text-muted-foreground" /> Bahasa Pilihan
-                  </Label>
+              <CardContent className="p-5 space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="font-black text-[10px] uppercase tracking-widest text-muted-foreground ml-1">Bahasa Pilihan</Label>
                   <Select value={language} onValueChange={handleLanguageChange}>
-                    <SelectTrigger className="rounded-xl h-11 bg-background text-foreground"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-11 bg-background text-[13px] font-bold shadow-inner"><SelectValue /></SelectTrigger>
                     <SelectContent>{LANGUAGES.map(lang => (<SelectItem key={lang.code} value={lang.code}>{lang.flag} {lang.label}</SelectItem>))}</SelectContent>
                   </Select>
                 </div>
@@ -214,31 +205,26 @@ export default function SettingsPage() {
             </Card>
           </div>
 
-          <Card className="border-border shadow-sm rounded-[2rem] overflow-hidden group hover:shadow-md transition-shadow bg-card">
-            <CardHeader className="bg-muted/20 border-b border-border p-5">
+          <Card className="border-border shadow-sm rounded-2xl overflow-hidden bg-card">
+            <CardHeader className="bg-muted/10 border-b border-border p-4">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Cpu className="size-5" />
+                <div className="size-9 rounded-xl bg-black text-white flex items-center justify-center">
+                  <Cpu className="size-4.5" />
                 </div>
-                <div>
-                  <CardTitle className="text-lg font-bold text-foreground">Sistem & Informasi</CardTitle>
-                  <CardDescription className="text-xs font-medium text-muted-foreground">Detail aplikasi.</CardDescription>
-                </div>
+                <CardTitle className="text-[14px] font-bold">Sistem & Informasi</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-5 space-y-3">
               <Link href="/settings/info">
-                <button className="w-full flex items-center justify-between p-4 rounded-xl bg-muted/20 hover:bg-black/5 border border-border hover:border-black transition-all group">
+                <button className="w-full flex items-center justify-between p-4 rounded-xl bg-muted/10 hover:bg-black/[0.03] border border-border transition-all">
                   <div className="flex items-center gap-4">
-                    <div className="size-9 rounded-xl bg-card shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Lock className="size-4.5 text-accent" />
-                    </div>
+                    <div className="size-8 rounded-lg bg-card shadow-sm flex items-center justify-center"><Lock className="size-3.5" /></div>
                     <div className="text-left">
-                      <h4 className="font-bold text-sm text-foreground">Info Aplikasi</h4>
-                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">V 2.4.0 Stable</p>
+                      <h4 className="font-bold text-[13px]">Info Aplikasi</h4>
+                      <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">V 2.4.0 Stable</p>
                     </div>
                   </div>
-                  <ChevronRight className="size-4 text-muted-foreground/30 group-hover:text-black transition-colors" />
+                  <ChevronRight className="size-4 text-muted-foreground/30" />
                 </button>
               </Link>
             </CardContent>

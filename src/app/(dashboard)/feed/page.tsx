@@ -24,9 +24,6 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -85,8 +82,8 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
-  // CRITICAL: Stop propagation at capture phase to lock outer swipe exclusively for multi-photo
-  const handleInteraction = (e: React.PointerEvent) => {
+  // ISOLASI TOUCH EVENT: Mencegah bubling ke wrapper kategori beranda
+  const handleGestureStop = (e: React.TouchEvent | React.MouseEvent) => {
     if (images.length > 1) {
       e.stopPropagation();
     }
@@ -95,7 +92,10 @@ function PostMedia({ images }: { images?: string[] }) {
   return (
     <div 
       className="relative group/carousel touch-pan-y" 
-      onPointerDownCapture={handleInteraction}
+      onTouchStart={handleGestureStop}
+      onTouchMove={handleGestureStop}
+      onTouchEnd={handleGestureStop}
+      onMouseDown={handleGestureStop}
     >
       <div className="overflow-hidden rounded-xl border border-border bg-muted/5" ref={emblaRef}>
         <div className="flex">
@@ -230,7 +230,6 @@ export default function FeedPage() {
     setIsPostModalOpen(false);
     setPostContent("");
     setPostImages([]);
-    toast({ title: "Postingan terbit!" });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -357,17 +356,15 @@ export default function FeedPage() {
       <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
         <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
           <div className="p-5 md:p-6 space-y-4">
-            <DialogHeader>
-              <div className="flex items-center justify-between">
-                <DialogTitle className="text-lg font-bold">Buat Postingan</DialogTitle>
-                <div className="w-32">
-                   <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
-                    <SelectTrigger className="h-9 rounded-lg bg-muted/50 border-none text-[11px] font-black uppercase tracking-widest px-3 shadow-inner"><SelectValue /></SelectTrigger>
-                    <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
-                  </Select>
-                </div>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Buat Postingan</h2>
+              <div className="w-32">
+                 <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
+                  <SelectTrigger className="h-9 rounded-lg bg-muted/50 border-none text-[11px] font-black uppercase tracking-widest px-3 shadow-inner"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                </Select>
               </div>
-            </DialogHeader>
+            </div>
             <div className="space-y-3">
               <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-0 resize-none shadow-inner" />
               <div className="flex flex-wrap gap-2">
@@ -380,9 +377,8 @@ export default function FeedPage() {
                 <button onClick={() => fileInputRef.current?.click()} className="size-16 rounded-lg bg-muted/50 border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-black hover:text-black transition-colors"><Plus size={20} /></button>
               </div>
             </div>
-            <DialogFooter>
-              <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-12 rounded-xl bg-black font-bold text-white shadow-lg active:scale-[0.98] transition-all">Posting</Button>
-            </DialogFooter>
+            <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-12 rounded-xl bg-black font-bold text-white shadow-lg active:scale-[0.98] transition-all">Posting</Button>
+            <button onClick={() => setIsPostModalOpen(false)} className="w-full text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground pt-2">Batal</button>
           </div>
         </DialogContent>
       </Dialog>
