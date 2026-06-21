@@ -143,13 +143,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
       { icon: Briefcase, label: t('opportunities'), href: "/opportunities", roles: ['bisnis', 'professional'] },
       { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
-      
-      // Hidden from drawer but part of role check for other locations
-      { icon: Rss, label: t('feed'), href: "/feed", roles: ['pribadi', 'professional', 'bisnis'] },
-      { icon: Search, label: t('search'), href: "/cari", roles: ['pribadi', 'professional', 'bisnis'] },
     ];
 
-    // Filter by role and exclude bottom nav items
+    // Filter by role and exclude bottom nav items to avoid duplication
     return baseItems.filter(item => 
       item.roles.includes(activeAccount?.type || 'pribadi') && 
       item.href !== "/feed" && 
@@ -385,4 +381,3 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-
