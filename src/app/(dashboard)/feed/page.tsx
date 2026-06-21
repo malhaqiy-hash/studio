@@ -27,7 +27,8 @@ import {
   Facebook,
   Music,
   ShoppingBag,
-  MessageCircleCode
+  MessageCircleCode,
+  Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -187,21 +188,19 @@ export default function FeedPage() {
           text: `Lihat postingan menarik dari ${post.author} di OnTapp!`,
           url: shareUrl
         });
-        toast({ title: "Berbagi Berhasil" });
       } catch (error: any) {
         if (error.name === 'AbortError') return;
+        if (error.name === 'NotAllowedError') {
+          navigator.clipboard.writeText(shareUrl);
+          toast({ title: "Tautan Berhasil Disalin", description: "Izin berbagi ditolak, tautan disalin ke papan klip." });
+          return;
+        }
         navigator.clipboard.writeText(shareUrl);
-        toast({ 
-          title: "Tautan Berhasil Disalin", 
-          description: "Laci berbagi sistem tidak dapat diakses, tautan disalin ke papan klip." 
-        });
+        toast({ title: "Tautan Berhasil Disalin" });
       }
     } else {
       navigator.clipboard.writeText(shareUrl);
-      toast({ 
-        title: "Tautan Berhasil Disalin", 
-        description: "Browser tidak mendukung fitur berbagi sistem, tautan telah disalin." 
-      });
+      toast({ title: "Tautan Berhasil Disalin" });
     }
   };
 
@@ -597,20 +596,14 @@ export default function FeedPage() {
 
       {/* Lightbox for Image Expansion */}
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
-        <DialogContent className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none">
+        <DialogContent className="max-w-screen-lg p-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:text-white [&>button]:bg-white/10 [&>button]:hover:bg-white/20 [&>button]:rounded-full [&>button]:size-10 [&>button]:top-6 [&>button]:right-6 [&>button]:p-0 [&>button_svg]:size-6">
           {zoomedImage && (
-            <div className="relative w-full h-full max-h-[90vh] flex items-center justify-center p-4">
+            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4">
               <img 
                 src={zoomedImage} 
                 alt="Expanded view" 
                 className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 fade-in duration-300"
               />
-              <button 
-                onClick={() => setExpandedImage(null)}
-                className="absolute top-4 right-4 p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all active:scale-90"
-              >
-                <X className="size-6" />
-              </button>
             </div>
           )}
         </DialogContent>

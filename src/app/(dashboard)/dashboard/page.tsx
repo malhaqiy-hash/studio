@@ -348,20 +348,14 @@ export default function UserDashboardPage() {
 
       {/* Lightbox for Image Expansion */}
       <Dialog open={!!zoomedImage} onOpenChange={() => setExpandedImage(null)}>
-        <DialogContent className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden">
+        <DialogContent className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden [&>button]:text-white [&>button]:bg-white/10 [&>button]:hover:bg-white/20 [&>button]:rounded-full [&>button]:size-10 [&>button]:top-6 [&>button]:right-6 [&>button]:p-0 [&>button_svg]:size-6">
           {zoomedImage && (
-            <div className="relative w-full h-full max-h-[90vh] flex items-center justify-center p-4">
+            <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4">
               <img 
                 src={zoomedImage} 
                 alt="Expanded view" 
                 className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-200"
               />
-              <button 
-                onClick={() => setExpandedImage(null)}
-                className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
-              >
-                <X className="size-6" />
-              </button>
             </div>
           )}
         </DialogContent>
