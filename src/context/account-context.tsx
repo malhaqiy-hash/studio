@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -94,7 +95,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     if (savedAccounts) {
       try {
         const parsed = JSON.parse(savedAccounts);
-        if (parsed.length > 0) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           const migratedAccounts = parsed.map((acc: Account) => ({
             ...acc,
             preferences: acc.preferences || DEFAULT_PREFERENCES,
