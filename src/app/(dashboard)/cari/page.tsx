@@ -31,7 +31,7 @@ import {
   Radio,
   Calendar,
   Car,
-  Building,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -42,11 +42,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -72,10 +67,6 @@ const SEARCH_CATEGORIES = [
   { id: 'lainnya', label: 'Lainnya', icon: Filter },
 ];
 
-const POPULAR_LOCATIONS = [
-  "Global", "Jakarta", "Surabaya", "Medan", "Bandung", "Bali", "Singapore", "Malaysia", "Tokyo", "London"
-];
-
 export default function CariPage() {
   const { language, t } = useLanguage();
   const { activeAccount } = useAccount();
@@ -86,13 +77,27 @@ export default function CariPage() {
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
   
   const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
-  const [activeLocation, setActiveLocation] = React.useState(language === 'id' ? "Pilih Lokasi" : "Choose Location");
-  const [isLocationOpen, setIsLocationOpen] = React.useState(false);
-  
+  const [activeLocation, setActiveLocation] = React.useState("");
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
   
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
+
+  // 1. Auto-Detect Wilayah saat pertama kali muat
+  React.useEffect(() => {
+    const detectLocation = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        if (data.city && data.country_name) {
+          setActiveLocation(`${data.city}, ${data.country_name}`);
+        }
+      } catch (err) {
+        console.warn("Gagal mendeteksi lokasi otomatis.");
+      }
+    };
+    detectLocation();
+  }, []);
 
   const cleanTitle = (text: string) => text.replace(/^Informasi Terkait:\s*/i, '').trim();
 
@@ -117,7 +122,7 @@ export default function CariPage() {
         query: finalQuery || (finalCategory ? `Cari ${finalCategory}` : "Analisis Gambar"), 
         filters: {
           category: finalCategory || undefined,
-          location: (finalLocation.includes('Lokasi') || finalLocation.includes('Location')) ? undefined : finalLocation
+          location: finalLocation || undefined
         } 
       });
 
@@ -142,6 +147,13 @@ export default function CariPage() {
       handleSearch(undefined, transcript);
     };
     recognition.start();
+  };
+
+  const handleClearLocation = () => {
+    setActiveLocation("");
+    if (query || activeCategory) {
+      handleSearch(undefined, query, activeCategory, "");
+    }
   };
 
   const getTypeIcon = (type: string) => {
@@ -170,6 +182,7 @@ export default function CariPage() {
       <div className="max-w-xl mx-auto space-y-4 py-2 px-1 md:px-0">
         <div className="bg-card p-4 rounded-2xl border border-border shadow-sm space-y-3">
           <form onSubmit={(e) => handleSearch(e)} className="space-y-3">
+            {/* Search Input Utama */}
             <div className="relative group w-full">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search className="size-4 text-muted-foreground" />
@@ -190,7 +203,8 @@ export default function CariPage() {
               {loading ? <RefreshCw className="size-4 animate-spin" /> : <>{t('search_now')}</>}
             </Button>
 
-            <div className="grid grid-cols-2 gap-2">
+            {/* Filter Section: Kategori & Lokasi */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-full h-10 justify-between rounded-lg border-border bg-card text-foreground font-bold hover:bg-muted/50 px-3 text-[10px] uppercase tracking-widest">
@@ -208,28 +222,32 @@ export default function CariPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Popover open={isLocationOpen} onOpenChange={setIsLocationOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full h-10 justify-between rounded-lg border-border bg-card text-foreground font-bold hover:bg-muted/50 px-3 text-[10px] uppercase tracking-widest">
-                    <div className="flex items-center gap-2 max-w-[120px] truncate"><MapPin className="size-3 shrink-0" />{activeLocation}</div>
-                    <ChevronDown className="size-3 opacity-30 shrink-0" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="center" className="w-[240px] rounded-xl p-2 shadow-2xl bg-card border-border space-y-2">
-                  <Button variant="outline" onClick={() => { setIsLocationOpen(false); setActiveLocation("Lokasi GPS"); handleSearch(undefined, query, activeCategory, "Lokasi GPS"); }} className="w-full h-10 rounded-lg border-black/10 bg-black/5 text-black font-black text-[10px] gap-2">
-                    <LocateFixed className="size-4" /> {t('nearby')}
-                  </Button>
-                  <div className="space-y-1 max-h-[160px] overflow-y-auto no-scrollbar">
-                    {POPULAR_LOCATIONS.map((loc) => (
-                      <button key={loc} type="button" onClick={() => { setActiveLocation(loc); setIsLocationOpen(false); }} className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-muted transition-colors">{loc}</button>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
+              {/* Input Lokasi Dinamis dengan Clear Button */}
+              <div className="relative group w-full">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <MapPin className="size-3 text-muted-foreground" />
+                </div>
+                <Input 
+                  value={activeLocation}
+                  onChange={(e) => setActiveLocation(e.target.value)}
+                  placeholder={language === 'id' ? "Ketik Lokasi..." : "Type Location..."}
+                  className="h-10 pl-8 pr-8 rounded-lg border-border bg-card text-[10px] font-black uppercase tracking-widest focus:bg-background transition-all focus:border-black shadow-none"
+                />
+                {activeLocation !== "" && (
+                  <button 
+                    type="button" 
+                    onClick={handleClearLocation}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-black transition-colors"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           </form>
         </div>
 
+        {/* Search Results */}
         {results && (
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
@@ -265,6 +283,7 @@ export default function CariPage() {
           </div>
         )}
 
+        {/* Empty State */}
         {!loading && !results && (
           <div className="py-12 text-center space-y-4 bg-card rounded-2xl border-2 border-dashed border-border/50">
              <div className="size-11 rounded-xl bg-muted flex items-center justify-center mx-auto"><Search className="size-5 text-muted-foreground/20" /></div>
@@ -276,6 +295,7 @@ export default function CariPage() {
         )}
       </div>
 
+      {/* Visual Search Modal */}
       <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>
         <DialogContent className="max-w-[280px] rounded-[1.5rem] bg-card text-foreground p-6 border-none shadow-2xl overflow-hidden outline-none [&>button]:hidden">
           <div className="space-y-6">
