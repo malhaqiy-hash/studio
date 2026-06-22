@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { 
   Select, 
@@ -11,24 +11,40 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { 
+  User, 
+  ShieldCheck, 
+  Lock, 
+  Activity, 
+  History, 
+  MessageSquare, 
+  Bell, 
   Palette, 
-  Languages,
-  Lock,
+  Languages, 
+  Accessibility, 
+  MapPin, 
+  Trash2, 
+  HardDrive, 
+  HelpCircle, 
+  FileText, 
+  Info, 
+  Users, 
+  LogOut, 
   ChevronRight,
-  Cpu,
-  Eye,
-  Heart,
-  Users,
   Zap,
+  Heart,
+  Eye,
+  Smartphone
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage, LANGUAGES } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { useAuth } from "@/firebase";
+import { cn } from "@/lib/utils";
 
-const SETTINGS_KEY = "ontapp_system_settings_v2";
+const SETTINGS_KEY = "ontapp_system_settings_v3";
 
 interface SettingsState {
   theme: string;
@@ -41,7 +57,9 @@ const DEFAULT_SETTINGS: SettingsState = {
 export default function SettingsPage() {
   const { toast } = useToast();
   const { language, setLanguage, t } = useLanguage();
-  const { activeAccount, updateActiveAccount } = useAccount();
+  const { activeAccount, availableAccounts, switchAccount, updateActiveAccount } = useAccount();
+  const auth = useAuth();
+  const router = useRouter();
   
   const [mounted, setMounted] = React.useState(false);
   const [settings, setSettings] = React.useState<SettingsState>(DEFAULT_SETTINGS);
@@ -86,11 +104,20 @@ export default function SettingsPage() {
     toast({ title: "Bahasa Diperbarui" });
   };
 
-  const updatePreference = (key: string, value: boolean) => {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+  const updatePrivacy = (key: string, val: string) => {
     updateActiveAccount({
       preferences: {
         ...activeAccount.preferences,
-        [key]: value
+        [key]: val
       }
     });
     toast({ title: "Privasi Diperbarui" });
@@ -98,133 +125,197 @@ export default function SettingsPage() {
 
   if (!mounted) return <DashboardLayout><div className="max-w-5xl mx-auto py-4 animate-pulse h-96 bg-card rounded-3xl" /></DashboardLayout>;
 
+  const MenuList = ({ items }: { items: any[] }) => (
+    <div className="flex flex-col bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+      {items.map((item, idx) => (
+        <div key={idx} className="group relative">
+          {item.href ? (
+            <button onClick={() => router.push(item.href)} className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className={cn("size-9 rounded-xl flex items-center justify-center shadow-sm", item.bg || "bg-muted text-muted-foreground")}>
+                  <item.icon className="size-4.5" />
+                </div>
+                <div className="text-left">
+                  <h4 className="font-bold text-[14px] leading-none">{item.label}</h4>
+                  {item.desc && <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}
+                </div>
+              </div>
+              <ChevronRight className="size-4 text-muted-foreground/30 group-hover:text-black transition-colors" />
+            </button>
+          ) : (
+            <div className="p-4 flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <div className={cn("size-9 rounded-xl flex items-center justify-center shadow-sm", item.bg || "bg-muted text-muted-foreground")}>
+                  <item.icon className="size-4.5" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-[14px] leading-none">{item.label}</h4>
+                  {item.desc && <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}
+                </div>
+              </div>
+              {item.content}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-4 pb-20 pt-2">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card p-5 rounded-2xl border border-border shadow-sm">
-          <div className="space-y-0.5">
-            <h1 className="text-xl font-black text-foreground tracking-tight uppercase">{t('settings')}</h1>
-            <p className="text-muted-foreground font-medium text-[11px] uppercase tracking-wider">Perubahan disimpan otomatis</p>
+      <div className="max-w-2xl mx-auto space-y-8 pb-32 pt-4 px-1">
+        <header className="space-y-1">
+          <h1 className="text-2xl font-black tracking-tight text-foreground uppercase">{t('settings')}</h1>
+          <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Manajemen sistem dan ekosistem</p>
+        </header>
+
+        {/* GROUP 1: AKUN */}
+        <section className="space-y-3">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Akun & Keamanan</h3>
+          <MenuList items={[
+            { icon: User, label: "Kelola Akun", desc: "Profil, Tipe Akun, Lencana", href: "/profile", bg: "bg-black text-white" },
+            { 
+              icon: ShieldCheck, 
+              label: "Izin Keamanan & Privasi Sosial", 
+              desc: "Enkripsi & Manajemen Perangkat",
+              content: (
+                <div className="space-y-4 pt-2">
+                  <div className="grid gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Pengikut?</Label>
+                      <Select value={activeAccount.preferences?.whoCanSeeFollowers} onValueChange={(v) => updatePrivacy('whoCanSeeFollowers', v)}>
+                        <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Mengikuti?</Label>
+                      <Select value={activeAccount.preferences?.whoCanSeeFollowing} onValueChange={(v) => updatePrivacy('whoCanSeeFollowing', v)}>
+                        <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Suka?</Label>
+                      <Select value={activeAccount.preferences?.whoCanSeeLikes} onValueChange={(v) => updatePrivacy('whoCanSeeLikes', v)}>
+                        <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Subscribe?</Label>
+                      <Select value={activeAccount.preferences?.whoCanSeeSubscribe} onValueChange={(v) => updatePrivacy('whoCanSeeSubscribe', v)}>
+                        <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )
+            }
+          ]} />
+        </section>
+
+        {/* GROUP 2: AKTIVITAS */}
+        <section className="space-y-3">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Aktivitas & Interaksi</h3>
+          <MenuList items={[
+            { icon: Activity, label: "Kelola Aktivitas", desc: "Log, Waktu Layar", href: "/dashboard" },
+            { icon: History, label: "Preferensi", desc: "Filter Minat, Muted Words", href: "#" },
+            { icon: MessageSquare, label: "Interaksi & Pesan", desc: "Izin Komentar, Balasan Otomatis", href: "/messages" },
+            { icon: Bell, label: "Notifikasi", desc: "Push, Chat, Email", href: "/notifications" }
+          ]} />
+        </section>
+
+        {/* GROUP 3: TAMPILAN */}
+        <section className="space-y-3">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Sistem & Tampilan</h3>
+          <MenuList items={[
+            { 
+              icon: Palette, 
+              label: "Mode Tampilan", 
+              desc: "Tema Antarmuka",
+              content: (
+                <Select value={settings.theme} onValueChange={handleThemeChange}>
+                  <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs shadow-inner"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="light">Terang</SelectItem><SelectItem value="dark">Gelap</SelectItem><SelectItem value="system">Ikuti Sistem HP</SelectItem></SelectContent>
+                </Select>
+              )
+            },
+            { 
+              icon: Languages, 
+              label: "Bahasa", 
+              desc: "Lokalisasi Aplikasi",
+              content: (
+                <Select value={language} onValueChange={handleLanguageChange}>
+                  <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs shadow-inner"><SelectValue /></SelectTrigger>
+                  <SelectContent>{LANGUAGES.map(lang => (<SelectItem key={lang.code} value={lang.code}>{lang.flag} {lang.label}</SelectItem>))}</SelectContent>
+                </Select>
+              )
+            },
+            { icon: Accessibility, label: "Aksesibilitas", desc: "Ukuran Teks, Auto-Play", href: "#" },
+            { icon: MapPin, label: "Kontak dan Lokasi", desc: "IP Geolocation, Sinkronisasi", href: "/cari" }
+          ]} />
+        </section>
+
+        {/* GROUP 4: PENYIMPANAN */}
+        <section className="space-y-3">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Penyimpanan</h3>
+          <MenuList items={[
+            { 
+              icon: Trash2, 
+              label: "Hapus Cache", 
+              desc: "Bersihkan File Sampah",
+              content: (
+                <button onClick={() => toast({ title: "Cache Berhasil Dihapus" })} className="w-full h-10 rounded-xl bg-muted/30 hover:bg-black/5 text-[11px] font-black uppercase tracking-widest transition-all">Bersihkan Sekarang</button>
+              )
+            },
+            { icon: HardDrive, label: "Kelola Data", desc: "Penghemat Data, Unduh ZIP", href: "#" }
+          ]} />
+        </section>
+
+        {/* GROUP 5: DUKUNGAN */}
+        <section className="space-y-3">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Dukungan & Tentang</h3>
+          <MenuList items={[
+            { icon: HelpCircle, label: "Pusat Bantuan", desc: "FAQ, Hubungi CS", href: "/knowledge" },
+            { icon: FileText, label: "Ketentuan & Kebijakan", desc: "Privasi, Data Pengguna", href: "#" },
+            { icon: Info, label: "Info Aplikasi", desc: "V 2.4.0-Stable", href: "/settings/info" }
+          ]} />
+        </section>
+
+        {/* AKSES CEPAT PALING BAWAH */}
+        <div className="space-y-3 pt-6">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Sesi</h3>
+          <div className="flex flex-col bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border shadow-sm">
+            <button 
+              onClick={() => {
+                const nextAcc = availableAccounts.find(a => a.id !== activeAccount.id) || availableAccounts[0];
+                switchAccount(nextAcc.id);
+                toast({ title: `Beralih ke ${nextAcc.name}` });
+                router.push("/profile");
+              }}
+              className="w-full flex items-center justify-between p-5 hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <div className="size-9 rounded-xl bg-black text-white flex items-center justify-center"><Users className="size-4.5" /></div>
+                <span className="font-bold text-[14px]">Beralih Akun</span>
+              </div>
+              <ChevronRight className="size-4 text-muted-foreground/30" />
+            </button>
+            <button onClick={handleLogout} className="w-full flex items-center justify-between p-5 hover:bg-rose-50 transition-colors group">
+              <div className="flex items-center gap-4 text-rose-600">
+                <div className="size-9 rounded-xl bg-rose-100 flex items-center justify-center"><LogOut className="size-4.5" /></div>
+                <span className="font-black text-[14px] uppercase tracking-wide">Logout</span>
+              </div>
+              <ChevronRight className="size-4 text-rose-300 group-hover:text-rose-600 transition-colors" />
+            </button>
           </div>
         </div>
 
-        <div className="grid gap-4">
-          <Card className="border-border shadow-sm rounded-2xl overflow-hidden">
-            <CardHeader className="bg-black text-white p-5">
-              <div className="flex items-center gap-3">
-                <div className="size-9 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Lock className="size-4.5 text-accent" />
-                </div>
-                <div>
-                  <CardTitle className="text-[15px] font-black uppercase tracking-tight">Privasi & Visibilitas</CardTitle>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-5 bg-card">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {activeAccount.type === 'pribadi' ? (
-                  <>
-                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/5">
-                      <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Users className="size-3.5" /> Pengikut</Label>
-                      <Switch 
-                        checked={activeAccount.preferences?.publicFollowers} 
-                        onCheckedChange={(val) => updatePreference('publicFollowers', val)}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/5">
-                      <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Users className="size-3.5" /> Mengikuti</Label>
-                      <Switch 
-                        checked={activeAccount.preferences?.publicFollowing} 
-                        onCheckedChange={(val) => updatePreference('publicFollowing', val)}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/5">
-                    <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Zap className="size-3.5" /> Subscribe (Penonton)</Label>
-                    <Switch 
-                      checked={activeAccount.preferences?.publicViews} 
-                      onCheckedChange={(val) => updatePreference('publicViews', val)}
-                    />
-                  </div>
-                )}
-                <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/5">
-                  <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Heart className="size-3.5" /> Penyukat (Suka)</Label>
-                  <Switch 
-                    checked={activeAccount.preferences?.publicLikes} 
-                    onCheckedChange={(val) => updatePreference('publicLikes', val)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="border-border shadow-sm rounded-2xl overflow-hidden bg-card">
-              <CardHeader className="bg-muted/10 border-b border-border p-4">
-                <div className="flex items-center gap-3">
-                  <div className="size-9 rounded-xl bg-black text-white flex items-center justify-center">
-                    <Palette className="size-4.5" />
-                  </div>
-                  <CardTitle className="text-[14px] font-bold">Tampilan</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-5 space-y-4">
-                <div className="space-y-1.5">
-                  <Label className="font-black text-[10px] uppercase tracking-widest text-muted-foreground ml-1">Pilih Tema</Label>
-                  <Select value={settings.theme} onValueChange={handleThemeChange}>
-                    <SelectTrigger className="rounded-xl h-11 bg-background text-[13px] font-bold shadow-inner"><SelectValue /></SelectTrigger>
-                    <SelectContent><SelectItem value="light">Terang</SelectItem><SelectItem value="dark">Gelap</SelectItem><SelectItem value="system">Ikuti Sistem</SelectItem></SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border shadow-sm rounded-2xl overflow-hidden bg-card">
-              <CardHeader className="bg-muted/10 border-b border-border p-4">
-                <div className="flex items-center gap-3">
-                  <div className="size-9 rounded-xl bg-black text-white flex items-center justify-center">
-                    <Languages className="size-4.5" />
-                  </div>
-                  <CardTitle className="text-[14px] font-bold">Lokalisasi</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-5 space-y-4">
-                <div className="space-y-1.5">
-                  <Label className="font-black text-[10px] uppercase tracking-widest text-muted-foreground ml-1">Bahasa Pilihan</Label>
-                  <Select value={language} onValueChange={handleLanguageChange}>
-                    <SelectTrigger className="rounded-xl h-11 bg-background text-[13px] font-bold shadow-inner"><SelectValue /></SelectTrigger>
-                    <SelectContent>{LANGUAGES.map(lang => (<SelectItem key={lang.code} value={lang.code}>{lang.flag} {lang.label}</SelectItem>))}</SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="border-border shadow-sm rounded-2xl overflow-hidden bg-card">
-            <CardHeader className="bg-muted/10 border-b border-border p-4">
-              <div className="flex items-center gap-3">
-                <div className="size-9 rounded-xl bg-black text-white flex items-center justify-center">
-                  <Cpu className="size-4.5" />
-                </div>
-                <CardTitle className="text-[14px] font-bold">Sistem & Informasi</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="p-5 space-y-3">
-              <Link href="/settings/info">
-                <button className="w-full flex items-center justify-between p-4 rounded-xl bg-muted/10 hover:bg-black/[0.03] border border-border transition-all">
-                  <div className="flex items-center gap-4">
-                    <div className="size-8 rounded-lg bg-card shadow-sm flex items-center justify-center"><Lock className="size-3.5" /></div>
-                    <div className="text-left">
-                      <h4 className="font-bold text-[13px]">Info Aplikasi</h4>
-                      <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">V 2.4.0 Stable</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="size-4 text-muted-foreground/30" />
-                </button>
-              </Link>
-            </CardContent>
-          </Card>
+        <div className="text-center space-y-1">
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">OnTapp Intelligence Network</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">© 2025 ALL RIGHTS RESERVED</p>
         </div>
       </div>
     </DashboardLayout>

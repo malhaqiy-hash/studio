@@ -6,11 +6,11 @@ export type AccountType = 'pribadi' | 'professional' | 'bisnis';
 
 export interface ContentItem {
   id: string;
-  image?: string; // Fallback for old single image data
-  images?: string[]; // Array for multi-photo support
+  image?: string; 
+  images?: string[]; 
   title?: string;
   description?: string;
-  categoryName?: string; // New field for grouping
+  categoryName?: string; 
   price?: string;
   visibility?: 'public' | 'private';
   timestamp?: string;
@@ -23,7 +23,11 @@ export interface AccountPreferences {
   publicFollowers?: boolean;
   publicFollowing?: boolean;
   publicLikes?: boolean;
-  publicViews?: boolean; // For subscribe/views logic
+  publicViews?: boolean;
+  whoCanSeeFollowers?: 'public' | 'friends' | 'private';
+  whoCanSeeFollowing?: 'public' | 'friends' | 'private';
+  whoCanSeeLikes?: 'public' | 'friends' | 'private';
+  whoCanSeeSubscribe?: 'public' | 'friends' | 'private';
 }
 
 export interface Account {
@@ -59,6 +63,10 @@ const DEFAULT_PREFERENCES: AccountPreferences = {
   publicFollowing: true,
   publicLikes: true,
   publicViews: true,
+  whoCanSeeFollowers: 'public',
+  whoCanSeeFollowing: 'public',
+  whoCanSeeLikes: 'public',
+  whoCanSeeSubscribe: 'public',
 };
 
 const DEFAULT_PRIBADI: Account = { 

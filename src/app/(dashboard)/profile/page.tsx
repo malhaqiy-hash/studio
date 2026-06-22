@@ -70,7 +70,6 @@ export default function ProfilePage() {
   const [shareUrl, setShareUrl] = React.useState("");
 
   const [mediaTarget, setMediaTarget] = React.useState<'avatar' | 'cover' | 'post'>('avatar');
-  const [isCloudLoading, setIsCloudLoading] = React.useState(false);
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
   
   const [isNewCategory, setIsNewCategory] = React.useState(false);
