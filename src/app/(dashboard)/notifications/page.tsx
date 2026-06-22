@@ -10,15 +10,26 @@ import {
   MessageSquare, 
   Handshake, 
   Clock, 
-  ChevronRight,
-  MoreVertical,
-  Zap,
-  Trash2,
-  Inbox
+  ChevronRight, 
+  MoreVertical, 
+  Zap, 
+  Trash2, 
+  Inbox,
+  Eye,
+  EyeOff,
+  VolumeX,
+  AlertTriangle
 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const INITIAL_NOTIFICATIONS = [
   {
@@ -46,6 +57,7 @@ const INITIAL_NOTIFICATIONS = [
 export default function NotificationsPage() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { toast } = useToast();
   const [notifications, setNotifications] = React.useState(INITIAL_NOTIFICATIONS);
   const [isAllRead, setIsAllRead] = React.useState(false);
 
@@ -53,23 +65,35 @@ export default function NotificationsPage() {
     const nextStatus = !isAllRead;
     setIsAllRead(nextStatus);
     setNotifications(prev => prev.map(n => ({ ...n, unread: !nextStatus })));
+    toast({ title: nextStatus ? "Semua ditandai dibaca" : "Semua ditandai belum dibaca" });
   };
 
   const handleClearAll = () => {
     setNotifications([]);
+    toast({ title: "Kotak masuk dibersihkan" });
   };
 
   const deleteNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
+  const toggleReadStatus = (id: string) => {
+    setNotifications(prev => prev.map(n => 
+      n.id === id ? { ...n, unread: !n.unread } : n
+    ));
+  };
+
+  const handleMute = (title: string) => {
+    toast({ title: "Akun Disenyapkan", description: `Notifikasi dari ${title} akan disembunyikan.` });
+  };
+
+  const handleReport = () => {
+    toast({ variant: "destructive", title: "Laporan Terkirim", description: "Tim moderasi akan meninjau notifikasi ini." });
   };
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 pb-10 relative">
+      <div className="space-y-8 pb-24 relative">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-1">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-black font-black text-[10px] uppercase tracking-[0.2em]">
@@ -102,7 +126,7 @@ export default function NotificationsPage() {
           </div>
         </header>
 
-        <div className="space-y-3 overflow-hidden">
+        <div className="space-y-3 overflow-hidden min-h-[300px]">
           <AnimatePresence initial={false}>
             {notifications.map((notification) => (
               <motion.div
@@ -111,14 +135,14 @@ export default function NotificationsPage() {
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 500, damping: 30, opacity: { duration: 0.2 } }}
+                className="overflow-hidden"
               >
-                <div className="relative group overflow-hidden rounded-[1.5rem] bg-card border border-border shadow-sm hover:shadow-md transition-shadow">
-                  {/* Swipe Action Area (Visual Only for Notifications as per specific request for Messages, but keeping consistency) */}
+                <div className="relative group rounded-[1.5rem] bg-card border border-border shadow-sm hover:shadow-md transition-shadow">
                   <div className={cn(
-                    "relative z-10 bg-card",
-                    notification.unread ? 'border-l-4 border-l-black' : 'bg-muted/10 opacity-80'
+                    "relative z-10 bg-card transition-colors duration-300",
+                    notification.unread ? 'border-l-4 border-l-black' : 'bg-muted/5 opacity-90'
                   )}>
-                    <CardContent className="p-5 md:p-6" onClick={() => markAsRead(notification.id)}>
+                    <CardContent className="p-5 md:p-6">
                       <div className="flex items-start gap-4">
                         <div className={cn("size-12 rounded-2xl flex items-center justify-center shrink-0 shadow-inner", notification.color)}>
                           <notification.icon className="size-6" />
@@ -141,23 +165,53 @@ export default function NotificationsPage() {
                           <p className="text-[13px] text-muted-foreground font-medium leading-relaxed line-clamp-2">
                             {notification.description}
                           </p>
-                          <div className="pt-2 flex items-center gap-4">
+                          <div className="pt-2 flex items-center justify-between">
                              <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase text-black hover:bg-black/5 rounded-lg">
                                {t('take_action')}
                                <ChevronRight className="size-3 ml-1" />
                              </Button>
-                             <div className="ml-auto flex gap-1">
+                             
+                             <div className="flex items-center gap-1">
                                <Button 
                                   variant="ghost" 
                                   size="icon" 
-                                  onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
-                                  className="size-8 rounded-lg text-rose-500 hover:bg-rose-50"
+                                  onClick={() => deleteNotification(notification.id)}
+                                  className="size-9 rounded-xl text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition-all active:scale-90"
                                 >
                                  <Trash2 className="size-4" />
                                </Button>
-                               <Button variant="ghost" size="icon" className="size-8 rounded-lg text-muted-foreground">
-                                 <MoreVertical className="size-4" />
-                               </Button>
+
+                               <DropdownMenu>
+                                 <DropdownMenuTrigger asChild>
+                                   <Button variant="ghost" size="icon" className="size-9 rounded-xl text-muted-foreground hover:text-black hover:bg-black/5 transition-all active:scale-90 outline-none">
+                                     <MoreVertical className="size-4" />
+                                   </Button>
+                                 </DropdownMenuTrigger>
+                                 <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-2xl border-border bg-card animate-in zoom-in-95 duration-200">
+                                   <DropdownMenuItem 
+                                     onClick={() => toggleReadStatus(notification.id)}
+                                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold cursor-pointer hover:bg-muted"
+                                   >
+                                     {notification.unread ? (
+                                       <><Eye className="size-4" /> Tandai Sudah Dibaca</>
+                                     ) : (
+                                       <><EyeOff className="size-4" /> Tandai Belum Dibaca</>
+                                     )}
+                                   </DropdownMenuItem>
+                                   <DropdownMenuItem 
+                                     onClick={() => handleMute(notification.title)}
+                                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold cursor-pointer hover:bg-muted"
+                                   >
+                                     <VolumeX className="size-4" /> Senyapkan Akun Ini
+                                   </DropdownMenuItem>
+                                   <DropdownMenuItem 
+                                     onClick={handleReport}
+                                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold cursor-pointer text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+                                   >
+                                     <AlertTriangle className="size-4" /> Laporkan Notifikasi
+                                   </DropdownMenuItem>
+                                 </DropdownMenuContent>
+                               </DropdownMenu>
                              </div>
                           </div>
                         </div>
