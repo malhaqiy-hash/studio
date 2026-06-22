@@ -10,6 +10,7 @@ export interface ContentItem {
   images?: string[]; // Array for multi-photo support
   title?: string;
   description?: string;
+  categoryName?: string; // New field for grouping
   price?: string;
   visibility?: 'public' | 'private';
   timestamp?: string;

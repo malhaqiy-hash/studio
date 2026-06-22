@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { ShareSheet } from '@/components/share-sheet';
+import { cn } from '@/lib/utils';
 
 function getSmartIcon(url: string) {
   const lower = url.toLowerCase();
@@ -69,14 +70,36 @@ export default function ProfilePage() {
   const [mediaTarget, setMediaTarget] = React.useState<'avatar' | 'cover' | 'post'>('avatar');
   const [isCloudLoading, setIsCloudLoading] = React.useState(false);
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
+  
+  // Modal Postingan State
+  const [isNewCategory, setIsNewCategory] = React.useState(false);
   const [newItem, setNewItem] = React.useState<Partial<ContentItem>>({
     visibility: 'public',
     images: [],
-    locationLink: ''
+    locationLink: '',
+    categoryName: ''
   });
   
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Grouping Items for Pro/Biz
+  const groupedItems = React.useMemo(() => {
+    const items = (activeAccount.items || []).filter(i => i.source === 'profile');
+    if (activeAccount.type === 'pribadi') return { 'Inspirasi': items };
+    
+    const groups: Record<string, ContentItem[]> = {};
+    items.forEach(item => {
+      const cat = item.categoryName || 'Lainnya';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(item);
+    });
+    return groups;
+  }, [activeAccount.items, activeAccount.type]);
+
+  const existingCategories = React.useMemo(() => {
+    return Array.from(new Set((activeAccount.items || []).map(i => i.categoryName).filter(Boolean)));
+  }, [activeAccount.items]);
 
   const handleSaveBio = () => {
     updateActiveAccount(tempAccount);
@@ -114,29 +137,24 @@ export default function ProfilePage() {
     }
   };
 
-  const handleCloudSource = (source: 'drive' | 'photos') => {
-    setIsCloudLoading(true);
-    toast({ title: `Menghubungkan ${source}...` });
-    setTimeout(() => {
-      const simulatedUrl = `https://picsum.photos/seed/cloud${Date.now()}/800/600`;
-      if (mediaTarget === 'avatar') updateActiveAccount({ avatar: simulatedUrl });
-      else if (mediaTarget === 'post') setNewItem(prev => ({ ...prev, images: [...(prev.images || []), simulatedUrl] }));
-      setIsCloudLoading(false);
-      setIsMediaPickerOpen(false);
-    }, 1200);
-  };
-
   const handleAddContent = () => {
+    if ((activeAccount.type === 'bisnis' || activeAccount.type === 'professional') && !newItem.categoryName) {
+      toast({ variant: "destructive", title: "Kategori wajib diisi." });
+      return;
+    }
+    
     addPost({
       images: newItem.images || [],
       title: newItem.title || 'Katalog Baru',
       description: newItem.description || '',
       visibility: newItem.visibility || 'public',
       locationLink: newItem.locationLink,
+      categoryName: newItem.categoryName,
       source: 'profile'
     });
     setIsContentModalOpen(false);
-    setNewItem({ visibility: 'public', images: [], locationLink: '' });
+    setNewItem({ visibility: 'public', images: [], locationLink: '', categoryName: '' });
+    setIsNewCategory(false);
     toast({ title: 'Konten dipublikasikan' });
   };
 
@@ -156,7 +174,6 @@ export default function ProfilePage() {
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
 
         <section className="relative group">
-          {/* Cover Photo: Aspect Ratio 1640 x 624 */}
           <div className="aspect-[1640/624] w-full bg-muted border-b border-border relative overflow-hidden rounded-xl md:rounded-2xl">
             <img 
               src={activeAccount.cover || `https://picsum.photos/seed/${activeAccount.id}_cover/1640/624`} 
@@ -185,7 +202,7 @@ export default function ProfilePage() {
 
           <div className="px-4 md:px-6 -mt-12 md:-mt-14 flex flex-col items-start gap-3">
             <div className="relative group/avatar">
-              <Avatar className="size-24 md:size-32 border-[4px] border-background dark:border-card shadow-lg rounded-2xl cursor-zoom-in">
+              <Avatar className="size-24 md:size-32 border-[4px] border-background dark:border-card shadow-lg rounded-2xl">
                 <AvatarImage src={activeAccount.avatar} className="object-cover" />
                 <AvatarFallback className="bg-accent/10 text-accent font-bold text-xl">{activeAccount.name[0]}</AvatarFallback>
               </Avatar>
@@ -222,43 +239,68 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        <section className="px-4 md:px-6 space-y-4">
+        <section className="px-4 md:px-6 space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Portofolio & Produk</h3>
             <Button size="sm" onClick={() => setIsContentModalOpen(true)} className="rounded-xl h-9 bg-accent hover:bg-accent/90 gap-1.5 font-bold text-xs uppercase tracking-widest px-4 shadow-lg text-white"><PlusCircle className="size-4" /> Tambah Item</Button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 md:gap-6">
-            {(activeAccount.items || []).filter(i => i.source === 'profile').map((item) => (
-              <div key={item.id} className="relative group">
-                <Card className="rounded-xl border-none shadow-sm overflow-hidden bg-card hover:shadow-lg transition-all group">
-                  {item.images && item.images.length > 0 && (
-                    <div className="aspect-square w-full overflow-hidden relative cursor-zoom-in" onClick={() => setZoomedImage(item.images![0])}>
-                      <img src={item.images[0]} className="w-full h-full object-cover" alt={item.title} />
-                      {item.images.length > 1 && <div className="absolute bottom-1 right-1 bg-black/60 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">{item.images.length} Foto</div>}
-                    </div>
-                  )}
-                  <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                    <button onClick={() => handleSharePost(item.id)} className="size-8 bg-black/60 text-white rounded-lg flex items-center justify-center shadow-lg"><Share2 className="size-4" /></button>
-                    <button onClick={() => removePost(item.id)} className="size-8 bg-rose-500 text-white rounded-lg flex items-center justify-center shadow-lg"><Trash2 className="size-4" /></button>
+          <div className="flex flex-col space-y-10">
+            {Object.entries(groupedItems).map(([category, items]) => (
+              <div key={category} className="space-y-4">
+                <div className="flex items-center justify-between px-1">
+                   <h4 className="text-lg font-black text-slate-900 tracking-tight uppercase border-l-4 border-black pl-3">{category}</h4>
+                   <Badge variant="secondary" className="text-[10px] font-black">{items.length} Item</Badge>
+                </div>
+                
+                {activeAccount.type === 'pribadi' ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    {items.map((item) => (
+                      <Card key={item.id} className="rounded-xl border-none shadow-sm overflow-hidden bg-card hover:shadow-lg transition-all group">
+                        {item.images && item.images.length > 0 && (
+                          <div className="aspect-square w-full overflow-hidden relative cursor-zoom-in" onClick={() => setZoomedImage(item.images![0])}>
+                            <img src={item.images[0]} className="w-full h-full object-cover" alt={item.title} />
+                            {item.images.length > 1 && <div className="absolute bottom-1 right-1 bg-black/60 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">{item.images.length} Foto</div>}
+                          </div>
+                        )}
+                        <CardContent className="p-3 space-y-1">
+                          <h5 className="font-bold text-[14px] line-clamp-1">{item.title}</h5>
+                          <p className="text-muted-foreground text-[12px] line-clamp-2">{item.description}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                  <CardContent className="p-3 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-slate-900 text-[14px] line-clamp-1">{item.title}</h4>
-                      <div className="flex items-center gap-1.5">
-                        {item.locationLink && <div className="text-muted-foreground">{getSmartIcon(item.locationLink)}</div>}
-                        {item.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
+                ) : (
+                  <div className="flex overflow-x-auto no-scrollbar space-x-4 px-1 pb-4 snap-x">
+                    {items.map((item) => (
+                      <div key={item.id} className="w-36 md:w-40 flex-shrink-0 snap-start">
+                        <Card className="rounded-2xl border-none shadow-md overflow-hidden bg-card hover:shadow-xl transition-all relative group">
+                          {item.images && item.images.length > 0 && (
+                            <div className="aspect-square w-full overflow-hidden relative cursor-zoom-in" onClick={() => setZoomedImage(item.images![0])}>
+                              <img src={item.images[0]} className="w-full h-full object-cover" alt={item.title} />
+                              {item.images.length > 1 && <div className="absolute top-1 right-1 bg-black/60 text-white px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase">{item.images.length} Foto</div>}
+                            </div>
+                          )}
+                          <div className="absolute top-1 left-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); handleSharePost(item.id); }} className="size-7 bg-black/60 text-white rounded-lg flex items-center justify-center shadow-lg"><Share2 className="size-3.5" /></button>
+                            <button onClick={(e) => { e.stopPropagation(); removePost(item.id); }} className="size-7 bg-rose-500 text-white rounded-lg flex items-center justify-center shadow-lg"><Trash2 className="size-3.5" /></button>
+                          </div>
+                          <CardContent className="p-3 space-y-0.5">
+                            <h5 className="font-black text-slate-900 text-[13px] truncate leading-none">{item.title}</h5>
+                            <p className="text-slate-400 text-[11px] font-medium line-clamp-2 leading-tight h-7">{item.description}</p>
+                          </CardContent>
+                        </Card>
                       </div>
-                    </div>
-                    <p className="text-muted-foreground text-[12px] font-normal line-clamp-2 leading-snug">{item.description}</p>
-                  </CardContent>
-                </Card>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </section>
       </div>
 
+      {/* Modal Edit Bio */}
       <Dialog open={isBioModalOpen} onOpenChange={setIsBioModalOpen}>
         <DialogContent className="w-[90%] md:max-sm rounded-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden">
           <DialogHeader><DialogTitle className="text-lg font-bold text-slate-900">Ubah Profil</DialogTitle></DialogHeader>
@@ -277,6 +319,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
+      {/* Modal Tambah Konten */}
       <Dialog open={isContentModalOpen} onOpenChange={setIsContentModalOpen}>
         <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden">
           <DialogHeader className="flex flex-row items-center justify-between">
@@ -300,6 +343,46 @@ export default function ProfilePage() {
                 <PlusCircle className="size-8 text-muted-foreground" />
               </div>
             </div>
+
+            {/* Kategori Dinamis untuk Pro/Biz */}
+            {(activeAccount.type === 'bisnis' || activeAccount.type === 'professional') && (
+              <div className="space-y-3 p-4 bg-muted/20 rounded-2xl">
+                 <Label className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Kategori Postingan *</Label>
+                 <Select 
+                   value={isNewCategory ? "new" : newItem.categoryName} 
+                   onValueChange={(val) => {
+                     if (val === 'new') {
+                       setIsNewCategory(true);
+                       setNewItem({...newItem, categoryName: ''});
+                     } else {
+                       setIsNewCategory(false);
+                       setNewItem({...newItem, categoryName: val});
+                     }
+                   }}
+                 >
+                   <SelectTrigger className="rounded-xl h-11 bg-card border-none shadow-sm font-bold text-sm">
+                     <SelectValue placeholder="Pilih Kategori" />
+                   </SelectTrigger>
+                   <SelectContent>
+                      <SelectItem value="new" className="font-black text-accent">+ Buat Kategori Baru</SelectItem>
+                      {existingCategories.map(cat => (
+                        <SelectItem key={cat} value={cat!}>{cat}</SelectItem>
+                      ))}
+                   </SelectContent>
+                 </Select>
+
+                 {isNewCategory && (
+                   <Input 
+                     autoFocus
+                     placeholder="Nama Kategori Baru" 
+                     value={newItem.categoryName} 
+                     onChange={(e) => setNewItem({...newItem, categoryName: e.target.value})} 
+                     className="rounded-xl h-11 bg-white border-black/10 focus:border-black transition-all font-bold px-4"
+                   />
+                 )}
+              </div>
+            )}
+
             <div className="space-y-2"><Label className="font-bold text-xs uppercase text-muted-foreground">Judul Item</Label><Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-xl h-12 bg-muted/20 border-none px-4 text-sm font-bold" /></div>
             <div className="space-y-2"><Label className="font-bold text-xs uppercase text-muted-foreground">Deskripsi</Label><Textarea value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="rounded-xl bg-muted/20 border-none min-h-[100px] px-4 text-sm font-medium" /></div>
             <div className="space-y-2">
@@ -310,10 +393,11 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-          <DialogFooter className="mt-6"><Button onClick={handleAddContent} disabled={!newItem.images?.length} className="w-full h-12 rounded-xl bg-accent font-bold text-white text-sm uppercase shadow-lg active:scale-95 transition-all">Posting</Button></DialogFooter>
+          <DialogFooter className="mt-6"><Button onClick={handleAddContent} disabled={!newItem.images?.length || ((activeAccount.type !== 'pribadi') && !newItem.categoryName)} className="w-full h-12 rounded-xl bg-accent font-bold text-white text-sm uppercase shadow-lg active:scale-95 transition-all">Posting</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* Modal Zoom Gambar */}
       <Dialog open={!!zoomedImage} onOpenChange={() => setZoomedImage(null)}>
         <DialogContent 
           className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
