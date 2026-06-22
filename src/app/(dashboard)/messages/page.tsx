@@ -69,7 +69,7 @@ export default function MessagesPage() {
                   transition={{ type: "spring", stiffness: 500, damping: 35 }}
                   className="relative group overflow-hidden"
                 >
-                  {/* Swipe Background Action (Revealed on Swipe) */}
+                  {/* Swipe Background Action */}
                   <div className="absolute inset-y-0 right-0 w-20 flex items-center justify-center bg-rose-500 rounded-2xl">
                     <button 
                       onClick={() => deleteChat(chat.id)}
@@ -86,7 +86,7 @@ export default function MessagesPage() {
                     dragConstraints={{ left: -80, right: 0 }}
                     dragElastic={0.05}
                     dragDirectionLock
-                    onDragStart={() => {}} // placeholder to ensure interaction
+                    onDragStart={() => {}} 
                     style={{ touchAction: 'pan-y' }}
                     onClick={() => setSelectedChat(chat)}
                     className={cn(
@@ -124,7 +124,7 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        {/* Chat Window Container */}
+        {/* Chat Window */}
         {selectedChat ? (
           <div className="flex-1 hidden md:flex flex-col animate-in fade-in duration-300">
             <header className="h-20 border-b border-border px-8 flex items-center justify-between bg-background/50">
@@ -164,7 +164,7 @@ export default function MessagesPage() {
             <footer className="p-6 border-t border-border bg-background/50">
               <div className="flex items-center gap-4 bg-muted/50 p-2 rounded-2xl border border-border">
                 <Input placeholder={t('type_message')} className="border-none bg-transparent h-10 focus-visible:ring-0" />
-                <Button className="size-10 rounded-xl bg-accent text-accent-foreground p-0"><Send className="size-5" /></Button>
+                <Button className="size-10 rounded-xl bg-accent text-accent-foreground p-0 active:scale-95 transition-transform"><Send className="size-5" /></Button>
               </div>
             </footer>
           </div>

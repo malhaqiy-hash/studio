@@ -108,7 +108,7 @@ export default function NotificationsPage() {
             <Button 
               variant="ghost" 
               onClick={toggleAllRead}
-              className="text-[10px] font-black uppercase tracking-widest text-slate-700 hover:text-black hover:bg-black/5 rounded-xl h-10 px-4 transition-all"
+              className="text-[10px] font-black uppercase tracking-widest text-slate-700 hover:text-black hover:bg-black/5 rounded-xl h-10 px-4 transition-colors"
             >
               {isAllRead ? "Tandai Belum Dibaca" : t('mark_read')}
             </Button>
@@ -117,7 +117,7 @@ export default function NotificationsPage() {
               <Button 
                 variant="ghost" 
                 onClick={handleClearAll}
-                className="text-[10px] font-black uppercase tracking-widest text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl h-10 px-4 transition-all flex gap-2"
+                className="text-[10px] font-black uppercase tracking-widest text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl h-10 px-4 transition-colors flex gap-2"
               >
                 <Trash2 className="size-3.5" />
                 Hapus Semua
@@ -126,7 +126,7 @@ export default function NotificationsPage() {
           </div>
         </header>
 
-        <div className="space-y-3 overflow-hidden min-h-[300px]">
+        <div className="space-y-3 min-h-[300px]">
           <AnimatePresence initial={false}>
             {notifications.map((notification) => (
               <motion.div
@@ -137,29 +137,30 @@ export default function NotificationsPage() {
                 transition={{ type: "spring", stiffness: 500, damping: 35 }}
                 className="overflow-hidden"
               >
-                <div className="relative group rounded-[1.5rem] bg-card border border-border shadow-sm overflow-hidden touch-pan-y">
+                <div className="relative rounded-[1.5rem] bg-card border border-border shadow-sm overflow-hidden touch-pan-y">
                   
-                  {/* Background Action (Reveal on Swipe) */}
+                  {/* Background Action */}
                   <div className="absolute inset-y-0 right-0 w-20 flex items-center justify-center bg-rose-500 rounded-r-[1.5rem]">
                     <button 
                       onClick={() => deleteNotification(notification.id)}
-                      className="w-full h-full flex flex-col items-center justify-center text-white"
+                      className="w-full h-full flex flex-col items-center justify-center text-white active:scale-90 transition-transform"
                     >
                       <Trash2 className="size-5" />
                       <span className="text-[8px] font-black uppercase mt-1">Hapus</span>
                     </button>
                   </div>
 
-                  {/* Foreground Content (Draggable Layer) */}
+                  {/* Foreground Content */}
                   <motion.div 
                     drag="x"
                     dragConstraints={{ left: -80, right: 0 }}
                     dragElastic={0.05}
                     dragDirectionLock
+                    onDragStart={() => {}} 
                     style={{ touchAction: 'pan-y' }}
                     className={cn(
-                      "relative z-10 bg-card transition-colors duration-300",
-                      notification.unread ? 'border-l-4 border-l-black' : 'bg-muted/5 opacity-90'
+                      "relative z-10 bg-card",
+                      notification.unread ? 'border-l-4 border-l-black' : 'opacity-90'
                     )}
                   >
                     <CardContent className="p-5 md:p-6">
@@ -186,7 +187,7 @@ export default function NotificationsPage() {
                             {notification.description}
                           </p>
                           <div className="pt-2 flex items-center justify-between">
-                             <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase text-black hover:bg-black/5 rounded-lg">
+                             <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase text-black hover:bg-black/5 rounded-lg transition-colors">
                                {t('take_action')}
                                <ChevronRight className="size-3 ml-1" />
                              </Button>
