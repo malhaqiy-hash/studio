@@ -67,6 +67,13 @@ const SEARCH_CATEGORIES = [
   { id: 'lainnya', label: 'Lainnya', icon: Filter },
 ];
 
+const DAFTAR_DAERAH = [
+  "Jakarta Pusat", "Jakarta Selatan", "Jakarta Barat", "Jakarta Timur", "Jakarta Utara", 
+  "Bandung", "Surabaya", "Semarang", "Kendal", "Yogyakarta", 
+  "Medan", "Makassar", "Palembang", "Denpasar", "Malang",
+  "Banten", "Depok", "Bekasi", "Tangerang", "Bogor"
+];
+
 export default function CariPage() {
   const { language, t } = useLanguage();
   const { activeAccount } = useAccount();
@@ -78,12 +85,16 @@ export default function CariPage() {
   
   const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
   const [activeLocation, setActiveLocation] = React.useState("");
+  const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [filteredRegions, setFilteredRegions] = React.useState<string[]>([]);
+  
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
   
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
+  const suggestionRef = React.useRef<HTMLDivElement>(null);
 
-  // 1. Auto-Detect Wilayah saat pertama kali muat
+  // Auto-Detect Wilayah saat pertama kali muat
   React.useEffect(() => {
     const detectLocation = async () => {
       try {
@@ -97,6 +108,17 @@ export default function CariPage() {
       }
     };
     detectLocation();
+  }, []);
+
+  // Handle click outside suggestions
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const cleanTitle = (text: string) => text.replace(/^Informasi Terkait:\s*/i, '').trim();
@@ -115,6 +137,7 @@ export default function CariPage() {
     if (!finalQuery && !finalCategory) return;
     
     setLoading(true);
+    setShowSuggestions(false);
     if (!overrideQuery) setResults(null);
 
     try {
@@ -137,6 +160,33 @@ export default function CariPage() {
     }
   };
 
+  const handleLocationChange = (val: string) => {
+    setActiveLocation(val);
+    if (val.length > 0) {
+      const filtered = DAFTAR_DAERAH.filter(d => 
+        d.toLowerCase().includes(val.toLowerCase())
+      );
+      setFilteredRegions(filtered);
+      setShowSuggestions(filtered.length > 0);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSelectRegion = (region: string) => {
+    setActiveLocation(region);
+    setShowSuggestions(false);
+    handleSearch(undefined, query, activeCategory, region);
+  };
+
+  const handleClearLocation = () => {
+    setActiveLocation("");
+    setShowSuggestions(false);
+    if (query || activeCategory) {
+      handleSearch(undefined, query, activeCategory, "");
+    }
+  };
+
   const handleVoiceSearch = () => {
     if (!('webkitSpeechRecognition' in window)) return;
     const recognition = new (window as any).webkitSpeechRecognition();
@@ -147,13 +197,6 @@ export default function CariPage() {
       handleSearch(undefined, transcript);
     };
     recognition.start();
-  };
-
-  const handleClearLocation = () => {
-    setActiveLocation("");
-    if (query || activeCategory) {
-      handleSearch(undefined, query, activeCategory, "");
-    }
   };
 
   const getTypeIcon = (type: string) => {
@@ -222,14 +265,15 @@ export default function CariPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Input Lokasi Dinamis dengan Clear Button */}
-              <div className="relative group w-full">
+              {/* Input Lokasi Dinamis dengan Suggestions */}
+              <div className="relative group w-full" ref={suggestionRef}>
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <MapPin className="size-3 text-muted-foreground" />
                 </div>
                 <Input 
                   value={activeLocation}
-                  onChange={(e) => setActiveLocation(e.target.value)}
+                  onChange={(e) => handleLocationChange(e.target.value)}
+                  onFocus={() => activeLocation.length > 0 && setShowSuggestions(true)}
                   placeholder={language === 'id' ? "Ketik Lokasi..." : "Type Location..."}
                   className="h-10 pl-8 pr-8 rounded-lg border-border bg-card text-[10px] font-black uppercase tracking-widest focus:bg-background transition-all focus:border-black shadow-none"
                 />
@@ -241,6 +285,23 @@ export default function CariPage() {
                   >
                     <X className="size-3.5" />
                   </button>
+                )}
+
+                {/* Suggestions Dropdown */}
+                {showSuggestions && (
+                  <div className="absolute top-full left-0 right-0 mt-1 z-[150] bg-white border border-border rounded-xl shadow-2xl max-h-48 overflow-y-auto no-scrollbar py-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                    {filteredRegions.map((region, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleSelectRegion(region)}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted transition-colors border-b last:border-none border-border/40"
+                      >
+                        <MapPin className="size-3 text-muted-foreground" />
+                        <span className="text-[12px] font-bold text-slate-700">{region}</span>
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
