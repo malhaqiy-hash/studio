@@ -64,33 +64,34 @@ export default function MessagesPage() {
               {chats.map((chat) => (
                 <motion.div
                   key={chat.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0, x: -100 }}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  className="relative group"
+                  className="relative group overflow-hidden"
                 >
-                  {/* Swipe Background Action */}
-                  <div className="absolute inset-0 bg-rose-500 flex items-center justify-end px-6 rounded-2xl">
-                    <Trash2 className="size-5 text-white" />
+                  {/* Swipe Background Action (Revealed on Swipe) */}
+                  <div className="absolute inset-y-0 right-0 w-20 flex items-center justify-center bg-rose-500 rounded-2xl">
+                    <button 
+                      onClick={() => deleteChat(chat.id)}
+                      className="w-full h-full flex flex-col items-center justify-center text-white active:scale-90 transition-transform"
+                    >
+                      <Trash2 className="size-5" />
+                      <span className="text-[8px] font-black uppercase mt-1">Hapus</span>
+                    </button>
                   </div>
 
                   {/* Swipeable Foreground */}
                   <motion.div
                     drag="x"
-                    dragConstraints={{ left: -100, right: 0 }}
+                    dragConstraints={{ left: -80, right: 0 }}
                     dragElastic={0.1}
-                    onDragEnd={(_, info) => {
-                      if (info.offset.x < -60) {
-                        deleteChat(chat.id);
-                      }
-                    }}
                     onClick={() => setSelectedChat(chat)}
                     className={cn(
                       "relative z-10 flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all bg-card active:scale-[0.98]",
                       selectedChat?.id === chat.id 
                         ? 'bg-background shadow-md border border-border' 
-                        : 'hover:bg-muted/50'
+                        : 'hover:bg-muted/50 border border-transparent'
                     )}
                   >
                     <div className="relative">
