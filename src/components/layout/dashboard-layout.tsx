@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -54,7 +55,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/sheet";
+} from "@/components/ui/sheet";
 import {
   Dialog,
   DialogContent,
@@ -131,7 +132,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: Bookmark, label: t('saved'), href: "/saved", roles: ['pribadi', 'professional', 'bisnis'] },
       { icon: Users, label: t('communities'), href: "/communities", roles: ['pribadi', 'professional', 'bisnis'] },
       
-      // AI Intelligence Menu (Differentiated by Account Type)
       { icon: Radar, label: t('scout'), href: "/scout", roles: ['bisnis', 'professional'] },
       { icon: Handshake, label: t('matchmaker'), href: "/matchmaker", roles: ['bisnis', 'professional'] },
       { icon: TrendingUp, label: t('market_radar'), href: "/market-radar", roles: ['bisnis'] },
@@ -144,7 +144,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
     ];
 
-    // Filter by role and exclude bottom nav items to avoid duplication
     return baseItems.filter(item => 
       item.roles.includes(activeAccount?.type || 'pribadi') && 
       item.href !== "/feed" && 
@@ -334,7 +333,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               ) : (
                 <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
                   <div className="flex items-center justify-between">
-                    <Button variant="ghost" size="sm" onClick={() => setPendingType(null)} className="h-8 px-3 font-bold text-[11px] uppercase tracking-widest text-muted-foreground hover:text-black">← Kembali</Button>
+                    <button type="button" onClick={() => setPendingType(null)} className="h-8 px-3 font-bold text-[11px] uppercase tracking-widest text-muted-foreground hover:text-black">← Kembali</button>
                     <Badge className="px-4 py-1 font-black text-[10px] uppercase border-none bg-black text-white rounded-full">{pendingType}</Badge>
                   </div>
                   
@@ -361,6 +360,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </div>
               )}
             </div>
+            
+            {activeAccount?.isNew && (
+              <DialogFooter className="px-5 pb-5 mt-auto">
+                <Button variant="ghost" onClick={handleLogout} className="w-full font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-black">Batal & Keluar</Button>
+              </DialogFooter>
+            )}
           </div>
         </DialogContent>
       </Dialog>
