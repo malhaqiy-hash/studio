@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
 
 const INITIAL_NOTIFICATIONS = [
   {
@@ -114,95 +113,64 @@ export default function NotificationsPage() {
         </header>
 
         <div className="space-y-3">
-          <AnimatePresence mode="popLayout">
-            {notifications.map((notification) => (
-              <motion.div
-                key={notification.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                className="relative group overflow-hidden rounded-[1.5rem]"
-              >
-                {/* Background Hapus Layer (Swipe Target) */}
-                <div className="absolute inset-0 bg-rose-500 flex items-center justify-end px-8">
-                  <div className="flex flex-col items-center text-white">
-                    <Trash2 className="size-6 mb-1" />
-                    <span className="text-[10px] font-black uppercase">Hapus</span>
+          {notifications.map((notification) => (
+            <div
+              key={notification.id}
+              className={cn(
+                "relative group overflow-hidden rounded-[1.5rem] bg-card border border-border shadow-sm hover:shadow-md transition-shadow",
+                notification.unread ? 'border-l-4 border-l-black' : 'bg-muted/10 opacity-80'
+              )}
+            >
+              <CardContent className="p-5 md:p-6" onClick={() => markAsRead(notification.id)}>
+                <div className="flex items-start gap-4">
+                  <div className={cn("size-12 rounded-2xl flex items-center justify-center shrink-0 shadow-inner", notification.color)}>
+                    <notification.icon className="size-6" />
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <h3 className={cn("font-black tracking-tight uppercase text-sm", notification.unread ? 'text-foreground' : 'text-muted-foreground')}>
+                          {notification.title}
+                        </h3>
+                        {notification.unread && (
+                          <span className="size-2 bg-black rounded-full animate-pulse" />
+                        )}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground font-black uppercase flex items-center gap-1">
+                        <Clock className="size-3" />
+                        {notification.time}
+                      </span>
+                    </div>
+                    <p className="text-[13px] text-muted-foreground font-medium leading-relaxed line-clamp-2">
+                      {notification.description}
+                    </p>
+                    <div className="pt-2 flex items-center gap-4">
+                       <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase text-black hover:bg-black/5 rounded-lg">
+                         {t('take_action')}
+                         <ChevronRight className="size-3 ml-1" />
+                       </Button>
+                       <div className="ml-auto flex gap-1">
+                         <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
+                            className="size-8 rounded-lg text-rose-500 hover:bg-rose-50"
+                          >
+                           <Trash2 className="size-4" />
+                         </Button>
+                         <Button variant="ghost" size="icon" className="size-8 rounded-lg text-muted-foreground">
+                           <MoreVertical className="size-4" />
+                         </Button>
+                       </div>
+                    </div>
                   </div>
                 </div>
-
-                {/* Foreground Content Card (Draggable) */}
-                <motion.div
-                  drag="x"
-                  dragConstraints={{ left: -100, right: 0 }}
-                  dragElastic={0.1}
-                  onDragEnd={(_, info) => {
-                    if (info.offset.x < -70) {
-                      deleteNotification(notification.id);
-                    }
-                  }}
-                  className={cn(
-                    "relative bg-card border border-border shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing",
-                    notification.unread ? 'border-l-4 border-l-black' : 'bg-muted/10 opacity-80'
-                  )}
-                >
-                  <CardContent className="p-5 md:p-6" onClick={() => markAsRead(notification.id)}>
-                    <div className="flex items-start gap-4">
-                      <div className={cn("size-12 rounded-2xl flex items-center justify-center shrink-0 shadow-inner", notification.color)}>
-                        <notification.icon className="size-6" />
-                      </div>
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <h3 className={cn("font-black tracking-tight uppercase text-sm", notification.unread ? 'text-foreground' : 'text-muted-foreground')}>
-                              {notification.title}
-                            </h3>
-                            {notification.unread && (
-                              <span className="size-2 bg-black rounded-full animate-pulse" />
-                            )}
-                          </div>
-                          <span className="text-[10px] text-muted-foreground font-black uppercase flex items-center gap-1">
-                            <Clock className="size-3" />
-                            {notification.time}
-                          </span>
-                        </div>
-                        <p className="text-[13px] text-muted-foreground font-medium leading-relaxed line-clamp-2">
-                          {notification.description}
-                        </p>
-                        <div className="pt-2 flex items-center gap-4">
-                           <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase text-black hover:bg-black/5 rounded-lg">
-                             {t('take_action')}
-                             <ChevronRight className="size-3 ml-1" />
-                           </Button>
-                           <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                             <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
-                                className="size-8 rounded-lg text-rose-500 hover:bg-rose-50"
-                              >
-                               <Trash2 className="size-4" />
-                             </Button>
-                             <Button variant="ghost" size="icon" className="size-8 rounded-lg text-muted-foreground">
-                               <MoreVertical className="size-4" />
-                             </Button>
-                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </motion.div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+              </CardContent>
+            </div>
+          ))}
 
           {notifications.length === 0 && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="py-24 text-center space-y-6 bg-card rounded-[3rem] border-2 border-dashed border-border/50"
-            >
+            <div className="py-24 text-center space-y-6 bg-card rounded-[3rem] border-2 border-dashed border-border/50">
                <div className="size-24 rounded-full bg-muted/20 flex items-center justify-center mx-auto shadow-inner">
                   <Inbox className="size-10 text-muted-foreground/30" />
                </div>
@@ -215,7 +183,7 @@ export default function NotificationsPage() {
                <Button onClick={() => router.push('/feed')} className="rounded-2xl bg-black text-white px-10 h-14 font-black shadow-xl uppercase tracking-widest text-[11px] active:scale-95 transition-all">
                   Jelajahi Beranda
                </Button>
-            </motion.div>
+            </div>
           )}
         </div>
 
