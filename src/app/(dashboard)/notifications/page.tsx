@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -137,11 +138,29 @@ export default function NotificationsPage() {
                 transition={{ type: "spring", stiffness: 500, damping: 30, opacity: { duration: 0.2 } }}
                 className="overflow-hidden"
               >
-                <div className="relative group rounded-[1.5rem] bg-card border border-border shadow-sm hover:shadow-md transition-shadow">
-                  <div className={cn(
-                    "relative z-10 bg-card transition-colors duration-300",
-                    notification.unread ? 'border-l-4 border-l-black' : 'bg-muted/5 opacity-90'
-                  )}>
+                <div className="relative group rounded-[1.5rem] bg-card border border-border shadow-sm overflow-hidden touch-pan-y">
+                  
+                  {/* Background Action (Reveal on Swipe) */}
+                  <div className="absolute inset-y-0 right-0 w-20 flex items-center justify-center bg-rose-500 rounded-r-[1.5rem]">
+                    <button 
+                      onClick={() => deleteNotification(notification.id)}
+                      className="w-full h-full flex flex-col items-center justify-center text-white"
+                    >
+                      <Trash2 className="size-5" />
+                      <span className="text-[8px] font-black uppercase mt-1">Hapus</span>
+                    </button>
+                  </div>
+
+                  {/* Foreground Content (Draggable Layer) */}
+                  <motion.div 
+                    drag="x"
+                    dragConstraints={{ left: -80, right: 0 }}
+                    dragElastic={0.1}
+                    className={cn(
+                      "relative z-10 bg-card transition-colors duration-300",
+                      notification.unread ? 'border-l-4 border-l-black' : 'bg-muted/5 opacity-90'
+                    )}
+                  >
                     <CardContent className="p-5 md:p-6">
                       <div className="flex items-start gap-4">
                         <div className={cn("size-12 rounded-2xl flex items-center justify-center shrink-0 shadow-inner", notification.color)}>
@@ -172,15 +191,6 @@ export default function NotificationsPage() {
                              </Button>
                              
                              <div className="flex items-center gap-1">
-                               <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => deleteNotification(notification.id)}
-                                  className="size-9 rounded-xl text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition-all active:scale-90"
-                                >
-                                 <Trash2 className="size-4" />
-                               </Button>
-
                                <DropdownMenu>
                                  <DropdownMenuTrigger asChild>
                                    <Button variant="ghost" size="icon" className="size-9 rounded-xl text-muted-foreground hover:text-black hover:bg-black/5 transition-all active:scale-90 outline-none">
@@ -217,7 +227,7 @@ export default function NotificationsPage() {
                         </div>
                       </div>
                     </CardContent>
-                  </div>
+                  </motion.div>
                 </div>
               </motion.div>
             ))}
