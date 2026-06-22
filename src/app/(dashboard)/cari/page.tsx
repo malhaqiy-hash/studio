@@ -27,6 +27,10 @@ import {
   Image as ImageIcon,
   Target,
   Briefcase,
+  Radio,
+  Calendar,
+  Car,
+  Building,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -49,19 +53,22 @@ import {
 } from "@/components/ui/dialog";
 import { useAccount } from "@/context/account-context";
 
-const BASE_CATEGORIES = [
+const SEARCH_CATEGORIES = [
+  { id: 'professional_personal', label: 'Profesional/Pribadi', icon: User },
   { id: 'toko', label: 'Toko', icon: Store },
+  { id: 'perusahaan', label: 'Perusahaan', icon: Building2 },
+  { id: 'saluran', label: 'Saluran', icon: Radio },
+  { id: 'komunitas', label: 'Komunitas', icon: Users },
+  { id: 'acara', label: 'Acara', icon: Calendar },
+  { id: 'peluang_bisnis', label: 'Peluang Bisnis', icon: Target },
+  { id: 'peluang_kerja', label: 'Peluang Kerja', icon: Briefcase },
   { id: 'produk', label: 'Produk', icon: Package },
-  { id: 'service', label: 'Service', icon: Headphones },
-  { id: 'hotel', label: 'Hotel', icon: Hotel },
-];
-
-const PREMIUM_CATEGORIES = [
-  { id: 'supplier', label: 'Supplier', icon: Truck },
+  { id: 'pemasok', label: 'Pemasok', icon: Truck },
   { id: 'distributor', label: 'Distributor', icon: Layers },
-  { id: 'professional', label: 'Talent/Freelancer', icon: User },
-  { id: 'communities', label: 'Komunitas', icon: Users },
-  { id: 'opportunity', label: 'Peluang Kerja', icon: Briefcase },
+  { id: 'layanan', label: 'Layanan/Jasa', icon: Headphones },
+  { id: 'transportasi', label: 'Transportasi', icon: Car },
+  { id: 'penginapan', label: 'Penginapan', icon: Hotel },
+  { id: 'lainnya', label: 'Lainnya', icon: Filter },
 ];
 
 const POPULAR_LOCATIONS = [
@@ -87,12 +94,6 @@ export default function CariPage() {
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
 
   const cleanTitle = (text: string) => text.replace(/^Informasi Terkait:\s*/i, '').trim();
-
-  const categories = React.useMemo(() => {
-    if (activeAccount.type === 'bisnis') return [...BASE_CATEGORIES, ...PREMIUM_CATEGORIES];
-    if (activeAccount.type === 'professional') return [...BASE_CATEGORIES, PREMIUM_CATEGORIES.find(c => c.id === 'opportunity')!];
-    return BASE_CATEGORIES;
-  }, [activeAccount.type]);
 
   const handleSearch = async (
     e?: React.FormEvent, 
@@ -147,10 +148,18 @@ export default function CariPage() {
       case 'product': return <Package className="size-4" />;
       case 'service': return <Headphones className="size-4" />;
       case 'supplier': return <Truck className="size-4" />;
-      case 'professional': return <User className="size-4" />;
-      case 'opportunity': return <Briefcase className="size-4" />;
+      case 'professional': 
+      case 'freelancer': return <User className="size-4" />;
+      case 'opportunity': 
+      case 'job_opportunity': return <Briefcase className="size-4" />;
       case 'shop': return <Store className="size-4" />;
       case 'hotel': return <Hotel className="size-4" />;
+      case 'channel': return <Radio className="size-4" />;
+      case 'event': return <Calendar className="size-4" />;
+      case 'community': return <Users className="size-4" />;
+      case 'transporter': return <Car className="size-4" />;
+      case 'company':
+      case 'business': return <Building2 className="size-4" />;
       default: return <Building2 className="size-4" />;
     }
   };
@@ -184,13 +193,13 @@ export default function CariPage() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-full h-10 justify-between rounded-lg border-border bg-card text-foreground font-bold hover:bg-muted/50 px-3 text-[10px] uppercase tracking-widest">
-                    <div className="flex items-center gap-2"><Filter className="size-3" />{activeCategory || "Kategori"}</div>
-                    <ChevronDown className="size-3 opacity-30" />
+                    <div className="flex items-center gap-2 max-w-[120px] truncate"><Filter className="size-3 shrink-0" />{activeCategory || "Kategori"}</div>
+                    <ChevronDown className="size-3 opacity-30 shrink-0" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-[240px] rounded-xl p-1 shadow-2xl bg-card border-border">
+                <DropdownMenuContent align="start" className="w-[280px] rounded-xl p-1 shadow-2xl bg-card border-border max-h-[400px] overflow-y-auto no-scrollbar">
                   <DropdownMenuItem onClick={() => setActiveCategory(null)} className="font-black text-muted-foreground p-2 rounded-lg text-[10px] uppercase">Semua Kategori</DropdownMenuItem>
-                  {categories.map((cat) => (
+                  {SEARCH_CATEGORIES.map((cat) => (
                     <DropdownMenuItem key={cat.id} onClick={() => setActiveCategory(cat.label)} className="flex items-center gap-3 py-2 rounded-lg font-bold cursor-pointer hover:bg-muted text-[13px]">
                       <div className="size-7 bg-muted rounded-md flex items-center justify-center text-muted-foreground shrink-0"><cat.icon className="size-3.5" /></div>{cat.label}
                     </DropdownMenuItem>
@@ -201,10 +210,10 @@ export default function CariPage() {
               <Popover open={isLocationOpen} onOpenChange={setIsLocationOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full h-10 justify-between rounded-lg border-border bg-card text-foreground font-bold hover:bg-muted/50 px-3 text-[10px] uppercase tracking-widest">
-                    <div className="flex items-center gap-2"><MapPin className="size-3" />{activeLocation}</div>
-                    <ChevronDown className="size-3 opacity-30" />
+                    <div className="flex items-center gap-2 max-w-[120px] truncate"><MapPin className="size-3 shrink-0" />{activeLocation}</div>
+                    <ChevronDown className="size-3 opacity-30 shrink-0" />
                   </Button>
-                </PopoverTrigger>
+                </DropdownMenuTrigger>
                 <PopoverContent align="center" className="w-[240px] rounded-xl p-2 shadow-2xl bg-card border-border space-y-2">
                   <Button variant="outline" onClick={() => { setIsLocationOpen(false); setActiveLocation("Lokasi GPS"); handleSearch(undefined, query, activeCategory, "Lokasi GPS"); }} className="w-full h-10 rounded-lg border-black/10 bg-black/5 text-black font-black text-[10px] gap-2">
                     <LocateFixed className="size-4" /> {t('nearby')}

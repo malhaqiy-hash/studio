@@ -24,7 +24,25 @@ export type AIIntentSearchInput = z.infer<typeof AIIntentSearchInputSchema>;
 const AIIntentSearchOutputSchema = z.object({
   results: z.array(
     z.object({
-      type: z.enum(['business', 'product', 'service', 'supplier', 'distributor', 'freelancer', 'community', 'transporter', 'opportunity', 'partner', 'shop', 'hotel']).describe('The type of the discovered item.'),
+      type: z.enum([
+        'business', 
+        'product', 
+        'service', 
+        'supplier', 
+        'distributor', 
+        'freelancer', 
+        'community', 
+        'transporter', 
+        'opportunity', 
+        'job_opportunity',
+        'partner', 
+        'shop', 
+        'hotel',
+        'channel',
+        'event',
+        'company',
+        'other'
+      ]).describe('The type of the discovered item.'),
       name: z.string().describe('The name of the business or product.'),
       description: z.string().describe('A brief description.'),
       matchScore: z.number().int().min(0).max(100).describe('The calculated match score based on priority and relevance.'),
