@@ -23,7 +23,7 @@ export interface AccountPreferences {
   publicFollowers?: boolean;
   publicFollowing?: boolean;
   publicLikes?: boolean;
-  publicViews?: boolean;
+  publicViews?: boolean; // For subscribe/views logic
 }
 
 export interface Account {
@@ -31,7 +31,7 @@ export interface Account {
   name: string;
   type: AccountType;
   avatar: string;
-  cover?: string; // Multi-photo or vertical cover support
+  cover?: string;
   bio?: string;
   contact?: string;
   extra?: string;
@@ -58,7 +58,7 @@ const DEFAULT_PREFERENCES: AccountPreferences = {
   publicFollowers: true,
   publicFollowing: true,
   publicLikes: true,
-  publicViews: false,
+  publicViews: true,
 };
 
 const DEFAULT_PRIBADI: Account = { 

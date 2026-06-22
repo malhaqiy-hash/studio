@@ -21,6 +21,7 @@ import {
   Eye,
   Heart,
   Users,
+  Zap,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage, LANGUAGES } from "@/context/language-context";
@@ -140,7 +141,7 @@ export default function SettingsPage() {
                   </>
                 ) : (
                   <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/5">
-                    <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Eye className="size-3.5" /> Penonton Profil</Label>
+                    <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Zap className="size-3.5" /> Subscribe (Penonton)</Label>
                     <Switch 
                       checked={activeAccount.preferences?.publicViews} 
                       onCheckedChange={(val) => updatePreference('publicViews', val)}
@@ -148,7 +149,7 @@ export default function SettingsPage() {
                   </div>
                 )}
                 <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/5">
-                  <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Heart className="size-3.5" /> Penyukat</Label>
+                  <Label className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2"><Heart className="size-3.5" /> Penyukat (Suka)</Label>
                   <Switch 
                     checked={activeAccount.preferences?.publicLikes} 
                     onCheckedChange={(val) => updatePreference('publicLikes', val)}

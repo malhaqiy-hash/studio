@@ -28,6 +28,8 @@ import {
   Facebook,
   Link as LinkIcon,
   Share2,
+  Users,
+  Zap,
 } from 'lucide-react';
 import {
   Dialog,
@@ -71,7 +73,6 @@ export default function ProfilePage() {
   const [isCloudLoading, setIsCloudLoading] = React.useState(false);
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
   
-  // Modal Postingan State
   const [isNewCategory, setIsNewCategory] = React.useState(false);
   const [newItem, setNewItem] = React.useState<Partial<ContentItem>>({
     visibility: 'public',
@@ -83,7 +84,6 @@ export default function ProfilePage() {
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Grouping Items for Pro/Biz
   const groupedItems = React.useMemo(() => {
     const items = (activeAccount.items || []).filter(i => i.source === 'profile');
     if (activeAccount.type === 'pribadi') return { 'Inspirasi': items };
@@ -216,9 +216,19 @@ export default function ProfilePage() {
               <div className="flex flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-4 text-muted-foreground font-medium text-[13px] md:text-[15px]">
                   <span>{activeAccount.extra || 'OnTapp Member'}</span>
-                  <div className="flex items-center gap-3 ml-auto">
-                     <div className="flex flex-col items-center"><span className="text-sm font-bold text-slate-900">1.2k</span><span className="text-[10px] font-bold uppercase opacity-60">Pengikut</span></div>
-                     <div className="flex flex-col items-center text-rose-500"><span className="text-sm font-bold">4.2k</span><span className="text-[10px] font-bold uppercase flex items-center gap-0.5"><Heart className="size-2.5 fill-rose-500" /> Suka</span></div>
+                  <div className="flex items-center gap-4 ml-auto">
+                     <div className="flex flex-col items-center">
+                        <span className="text-sm font-bold text-slate-900">1.2k</span>
+                        <span className="text-[9px] font-black uppercase opacity-60 flex items-center gap-1">
+                          {activeAccount.type === 'pribadi' ? <><Users className="size-2.5" /> Pengikut</> : <><Zap className="size-2.5" /> Subscribe</>}
+                        </span>
+                     </div>
+                     <div className="flex flex-col items-center text-rose-500">
+                        <span className="text-sm font-bold">4.2k</span>
+                        <span className="text-[9px] font-black uppercase flex items-center gap-1">
+                          <Heart className="size-2.5 fill-rose-500" /> Suka
+                        </span>
+                     </div>
                   </div>
                 </div>
                 {activeAccount.locationLink && (
@@ -300,7 +310,6 @@ export default function ProfilePage() {
         </section>
       </div>
 
-      {/* Modal Edit Bio */}
       <Dialog open={isBioModalOpen} onOpenChange={setIsBioModalOpen}>
         <DialogContent className="w-[90%] md:max-sm rounded-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden">
           <DialogHeader><DialogTitle className="text-lg font-bold text-slate-900">Ubah Profil</DialogTitle></DialogHeader>
@@ -319,7 +328,6 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal Tambah Konten */}
       <Dialog open={isContentModalOpen} onOpenChange={setIsContentModalOpen}>
         <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden">
           <DialogHeader className="flex flex-row items-center justify-between">
@@ -344,7 +352,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Kategori Dinamis untuk Pro/Biz */}
             {(activeAccount.type === 'bisnis' || activeAccount.type === 'professional') && (
               <div className="space-y-3 p-4 bg-muted/20 rounded-2xl">
                  <Label className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Kategori Postingan *</Label>
@@ -397,7 +404,6 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal Zoom Gambar */}
       <Dialog open={!!zoomedImage} onOpenChange={() => setZoomedImage(null)}>
         <DialogContent 
           className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
