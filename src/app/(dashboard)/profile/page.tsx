@@ -73,6 +73,7 @@ export default function ProfilePage() {
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
   
   const [isNewCategory, setIsNewCategory] = React.useState(false);
+  const [isCloudLoading, setIsCloudLoading] = React.useState(false);
   const [newItem, setNewItem] = React.useState<Partial<ContentItem>>({
     visibility: 'public',
     images: [],
@@ -117,14 +118,15 @@ export default function ProfilePage() {
       if (mediaTarget === 'post') {
         Array.from(files).forEach(file => {
           const reader = new FileReader();
-          reader.onloadend = () => {
+          reader.onload = () => {
             setNewItem(prev => ({ ...prev, images: [...(prev.images || []), reader.result as string] }));
           };
           reader.readAsDataURL(file);
         });
+        setIsMediaPickerOpen(false);
       } else {
         const reader = new FileReader();
-        reader.onloadend = () => {
+        reader.onload = () => {
           const result = reader.result as string;
           if (mediaTarget === 'avatar') updateActiveAccount({ avatar: result });
           if (mediaTarget === 'cover') updateActiveAccount({ cover: result });
@@ -132,8 +134,32 @@ export default function ProfilePage() {
         };
         reader.readAsDataURL(files[0]);
       }
-      setIsMediaPickerOpen(false);
+      // Reset input value to allow selecting same file again
+      e.target.value = '';
     }
+  };
+
+  const handleCloudSource = (source: 'drive' | 'photos') => {
+    setIsCloudLoading(true);
+    toast({ title: `Menghubungkan ke ${source === 'drive' ? 'Drive' : 'Photos'}...` });
+    
+    setTimeout(() => {
+      const simulatedUrl = mediaTarget === 'cover' 
+        ? `https://picsum.photos/seed/cover${Date.now()}/1640/624`
+        : `https://picsum.photos/seed/img${Date.now()}/500/500`;
+      
+      if (mediaTarget === 'avatar') {
+        updateActiveAccount({ avatar: simulatedUrl });
+      } else if (mediaTarget === 'cover') {
+        updateActiveAccount({ cover: simulatedUrl });
+      } else if (mediaTarget === 'post') {
+        setNewItem(prev => ({ ...prev, images: [...(prev.images || []), simulatedUrl] }));
+      }
+      
+      setIsCloudLoading(false);
+      setIsMediaPickerOpen(false);
+      toast({ title: "Media berhasil disinkronkan" });
+    }, 1500);
   };
 
   const handleAddContent = () => {
@@ -400,6 +426,17 @@ export default function ProfilePage() {
             </div>
           </div>
           <DialogFooter className="mt-6"><Button onClick={handleAddContent} disabled={!newItem.images?.length || ((activeAccount.type !== 'pribadi') && !newItem.categoryName)} className="w-full h-12 rounded-xl bg-accent font-bold text-white text-sm uppercase shadow-lg active:scale-95 transition-all">Posting</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
+        <DialogContent className="w-[85%] md:max-w-xs rounded-2xl p-6 border-none shadow-2xl bg-card text-foreground outline-none [&>button]:hidden">
+          <DialogHeader className="text-center"><DialogTitle className="text-base font-black uppercase tracking-tight">Pilih Media</DialogTitle></DialogHeader>
+          <div className="grid gap-3 py-5">
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-12 rounded-xl border-border bg-muted/50 hover:bg-black/5 justify-start gap-5 px-6 shadow-inner"><Smartphone className="size-5 text-black" /><p className="font-black text-[11px] uppercase tracking-widest">Galeri HP</p></Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-12 rounded-xl border-border bg-muted/50 hover:bg-black/5 justify-start gap-5 px-6 shadow-inner"><Cloud className="size-5 text-black" /><p className="font-black text-[11px] uppercase tracking-widest">Layanan Cloud</p></Button>
+          </div>
+          <DialogFooter><Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-black text-[11px] uppercase text-muted-foreground hover:bg-transparent">Batal</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
