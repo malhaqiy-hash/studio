@@ -6,7 +6,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Send, Phone, Video, MoreVertical, Trash2 } from "lucide-react";
+import { Search, Send, Phone, Video, MoreVertical, Trash2, MessageSquare } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,7 +18,6 @@ const INITIAL_CHATS = [
 ];
 
 export default function MessagesPage() {
-  const router = useRouter();
   const { t } = useLanguage();
   const [chats, setChats] = React.useState(INITIAL_CHATS);
   const [selectedChat, setSelectedChat] = React.useState<any>(INITIAL_CHATS[0]);
@@ -67,7 +66,7 @@ export default function MessagesPage() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0, x: -100 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
                   className="relative group overflow-hidden"
                 >
                   {/* Swipe Background Action (Revealed on Swipe) */}
@@ -85,13 +84,16 @@ export default function MessagesPage() {
                   <motion.div
                     drag="x"
                     dragConstraints={{ left: -80, right: 0 }}
-                    dragElastic={0.1}
+                    dragElastic={0.05}
+                    dragDirectionLock
+                    onDragStart={() => {}} // placeholder to ensure interaction
+                    style={{ touchAction: 'pan-y' }}
                     onClick={() => setSelectedChat(chat)}
                     className={cn(
-                      "relative z-10 flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all bg-card active:scale-[0.98]",
+                      "relative z-10 flex items-center gap-4 p-4 rounded-2xl cursor-pointer bg-card border border-transparent transition-colors",
                       selectedChat?.id === chat.id 
-                        ? 'bg-background shadow-md border border-border' 
-                        : 'hover:bg-muted/50 border border-transparent'
+                        ? 'bg-background shadow-md border-border' 
+                        : 'hover:bg-muted/50'
                     )}
                   >
                     <div className="relative">

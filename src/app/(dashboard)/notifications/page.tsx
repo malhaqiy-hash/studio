@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -135,7 +134,7 @@ export default function NotificationsPage() {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30, opacity: { duration: 0.2 } }}
+                transition={{ type: "spring", stiffness: 500, damping: 35 }}
                 className="overflow-hidden"
               >
                 <div className="relative group rounded-[1.5rem] bg-card border border-border shadow-sm overflow-hidden touch-pan-y">
@@ -155,7 +154,9 @@ export default function NotificationsPage() {
                   <motion.div 
                     drag="x"
                     dragConstraints={{ left: -80, right: 0 }}
-                    dragElastic={0.1}
+                    dragElastic={0.05}
+                    dragDirectionLock
+                    style={{ touchAction: 'pan-y' }}
                     className={cn(
                       "relative z-10 bg-card transition-colors duration-300",
                       notification.unread ? 'border-l-4 border-l-black' : 'bg-muted/5 opacity-90'
