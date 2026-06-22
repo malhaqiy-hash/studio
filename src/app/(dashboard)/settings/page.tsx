@@ -125,38 +125,73 @@ export default function SettingsPage() {
 
   if (!mounted) return <DashboardLayout><div className="max-w-5xl mx-auto py-4 animate-pulse h-96 bg-card rounded-3xl" /></DashboardLayout>;
 
+  // Internal MenuRow component for consistent look across all items
+  const MenuRow = ({ item }: { item: any }) => {
+    const [isOpen, setIsOpen] = React.useState(false);
+    
+    if (item.href) {
+        return (
+            <button onClick={() => item.href !== '#' ? router.push(item.href) : null} className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors group">
+                <div className="flex items-center gap-4 text-left">
+                    <div className={cn("size-9 rounded-xl flex items-center justify-center shadow-sm", item.bg || "bg-muted text-muted-foreground")}>
+                        <item.icon className="size-4.5" />
+                    </div>
+                    <div className="flex flex-col">
+                        <h4 className="font-bold text-[14px] leading-none">{item.label}</h4>
+                        {item.desc && <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}
+                    </div>
+                </div>
+                <ChevronRight className="size-4 text-muted-foreground/30 group-hover:text-black transition-colors" />
+            </button>
+        );
+    }
+
+    if (item.content) {
+        return (
+            <div className="flex flex-col w-full">
+                <button 
+                    onClick={() => setIsOpen(!isOpen)} 
+                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors group"
+                >
+                    <div className="flex items-center gap-4 text-left">
+                        <div className={cn("size-9 rounded-xl flex items-center justify-center shadow-sm", item.bg || "bg-muted text-muted-foreground")}>
+                            <item.icon className="size-4.5" />
+                        </div>
+                        <div className="flex flex-col">
+                            <h4 className="font-bold text-[14px] leading-none">{item.label}</h4>
+                            {item.desc && <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}
+                        </div>
+                    </div>
+                    <ChevronRight className={cn("size-4 text-muted-foreground/30 group-hover:text-black transition-all", isOpen && "rotate-90 text-black")} />
+                </button>
+                {isOpen && (
+                    <div className="px-4 pb-4 pt-0 animate-in fade-in slide-in-from-top-1 duration-200">
+                        <div className="pt-2 border-t border-border/10">
+                          {item.content}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <div className="p-4 flex items-center gap-4">
+            <div className={cn("size-9 rounded-xl flex items-center justify-center shadow-sm", item.bg || "bg-muted text-muted-foreground")}>
+                <item.icon className="size-4.5" />
+            </div>
+            <div className="text-left">
+                <h4 className="font-bold text-[14px] leading-none">{item.label}</h4>
+                {item.desc && <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}
+            </div>
+        </div>
+    );
+  };
+
   const MenuList = ({ items }: { items: any[] }) => (
     <div className="flex flex-col bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
       {items.map((item, idx) => (
-        <div key={idx} className="group relative">
-          {item.href ? (
-            <button onClick={() => router.push(item.href)} className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className={cn("size-9 rounded-xl flex items-center justify-center shadow-sm", item.bg || "bg-muted text-muted-foreground")}>
-                  <item.icon className="size-4.5" />
-                </div>
-                <div className="text-left">
-                  <h4 className="font-bold text-[14px] leading-none">{item.label}</h4>
-                  {item.desc && <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}
-                </div>
-              </div>
-              <ChevronRight className="size-4 text-muted-foreground/30 group-hover:text-black transition-colors" />
-            </button>
-          ) : (
-            <div className="p-4 flex flex-col gap-4">
-              <div className="flex items-center gap-4">
-                <div className={cn("size-9 rounded-xl flex items-center justify-center shadow-sm", item.bg || "bg-muted text-muted-foreground")}>
-                  <item.icon className="size-4.5" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-[14px] leading-none">{item.label}</h4>
-                  {item.desc && <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}
-                </div>
-              </div>
-              {item.content}
-            </div>
-          )}
-        </div>
+        <MenuRow key={idx} item={item} />
       ))}
     </div>
   );
@@ -179,35 +214,43 @@ export default function SettingsPage() {
               label: "Izin Keamanan & Privasi Sosial", 
               desc: "Enkripsi & Manajemen Perangkat",
               content: (
-                <div className="space-y-4 pt-2">
-                  <div className="grid gap-4">
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Pengikut?</Label>
-                      <Select value={activeAccount.preferences?.whoCanSeeFollowers} onValueChange={(v) => updatePrivacy('whoCanSeeFollowers', v)}>
-                        <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Mengikuti?</Label>
-                      <Select value={activeAccount.preferences?.whoCanSeeFollowing} onValueChange={(v) => updatePrivacy('whoCanSeeFollowing', v)}>
-                        <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Suka?</Label>
-                      <Select value={activeAccount.preferences?.whoCanSeeLikes} onValueChange={(v) => updatePrivacy('whoCanSeeLikes', v)}>
-                        <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Subscribe?</Label>
-                      <Select value={activeAccount.preferences?.whoCanSeeSubscribe} onValueChange={(v) => updatePrivacy('whoCanSeeSubscribe', v)}>
-                        <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
-                      </Select>
+                <div className="space-y-6 pt-2">
+                  <div className="grid grid-cols-2 gap-2">
+                     <button className="p-3 rounded-xl bg-muted/20 border border-border/50 text-[11px] font-bold uppercase tracking-tight text-left hover:bg-muted/30">Ubah Password</button>
+                     <button className="p-3 rounded-xl bg-muted/20 border border-border/50 text-[11px] font-bold uppercase tracking-tight text-left hover:bg-muted/30">Aktifkan 2FA</button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h5 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground border-b pb-1">Kontrol Privasi Sosial</h5>
+                    <div className="grid gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Pengikut?</Label>
+                        <Select value={activeAccount.preferences?.whoCanSeeFollowers} onValueChange={(v) => updatePrivacy('whoCanSeeFollowers', v)}>
+                          <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Mengikuti?</Label>
+                        <Select value={activeAccount.preferences?.whoCanSeeFollowing} onValueChange={(v) => updatePrivacy('whoCanSeeFollowing', v)}>
+                          <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Suka?</Label>
+                        <Select value={activeAccount.preferences?.whoCanSeeLikes} onValueChange={(v) => updatePrivacy('whoCanSeeLikes', v)}>
+                          <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Siapa dapat melihat Subscribe?</Label>
+                        <Select value={activeAccount.preferences?.whoCanSeeSubscribe} onValueChange={(v) => updatePrivacy('whoCanSeeSubscribe', v)}>
+                          <SelectTrigger className="rounded-xl h-10 bg-muted/20 border-none font-bold text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
                 </div>
