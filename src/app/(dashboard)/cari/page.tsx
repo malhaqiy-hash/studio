@@ -213,7 +213,7 @@ export default function CariPage() {
                     <div className="flex items-center gap-2 max-w-[120px] truncate"><MapPin className="size-3 shrink-0" />{activeLocation}</div>
                     <ChevronDown className="size-3 opacity-30 shrink-0" />
                   </Button>
-                </DropdownMenuTrigger>
+                </PopoverTrigger>
                 <PopoverContent align="center" className="w-[240px] rounded-xl p-2 shadow-2xl bg-card border-border space-y-2">
                   <Button variant="outline" onClick={() => { setIsLocationOpen(false); setActiveLocation("Lokasi GPS"); handleSearch(undefined, query, activeCategory, "Lokasi GPS"); }} className="w-full h-10 rounded-lg border-black/10 bg-black/5 text-black font-black text-[10px] gap-2">
                     <LocateFixed className="size-4" /> {t('nearby')}

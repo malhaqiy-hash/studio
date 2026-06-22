@@ -31,6 +31,7 @@ const AIIntentSearchOutputSchema = z.object({
         'supplier', 
         'distributor', 
         'freelancer', 
+        'professional',
         'community', 
         'transporter', 
         'opportunity', 

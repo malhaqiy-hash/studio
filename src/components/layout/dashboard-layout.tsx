@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -55,7 +54,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
+} from "@/sheet";
 import {
   Dialog,
   DialogContent,
@@ -245,7 +244,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuSeparator className="my-1" />
                 {availableAccounts.filter(a => !a.isNew).map((acc) => (
                   <DropdownMenuItem key={acc.id} onSelect={() => { switchAccount(acc.id); router.push("/profile"); }} className={cn("flex items-center justify-between px-3 py-2.5 rounded-xl font-bold cursor-pointer mb-0.5", activeAccount.id === acc.id ? "bg-black/5 text-black" : "focus:bg-black/5")}>
-                    <div className="flex items-center gap-3"><Avatar className="size-8 rounded-lg"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="text-[10px] bg-muted">{acc.name[0]}</AvatarFallback></Avatar><div className="flex flex-col"><span className="text-[13px] leading-none mb-0.5">{acc.name}</span><span className="text-[9px] uppercase opacity-60 font-black">{acc.type}</span></div></div>
+                    <div className="flex items-center gap-3"><Avatar className="size-8 rounded-lg"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="text-[10px] bg-muted">{acc.name[0]}</AvatarFallback></Avatar><div className="flex flex-col"><span className="text-[13px] leading-none mb-0.5">{acc.name}</span><span className="text-[9px] uppercase font-black opacity-60">{acc.type}</span></div></div>
                     {activeAccount.id === acc.id && <Check className="size-3.5" />}
                   </DropdownMenuItem>
                 ))}
