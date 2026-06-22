@@ -156,16 +156,30 @@ export default function ProfilePage() {
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
 
         <section className="relative group">
-          {/* Cover Photo: Aspect Ratio 1640 x 624 (~2.63:1) */}
+          {/* Cover Photo: Aspect Ratio 1640 x 624 */}
           <div className="aspect-[1640/624] w-full bg-muted border-b border-border relative overflow-hidden rounded-xl md:rounded-2xl">
             <img 
               src={activeAccount.cover || `https://picsum.photos/seed/${activeAccount.id}_cover/1640/624`} 
               alt="Cover" 
               className="w-full h-full object-cover opacity-90" 
             />
-            <div className="absolute top-4 right-4 flex flex-col gap-2">
-              <Button onClick={() => openMediaPicker('cover')} variant="outline" className="bg-background/80 backdrop-blur text-foreground rounded-lg border-none font-bold text-xs uppercase tracking-widest gap-1.5 shadow-sm h-8 px-3"><Camera className="size-3.5 text-accent" /> Edit Sampul</Button>
-              <Button onClick={handleShareProfile} variant="outline" className="bg-background/80 backdrop-blur text-foreground rounded-lg border-none font-bold text-xs uppercase tracking-widest gap-1.5 shadow-sm h-8 px-3"><Share2 className="size-3.5 text-accent" /> Bagi Profil</Button>
+            <div className="absolute top-4 right-4 flex gap-2">
+              <Button 
+                onClick={() => openMediaPicker('cover')} 
+                variant="outline" 
+                size="icon"
+                className="bg-background/80 backdrop-blur text-accent border-none rounded-xl shadow-lg active:scale-90 transition-transform"
+              >
+                <Camera className="size-5" />
+              </Button>
+              <Button 
+                onClick={handleShareProfile} 
+                variant="outline" 
+                size="icon"
+                className="bg-background/80 backdrop-blur text-accent border-none rounded-xl shadow-lg active:scale-90 transition-transform"
+              >
+                <Share2 className="size-5" />
+              </Button>
             </div>
           </div>
 

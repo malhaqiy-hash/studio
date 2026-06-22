@@ -18,6 +18,7 @@ import {
   Twitter,
   SendHorizontal,
   Slack,
+  QrCode,
 } from 'lucide-react';
 import {
   Dialog,
@@ -59,6 +60,7 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
   const [search, setSearch] = React.useState('');
   const [copied, setCopied] = React.useState(false);
   const [selectedFriends, setSelectedFriends] = React.useState<string[]>([]);
+  const isProfile = postUrl.includes('/profile/');
 
   const filteredFriends = MOCK_FRIENDS.filter(f => 
     f.name.toLowerCase().includes(search.toLowerCase())
@@ -104,13 +106,36 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-0 border-none bg-card text-foreground rounded-t-[2.5rem] sm:rounded-[3rem] overflow-hidden outline-none shadow-2xl flex flex-col max-h-[90vh] [&>button]:hidden">
+      <DialogContent className="max-w-md p-0 border-none bg-card text-foreground rounded-t-[2.5rem] sm:rounded-[3rem] overflow-hidden outline-none shadow-2xl flex flex-col max-h-[95vh] [&>button]:hidden">
         <div className="w-full flex flex-col items-center justify-center pt-4 pb-2"><div className="w-12 h-1 bg-muted rounded-full" /></div>
         <div className="p-6 pt-2 pb-4">
-          <h3 className="text-xl font-black uppercase tracking-tight">Bagikan Konten</h3>
+          <h3 className="text-xl font-black uppercase tracking-tight">Bagikan</h3>
         </div>
         
-        <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-8">
+          {/* QR Profile Card Section */}
+          {isProfile && (
+            <div className="bg-muted/10 rounded-[2rem] p-6 border border-border flex flex-col items-center space-y-4 animate-in fade-in zoom-in-95 duration-500">
+               <div className="relative p-4 bg-white rounded-3xl shadow-xl">
+                  <div className="size-48 bg-slate-50 flex items-center justify-center relative overflow-hidden rounded-xl">
+                    {/* Mock QR Code Drawing */}
+                    <div className="grid grid-cols-5 grid-rows-5 gap-1.5 opacity-80">
+                      {[...Array(25)].map((_, i) => (
+                        <div key={i} className={cn("size-6 rounded-[4px]", (i % 3 === 0 || i % 7 === 0) ? "bg-black" : "bg-transparent")} />
+                      ))}
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                       <div className="size-12 rounded-2xl bg-black text-white flex items-center justify-center font-black text-xl shadow-2xl ring-4 ring-white">O</div>
+                    </div>
+                  </div>
+               </div>
+               <div className="text-center space-y-1">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Scan QR Profil</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Bagikan identitas bisnis Anda secara instan</p>
+               </div>
+            </div>
+          )}
+
           <div className="space-y-4">
             <div className="flex items-center bg-muted/50 rounded-2xl p-1.5 pl-4 border border-border group focus-within:border-black transition-all">
               <p className="text-[12px] text-muted-foreground truncate flex-1 font-medium select-all">{postUrl}</p>
@@ -121,7 +146,7 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
             <Input 
               placeholder="Cari teman..." 
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="h-11 pl-4 bg-muted/20 border-none rounded-2xl text-[14px]"
             />
           </div>
