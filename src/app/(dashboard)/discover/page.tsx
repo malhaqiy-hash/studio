@@ -32,7 +32,12 @@ export default function DiscoveryHistoryPage() {
     const storageKey = getHistoryKey();
     const saved = localStorage.getItem(storageKey);
     if (saved) {
-      setHistory(JSON.parse(saved));
+      try {
+        setHistory(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse history", e);
+        setHistory([]);
+      }
     } else {
       setHistory([]);
     }
@@ -99,16 +104,17 @@ export default function DiscoveryHistoryPage() {
                         </div>
                         
                         <div className="flex-1 space-y-2 text-center md:text-left">
-                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                          <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
                             <h4 className="text-xl font-black text-slate-900 leading-none">{item.name}</h4>
                             {item.source === 'ontapp_verified' && <ShieldCheck className="size-4 text-emerald-500 fill-emerald-50" />}
                           </div>
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                             <button 
                               onClick={() => openInGoogleMaps(item.name, item.location)}
-                              className="flex items-center gap-1 hover:text-rose-500 transition-colors"
+                              className="flex items-center gap-1 hover:text-black transition-colors"
                             >
-                              <MapPin className="size-3" /> {item.location || 'Global'}
+                              <MapPin className="size-3" />
+                              <span className="underline decoration-dotted underline-offset-2">{item.location || 'Global'}</span>
                             </button>
                             <div className="size-1 bg-slate-200 rounded-full" />
                             <div>{item.industry || item.type}</div>
@@ -130,7 +136,7 @@ export default function DiscoveryHistoryPage() {
                            <Button 
                              onClick={() => openInGoogleMaps(item.name, item.location)}
                              variant="outline"
-                             className="flex-1 md:flex-none rounded-xl border-rose-100 text-rose-600 font-black text-[10px] uppercase h-10 px-4 gap-2"
+                             className="flex-1 md:flex-none rounded-xl border-slate-100 text-slate-900 font-black text-[10px] uppercase h-10 px-4 gap-2 hover:bg-slate-50"
                            >
                              <MapIcon className="size-3.5" />
                              Maps

@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -32,6 +31,7 @@ import {
   Calendar,
   Car,
   X,
+  Map as MapIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -160,6 +160,11 @@ export default function CariPage() {
     }
   };
 
+  const openInGoogleMaps = (name: string, location?: string) => {
+    const searchQuery = encodeURIComponent(`${name} ${location || ''}`);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${searchQuery}`, '_blank');
+  };
+
   const handleLocationChange = (val: string) => {
     setActiveLocation(val);
     if (val.length > 0) {
@@ -265,7 +270,7 @@ export default function CariPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Input Lokasi Dinamis dengan Suggestions */}
+              {/* Lokasi dengan Suggestions */}
               <div className="relative group w-full" ref={suggestionRef}>
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <MapPin className="size-3 text-muted-foreground" />
@@ -329,7 +334,15 @@ export default function CariPage() {
                         </div>
                         <p className="text-slate-500 font-medium text-[13px] leading-snug line-clamp-2">{result.description}</p>
                         <div className="flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pt-1">
-                          {result.location && <div className="flex items-center gap-1"><MapPin className="size-3" />{result.location}</div>}
+                          {result.location && (
+                            <button 
+                              onClick={() => openInGoogleMaps(result.name, result.location)}
+                              className="flex items-center gap-1 hover:text-black transition-colors"
+                            >
+                              <MapPin className="size-3" />
+                              <span className="underline decoration-dotted underline-offset-2">{result.location}</span>
+                            </button>
+                          )}
                           <div className="flex items-center gap-1 text-black"><Target className="size-3" />{result.matchScore}% Synergy</div>
                         </div>
                       </div>
