@@ -36,9 +36,12 @@ import {
   Zap,
   Smartphone,
   Check,
+  Heart,
+  UserCheck,
+  UserPlus,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage, LANGUAGES } from "@/context/language-context";
+import { useLanguage } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
@@ -46,6 +49,8 @@ import { useAuth } from "@/firebase";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const SETTINGS_KEY = "ontapp_system_settings_v3";
 
@@ -57,9 +62,30 @@ const DEFAULT_SETTINGS: SettingsState = {
   theme: "system",
 };
 
+// Mock Data for Hubungan
+const MOCK_RELATIONS = {
+  pengikut: [
+    { id: 'u1', name: 'Andi Wijaya', avatar: 'https://picsum.photos/seed/u1/100', extra: 'Distributor Kopi' },
+    { id: 'u2', name: 'Siti Aminah', avatar: 'https://picsum.photos/seed/u2/100', extra: 'Pemasok Kemasan' },
+    { id: 'u3', name: 'Budi Santoso', avatar: 'https://picsum.photos/seed/u3/100', extra: 'Logistik Regional' },
+  ],
+  mengikuti: [
+    { id: 'u4', name: 'Alpha Tech', avatar: 'https://picsum.photos/seed/u4/100', extra: 'Solusi AI' },
+    { id: 'u5', name: 'Global Logistics', avatar: 'https://picsum.photos/seed/u5/100', extra: 'Cargo Udara' },
+  ],
+  suka: [
+    { id: 'u6', name: 'Rina Kartika', avatar: 'https://picsum.photos/seed/u6/100', extra: 'Desain Produk' },
+    { id: 'u7', name: 'Hendra Gunawan', avatar: 'https://picsum.photos/seed/u7/100', extra: 'Export Manager' },
+  ],
+  subscribe: [
+    { id: 'u8', name: 'Indo Retail Corp', avatar: 'https://picsum.photos/seed/u8/100', extra: 'Premium Member' },
+    { id: 'u9', name: 'Eco Pack Solutions', avatar: 'https://picsum.photos/seed/u9/100', extra: 'Partner Bisnis' },
+  ]
+};
+
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { language, setLanguage, t } = useLanguage();
+  const { setLanguage, t } = useLanguage();
   const { activeAccount, availableAccounts, switchAccount, updateActiveAccount } = useAccount();
   const auth = useAuth();
   const router = useRouter();
@@ -103,11 +129,6 @@ export default function SettingsPage() {
     toast({ title: "Tema Diperbarui" });
   };
 
-  const handleLanguageChange = (val: any) => {
-    setLanguage(val);
-    toast({ title: "Bahasa Diperbarui" });
-  };
-
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -146,8 +167,62 @@ export default function SettingsPage() {
     </div>
   );
 
+  const UserListRow = ({ user, actionLabel }: { user: any, actionLabel?: string }) => (
+    <div className="flex items-center justify-between p-4 bg-muted/10 rounded-2xl border border-transparent hover:border-border transition-all">
+      <div className="flex items-center gap-3">
+        <Avatar className="size-10 rounded-xl border border-border">
+          <AvatarImage src={user.avatar} className="object-cover" />
+          <AvatarFallback className="bg-black/5 font-bold text-xs">{user.name[0]}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <span className="font-bold text-[14px] leading-none mb-1">{user.name}</span>
+          <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{user.extra}</span>
+        </div>
+      </div>
+      <Button variant="outline" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest px-3">
+        {actionLabel || 'Lihat'}
+      </Button>
+    </div>
+  );
+
   const renderSubMenuContent = () => {
     switch (activeSubMenu) {
+      case "hubungan":
+        const isPribadi = activeAccount.type === 'pribadi';
+        return (
+          <SubMenuLayout title="Hubungan Jaringan">
+            <Tabs defaultValue={isPribadi ? "pengikut" : "subscribe"} className="w-full">
+              <TabsList className="w-full grid h-12 bg-muted/20 rounded-xl p-1 gap-1 mb-6" style={{ gridTemplateColumns: isPribadi ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>
+                {isPribadi ? (
+                  <>
+                    <TabsTrigger value="pengikut" className="rounded-lg font-black text-[10px] uppercase tracking-widest">Pengikut</TabsTrigger>
+                    <TabsTrigger value="mengikuti" className="rounded-lg font-black text-[10px] uppercase tracking-widest">Mengikuti</TabsTrigger>
+                    <TabsTrigger value="suka" className="rounded-lg font-black text-[10px] uppercase tracking-widest">Suka</TabsTrigger>
+                  </>
+                ) : (
+                  <>
+                    <TabsTrigger value="subscribe" className="rounded-lg font-black text-[10px] uppercase tracking-widest">Subscriber</TabsTrigger>
+                    <TabsTrigger value="suka" className="rounded-lg font-black text-[10px] uppercase tracking-widest">Penyuka</TabsTrigger>
+                  </>
+                )}
+              </TabsList>
+
+              <TabsContent value="pengikut" className="space-y-2 outline-none">
+                {MOCK_RELATIONS.pengikut.map(u => <UserListRow key={u.id} user={u} actionLabel="Ikuti Balik" />)}
+              </TabsContent>
+              <TabsContent value="mengikuti" className="space-y-2 outline-none">
+                {MOCK_RELATIONS.mengikuti.map(u => <UserListRow key={u.id} user={u} actionLabel="Berhenti" />)}
+              </TabsContent>
+              <TabsContent value="suka" className="space-y-2 outline-none">
+                {MOCK_RELATIONS.suka.map(u => <UserListRow key={u.id} user={u} actionLabel="Hubungkan" />)}
+              </TabsContent>
+              <TabsContent value="subscribe" className="space-y-2 outline-none">
+                {MOCK_RELATIONS.subscribe.map(u => <UserListRow key={u.id} user={u} actionLabel="Detail" />)}
+              </TabsContent>
+            </Tabs>
+          </SubMenuLayout>
+        );
+
       case "keamanan_privasi":
         return (
           <SubMenuLayout title="Izin Keamanan & Privasi">
@@ -348,6 +423,7 @@ export default function SettingsPage() {
             <section className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Aktivitas & Interaksi</h3>
               <MenuList items={[
+                { icon: UserCheck, label: "Hubungan Jaringan", desc: activeAccount.type === 'pribadi' ? "Pengikut, Mengikuti, Suka" : "Subscribe & Suka", subMenu: "hubungan", bg: "bg-black text-white" },
                 { icon: Activity, label: "Kelola Aktivitas", desc: "Log, Waktu Layar", href: "/dashboard" },
                 { icon: History, label: "Preferensi", desc: "Filter Minat, Muted Words", href: "#" },
                 { icon: MessageSquare, label: "Interaksi & Pesan", desc: "Izin Komentar, Balasan Otomatis", href: "/messages" },
@@ -364,7 +440,7 @@ export default function SettingsPage() {
                   icon: Languages, 
                   label: "Bahasa", 
                   desc: "Lokalisasi Aplikasi",
-                  subMenu: "bahasa" // Bisa ditambahkan sub-menu bahasa jika perlu, saat ini kita gunakan modal dropdown sebelumnya
+                  subMenu: "bahasa"
                 },
                 { icon: Accessibility, label: "Aksesibilitas", desc: "Ukuran Teks, Auto-Play", href: "#" },
                 { icon: MapPin, label: "Kontak dan Lokasi", desc: "IP Geolocation, Sinkronisasi", subMenu: "kontak_lokasi" }
@@ -429,4 +505,3 @@ export default function SettingsPage() {
     </DashboardLayout>
   );
 }
-
