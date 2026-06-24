@@ -134,7 +134,6 @@ export default function ProfilePage() {
         };
         reader.readAsDataURL(files[0]);
       }
-      // Reset input value to allow selecting same file again
       e.target.value = '';
     }
   };
@@ -184,12 +183,12 @@ export default function ProfilePage() {
   };
 
   const handleShareProfile = () => {
-    setShareUrl(`https://ontapp.network/profile/${activeAccount.id}`);
+    setShareUrl(`https://tapp.network/profile/${activeAccount.id}`);
     setIsShareSheetOpen(true);
   };
 
   const handleSharePost = (id: string) => {
-    setShareUrl(`https://ontapp.network/post/${id}`);
+    setShareUrl(`https://tapp.network/post/${id}`);
     setIsShareSheetOpen(true);
   };
 
@@ -240,7 +239,7 @@ export default function ProfilePage() {
               </div>
               <div className="flex flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-4 text-muted-foreground font-medium text-[13px] md:text-[15px]">
-                  <span>{activeAccount.extra || 'OnTapp Member'}</span>
+                  <span>{activeAccount.extra || 'Tapp Member'}</span>
                   <div className="flex items-center gap-4 ml-auto">
                      <div className="flex flex-col items-center">
                         <span className="text-sm font-bold text-slate-900">1.2k</span>
@@ -269,7 +268,7 @@ export default function ProfilePage() {
 
         <section className="px-4 md:px-6">
           <div className="flex items-center justify-between border-b border-border/40 pb-4">
-            <p className="text-slate-700 leading-relaxed font-normal text-[14px] md:text-[15px]">"{activeAccount.bio || 'Membangun koneksi cerdas di OnTapp.'}"</p>
+            <p className="text-slate-700 leading-relaxed font-normal text-[14px] md:text-[15px]">"{activeAccount.bio || 'Membangun koneksi cerdas di Tapp.'}"</p>
             <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio, locationLink: activeAccount.locationLink }); setIsBioModalOpen(true); }} className="text-[11px] font-bold uppercase text-accent hover:bg-accent/10 px-3 h-8 rounded-lg border border-accent/20 shrink-0 ml-4"><Pencil className="size-3 mr-1" /> Edit</Button>
           </div>
         </section>
@@ -299,7 +298,10 @@ export default function ProfilePage() {
                           </div>
                         )}
                         <CardContent className="p-3 space-y-1">
-                          <h5 className="font-bold text-[14px] line-clamp-1">{item.title}</h5>
+                          <div className="flex items-center justify-between">
+                            <h5 className="font-bold text-[14px] line-clamp-1">{item.title}</h5>
+                            <button onClick={(e) => { e.stopPropagation(); handleSharePost(item.id); }} className="p-1.5 rounded-full hover:bg-muted text-muted-foreground transition-colors"><Share2 className="size-3.5" /></button>
+                          </div>
                           <p className="text-muted-foreground text-[12px] line-clamp-2">{item.description}</p>
                         </CardContent>
                       </Card>

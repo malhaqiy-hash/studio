@@ -60,7 +60,7 @@ const CATEGORIES = [
 const INITIAL_POSTS = [
   {
     id: "p1",
-    author: "OnTapp Intelligence",
+    author: "Tapp Intelligence",
     extra: "Enterprise AI Analyst",
     avatar: "https://picsum.photos/seed/ontapp/200",
     content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
@@ -76,7 +76,7 @@ const INITIAL_POSTS = [
     author: "Global Logistics Co.",
     extra: "Logistics & Supply Chain",
     avatar: "https://picsum.photos/seed/log/100",
-    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member OnTapp hari ini.",
+    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member Tapp hari ini.",
     time: "2 jam yang lalu",
     stats: { likes: 452, comments: 12 },
     verified: true,
@@ -102,19 +102,8 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
-  const handleIsolate = (e: React.PointerEvent | React.TouchEvent | React.MouseEvent) => {
-    if (images.length > 1) {
-      e.stopPropagation();
-    }
-  };
-
   return (
-    <div 
-      className="relative group/carousel w-full overflow-hidden rounded-xl border border-border bg-muted/5 touch-pan-x select-none"
-      onPointerDown={handleIsolate}
-      onTouchStart={handleIsolate}
-      onTouchMove={handleIsolate}
-    >
+    <div className="relative group/carousel w-full overflow-hidden rounded-xl border border-border bg-muted/5 touch-pan-x select-none">
       <Swiper
         modules={[Navigation]}
         nested={true}
@@ -206,34 +195,7 @@ export default function FeedPage() {
   const [shareUrl, setShareUrl] = React.useState("");
 
   const [zoomedAvatar, setExpandedAvatar] = React.useState<string | null>(null);
-
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const [swipeStartX, setSwipeStartX] = React.useState<number | null>(null);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (activeCategory === 'saran') {
-      setSwipeStartX(e.targetTouches[0].clientX);
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (swipeStartX === null) return;
-    const endX = e.changedTouches[0].clientX;
-    const diff = endX - swipeStartX;
-    if (diff > 120) {
-      setIsPostModalOpen(true);
-    }
-    setSwipeStartX(null);
-  };
-
-  React.useEffect(() => {
-    const initialLikes: Record<string, { count: number, active: boolean }> = {};
-    INITIAL_POSTS.forEach(p => {
-      initialLikes[p.id] = { count: p.stats.likes, active: false };
-    });
-    setLikes(initialLikes);
-  }, []);
 
   const handleLike = (postId: string) => {
     setLikes(prev => {
@@ -264,7 +226,7 @@ export default function FeedPage() {
   };
 
   const handleShare = (postId: string) => {
-    setShareUrl(`https://ontapp.network/post/${postId}`);
+    setShareUrl(`https://tapp.network/post/${postId}`);
     setIsShareSheetOpen(true);
   };
 
@@ -316,11 +278,7 @@ export default function FeedPage() {
 
   return (
     <DashboardLayout>
-      <div 
-        className="flex flex-col max-w-2xl mx-auto relative px-1 md:px-0 min-h-[calc(100vh-8rem)]"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
+      <div className="flex flex-col max-w-2xl mx-auto relative px-1 md:px-0 min-h-[calc(100vh-8rem)]">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
         <div className="flex items-center justify-center gap-1 mb-2 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 overflow-x-auto no-scrollbar">
@@ -421,7 +379,7 @@ export default function FeedPage() {
               </div>
             </div>
             <div className="space-y-3">
-              <Textarea placeholder="Apa yang Anda pikirkan? (Tarik ke bawah atau klik luar untuk batal)" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-0 resize-none shadow-inner" />
+              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-0 resize-none shadow-inner" />
               
               <div className="relative group">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{postLocationLink ? getSmartIcon(postLocationLink) : <LinkIcon className="size-4" />}</div>
@@ -462,6 +420,14 @@ export default function FeedPage() {
       </Dialog>
 
       <ShareSheet isOpen={isShareSheetOpen} onOpenChange={setIsShareSheetOpen} postUrl={shareUrl} />
+      
+      {/* Floating Add Post Button for mobile */}
+      <button 
+        onClick={() => setIsPostModalOpen(true)}
+        className="fixed bottom-20 right-4 size-14 rounded-full bg-black text-white shadow-2xl flex items-center justify-center active:scale-90 transition-transform z-40 md:hidden"
+      >
+        <Plus className="size-8" />
+      </button>
     </DashboardLayout>
   );
 }
