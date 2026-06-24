@@ -9,16 +9,10 @@ import {
   Instagram,
   Facebook,
   Music,
-  Youtube,
-  ShoppingBag,
   Linkedin,
-  Chrome,
   Share2,
   Mail,
-  Twitter,
   SendHorizontal,
-  Slack,
-  QrCode,
   X
 } from 'lucide-react';
 import {
@@ -44,7 +38,6 @@ const EXTERNAL_APPS = [
   { name: 'Instagram', icon: Instagram, color: 'bg-black', url: 'instagram://' },
   { name: 'Telegram', icon: SendHorizontal, color: 'bg-black', url: 'tg://msg?text=' },
   { name: 'Facebook', icon: Facebook, color: 'bg-black', url: 'fb://' },
-  { name: 'Twitter', icon: Twitter, color: 'bg-black', url: 'twitter://' },
   { name: 'Gmail', icon: Mail, color: 'bg-black', url: 'googlegmail://' },
   { name: 'TikTok', icon: Music, color: 'bg-black', url: 'snssdk1128://' },
   { name: 'LinkedIn', icon: Linkedin, color: 'bg-black', url: 'linkedin://' },
