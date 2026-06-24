@@ -46,8 +46,8 @@ export const translations = {
   search_now: { en: 'Search Now', id: 'Cari Sekarang' },
   nearby: { en: 'Nearby (GPS)', id: 'Sekitar (GPS)' },
   results: { en: 'Results', id: 'Hasil' },
-  start_search: { en: 'Start Smart Search', id: 'Mulai Cari Cerdas' },
-  daily_limit_msg: { en: '30 daily accesses to maintain quality.', id: 'Batas 30 akses harian untuk menjaga kualitas.' },
+  start_search: { en: 'Your Network is Your Net Worth', id: 'Jaringan Anda Adalah Kekayaan Anda' },
+  daily_limit_msg: { en: 'Every connection is a new opportunity to grow. Start building strategic relationships today.', id: 'Setiap koneksi adalah peluang baru untuk tumbuh. Mulai jalin hubungan strategis hari ini.' },
   recent_searches: { en: 'Recent Searches', id: 'Pencarian Terakhir' },
   clear_all: { en: 'Clear All', id: 'Hapus Semua' },
   

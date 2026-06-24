@@ -30,6 +30,7 @@ import {
   Calendar,
   Car,
   X,
+  Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -152,7 +153,6 @@ export default function CariPage() {
       setIsSourcePickerOpen(false);
       toast({ title: "Visual AI Aktif", description: "Menganalisis objek dalam gambar..." });
       
-      // Simulasi ekstraksi query dari gambar
       setQuery("Analisis Gambar...");
       handleSearch(undefined, "Analisis Gambar");
     }
@@ -362,11 +362,20 @@ export default function CariPage() {
         )}
 
         {!loading && !results && (
-          <div className="py-12 text-center space-y-3 bg-white rounded-2xl border-2 border-dashed border-slate-100 shadow-inner">
-             <div className="size-10 rounded-lg bg-slate-50 flex items-center justify-center mx-auto"><Search className="size-5 text-slate-200" /></div>
-             <div className="space-y-1 px-4">
-               <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-widest">{t('start_search')}</h3>
-               <p className="text-[10px] text-slate-500 max-w-xs mx-auto font-medium leading-relaxed">{t('daily_limit_msg')}</p>
+          <div className="py-10 px-6 text-center space-y-4 bg-gradient-to-br from-primary/5 to-accent/5 rounded-[2rem] border border-primary/10 shadow-inner overflow-hidden relative group">
+             <div className="absolute -top-10 -right-10 size-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
+             <div className="size-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mx-auto text-primary animate-bounce">
+                <Target className="size-6" />
+             </div>
+             <div className="space-y-2 relative z-10">
+               <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">
+                 {language === 'id' ? "Jaringan Anda Adalah Kekayaan Anda" : "Your Network is Your Net Worth"}
+               </h3>
+               <p className="text-[10px] text-slate-500 max-w-xs mx-auto font-medium leading-relaxed italic">
+                 {language === 'id' 
+                   ? "Setiap koneksi adalah pintu menuju peluang baru. Tapp membantu Anda membuka pintu tersebut secara cerdas." 
+                   : "Every connection is a gateway to new opportunities. Tapp helps you open those doors intelligently."}
+               </p>
              </div>
           </div>
         )}
