@@ -16,10 +16,39 @@ const INITIAL_CHATS = [
   { id: 3, name: "Skyline Ventures", avatar: "https://picsum.photos/seed/invest/100", lastMsg: "Sync next week?", time: "2 days ago", unread: 0, status: "online" },
 ];
 
+const STORAGE_KEY = "ontapp_chats_data_v1";
+
 export default function MessagesPage() {
   const { t } = useLanguage();
-  const [chats, setChats] = React.useState(INITIAL_CHATS);
-  const [selectedChat, setSelectedChat] = React.useState<any>(INITIAL_CHATS[0]);
+  const [chats, setChats] = React.useState<any[]>([]);
+  const [selectedChat, setSelectedChat] = React.useState<any>(null);
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
+  // Load from localStorage on mount
+  React.useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setChats(parsed);
+        if (parsed.length > 0) setSelectedChat(parsed[0]);
+      } catch (e) {
+        setChats(INITIAL_CHATS);
+        setSelectedChat(INITIAL_CHATS[0]);
+      }
+    } else {
+      setChats(INITIAL_CHATS);
+      setSelectedChat(INITIAL_CHATS[0]);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save to localStorage on changes
+  React.useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+    }
+  }, [chats, isLoaded]);
 
   const handleClearAll = () => {
     setChats([]);
@@ -27,12 +56,16 @@ export default function MessagesPage() {
   };
 
   const deleteChat = (id: number) => {
-    const updated = chats.filter(c => c.id !== id);
-    setChats(updated);
-    if (selectedChat?.id === id) {
-      setSelectedChat(updated[0] || null);
-    }
+    setChats(prev => {
+      const updated = prev.filter(c => c.id !== id);
+      if (selectedChat?.id === id) {
+        setSelectedChat(updated[0] || null);
+      }
+      return updated;
+    });
   };
+
+  if (!isLoaded) return null;
 
   return (
     <DashboardLayout>
@@ -41,7 +74,7 @@ export default function MessagesPage() {
         <div className="w-full md:w-72 lg:w-80 border-r border-border flex flex-col bg-muted/5">
           <div className="p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-black tracking-tight uppercase">{t('global_pulse')}</h2>
+              <h2 className="text-base font-black tracking-tight uppercase">{t('global_pulse')}</h2>
               {chats.length > 0 && (
                 <button 
                   onClick={handleClearAll}
@@ -52,8 +85,8 @@ export default function MessagesPage() {
               )}
             </div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-              <Input placeholder={t('search_chats')} className="pl-9 h-9 bg-background border-border rounded-lg text-[12px] font-medium" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
+              <Input placeholder={t('search_chats')} className="pl-9 h-8 bg-background border-border rounded-lg text-[11px] font-medium" />
             </div>
           </div>
           
@@ -68,44 +101,44 @@ export default function MessagesPage() {
                   transition={{ type: "spring", stiffness: 500, damping: 35 }}
                   className="relative group overflow-hidden"
                 >
-                  <div className="absolute inset-y-0 right-0 w-16 flex items-center justify-center bg-rose-500 rounded-xl">
+                  <div className="absolute inset-y-0 right-0 w-14 flex items-center justify-center bg-rose-500 rounded-xl">
                     <button 
                       onClick={() => deleteChat(chat.id)}
                       className="w-full h-full flex flex-col items-center justify-center text-white active:scale-90 transition-transform"
                     >
-                      <Trash2 className="size-4" />
+                      <Trash2 className="size-3.5" />
                       <span className="text-[7px] font-black uppercase mt-0.5">Hapus</span>
                     </button>
                   </div>
 
                   <motion.div
                     drag="x"
-                    dragConstraints={{ left: -64, right: 0 }}
+                    dragConstraints={{ left: -56, right: 0 }}
                     dragElastic={0.05}
                     dragDirectionLock
                     onDragStart={() => {}} 
                     style={{ touchAction: 'pan-y' }}
                     onClick={() => setSelectedChat(chat)}
                     className={cn(
-                      "relative z-10 flex items-center gap-3 p-3 rounded-xl cursor-pointer bg-card border border-transparent transition-colors",
+                      "relative z-10 flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer bg-card border border-transparent transition-colors",
                       selectedChat?.id === chat.id 
                         ? 'bg-background shadow-sm border-border' 
                         : 'hover:bg-muted/50'
                     )}
                   >
                     <div className="relative">
-                      <Avatar className="size-10 border border-border">
+                      <Avatar className="size-9 border border-border">
                         <AvatarImage src={chat.avatar} className="object-cover" />
-                        <AvatarFallback className="text-[10px]">{chat.name[0]}</AvatarFallback>
+                        <AvatarFallback className="text-[9px]">{chat.name[0]}</AvatarFallback>
                       </Avatar>
-                      {chat.status === 'online' && <div className="absolute bottom-0 right-0 size-2.5 bg-emerald-500 rounded-full border-2 border-card" />}
+                      {chat.status === 'online' && <div className="absolute bottom-0 right-0 size-2 bg-emerald-500 rounded-full border-2 border-card" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline mb-0.5">
-                        <h4 className="font-bold text-[13px] truncate">{chat.name}</h4>
-                        <span className="text-[8px] text-muted-foreground font-black uppercase">{chat.time}</span>
+                        <h4 className="font-bold text-[12px] truncate">{chat.name}</h4>
+                        <span className="text-[7px] text-muted-foreground font-black uppercase">{chat.time}</span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground font-medium truncate">{chat.lastMsg}</p>
+                      <p className="text-[10px] text-muted-foreground font-medium truncate">{chat.lastMsg}</p>
                     </div>
                   </motion.div>
                 </motion.div>
@@ -114,7 +147,7 @@ export default function MessagesPage() {
             
             {chats.length === 0 && (
               <div className="py-12 text-center space-y-2 opacity-50">
-                <p className="font-bold text-xs uppercase tracking-widest">Tidak ada pesan</p>
+                <p className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Tidak ada pesan</p>
               </div>
             )}
           </div>
@@ -122,51 +155,51 @@ export default function MessagesPage() {
 
         {selectedChat ? (
           <div className="flex-1 hidden md:flex flex-col animate-in fade-in duration-300">
-            <header className="h-16 border-b border-border px-6 flex items-center justify-between bg-background/50">
-              <div className="flex items-center gap-3">
-                <Avatar className="size-9 border border-border">
+            <header className="h-14 border-b border-border px-5 flex items-center justify-between bg-background/50">
+              <div className="flex items-center gap-2.5">
+                <Avatar className="size-8 border border-border">
                   <AvatarImage src={selectedChat.avatar} className="object-cover" />
-                  <AvatarFallback className="text-[10px]">{selectedChat.name[0]}</AvatarFallback>
+                  <AvatarFallback className="text-[9px]">{selectedChat.name[0]}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="font-bold text-[14px] leading-none">{selectedChat.name}</h3>
+                  <h3 className="font-bold text-[13px] leading-none">{selectedChat.name}</h3>
                   <div className="flex items-center gap-1 mt-1">
                     <div className={cn("size-1.5 rounded-full", selectedChat.status === 'online' ? 'bg-emerald-500' : 'bg-muted-foreground')} />
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase">{selectedChat.status}</span>
+                    <span className="text-[8px] font-bold text-muted-foreground uppercase">{selectedChat.status}</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <Button variant="ghost" size="icon" className="size-8 rounded-lg"><Phone className="size-4" /></Button>
-                <Button variant="ghost" size="icon" className="size-8 rounded-lg"><Video className="size-4" /></Button>
-                <Button variant="ghost" size="icon" className="size-8 rounded-lg"><MoreVertical className="size-4" /></Button>
+              <div className="flex items-center gap-0.5 text-muted-foreground">
+                <Button variant="ghost" size="icon" className="size-7 rounded-lg"><Phone className="size-3.5" /></Button>
+                <Button variant="ghost" size="icon" className="size-7 rounded-lg"><Video className="size-3.5" /></Button>
+                <Button variant="ghost" size="icon" className="size-7 rounded-lg"><MoreVertical className="size-3.5" /></Button>
               </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/5 no-scrollbar">
+            <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-muted/5 no-scrollbar">
               <div className="flex flex-col gap-1 max-w-[75%]">
-                <div className="bg-muted rounded-xl rounded-tl-none p-3 text-[13px] font-medium shadow-sm border border-border leading-relaxed">
+                <div className="bg-muted rounded-xl rounded-tl-none p-2.5 text-[12px] font-medium shadow-sm border border-border leading-relaxed">
                   Hi! We're reviewing your request for the eco-packaging bulk order.
                 </div>
               </div>
               <div className="flex flex-col gap-1 max-w-[75%] ml-auto items-end">
-                <div className="bg-accent text-accent-foreground rounded-xl rounded-tr-none p-3 text-[13px] font-medium shadow-lg leading-relaxed">
+                <div className="bg-accent text-accent-foreground rounded-xl rounded-tr-none p-2.5 text-[12px] font-medium shadow-lg leading-relaxed">
                   Great. Let me know when it's ready for dispatch.
                 </div>
               </div>
             </div>
 
-            <footer className="p-4 border-t border-border bg-background/50">
-              <div className="flex items-center gap-3 bg-muted/50 p-1.5 rounded-xl border border-border">
-                <Input placeholder={t('type_message')} className="border-none bg-transparent h-9 focus-visible:ring-0 text-[13px]" />
-                <Button className="size-9 rounded-lg bg-accent text-accent-foreground p-0 active:scale-95 transition-transform"><Send className="size-4" /></Button>
+            <footer className="p-3 border-t border-border bg-background/50">
+              <div className="flex items-center gap-2.5 bg-muted/50 p-1 rounded-xl border border-border">
+                <Input placeholder={t('type_message')} className="border-none bg-transparent h-8 focus-visible:ring-0 text-[12px]" />
+                <Button className="size-8 rounded-lg bg-accent text-accent-foreground p-0 active:scale-95 transition-transform"><Send className="size-3.5" /></Button>
               </div>
             </footer>
           </div>
         ) : (
           <div className="flex-1 hidden md:flex flex-col items-center justify-center bg-muted/5 opacity-30 select-none">
-             <MessageSquare className="size-14 mb-3" />
-             <p className="font-black uppercase tracking-[0.2em] text-[10px]">Pilih Obrolan</p>
+             <MessageSquare className="size-12 mb-2" />
+             <p className="font-black uppercase tracking-[0.2em] text-[9px]">Pilih Obrolan</p>
           </div>
         )}
       </div>
