@@ -61,7 +61,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -81,7 +80,7 @@ import { useLanguage } from "@/context/language-context";
 import { useAccount, AccountType } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -267,7 +266,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild><button className="flex flex-col items-center gap-1 hover:text-primary w-full py-1.5 outline-none transition-all"><Menu className="size-5 md:size-6" /><span>{t('more')}</span></button></SheetTrigger>
-              <SheetContent side="bottom" className="rounded-t-[2rem] border-none p-0 h-[80vh] bg-card overflow-hidden [&>button]:hidden outline-none shadow-2xl">
+              <SheetContent side="bottom" className="p-0 h-[80vh] bg-transparent border-none [&>button]:hidden outline-none shadow-none overflow-visible">
                 <motion.div 
                   drag="y"
                   dragConstraints={{ top: 0, bottom: 0 }}
@@ -283,7 +282,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   }}
                   className="w-full h-full flex flex-col"
                 >
-                  <motion.div style={{ opacity: dragOpacity }} className="w-full h-full flex flex-col">
+                  <motion.div style={{ opacity: dragOpacity }} className="w-full h-full flex flex-col bg-card rounded-t-[2rem] border-t border-border/50 shadow-2xl overflow-hidden">
                     <div className="w-full flex flex-col items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
                       <div className="sheet-handle w-10 h-1 bg-muted rounded-full" />
                     </div>

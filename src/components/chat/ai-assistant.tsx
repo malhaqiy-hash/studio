@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from 'react';
-import { Send, User, Globe, RefreshCw, Mic, X as XIcon } from 'lucide-react';
+import { User, Globe, RefreshCw, Mic, X as XIcon, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,7 @@ type Message = {
   showTranslated?: boolean;
 };
 
-const STORAGE_KEY = 'tapp_assistant_offset_v1';
+const STORAGE_KEY = 'tapp_assistant_offset_v3';
 
 export function AIAssistant() {
   const { language, t } = useLanguage();
@@ -32,8 +32,10 @@ export function AIAssistant() {
   const [loading, setLoading] = React.useState(false);
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [isMounted, setIsMounted] = React.useState(false);
+  
+  // Guard to prevent opening on drag
+  const dragStartPos = React.useRef({ x: 0, y: 0 });
 
-  // Offset values relative to default CSS position (bottom-24 right-4)
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
 
@@ -61,11 +63,24 @@ export function AIAssistant() {
     return () => window.removeEventListener('open-ai-assistant', handleOpen);
   }, []);
 
+  const handleDragStart = () => {
+    dragStartPos.current = { x: dragX.get(), y: dragY.get() };
+  };
+
   const handleDragEnd = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ 
       x: dragX.get(), 
       y: dragY.get() 
     }));
+  };
+
+  const handleTap = () => {
+    // Only open if displacement is very small (it was a click, not a drag)
+    const dx = Math.abs(dragX.get() - dragStartPos.current.x);
+    const dy = Math.abs(dragY.get() - dragStartPos.current.y);
+    if (dx < 5 && dy < 5) {
+      setIsOpen(!isOpen);
+    }
   };
 
   const handleSend = async () => {
@@ -121,10 +136,11 @@ export function AIAssistant() {
       <motion.div 
         drag
         dragMomentum={false}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onTap={handleTap}
         style={{ x: dragX, y: dragY }}
         className="fixed z-[300] bottom-24 right-4 size-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xl cursor-grab active:cursor-grabbing border-2 border-white/20 group"
-        onTap={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
