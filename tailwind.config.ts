@@ -1,4 +1,3 @@
-
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -18,6 +17,10 @@ export default {
   			headline: [
   				'Inter',
   				'sans-serif'
+  			],
+  			latin: [
+  				'Dancing Script',
+  				'cursive'
   			],
   			code: [
   				'monospace'

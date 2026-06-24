@@ -236,7 +236,7 @@ export default function ProfilePage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-xl mx-auto space-y-3 md:space-y-5 pb-20">
+      <div className="max-w-xl mx-auto space-y-3 md:space-y-4 pb-20">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
 
         <section className="relative group">
@@ -251,54 +251,55 @@ export default function ProfilePage() {
                 onClick={() => openMediaPicker('cover')} 
                 variant="outline" 
                 size="icon"
-                className="size-8 bg-background/80 backdrop-blur text-accent border-none rounded-lg shadow-lg active:scale-90 transition-transform"
+                className="size-7 bg-background/80 backdrop-blur text-accent border-none rounded-lg shadow-lg active:scale-90 transition-transform"
               >
-                <Camera className="size-4" />
+                <Camera className="size-3.5" />
               </Button>
               <Button 
                 onClick={handleShareProfile} 
                 variant="outline" 
                 size="icon"
-                className="size-8 bg-background/80 backdrop-blur text-accent border-none rounded-lg shadow-lg active:scale-90 transition-transform"
+                className="size-7 bg-background/80 backdrop-blur text-accent border-none rounded-lg shadow-lg active:scale-90 transition-transform"
               >
-                <Share2 className="size-4" />
+                <Share2 className="size-3.5" />
               </Button>
             </div>
           </div>
 
-          <div className="px-3 md:px-5 -mt-10 md:-mt-12 flex flex-col items-start gap-2.5">
+          <div className="px-3 md:px-5 -mt-8 md:-mt-10 flex flex-col items-start gap-2">
             <div className="relative group/avatar">
-              <Avatar className="size-20 md:size-28 border-[3px] border-background dark:border-card shadow-lg rounded-2xl">
+              <Avatar className="size-16 md:size-24 border-[3px] border-background dark:border-card shadow-lg rounded-2xl">
                 <AvatarImage src={activeAccount.avatar} className="object-cover" />
-                <AvatarFallback className="bg-accent/10 text-accent font-bold text-lg">{activeAccount.name[0]}</AvatarFallback>
+                <AvatarFallback className="bg-accent/10 text-accent font-bold text-base">{activeAccount.name[0]}</AvatarFallback>
               </Avatar>
-              <button onClick={() => openMediaPicker('avatar')} className="absolute bottom-0 right-0 size-7 bg-accent text-white rounded-lg flex items-center justify-center border-2 border-background shadow-lg hover:scale-105 active:scale-95 transition-all"><Pencil className="size-3.5" /></button>
+              <button onClick={() => openMediaPicker('avatar')} className="absolute bottom-0 right-0 size-6 bg-accent text-white rounded-lg flex items-center justify-center border-2 border-background shadow-lg hover:scale-105 active:scale-95 transition-all"><Pencil className="size-3" /></button>
             </div>
-            <div className="space-y-0.5 w-full">
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight">{activeAccount.name}</h1>
-                {activeAccount.verificationStatus === 'Verified' && <Badge className="bg-emerald-500/10 text-emerald-500 border-none px-1.5 py-0.5 text-[9px] uppercase font-bold rounded-full"><ShieldCheck className="size-2.5" /> AI</Badge>}
+            <div className="space-y-0 w-full">
+              <div className="flex items-center gap-2">
+                <h1 className="text-base md:text-lg font-bold text-slate-900 tracking-tight">{activeAccount.name}</h1>
+                {activeAccount.verificationStatus === 'Verified' && <ShieldCheck className="size-3 text-emerald-500" />}
+                <span className="font-latin text-xl text-primary/80 italic lowercase select-none ml-1 leading-none">{activeAccount.type}</span>
               </div>
               <div className="flex flex-col gap-0.5">
-                <div className="flex flex-wrap items-center gap-3 text-muted-foreground font-medium text-[12px] md:text-[14px]">
+                <div className="flex flex-wrap items-center gap-3 text-muted-foreground font-medium text-[11px] md:text-[13px]">
                   <span>{activeAccount.extra || 'Tapp Member'}</span>
                   <div className="flex items-center gap-3 ml-auto">
                      <div className="flex flex-col items-center">
                         <span className="text-xs font-bold text-slate-900">1.2k</span>
-                        <span className="text-[8px] font-black uppercase opacity-60 flex items-center gap-1">
+                        <span className="text-[7px] font-black uppercase opacity-60 flex items-center gap-1">
                           {activeAccount.type === 'pribadi' ? <><Users className="size-2" /> Pengikut</> : <><Zap className="size-2" /> Subscribe</>}
                         </span>
                      </div>
                      <div className="flex flex-col items-center text-rose-500">
                         <span className="text-xs font-bold">4.2k</span>
-                        <span className="text-[8px] font-black uppercase flex items-center gap-1">
+                        <span className="text-[7px] font-black uppercase flex items-center gap-1">
                           <Heart className="size-2 fill-rose-500" /> Suka
                         </span>
                      </div>
                   </div>
                 </div>
                 {activeAccount.locationLink && (
-                  <a href={activeAccount.locationLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-accent font-bold text-[10px] uppercase tracking-widest hover:underline mt-0.5">
+                  <a href={activeAccount.locationLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-accent font-bold text-[9px] uppercase tracking-widest hover:underline mt-0.5">
                     {getSmartIcon(activeAccount.locationLink)}
                     Tautan Profil
                   </a>
@@ -309,46 +310,46 @@ export default function ProfilePage() {
         </section>
 
         <section className="px-3 md:px-5">
-          <div className="flex items-center justify-between border-b border-border/40 pb-3">
-            <p className="text-slate-700 leading-relaxed font-normal text-[13px] md:text-[14px]">"{activeAccount.bio || 'Membangun koneksi cerdas di Tapp.'}"</p>
-            <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio, locationLink: activeAccount.locationLink }); setIsBioModalOpen(true); }} className="text-[10px] font-bold uppercase text-accent hover:bg-accent/10 px-2.5 h-7 rounded-lg border border-accent/20 shrink-0 ml-3"><Pencil className="size-2.5 mr-1" /> Edit</Button>
+          <div className="flex items-center justify-between border-b border-border/40 pb-2">
+            <p className="text-slate-700 leading-relaxed font-normal text-[12px] md:text-[13px]">"{activeAccount.bio || 'Membangun koneksi cerdas di Tapp.'}"</p>
+            <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio, locationLink: activeAccount.locationLink }); setIsBioModalOpen(true); }} className="text-[9px] font-bold uppercase text-accent hover:bg-accent/10 px-2 h-6 rounded-lg border border-accent/20 shrink-0 ml-3"><Pencil className="size-2 mr-1" /> Edit</Button>
           </div>
         </section>
 
-        <section className="px-3 md:px-5 space-y-4">
+        <section className="px-3 md:px-5 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Portofolio & Produk</h3>
-            <Button size="sm" onClick={() => setIsContentModalOpen(true)} className="rounded-lg h-8 bg-accent hover:bg-accent/90 gap-1 font-bold text-[11px] uppercase tracking-widest px-3 shadow-lg text-white"><PlusCircle className="size-3.5" /> Item</Button>
+            <h3 className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Portofolio & Produk</h3>
+            <Button size="sm" onClick={() => setIsContentModalOpen(true)} className="rounded-lg h-7 bg-accent hover:bg-accent/90 gap-1 font-bold text-[10px] uppercase tracking-widest px-2.5 shadow-lg text-white"><PlusCircle className="size-3" /> Item</Button>
           </div>
 
-          <div className="flex flex-col space-y-8">
+          <div className="flex flex-col space-y-6">
             {Object.entries(groupedItems).map(([category, items]) => (
-              <div key={category} className="space-y-3">
+              <div key={category} className="space-y-2.5">
                 <div className="flex items-center justify-between px-1">
-                   <h4 className="text-base font-black text-slate-900 tracking-tight uppercase border-l-4 border-black pl-2">{category}</h4>
-                   <Badge variant="secondary" className="text-[9px] font-black">{items.length} Item</Badge>
+                   <h4 className="text-sm font-black text-slate-900 tracking-tight uppercase border-l-3 border-black pl-2">{category}</h4>
+                   <Badge variant="secondary" className="text-[8px] font-black">{items.length} Item</Badge>
                 </div>
                 
                 <div className={cn(
-                  activeAccount.type === 'pribadi' ? "grid grid-cols-2 gap-3" : "flex overflow-x-auto no-scrollbar space-x-3 px-1 pb-3 snap-x"
+                  activeAccount.type === 'pribadi' ? "grid grid-cols-2 gap-2.5" : "flex overflow-x-auto no-scrollbar space-x-2.5 px-1 pb-2.5 snap-x"
                 )}>
                   {items.map((item) => (
-                    <div key={item.id} className={cn(activeAccount.type === 'pribadi' ? "" : "w-32 md:w-36 flex-shrink-0 snap-start")}>
+                    <div key={item.id} className={cn(activeAccount.type === 'pribadi' ? "" : "w-28 md:w-32 flex-shrink-0 snap-start")}>
                       <Card className="rounded-xl border-none shadow-md overflow-hidden bg-card hover:shadow-xl transition-all relative group">
                         {item.images && item.images.length > 0 && (
                           <div className="aspect-square w-full overflow-hidden relative cursor-zoom-in" onClick={() => setZoomedImage(item.images![0])}>
                             <img src={item.images[0]} className="w-full h-full object-cover" alt={item.title} />
-                            {item.images.length > 1 && <div className="absolute bottom-1 right-1 bg-black/60 text-white px-1 py-0.5 rounded-md text-[7px] font-black uppercase">{item.images.length} Foto</div>}
-                            {item.isPinned && <div className="absolute top-1.5 right-1.5 bg-accent text-white p-1 rounded-full shadow-lg"><Pin className="size-2.5 fill-white" /></div>}
+                            {item.images.length > 1 && <div className="absolute bottom-1 right-1 bg-black/60 text-white px-1 py-0.5 rounded-md text-[6px] font-black uppercase">{item.images.length} Foto</div>}
+                            {item.isPinned && <div className="absolute top-1 right-1 bg-accent text-white p-0.5 rounded-full shadow-lg"><Pin className="size-2 fill-white" /></div>}
                           </div>
                         )}
                         <div className="absolute top-1 left-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                          <button onClick={(e) => { e.stopPropagation(); handleSharePost(item.id); }} className="size-6 bg-black/60 text-white rounded-lg flex items-center justify-center shadow-lg"><Share2 className="size-3" /></button>
-                          <button onClick={(e) => { e.stopPropagation(); removePost(item.id); }} className="size-6 bg-rose-500 text-white rounded-lg flex items-center justify-center shadow-lg"><Trash2 className="size-3" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); handleSharePost(item.id); }} className="size-5 bg-black/60 text-white rounded-lg flex items-center justify-center shadow-lg"><Share2 className="size-2.5" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); removePost(item.id); }} className="size-5 bg-rose-500 text-white rounded-lg flex items-center justify-center shadow-lg"><Trash2 className="size-2.5" /></button>
                         </div>
-                        <CardContent className="p-2 space-y-0.5">
-                          <h5 className="font-black text-slate-900 text-[12px] truncate leading-none">{item.title}</h5>
-                          <p className="text-slate-400 text-[10px] font-medium line-clamp-2 leading-tight h-6">{item.description}</p>
+                        <CardContent className="p-1.5 space-y-0">
+                          <h5 className="font-black text-slate-900 text-[11px] truncate leading-none">{item.title}</h5>
+                          <p className="text-slate-400 text-[9px] font-medium line-clamp-2 leading-tight h-5 mt-0.5">{item.description}</p>
                         </CardContent>
                       </Card>
                     </div>
@@ -361,20 +362,20 @@ export default function ProfilePage() {
       </div>
 
       <Dialog open={isBioModalOpen} onOpenChange={setIsBioModalOpen}>
-        <DialogContent className="w-[90%] md:max-sm rounded-xl p-5 bg-card text-foreground outline-none [&>button]:hidden">
-          <DialogHeader><DialogTitle className="text-base font-bold text-slate-900">Ubah Profil</DialogTitle></DialogHeader>
-          <div className="space-y-4 py-3">
-            <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-muted-foreground">Nama Tampilan</Label><Input value={tempAccount.name || ''} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-lg h-10 bg-muted/20 border-none px-3 text-[13px] font-bold" /></div>
-            <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-muted-foreground">Bio</Label><Textarea value={tempAccount.bio || ''} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} className="rounded-lg bg-muted/20 border-none min-h-[80px] px-3 text-[13px] font-medium" /></div>
-            <div className="space-y-1.5">
-              <Label className="text-[10px] font-bold uppercase text-muted-foreground">Link Alamat/Web</Label>
+        <DialogContent className="w-[90%] md:max-sm rounded-xl p-4 bg-card text-foreground outline-none [&>button]:hidden">
+          <DialogHeader><DialogTitle className="text-sm font-bold text-slate-900">Ubah Profil</DialogTitle></DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1"><Label className="text-[9px] font-bold uppercase text-muted-foreground">Nama Tampilan</Label><Input value={tempAccount.name || ''} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-lg h-9 bg-muted/20 border-none px-3 text-[12px] font-bold" /></div>
+            <div className="space-y-1"><Label className="text-[9px] font-bold uppercase text-muted-foreground">Bio</Label><Textarea value={tempAccount.bio || ''} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} className="rounded-lg bg-muted/20 border-none min-h-[60px] px-3 text-[12px] font-medium" /></div>
+            <div className="space-y-1">
+              <Label className="text-[9px] font-bold uppercase text-muted-foreground">Link Alamat/Web</Label>
               <div className="relative">
-                <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">{tempAccount.locationLink ? getSmartIcon(tempAccount.locationLink) : <LinkIcon className="size-3.5" />}</div>
-                <Input value={tempAccount.locationLink || ''} onChange={(e) => setTempAccount({ ...tempAccount, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-lg h-10 bg-muted/20 border-none pl-9 text-[13px] font-medium shadow-inner" />
+                <div className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">{tempAccount.locationLink ? getSmartIcon(tempAccount.locationLink) : <LinkIcon className="size-3" />}</div>
+                <Input value={tempAccount.locationLink || ''} onChange={(e) => setTempAccount({ ...tempAccount, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-lg h-9 bg-muted/20 border-none pl-8 text-[12px] font-medium shadow-inner" />
               </div>
             </div>
           </div>
-          <DialogFooter><Button onClick={handleSaveBio} className="w-full h-11 rounded-lg bg-accent font-bold text-white text-[13px] uppercase tracking-widest shadow-lg active:scale-95 transition-all">Simpan</Button></DialogFooter>
+          <DialogFooter><Button onClick={handleSaveBio} className="w-full h-10 rounded-lg bg-accent font-bold text-white text-[12px] uppercase tracking-widest shadow-lg active:scale-95 transition-all">Simpan</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -385,21 +386,21 @@ export default function ProfilePage() {
           if (!open) resetContentForm(); 
         }}
       >
-        <DialogContent className="w-[95%] md:max-w-lg rounded-xl p-5 bg-card text-foreground outline-none [&>button]:hidden">
+        <DialogContent className="w-[95%] md:max-w-lg rounded-xl p-4 bg-card text-foreground outline-none [&>button]:hidden">
           <DialogHeader className="flex flex-row items-center justify-between">
-            <DialogTitle className="text-base font-bold text-slate-900">Tambah Konten</DialogTitle>
-            <div className="w-28">
+            <DialogTitle className="text-sm font-bold text-slate-900">Tambah Konten</DialogTitle>
+            <div className="w-24">
               <Select value={newItem.visibility} onValueChange={(val: 'public' | 'private') => setNewItem({ ...newItem, visibility: val })}>
-                <SelectTrigger className="h-8 rounded-lg bg-muted/50 border-none text-[10px] font-bold px-2 shadow-inner"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-7 rounded-lg bg-muted/50 border-none text-[9px] font-bold px-2 shadow-inner"><SelectValue /></SelectTrigger>
                 <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
               </Select>
             </div>
           </DialogHeader>
-          <div className="space-y-4 pt-3 overflow-y-auto max-h-[65vh] no-scrollbar">
-            <div className="space-y-2 p-3 bg-muted/20 rounded-xl">
-              <Label className="font-black text-[9px] uppercase tracking-widest text-muted-foreground">Lokasi Tampilan Konten</Label>
+          <div className="space-y-3 pt-2 overflow-y-auto max-h-[60vh] no-scrollbar">
+            <div className="space-y-1.5 p-2.5 bg-muted/20 rounded-xl">
+              <Label className="font-black text-[8px] uppercase tracking-widest text-muted-foreground">Lokasi Tampilan Konten</Label>
               <Select value={newItem.displayLocation} onValueChange={(val: any) => setNewItem({ ...newItem, displayLocation: val })}>
-                <SelectTrigger className="rounded-lg h-9 bg-card border-none shadow-sm font-bold text-[11px]">
+                <SelectTrigger className="rounded-lg h-8 bg-card border-none shadow-sm font-bold text-[10px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -410,21 +411,21 @@ export default function ProfilePage() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5">
               {(newItem.images || []).map((src, i) => (
                 <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-border">
                   <img src={src} className="w-full h-full object-cover" />
-                  <button onClick={() => setNewItem(prev => ({ ...prev, images: prev.images?.filter((_, idx) => idx !== i) }))} className="absolute top-1 right-1 size-5 bg-black/60 text-white rounded-full flex items-center justify-center"><X size={10} /></button>
+                  <button onClick={() => setNewItem(prev => ({ ...prev, images: prev.images?.filter((_, idx) => idx !== i) }))} className="absolute top-0.5 right-0.5 size-4 bg-black/60 text-white rounded-full flex items-center justify-center"><X size={8} /></button>
                 </div>
               ))}
               <div onClick={() => openMediaPicker('post')} className="aspect-square rounded-lg bg-muted/30 border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:bg-accent/5 transition-colors">
-                <PlusCircle className="size-6 text-muted-foreground" />
+                <PlusCircle className="size-5 text-muted-foreground" />
               </div>
             </div>
 
             {(activeAccount.type === 'bisnis' || activeAccount.type === 'professional') && (
-              <div className="space-y-2 p-3 bg-muted/20 rounded-xl">
-                 <Label className="font-black text-[9px] uppercase tracking-widest text-muted-foreground">Kategori Postingan *</Label>
+              <div className="space-y-1.5 p-2.5 bg-muted/20 rounded-xl">
+                 <Label className="font-black text-[8px] uppercase tracking-widest text-muted-foreground">Kategori Postingan *</Label>
                  <Select 
                    value={isNewCategory ? "new" : (newItem.categoryName || '')} 
                    onValueChange={(val) => {
@@ -437,7 +438,7 @@ export default function ProfilePage() {
                      }
                    }}
                  >
-                   <SelectTrigger className="rounded-lg h-9 bg-card border-none shadow-sm font-bold text-[11px]">
+                   <SelectTrigger className="rounded-lg h-8 bg-card border-none shadow-sm font-bold text-[10px]">
                      <SelectValue placeholder="Pilih Kategori" />
                    </SelectTrigger>
                    <SelectContent>
@@ -454,34 +455,34 @@ export default function ProfilePage() {
                      placeholder="Nama Kategori Baru" 
                      value={newItem.categoryName || ''} 
                      onChange={(e) => setNewItem({...newItem, categoryName: e.target.value})} 
-                     className="rounded-lg h-9 bg-white border-black/10 focus:border-black transition-all font-bold px-3 text-[11px]"
+                     className="rounded-lg h-8 bg-white border-black/10 focus:border-black transition-all font-bold px-2 text-[10px]"
                    />
                  )}
               </div>
             )}
 
-            <div className="space-y-1.5"><Label className="font-bold text-[10px] uppercase text-muted-foreground">Judul Item</Label><Input value={newItem.title || ''} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-lg h-10 bg-muted/20 border-none px-3 text-[13px] font-bold" /></div>
-            <div className="space-y-1.5"><Label className="font-bold text-[10px] uppercase text-muted-foreground">Deskripsi</Label><Textarea value={newItem.description || ''} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="rounded-lg bg-muted/20 border-none min-h-[80px] px-3 text-[13px] font-medium" /></div>
-            <div className="space-y-1.5">
-              <Label className="font-bold text-[10px] uppercase text-muted-foreground">Link Alamat/Web</Label>
+            <div className="space-y-1"><Label className="font-bold text-[9px] uppercase text-muted-foreground">Judul Item</Label><Input value={newItem.title || ''} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-lg h-9 bg-muted/20 border-none px-3 text-[12px] font-bold" /></div>
+            <div className="space-y-1"><Label className="font-bold text-[9px] uppercase text-muted-foreground">Deskripsi</Label><Textarea value={newItem.description || ''} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="rounded-lg bg-muted/20 border-none min-h-[60px] px-3 text-[12px] font-medium" /></div>
+            <div className="space-y-1">
+              <Label className="font-bold text-[9px] uppercase text-muted-foreground">Link Alamat/Web</Label>
               <div className="relative">
-                <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">{newItem.locationLink ? getSmartIcon(newItem.locationLink) : <LinkIcon className="size-3.5" />}</div>
-                <Input value={newItem.locationLink || ''} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-lg h-10 bg-muted/20 border-none pl-9 text-[13px] font-medium shadow-inner" />
+                <div className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">{newItem.locationLink ? getSmartIcon(newItem.locationLink) : <LinkIcon className="size-3" />}</div>
+                <Input value={newItem.locationLink || ''} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-lg h-9 bg-muted/20 border-none pl-8 text-[12px] font-medium shadow-inner" />
               </div>
             </div>
           </div>
-          <DialogFooter className="mt-4"><Button onClick={handleAddContent} disabled={!newItem.images?.length || ((activeAccount.type !== 'pribadi') && !newItem.categoryName)} className="w-full h-11 rounded-lg bg-accent font-bold text-white text-[13px] uppercase shadow-lg active:scale-95 transition-all">Posting</Button></DialogFooter>
+          <DialogFooter className="mt-3"><Button onClick={handleAddContent} disabled={!newItem.images?.length || ((activeAccount.type !== 'pribadi') && !newItem.categoryName)} className="w-full h-10 rounded-lg bg-accent font-bold text-white text-[12px] uppercase shadow-lg active:scale-95 transition-all">Posting</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
-        <DialogContent className="w-[85%] md:max-w-xs rounded-xl p-5 border-none shadow-2xl bg-card text-foreground outline-none [&>button]:hidden">
-          <DialogHeader className="text-center"><DialogTitle className="text-[14px] font-black uppercase tracking-tight">Pilih Media</DialogTitle></DialogHeader>
-          <div className="grid gap-2.5 py-4">
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-11 rounded-lg border-border bg-muted/50 hover:bg-black/5 justify-start gap-4 px-5 shadow-inner"><Smartphone className="size-4 text-black" /><p className="font-black text-[10px] uppercase tracking-widest">Galeri HP</p></Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-11 rounded-lg border-border bg-muted/50 hover:bg-black/5 justify-start gap-4 px-5 shadow-inner"><Cloud className="size-4 text-black" /><p className="font-black text-[10px] uppercase tracking-widest">Layanan Cloud</p></Button>
+        <DialogContent className="w-[85%] md:max-w-xs rounded-xl p-4 border-none shadow-2xl bg-card text-foreground outline-none [&>button]:hidden">
+          <DialogHeader className="text-center"><DialogTitle className="text-[12px] font-black uppercase tracking-tight">Pilih Media</DialogTitle></DialogHeader>
+          <div className="grid gap-2 py-3">
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-10 rounded-lg border-border bg-muted/50 hover:bg-black/5 justify-start gap-3 px-4 shadow-inner"><Smartphone className="size-4 text-black" /><p className="font-black text-[9px] uppercase tracking-widest">Galeri HP</p></Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-10 rounded-lg border-border bg-muted/50 hover:bg-black/5 justify-start gap-3 px-4 shadow-inner"><Cloud className="size-4 text-black" /><p className="font-black text-[9px] uppercase tracking-widest">Layanan Cloud</p></Button>
           </div>
-          <DialogFooter><Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-black text-[10px] uppercase text-muted-foreground hover:bg-transparent">Batal</Button></DialogFooter>
+          <DialogFooter><Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-black text-[9px] uppercase text-muted-foreground hover:bg-transparent">Batal</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
