@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -214,6 +215,7 @@ export default function FeedPage() {
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean }>>({});
   const [likes, setLikes] = React.useState<Record<string, { count: number, active: boolean }>>({});
 
+  // Form State
   const [isPostModalOpen, setIsPostModalOpen] = React.useState(false);
   const [postContent, setPostContent] = React.useState("");
   const [postImages, setPostImages] = React.useState<string[]>([]);
@@ -230,6 +232,20 @@ export default function FeedPage() {
   const dragX = useMotionValue(0);
   const swipePlusOpacity = useTransform(dragX, [0, 100], [0, 1]);
   const swipePlusScale = useTransform(dragX, [0, 100], [0.5, 1.2]);
+
+  // Logic: Reset form state when account changes or modal closes
+  const resetForm = React.useCallback(() => {
+    setPostContent("");
+    setPostImages([]);
+    setPostLocationLink("");
+    setPostVisibility('public');
+  }, []);
+
+  // Watch for account changes to isolate state per account
+  React.useEffect(() => {
+    resetForm();
+    setIsPostModalOpen(false); // Close modal if open during switch
+  }, [activeAccount.id, resetForm]);
 
   const handleDragEnd = (event: any, info: any) => {
     if (info.offset.x > 100) {
@@ -289,9 +305,7 @@ export default function FeedPage() {
       source: 'feed'
     });
     setIsPostModalOpen(false);
-    setPostContent("");
-    setPostImages([]);
-    setPostLocationLink("");
+    resetForm();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -349,7 +363,6 @@ export default function FeedPage() {
           <span className="text-[10px] font-black uppercase tracking-widest bg-primary text-white px-3 py-1 rounded-full">Buat Postingan</span>
         </motion.div>
 
-        {/* Updated symmetrical sticky categories */}
         <div className="flex items-center justify-center gap-6 mb-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md py-3 overflow-x-auto no-scrollbar border-b border-border/40 px-2">
           {CATEGORIES.map((cat) => (
             <button
@@ -441,7 +454,13 @@ export default function FeedPage() {
         </div>
       </motion.div>
 
-      <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
+      <Dialog 
+        open={isPostModalOpen} 
+        onOpenChange={(open) => {
+          setIsPostModalOpen(open);
+          if (!open) resetForm(); // Explicit cleanup on modal close
+        }}
+      >
         <DialogContent className="w-[95%] md:max-lg rounded-3xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
           <div className="p-6 space-y-4">
             <div className="flex items-center justify-between">

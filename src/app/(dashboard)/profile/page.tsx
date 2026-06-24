@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -74,6 +75,8 @@ export default function ProfilePage() {
   
   const [isNewCategory, setIsNewCategory] = React.useState(false);
   const [isCloudLoading, setIsCloudLoading] = React.useState(false);
+  
+  // New Item State
   const [newItem, setNewItem] = React.useState<Partial<ContentItem>>({
     visibility: 'public',
     images: [],
@@ -83,6 +86,26 @@ export default function ProfilePage() {
   
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Logic: Reset form state when account changes
+  const resetContentForm = React.useCallback(() => {
+    setNewItem({
+      visibility: 'public',
+      images: [],
+      locationLink: '',
+      categoryName: '',
+      title: '',
+      description: ''
+    });
+    setIsNewCategory(false);
+  }, []);
+
+  // Isolate state per account switch
+  React.useEffect(() => {
+    resetContentForm();
+    setIsContentModalOpen(false);
+    setIsBioModalOpen(false);
+  }, [activeAccount.id, resetContentForm]);
 
   const groupedItems = React.useMemo(() => {
     const items = (activeAccount.items || []).filter(i => i.source === 'profile');
@@ -177,8 +200,7 @@ export default function ProfilePage() {
       source: 'profile'
     });
     setIsContentModalOpen(false);
-    setNewItem({ visibility: 'public', images: [], locationLink: '', categoryName: '' });
-    setIsNewCategory(false);
+    resetContentForm();
     toast({ title: 'Konten dipublikasikan' });
   };
 
@@ -355,7 +377,13 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isContentModalOpen} onOpenChange={setIsContentModalOpen}>
+      <Dialog 
+        open={isContentModalOpen} 
+        onOpenChange={(open) => {
+          setIsContentModalOpen(open);
+          if (!open) resetContentForm(); // Explicit cleanup on modal close
+        }}
+      >
         <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden">
           <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle className="text-lg font-bold text-slate-900">Tambah Konten</DialogTitle>
