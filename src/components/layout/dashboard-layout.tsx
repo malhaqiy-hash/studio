@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -282,7 +283,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   }}
                   className="w-full h-full flex flex-col"
                 >
-                  <motion.div style={{ opacity: dragOpacity }} className="w-full h-full flex flex-col bg-card rounded-t-[2rem] border-t border-border/50 shadow-2xl overflow-hidden">
+                  <motion.div 
+                    style={{ opacity: dragOpacity }} 
+                    className="w-full h-full flex flex-col bg-card rounded-t-[2rem] border-t border-border/50 shadow-2xl overflow-hidden pointer-events-auto"
+                  >
                     <div className="w-full flex flex-col items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
                       <div className="sheet-handle w-10 h-1 bg-muted rounded-full" />
                     </div>

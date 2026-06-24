@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -33,9 +34,7 @@ export function AIAssistant() {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [isMounted, setIsMounted] = React.useState(false);
   
-  // Guard to prevent opening on drag
-  const dragStartPos = React.useRef({ x: 0, y: 0 });
-
+  const isDragging = React.useRef(false);
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
 
@@ -64,7 +63,7 @@ export function AIAssistant() {
   }, []);
 
   const handleDragStart = () => {
-    dragStartPos.current = { x: dragX.get(), y: dragY.get() };
+    isDragging.current = true;
   };
 
   const handleDragEnd = () => {
@@ -72,13 +71,14 @@ export function AIAssistant() {
       x: dragX.get(), 
       y: dragY.get() 
     }));
+    // Small delay to ensure click doesn't fire immediately after drag
+    setTimeout(() => {
+      isDragging.current = false;
+    }, 100);
   };
 
   const handleTap = () => {
-    // Only open if displacement is very small (it was a click, not a drag)
-    const dx = Math.abs(dragX.get() - dragStartPos.current.x);
-    const dy = Math.abs(dragY.get() - dragStartPos.current.y);
-    if (dx < 5 && dy < 5) {
+    if (!isDragging.current) {
       setIsOpen(!isOpen);
     }
   };
@@ -140,7 +140,7 @@ export function AIAssistant() {
         onDragEnd={handleDragEnd}
         onTap={handleTap}
         style={{ x: dragX, y: dragY }}
-        className="fixed z-[300] bottom-24 right-4 size-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xl cursor-grab active:cursor-grabbing border-2 border-white/20 group"
+        className="fixed z-[300] bottom-24 right-4 size-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xl cursor-grab active:cursor-grabbing border-2 border-white/20 group transition-colors hover:bg-primary/90"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
