@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -120,7 +119,7 @@ export default function ProfilePage() {
     } else {
       setIsBioModalOpen(false);
     }
-  }, [activeAccount.id, resetContentValue]);
+  }, [activeAccount.id, resetContentForm]);
 
   const profileVisibleItems = React.useMemo(() => {
     const items = (activeAccount.items || []).filter(i => 
@@ -492,7 +491,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!zoomedImage} onOpenChange={() => setZoomedImage(null)}>
+      <Dialog open={!!zoomedImage} onOpenChange={setZoomedImage(null)}>
         <DialogContent 
           className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
           onClick={() => setZoomedImage(null)}
