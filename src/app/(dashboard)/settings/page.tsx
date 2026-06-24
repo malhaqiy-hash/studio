@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -17,12 +16,10 @@ import {
   ShieldCheck, 
   Lock, 
   Activity, 
-  History, 
   MessageSquare, 
   Bell, 
   Palette, 
   Languages, 
-  Accessibility, 
   MapPin, 
   Trash2, 
   HardDrive, 
@@ -36,9 +33,7 @@ import {
   Zap,
   Smartphone,
   Check,
-  Heart,
   UserCheck,
-  UserPlus,
   LayoutGrid,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -152,33 +147,33 @@ export default function SettingsPage() {
   if (!mounted) return <DashboardLayout><div className="max-w-5xl mx-auto py-4 animate-pulse h-96 bg-card rounded-3xl" /></DashboardLayout>;
 
   const SubMenuLayout = ({ title, children }: { title: string, children: React.ReactNode }) => (
-    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-      <div className="flex items-center gap-4 border-b border-border/40 pb-4">
+    <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+      <div className="flex items-center gap-3 border-b border-border/40 pb-3">
         <button 
           onClick={() => setActiveSubMenu(null)}
-          className="size-10 rounded-xl bg-muted/30 flex items-center justify-center text-muted-foreground hover:text-primary transition-all active:scale-90"
+          className="size-9 rounded-lg bg-muted/30 flex items-center justify-center text-muted-foreground hover:text-primary transition-all active:scale-90"
         >
-          <ChevronLeft className="size-5" />
+          <ChevronLeft className="size-4" />
         </button>
-        <h2 className="text-lg font-black uppercase tracking-tight"> {title}</h2>
+        <h2 className="text-base font-black uppercase tracking-tight"> {title}</h2>
       </div>
       <div className="px-1">{children}</div>
     </div>
   );
 
   const UserListRow = ({ user, actionLabel }: { user: any, actionLabel?: string }) => (
-    <div className="flex items-center justify-between p-4 bg-muted/10 rounded-2xl border border-transparent hover:border-border transition-all">
-      <div className="flex items-center gap-3">
-        <Avatar className="size-10 rounded-xl border border-border">
+    <div className="flex items-center justify-between p-3 bg-muted/10 rounded-xl border border-transparent hover:border-border transition-all">
+      <div className="flex items-center gap-2.5">
+        <Avatar className="size-8 rounded-lg border border-border">
           <AvatarImage src={user.avatar} className="object-cover" />
-          <AvatarFallback className="bg-primary/5 font-bold text-xs text-primary">{user.name[0]}</AvatarFallback>
+          <AvatarFallback className="bg-primary/5 font-bold text-[10px] text-primary">{user.name[0]}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
-          <span className="font-bold text-[14px] leading-none mb-1">{user.name}</span>
-          <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{user.extra}</span>
+          <span className="font-bold text-[13px] leading-none mb-0.5">{user.name}</span>
+          <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">{user.extra}</span>
         </div>
       </div>
-      <Button variant="outline" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest px-3 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all">
+      <Button variant="outline" size="sm" className="h-7 rounded-lg text-[8px] font-black uppercase tracking-widest px-2.5 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all">
         {actionLabel || 'Lihat'}
       </Button>
     </div>
@@ -191,31 +186,31 @@ export default function SettingsPage() {
         return (
           <SubMenuLayout title="Hubungan Jaringan">
             <Tabs defaultValue={isPribadi ? "pengikut" : "subscribe"} className="w-full">
-              <TabsList className="w-full grid h-12 bg-muted/20 rounded-xl p-1 gap-1 mb-6" style={{ gridTemplateColumns: isPribadi ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>
+              <TabsList className="w-full grid h-10 bg-muted/20 rounded-lg p-1 gap-1 mb-4" style={{ gridTemplateColumns: isPribadi ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>
                 {isPribadi ? (
                   <>
-                    <TabsTrigger value="pengikut" className="rounded-lg font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Pengikut</TabsTrigger>
-                    <TabsTrigger value="mengikuti" className="rounded-lg font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Mengikuti</TabsTrigger>
-                    <TabsTrigger value="suka" className="rounded-lg font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Suka</TabsTrigger>
+                    <TabsTrigger value="pengikut" className="rounded-md font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Pengikut</TabsTrigger>
+                    <TabsTrigger value="mengikuti" className="rounded-md font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Mengikuti</TabsTrigger>
+                    <TabsTrigger value="suka" className="rounded-md font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Suka</TabsTrigger>
                   </>
                 ) : (
                   <>
-                    <TabsTrigger value="subscribe" className="rounded-lg font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Subscriber</TabsTrigger>
-                    <TabsTrigger value="suka" className="rounded-lg font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Penyuka</TabsTrigger>
+                    <TabsTrigger value="subscribe" className="rounded-md font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Subscriber</TabsTrigger>
+                    <TabsTrigger value="suka" className="rounded-md font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Penyuka</TabsTrigger>
                   </>
                 )}
               </TabsList>
 
-              <TabsContent value="pengikut" className="space-y-2 outline-none">
+              <TabsContent value="pengikut" className="space-y-1.5 outline-none">
                 {MOCK_RELATIONS.pengikut.map(u => <UserListRow key={u.id} user={u} actionLabel="Ikuti Balik" />)}
               </TabsContent>
-              <TabsContent value="mengikuti" className="space-y-2 outline-none">
+              <TabsContent value="mengikuti" className="space-y-1.5 outline-none">
                 {MOCK_RELATIONS.mengikuti.map(u => <UserListRow key={u.id} user={u} actionLabel="Berhenti" />)}
               </TabsContent>
-              <TabsContent value="suka" className="space-y-2 outline-none">
+              <TabsContent value="suka" className="space-y-1.5 outline-none">
                 {MOCK_RELATIONS.suka.map(u => <UserListRow key={u.id} user={u} actionLabel="Hubungkan" />)}
               </TabsContent>
-              <TabsContent value="subscribe" className="space-y-2 outline-none">
+              <TabsContent value="subscribe" className="space-y-1.5 outline-none">
                 {MOCK_RELATIONS.subscribe.map(u => <UserListRow key={u.id} user={u} actionLabel="Detail" />)}
               </TabsContent>
             </Tabs>
@@ -224,32 +219,32 @@ export default function SettingsPage() {
 
       case "keamanan_privasi":
         return (
-          <SubMenuLayout title="Izin Keamanan & Privasi">
-            <div className="space-y-8">
-              <div className="space-y-3">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Kredensial</h3>
+          <SubMenuLayout title="Keamanan & Privasi">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Kredensial</h3>
                 <div className="grid grid-cols-2 gap-2">
-                   <button className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-[11px] font-black uppercase tracking-tight text-center hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all">Ubah Password</button>
-                   <button className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-[11px] font-black uppercase tracking-tight text-center hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all">Aktifkan 2FA</button>
+                   <button className="p-3 rounded-xl bg-muted/20 border border-border/50 text-[10px] font-black uppercase tracking-tight text-center hover:bg-primary/5 hover:text-primary transition-all">Ubah Password</button>
+                   <button className="p-3 rounded-xl bg-muted/20 border border-border/50 text-[10px] font-black uppercase tracking-tight text-center hover:bg-primary/5 hover:text-primary transition-all">Aktifkan 2FA</button>
                 </div>
               </div>
 
-              <div className="space-y-5">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Kontrol Visibilitas</h3>
-                <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border/50 shadow-sm">
+              <div className="space-y-3">
+                <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Kontrol Visibilitas</h3>
+                <div className="bg-card rounded-xl border border-border overflow-hidden divide-y divide-border/50 shadow-sm">
                   {[
                     { label: "Siapa dapat melihat Pengikut?", key: "whoCanSeeFollowers" },
                     { label: "Siapa dapat melihat Mengikuti?", key: "whoCanSeeFollowing" },
                     { label: "Siapa dapat melihat Suka?", key: "whoCanSeeLikes" },
                     { label: "Siapa dapat melihat Subscribe?", key: "whoCanSeeSubscribe" },
                   ].map((item) => (
-                    <div key={item.key} className="p-4 space-y-2">
-                      <Label className="text-[11px] font-bold uppercase text-slate-600">{item.label}</Label>
+                    <div key={item.key} className="p-3 space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-slate-600">{item.label}</Label>
                       <Select 
                         value={activeAccount.preferences?.[item.key as keyof typeof activeAccount.preferences] as string || 'public'} 
                         onValueChange={(v) => updatePrivacy(item.key, v)}
                       >
-                        <SelectTrigger className="rounded-xl h-11 bg-muted/20 border-none font-bold text-xs shadow-inner focus:ring-2 focus:ring-primary/10 transition-all">
+                        <SelectTrigger className="rounded-lg h-9 bg-muted/20 border-none font-bold text-[11px] shadow-inner">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl shadow-xl">
@@ -269,9 +264,9 @@ export default function SettingsPage() {
       case "mode":
         return (
           <SubMenuLayout title="Mode Tampilan">
-            <div className="space-y-4">
-              <p className="text-xs font-medium text-muted-foreground px-1">Pilih tema antarmuka yang paling nyaman bagi Anda.</p>
-              <div className="grid gap-3">
+            <div className="space-y-3">
+              <p className="text-[11px] font-medium text-muted-foreground px-1">Pilih tema antarmuka yang paling nyaman bagi Anda.</p>
+              <div className="grid gap-2">
                 {[
                   { id: 'light', label: 'Terang', icon: Zap, bg: 'bg-amber-50 text-amber-600' },
                   { id: 'dark', label: 'Gelap', icon: Lock, bg: 'bg-slate-900 text-white' },
@@ -281,17 +276,17 @@ export default function SettingsPage() {
                     key={m.id}
                     onClick={() => handleThemeChange(m.id)}
                     className={cn(
-                      "w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all active:scale-[0.98]",
+                      "w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all active:scale-[0.98]",
                       settings.theme === m.id ? "border-primary bg-primary/[0.02]" : "border-transparent bg-muted/20 hover:border-muted-foreground/20"
                     )}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className={cn("size-10 rounded-xl flex items-center justify-center shadow-sm", m.bg)}>
-                        <m.icon className="size-5" />
+                    <div className="flex items-center gap-3">
+                      <div className={cn("size-8 rounded-lg flex items-center justify-center shadow-sm", m.bg)}>
+                        <m.icon className="size-4" />
                       </div>
-                      <span className="font-black text-sm uppercase tracking-wide">{m.label}</span>
+                      <span className="font-black text-[12px] uppercase tracking-wide">{m.label}</span>
                     </div>
-                    {settings.theme === m.id && <Check className="size-5 text-primary" />}
+                    {settings.theme === m.id && <Check className="size-4 text-primary" />}
                   </button>
                 ))}
               </div>
@@ -302,10 +297,10 @@ export default function SettingsPage() {
       case "bahasa":
         return (
           <SubMenuLayout title="Bahasa Sistem">
-            <div className="space-y-4">
-              <p className="text-xs font-medium text-muted-foreground px-1">Pilih bahasa pilihan Anda untuk antarmuka aplikasi.</p>
-              <Card className="rounded-3xl border border-border overflow-hidden">
-                <ScrollArea className="h-[400px]">
+            <div className="space-y-3">
+              <p className="text-[11px] font-medium text-muted-foreground px-1">Pilih bahasa pilihan Anda untuk antarmuka aplikasi.</p>
+              <Card className="rounded-2xl border border-border overflow-hidden">
+                <ScrollArea className="h-[350px]">
                   <div className="flex flex-col divide-y divide-border">
                     {LANGUAGES.map((lang) => (
                       <button
@@ -315,87 +310,23 @@ export default function SettingsPage() {
                           toast({ title: `Bahasa diubah ke ${lang.label}` });
                         }}
                         className={cn(
-                          "w-full flex items-center justify-between p-5 hover:bg-muted/50 transition-colors text-left",
+                          "w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors text-left",
                           language === lang.code ? "bg-primary/[0.02]" : "bg-transparent"
                         )}
                       >
-                        <div className="flex items-center gap-4">
-                          <span className="text-2xl leading-none">{lang.flag}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl leading-none">{lang.flag}</span>
                           <div className="flex flex-col">
-                            <span className="font-bold text-[14px] text-slate-900">{lang.label}</span>
-                            <span className="text-[10px] font-black uppercase text-muted-foreground opacity-60">{lang.code}</span>
+                            <span className="font-bold text-[13px] text-slate-900">{lang.label}</span>
+                            <span className="text-[9px] font-black uppercase text-muted-foreground opacity-60">{lang.code}</span>
                           </div>
                         </div>
-                        {language === lang.code && <Check className="size-5 text-primary" />}
+                        {language === lang.code && <Check className="size-4 text-primary" />}
                       </button>
                     ))}
                   </div>
                 </ScrollArea>
               </Card>
-              <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex items-start gap-3">
-                <Info className="size-4 text-primary mt-0.5" />
-                <p className="text-[11px] text-slate-600 leading-relaxed">Daftar ini mencakup bahasa-bahasa utama dunia untuk mendukung ekspansi bisnis global Anda.</p>
-              </div>
-            </div>
-          </SubMenuLayout>
-        );
-
-      case "hapus_cache":
-        return (
-          <SubMenuLayout title="Pembersihan Cache">
-            <div className="space-y-6">
-              <Card className="rounded-[2.5rem] border-none bg-muted/20 shadow-inner">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="size-20 rounded-full bg-white flex items-center justify-center mx-auto shadow-xl">
-                    <Trash2 className="size-10 text-slate-300" />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="text-3xl font-black tracking-tight">24.5 MB</h4>
-                    <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.2em]">Ukuran File Sampah</p>
-                  </div>
-                  <p className="text-xs text-slate-500 font-medium px-4">Membersihkan cache akan menghapus data gambar sementara dan mempercepat performa aplikasi tanpa menghapus data penting Anda.</p>
-                </CardContent>
-              </Card>
-              <Button 
-                onClick={() => toast({ title: "Cache Berhasil Dihapus", description: "Sistem sekarang lebih ringan." })}
-                className="w-full h-14 rounded-2xl bg-primary text-white font-black uppercase tracking-[0.15em] shadow-xl shadow-primary/20 hover:bg-primary/90 active:scale-95 transition-all"
-              >
-                Bersihkan Sekarang
-              </Button>
-            </div>
-          </SubMenuLayout>
-        );
-
-      case "kontak_lokasi":
-        return (
-          <SubMenuLayout title="Kontak dan Lokasi">
-            <div className="space-y-6">
-              <div className="bg-card rounded-3xl border border-border overflow-hidden divide-y divide-border">
-                <div className="p-6 flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-sm">Deteksi Negara Otomatis</h4>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Gunakan IP Geolocation</p>
-                  </div>
-                  <Switch 
-                    defaultChecked={true}
-                    onCheckedChange={(checked) => toast({ title: checked ? "Lokasi Diaktifkan" : "Lokasi Dinonaktifkan" })}
-                  />
-                </div>
-                <div className="p-6 flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-sm">Sinkronisasi Kontak</h4>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Temukan relasi bisnis</p>
-                  </div>
-                  <Switch 
-                    defaultChecked={false}
-                    onCheckedChange={(checked) => toast({ title: "Fitur akan segera hadir" })}
-                  />
-                </div>
-              </div>
-              <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex items-start gap-3">
-                <Info className="size-4 text-primary mt-0.5" />
-                <p className="text-[11px] text-slate-600 leading-relaxed">Informasi lokasi digunakan hanya untuk memberikan hasil pencarian yang relevan di halaman Cari AI.</p>
-              </div>
             </div>
           </SubMenuLayout>
         );
@@ -412,24 +343,24 @@ export default function SettingsPage() {
           if (item.subMenu) setActiveSubMenu(item.subMenu);
           else if (item.href && item.href !== '#') router.push(item.href);
         }} 
-        className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors group"
+        className="w-full flex items-center justify-between p-3.5 hover:bg-muted/50 transition-colors group"
       >
-        <div className="flex items-center gap-4 text-left">
-          <div className={cn("size-9 rounded-xl flex items-center justify-center shadow-sm", item.bg || "bg-muted text-muted-foreground")}>
-            <item.icon className="size-4.5" />
+        <div className="flex items-center gap-3 text-left">
+          <div className={cn("size-8 rounded-lg flex items-center justify-center shadow-sm", item.bg || "bg-muted text-muted-foreground")}>
+            <item.icon className="size-4" />
           </div>
           <div className="flex flex-col">
-            <h4 className="font-bold text-[14px] leading-none group-hover:text-primary transition-colors">{item.label}</h4>
-            {item.desc && <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}
+            <h4 className="font-bold text-[13px] leading-none group-hover:text-primary transition-colors">{item.label}</h4>
+            {item.desc && <p className="text-[9px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}
           </div>
         </div>
-        <ChevronRight className="size-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+        <ChevronRight className="size-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
       </button>
     );
   };
 
   const MenuList = ({ items }: { items: any[] }) => (
-    <div className="flex flex-col bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+    <div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border">
       {items.map((item, idx) => (
         <MenuRow key={idx} item={item} />
       ))}
@@ -438,63 +369,51 @@ export default function SettingsPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto space-y-8 pb-32 pt-4 px-1">
+      <div className="max-w-xl mx-auto space-y-6 pb-24 pt-2 px-1">
         {activeSubMenu ? (
           renderSubMenuContent()
         ) : (
           <>
-            <header className="space-y-1">
-              <h1 className="text-2xl font-black tracking-tight text-foreground uppercase">{t('settings')}</h1>
-              <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Manajemen sistem dan ekosistem</p>
+            <header className="space-y-0.5">
+              <h1 className="text-xl font-black tracking-tight text-foreground uppercase">{t('settings')}</h1>
+              <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-widest">Manajemen sistem dan ekosistem</p>
             </header>
 
-            <section className="space-y-3">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Akun & Keamanan</h3>
+            <section className="space-y-2">
+              <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Akun & Keamanan</h3>
               <MenuList items={[
                 { icon: User, label: "Kelola Akun", desc: "Profil, Tipe Akun, Lencana", href: "/profile?edit=true", bg: "bg-primary text-white shadow-primary/20 shadow-lg" },
-                { icon: ShieldCheck, label: "Izin Keamanan & Privasi Sosial", desc: "Enkripsi & Manajemen Perangkat", subMenu: "keamanan_privasi" }
+                { icon: ShieldCheck, label: "Izin Keamanan & Privasi", desc: "Enkripsi & Visibilitas", subMenu: "keamanan_privasi" }
               ]} />
             </section>
 
-            <section className="space-y-3">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Aktivitas & Interaksi</h3>
+            <section className="space-y-2">
+              <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Aktivitas & Interaksi</h3>
               <MenuList items={[
                 { icon: LayoutGrid, label: "Kelola Postingan", desc: "Arsip, Pin, Seluruh Aktivitas", href: "/settings/posts", bg: "bg-primary text-white shadow-primary/20 shadow-lg" },
                 { icon: UserCheck, label: "Hubungan Jaringan", desc: activeAccount.type === 'pribadi' ? "Pengikut, Mengikuti, Suka" : "Subscribe & Suka", subMenu: "hubungan" },
-                { icon: Activity, label: "Kelola Aktivitas", desc: "Log, Waktu Layar", href: "/dashboard" },
                 { icon: Bell, label: "Notifikasi", desc: "Push, Chat, Email", href: "/notifications" }
               ]} />
             </section>
 
-            <section className="space-y-3">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Sistem & Tampilan</h3>
+            <section className="space-y-2">
+              <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Sistem & Tampilan</h3>
               <MenuList items={[
                 { icon: Palette, label: "Mode Tampilan", desc: "Tema Antarmuka", subMenu: "mode" },
                 { icon: Languages, label: "Bahasa", desc: "Lokalisasi Aplikasi", subMenu: "bahasa" },
-                { icon: MapPin, label: "Kontak dan Lokasi", desc: "IP Geolocation, Sinkronisasi", subMenu: "kontak_lokasi" }
               ]} />
             </section>
 
-            <section className="space-y-3">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Penyimpanan</h3>
-              <MenuList items={[
-                { icon: Trash2, label: "Hapus Cache", desc: "Bersihkan File Sampah", subMenu: "hapus_cache" },
-                { icon: HardDrive, label: "Kelola Data", desc: "Penghemat Data, Unduh ZIP", href: "#" }
-              ]} />
-            </section>
-
-            <section className="space-y-3">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Dukungan & Tentang</h3>
+            <section className="space-y-2">
+              <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Bantuan</h3>
               <MenuList items={[
                 { icon: HelpCircle, label: "Pusat Bantuan", desc: "FAQ, Hubungi CS", href: "/knowledge" },
-                { icon: FileText, label: "Ketentuan & Kebijakan", desc: "Privasi, Data Pengguna", href: "#" },
                 { icon: Info, label: "Info Aplikasi", desc: "V 2.4.0-Stable", href: "/settings/info" }
               ]} />
             </section>
 
-            <div className="space-y-3 pt-6">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Sesi</h3>
-              <div className="flex flex-col bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border shadow-sm">
+            <div className="space-y-2 pt-4">
+              <div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border shadow-sm">
                 <button 
                   onClick={() => {
                     const nextAcc = availableAccounts.find(a => a.id !== activeAccount.id) || availableAccounts[0];
@@ -502,27 +421,27 @@ export default function SettingsPage() {
                     toast({ title: `Beralih ke ${nextAcc.name}` });
                     router.push("/profile");
                   }}
-                  className="w-full flex items-center justify-between p-5 hover:bg-muted/50 transition-colors group"
+                  className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors group"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="size-9 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/10"><Users className="size-4.5" /></div>
-                    <span className="font-bold text-[14px] group-hover:text-primary transition-colors">Beralih Akun</span>
+                  <div className="flex items-center gap-3">
+                    <div className="size-8 rounded-lg bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/10"><Users className="size-4" /></div>
+                    <span className="font-bold text-[13px] group-hover:text-primary">Beralih Akun</span>
                   </div>
-                  <ChevronRight className="size-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                  <ChevronRight className="size-3.5 text-muted-foreground/30 group-hover:text-primary" />
                 </button>
-                <button onClick={handleLogout} className="w-full flex items-center justify-between p-5 hover:bg-rose-50 transition-colors group">
-                  <div className="flex items-center gap-4 text-rose-600">
-                    <div className="size-9 rounded-xl bg-rose-100 flex items-center justify-center"><LogOut className="size-4.5" /></div>
-                    <span className="font-black text-[14px] uppercase tracking-wide">Logout</span>
+                <button onClick={handleLogout} className="w-full flex items-center justify-between p-4 hover:bg-rose-50 transition-colors group">
+                  <div className="flex items-center gap-3 text-rose-600">
+                    <div className="size-8 rounded-lg bg-rose-100 flex items-center justify-center"><LogOut className="size-4" /></div>
+                    <span className="font-black text-[13px] uppercase tracking-wide">Logout</span>
                   </div>
-                  <ChevronRight className="size-4 text-rose-300 group-hover:text-rose-600 transition-colors" />
+                  <ChevronRight className="size-3.5 text-rose-300 group-hover:text-rose-600" />
                 </button>
               </div>
             </div>
 
-            <div className="text-center space-y-1 mt-10">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Tapp Intelligence Network</p>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">© 2025 ALL RIGHTS RESERVED</p>
+            <div className="text-center space-y-0.5 mt-8">
+              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.4em]">Tapp Intelligence Network</p>
+              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">© 2025 ALL RIGHTS RESERVED</p>
             </div>
           </>
         )}

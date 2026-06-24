@@ -63,12 +63,12 @@ const CATEGORIES = [
 
 function getSmartIcon(url: string) {
   const lower = url.toLowerCase();
-  if (lower.includes('maps.google') || lower.includes('goo.gl/maps') || lower.includes('apple.com/maps')) return <MapPin className="size-3.5" />;
-  if (lower.includes('instagram.com')) return <Instagram className="size-3.5" />;
-  if (lower.includes('linkedin.com')) return <Linkedin className="size-3.5" />;
-  if (lower.includes('facebook.com') || lower.includes('fb.com')) return <Facebook className="size-3.5" />;
-  if (lower.includes('wa.me') || lower.includes('whatsapp.com')) return <Smartphone className="size-3.5" />;
-  return <Globe className="size-3.5" />;
+  if (lower.includes('maps.google') || lower.includes('goo.gl/maps') || lower.includes('apple.com/maps')) return <MapPin className="size-3" />;
+  if (lower.includes('instagram.com')) return <Instagram className="size-3" />;
+  if (lower.includes('linkedin.com')) return <Linkedin className="size-3" />;
+  if (lower.includes('facebook.com') || lower.includes('fb.com')) return <Facebook className="size-3" />;
+  if (lower.includes('wa.me') || lower.includes('whatsapp.com')) return <Smartphone className="size-3" />;
+  return <Globe className="size-3" />;
 }
 
 function PostMedia({ images }: { images?: string[] }) {
@@ -126,24 +126,24 @@ function PostMedia({ images }: { images?: string[] }) {
         <button 
           onClick={(e) => { e.stopPropagation(); swiperRef.current?.slidePrev(); }}
           className={cn(
-            "size-9 rounded-full bg-white/80 backdrop-blur shadow-lg border border-border flex items-center justify-center pointer-events-auto transition-all active:scale-90",
+            "size-8 rounded-full bg-white/80 backdrop-blur shadow-lg border border-border flex items-center justify-center pointer-events-auto transition-all active:scale-90",
             activeIdx === 0 ? "opacity-0 invisible" : "opacity-0 group-hover/carousel:opacity-100"
           )}
         >
-          <ChevronLeft className="size-5 text-slate-900" />
+          <ChevronLeft className="size-4 text-slate-900" />
         </button>
         <button 
           onClick={(e) => { e.stopPropagation(); swiperRef.current?.slideNext(); }}
           className={cn(
-            "size-9 rounded-full bg-white/80 backdrop-blur shadow-lg border border-border flex items-center justify-center pointer-events-auto transition-all active:scale-90",
+            "size-8 rounded-full bg-white/80 backdrop-blur shadow-lg border border-border flex items-center justify-center pointer-events-auto transition-all active:scale-90",
             activeIdx === images.length - 1 ? "opacity-0 invisible" : "opacity-0 group-hover/carousel:opacity-100"
           )}
         >
-          <ChevronRight className="size-5 text-slate-900" />
+          <ChevronRight className="size-4 text-slate-900" />
         </button>
       </div>
 
-      <div className="absolute top-3 right-3 bg-slate-900/40 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black z-10 text-white tracking-widest shadow-sm pointer-events-none">
+      <div className="absolute top-2 right-2 bg-slate-900/40 backdrop-blur-md px-2 py-0.5 rounded-full text-[8px] font-black z-10 text-white tracking-widest shadow-sm pointer-events-none">
         {activeIdx + 1} / {images.length}
       </div>
 
@@ -218,7 +218,6 @@ export default function FeedPage() {
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean }>>({});
   const [likes, setLikes] = React.useState<Record<string, { count: number, active: boolean }>>({});
 
-  // Form State
   const [isPostModalOpen, setIsPostModalOpen] = React.useState(false);
   const [postContent, setPostContent] = React.useState("");
   const [postImages, setPostImages] = React.useState<string[]>([]);
@@ -356,27 +355,27 @@ export default function FeedPage() {
         dragElastic={0.15}
         onDragEnd={handleDragEnd}
         style={{ x: dragX }}
-        className="flex flex-col max-w-2xl mx-auto relative px-1 md:px-0 min-h-[calc(100vh-8rem)]"
+        className="flex flex-col max-w-xl mx-auto relative px-1 md:px-0 min-h-[calc(100vh-8rem)]"
       >
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
         <motion.div 
           style={{ opacity: swipePlusOpacity, scale: swipePlusScale }}
-          className="fixed left-6 top-1/2 -translate-y-1/2 z-50 pointer-events-none text-primary flex flex-col items-center gap-2"
+          className="fixed left-6 top-1/2 -translate-y-1/2 z-50 pointer-events-none text-primary flex flex-col items-center gap-1.5"
         >
-          <div className="size-16 rounded-3xl bg-primary/10 backdrop-blur-sm border-2 border-primary/20 flex items-center justify-center shadow-xl shadow-primary/10">
-            <Plus className="size-10" />
+          <div className="size-12 rounded-2xl bg-primary/10 backdrop-blur-sm border-2 border-primary/20 flex items-center justify-center shadow-xl shadow-primary/10">
+            <Plus className="size-8" />
           </div>
-          <span className="text-[10px] font-black uppercase tracking-widest bg-primary text-white px-3 py-1 rounded-full">Buat Postingan</span>
+          <span className="text-[9px] font-black uppercase tracking-widest bg-primary text-white px-2.5 py-1 rounded-full">Buat Postingan</span>
         </motion.div>
 
-        <div className="flex items-center justify-center gap-6 mb-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md py-3 overflow-x-auto no-scrollbar border-b border-border/40 px-2">
+        <div className="flex items-center justify-center gap-5 mb-3 sticky top-0 z-20 bg-background/80 backdrop-blur-md py-2 overflow-x-auto no-scrollbar border-b border-border/40 px-2">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
               className={cn(
-                "text-[13px] font-black uppercase tracking-widest transition-all shrink-0",
+                "text-[12px] font-black uppercase tracking-widest transition-all shrink-0",
                 activeCategory === cat.id 
                   ? "text-primary scale-105" 
                   : "text-slate-400 hover:text-slate-600"
@@ -387,72 +386,72 @@ export default function FeedPage() {
           ))}
           <button 
             onClick={() => setIsPostModalOpen(true)}
-            className="flex items-center justify-center size-8 rounded-full bg-primary/5 text-primary hover:bg-primary/10 transition-all shrink-0 active:scale-90"
+            className="flex items-center justify-center size-7 rounded-full bg-primary/5 text-primary hover:bg-primary/10 transition-all shrink-0 active:scale-90"
           >
-            <Plus className="size-5" />
+            <Plus className="size-4" />
           </button>
         </div>
 
         <div className="flex-1">
-          <div className="space-y-4 pb-20">
+          <div className="space-y-3 pb-20">
             {combinedPosts.map((post) => {
               const trans = translations[post.id];
               const postLike = likes[post.id] || { count: 0, active: false };
               
               return (
-                <Card key={post.id} className="border-border shadow-sm rounded-2xl overflow-hidden bg-card">
-                  <div className="p-4 pb-2 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                <Card key={post.id} className="border-border shadow-sm rounded-xl overflow-hidden bg-card">
+                  <div className="p-3 pb-1.5 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
                       <Avatar 
-                        className="size-10 border border-border cursor-pointer"
+                        className="size-9 border border-border cursor-pointer"
                         onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
                       >
                         <AvatarImage src={post.avatar} className="object-cover" />
-                        <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">{post.author[0]}</AvatarFallback>
+                        <AvatarFallback className="bg-primary/5 text-primary font-black text-[10px]">{post.author[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
                         <div className="flex items-center gap-1">
-                          <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[15px]">{post.author}</h3></Link>
-                          {post.verified && <ShieldCheck className="size-3.5 text-primary" />}
+                          <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[13px]">{post.author}</h3></Link>
+                          {post.verified && <ShieldCheck className="size-3 text-primary" />}
                           {post.locationLink && (
                             <a href={post.locationLink} target="_blank" rel="noopener noreferrer" className="ml-1 text-slate-400 hover:text-primary transition-colors">
                               {getSmartIcon(post.locationLink)}
                             </a>
                           )}
                         </div>
-                        <div className="flex items-center gap-1 text-[11px] text-slate-400 font-bold uppercase tracking-tight">
+                        <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
                           {post.time}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                        {post.visibility === 'private' && <Lock className="size-3 text-slate-300" />}
-                        <button className="p-2 rounded-full text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors"><Bookmark className="size-5" /></button>
+                    <div className="flex items-center gap-0.5">
+                        {post.visibility === 'private' && <Lock className="size-2.5 text-slate-300" />}
+                        <button className="p-1.5 rounded-full text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors"><Bookmark className="size-4" /></button>
                     </div>
                   </div>
 
-                  <CardContent className="px-4 py-2 space-y-3">
-                    <p className="text-slate-700 leading-normal font-medium text-[14px] md:text-[15px] whitespace-pre-wrap">
+                  <CardContent className="px-3 py-1.5 space-y-2.5">
+                    <p className="text-slate-700 leading-normal font-medium text-[13px] md:text-[14px] whitespace-pre-wrap">
                       {trans?.show ? trans.text : post.content}
                     </p>
                     <PostMedia images={post.images} />
                   </CardContent>
 
-                  <div className="p-3 pt-1 border-t border-border/40 bg-slate-50/30 flex items-center justify-between">
-                    <div className="flex items-center gap-6 text-slate-500">
-                      <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1.5 py-1 transition-all", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
-                        <Heart className={cn("size-5", postLike.active && "fill-rose-500")} />
-                        <span className="text-xs font-bold">{postLike.count > 0 ? postLike.count : 'Suka'}</span>
+                  <div className="p-2 pt-1 border-t border-border/40 bg-slate-50/30 flex items-center justify-between">
+                    <div className="flex items-center gap-5 text-slate-500">
+                      <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1 py-1 transition-all", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
+                        <Heart className={cn("size-4", postLike.active && "fill-rose-500")} />
+                        <span className="text-[11px] font-bold">{postLike.count > 0 ? postLike.count : 'Suka'}</span>
                       </button>
-                      <button className="flex items-center gap-1.5 py-1 hover:text-primary transition-colors">
-                        <MessageCircle className="size-5" />
-                        <span className="text-xs font-bold">{post.stats.comments > 0 ? post.stats.comments : 'Komentar'}</span>
+                      <button className="flex items-center gap-1 py-1 hover:text-primary transition-colors">
+                        <MessageCircle className="size-4" />
+                        <span className="text-[11px] font-bold">{post.stats.comments > 0 ? post.stats.comments : 'Komentar'}</span>
                       </button>
                       <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center py-1", trans?.show ? "text-primary" : "hover:text-primary transition-colors")}>
-                        {trans?.loading ? <RefreshCw className="size-5 animate-spin" /> : <Globe className="size-5" />}
+                        {trans?.loading ? <RefreshCw className="size-4 animate-spin" /> : <Globe className="size-4" />}
                       </button>
                     </div>
-                    <button onClick={() => handleShare(post.id)} className="p-2 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-5" /></button>
+                    <button onClick={() => handleShare(post.id)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-4" /></button>
                   </div>
                 </Card>
               );
@@ -468,23 +467,23 @@ export default function FeedPage() {
           if (!open) resetForm(); 
         }}
       >
-        <DialogContent className="w-[95%] md:max-w-lg rounded-3xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
-          <div className="p-6 space-y-4">
+        <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
+          <div className="p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-black uppercase tracking-tight text-slate-900">Buat Postingan</h2>
+              <h2 className="text-base font-black uppercase tracking-tight text-slate-900">Buat Postingan</h2>
               <div className="flex gap-2">
                  <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
-                  <SelectTrigger className="h-9 rounded-xl bg-slate-50 border-none text-[10px] font-black uppercase tracking-widest px-3 shadow-inner focus:ring-2 focus:ring-primary/10 transition-all"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-8 rounded-lg bg-slate-50 border-none text-[9px] font-black uppercase tracking-widest px-2 shadow-inner focus:ring-2 focus:ring-primary/10 transition-all"><SelectValue /></SelectTrigger>
                   <SelectContent className="rounded-xl shadow-xl"><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Lokasi Tampilan Postingan</Label>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Lokasi Tampilan Postingan</Label>
                 <Select value={postDisplayLocation} onValueChange={(val: any) => setPostDisplayLocation(val)}>
-                  <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none px-4 text-xs font-bold shadow-inner">
+                  <SelectTrigger className="h-9 rounded-lg bg-slate-50 border-none px-3 text-[11px] font-bold shadow-inner">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl shadow-xl">
@@ -495,29 +494,29 @@ export default function FeedPage() {
                 </Select>
               </div>
 
-              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[140px] rounded-2xl border-none bg-slate-50/50 p-4 text-[15px] font-medium focus-visible:ring-2 focus-visible:ring-primary/10 resize-none shadow-inner" />
+              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-slate-50/50 p-3 text-[14px] font-medium focus-visible:ring-2 focus-visible:ring-primary/10 resize-none shadow-inner" />
               
               <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary">{postLocationLink ? getSmartIcon(postLocationLink) : <LinkIcon className="size-4" />}</div>
+                <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary">{postLocationLink ? getSmartIcon(postLocationLink) : <LinkIcon className="size-3.5" />}</div>
                 <Input 
                   placeholder="Link Alamat/Web (opsional)" 
                   value={postLocationLink} 
                   onChange={(e) => setPostLocationLink(e.target.value)}
-                  className="h-11 pl-10 rounded-xl border-none bg-slate-50/50 text-[14px] font-bold shadow-inner focus-visible:ring-2 focus-visible:ring-primary/10 transition-all" 
+                  className="h-9 pl-9 rounded-lg border-none bg-slate-50/50 text-[13px] font-bold shadow-inner focus-visible:ring-2 focus-visible:ring-primary/10 transition-all" 
                 />
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {postImages.map((src, i) => (
-                  <div key={i} className="relative size-16 rounded-xl overflow-hidden border border-border">
+                  <div key={i} className="relative size-14 rounded-lg overflow-hidden border border-border">
                     <img src={src} className="w-full h-full object-cover" />
-                    <button onClick={() => setPostImages(postImages.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 bg-slate-900/60 text-white rounded-full p-0.5 hover:bg-rose-500 transition-colors"><Plus className="size-3 rotate-45" /></button>
+                    <button onClick={() => setPostImages(postImages.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 bg-slate-900/60 text-white rounded-full p-0.5 hover:bg-rose-500 transition-colors"><Plus className="size-2.5 rotate-45" /></button>
                   </div>
                 ))}
-                <button onClick={() => fileInputRef.current?.click()} className="size-16 rounded-xl bg-slate-50 border-2 border-dashed border-border flex items-center justify-center text-slate-400 hover:border-primary hover:text-primary transition-all"><Plus size={20} /></button>
+                <button onClick={() => fileInputRef.current?.click()} className="size-14 rounded-lg bg-slate-50 border-2 border-dashed border-border flex items-center justify-center text-slate-400 hover:border-primary hover:text-primary transition-all"><Plus size={16} /></button>
               </div>
             </div>
-            <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 font-black text-white shadow-xl shadow-primary/20 active:scale-[0.98] transition-all uppercase tracking-widest text-xs">Posting Sekarang</Button>
+            <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 font-black text-white shadow-xl shadow-primary/20 active:scale-[0.98] transition-all uppercase tracking-widest text-[11px]">Posting Sekarang</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -529,7 +528,7 @@ export default function FeedPage() {
         >
           {zoomedAvatar && (
             <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4">
-              <img src={zoomedAvatar} alt="Expanded Avatar" className="max-w-full max-h-full object-contain rounded-2xl animate-in zoom-in-95 duration-300 shadow-none border-none" />
+              <img src={zoomedAvatar} alt="Expanded Avatar" className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300 shadow-none border-none" />
             </div>
           )}
         </DialogContent>
