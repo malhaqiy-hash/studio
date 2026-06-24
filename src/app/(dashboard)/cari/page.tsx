@@ -30,7 +30,7 @@ import {
   Calendar,
   Car,
   X,
-  Zap,
+  History,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -81,6 +81,7 @@ export default function CariPage() {
   const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
+  const [recentQueries, setRecentQueries] = React.useState<string[]>([]);
   
   const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
   const [activeLocation, setActiveLocation] = React.useState("");
@@ -92,6 +93,19 @@ export default function CariPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
   const suggestionRef = React.useRef<HTMLDivElement>(null);
+
+  const getRecentQueriesKey = React.useCallback(() => `ontapp_recent_queries_${activeAccount.id}`, [activeAccount.id]);
+  const getHistoryKey = React.useCallback(() => `ontapp_discovery_history_${activeAccount.id}`, [activeAccount.id]);
+
+  // Load account-specific recent queries
+  React.useEffect(() => {
+    const saved = localStorage.getItem(getRecentQueriesKey());
+    if (saved) {
+      try { setRecentQueries(JSON.parse(saved)); } catch (e) { setRecentQueries([]); }
+    } else {
+      setRecentQueries([]);
+    }
+  }, [activeAccount.id, getRecentQueriesKey]);
 
   React.useEffect(() => {
     const detectLocation = async () => {
@@ -139,6 +153,25 @@ export default function CariPage() {
       if (output) {
         output.results = output.results.map(r => ({ ...r, name: cleanTitle(r.name) }));
         setResults(output);
+
+        // Save to Discovery History (segmented by account)
+        const historyKey = getHistoryKey();
+        const existingHistory = JSON.parse(localStorage.getItem(historyKey) || '[]');
+        const newDiscoveryItems = output.results.map(r => ({
+          ...r,
+          id: `disc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+          date: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+        }));
+        const updatedHistory = [...newDiscoveryItems, ...existingHistory].slice(0, 50);
+        localStorage.setItem(historyKey, JSON.stringify(updatedHistory));
+
+        // Save to Recent Queries (segmented by account)
+        if (finalQuery && finalQuery !== "Analisis Gambar") {
+          const qKey = getRecentQueriesKey();
+          const updatedQueries = [finalQuery, ...recentQueries.filter(q => q !== finalQuery)].slice(0, 5);
+          setRecentQueries(updatedQueries);
+          localStorage.setItem(qKey, JSON.stringify(updatedQueries));
+        }
       }
     } catch (err: any) {
       toast({ variant: "destructive", title: "Gagal Mencari", description: "Terjadi gangguan jaringan AI." });
@@ -152,7 +185,6 @@ export default function CariPage() {
     if (file) {
       setIsSourcePickerOpen(false);
       toast({ title: "Visual AI Aktif", description: "Menganalisis objek dalam gambar..." });
-      
       setQuery("Analisis Gambar...");
       handleSearch(undefined, "Analisis Gambar");
     }
@@ -316,6 +348,20 @@ export default function CariPage() {
               </div>
             </div>
           </form>
+          
+          {recentQueries.length > 0 && !results && !loading && (
+            <div className="pt-2 flex flex-wrap gap-1.5">
+               {recentQueries.map((q, i) => (
+                 <button 
+                  key={i} 
+                  onClick={() => { setQuery(q); handleSearch(undefined, q); }}
+                  className="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-100 text-[9px] font-black uppercase text-slate-400 hover:text-primary hover:border-primary/20 transition-all flex items-center gap-1.5"
+                 >
+                   <History className="size-2" /> {q}
+                 </button>
+               ))}
+            </div>
+          )}
         </div>
 
         {results && (
