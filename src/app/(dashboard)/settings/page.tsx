@@ -41,7 +41,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/context/language-context";
+import { useLanguage, LANGUAGES } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
@@ -51,6 +51,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const SETTINGS_KEY = "ontapp_system_settings_v3";
 
@@ -85,7 +86,7 @@ const MOCK_RELATIONS = {
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const { setLanguage, t } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const { activeAccount, availableAccounts, switchAccount, updateActiveAccount } = useAccount();
   const auth = useAuth();
   const router = useRouter();
@@ -295,6 +296,47 @@ export default function SettingsPage() {
                     {settings.theme === m.id && <Check className="size-5 text-black" />}
                   </button>
                 ))}
+              </div>
+            </div>
+          </SubMenuLayout>
+        );
+
+      case "bahasa":
+        return (
+          <SubMenuLayout title="Bahasa Sistem">
+            <div className="space-y-4">
+              <p className="text-xs font-medium text-muted-foreground px-1">Pilih bahasa pilihan Anda untuk antarmuka aplikasi.</p>
+              <Card className="rounded-3xl border border-border overflow-hidden">
+                <ScrollArea className="h-[400px]">
+                  <div className="flex flex-col divide-y divide-border">
+                    {LANGUAGES.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => {
+                          setLanguage(lang.code);
+                          toast({ title: `Bahasa diubah ke ${lang.label}` });
+                        }}
+                        className={cn(
+                          "w-full flex items-center justify-between p-5 hover:bg-muted/50 transition-colors text-left",
+                          language === lang.code ? "bg-black/[0.02]" : "bg-transparent"
+                        )}
+                      >
+                        <div className="flex items-center gap-4">
+                          <span className="text-2xl leading-none">{lang.flag}</span>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-[14px] text-slate-900">{lang.label}</span>
+                            <span className="text-[10px] font-black uppercase text-muted-foreground opacity-60">{lang.code}</span>
+                          </div>
+                        </div>
+                        {language === lang.code && <Check className="size-5 text-black" />}
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </Card>
+              <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex items-start gap-3">
+                <Info className="size-4 text-accent mt-0.5" />
+                <p className="text-[11px] text-slate-600 leading-relaxed">Daftar ini mencakup bahasa-bahasa utama dunia untuk mendukung ekspansi bisnis global Anda.</p>
               </div>
             </div>
           </SubMenuLayout>

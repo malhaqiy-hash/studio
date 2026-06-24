@@ -2,7 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type Language = 'en' | 'id' | 'ja' | 'zh' | 'ko' | 'ar' | 'es' | 'fr' | 'all';
+export type Language = 
+  | 'en' | 'id' | 'ja' | 'zh' | 'ko' | 'ar' | 'es' | 'fr' 
+  | 'de' | 'pt' | 'ru' | 'it' | 'hi' | 'tr' | 'vi' | 'th';
 
 export interface LanguageOption {
   code: Language;
@@ -19,7 +21,14 @@ export const LANGUAGES: LanguageOption[] = [
   { code: 'ar', label: 'Arabic', flag: '🇸🇦' },
   { code: 'es', label: 'Spanish', flag: '🇪🇸' },
   { code: 'fr', label: 'French', flag: '🇫🇷' },
-  { code: 'all', label: 'All Worldwide Languages', flag: '🌐' },
+  { code: 'de', label: 'German', flag: '🇩🇪' },
+  { code: 'pt', label: 'Portuguese', flag: '🇵🇹' },
+  { code: 'ru', label: 'Russian', flag: '🇷🇺' },
+  { code: 'it', label: 'Italian', flag: '🇮🇹' },
+  { code: 'hi', label: 'Hindi', flag: '🇮🇳' },
+  { code: 'tr', label: 'Turkish', flag: '🇹🇷' },
+  { code: 'vi', label: 'Vietnamese', flag: '🇻🇳' },
+  { code: 'th', label: 'Thai', flag: '🇹🇭' },
 ];
 
 export const translations = {

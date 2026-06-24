@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useLanguage, LANGUAGES, Language } from '@/context/language-context';
+import { useLanguage, LANGUAGES } from '@/context/language-context';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Globe, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function LanguagePicker() {
   const { language, setLanguage } = useLanguage();
@@ -30,26 +31,32 @@ export function LanguagePicker() {
           <Globe className="size-3.5 text-slate-400" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-2xl border-slate-100">
-        <div className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+      <DropdownMenuContent align="end" className="w-56 rounded-2xl p-0 shadow-2xl border-slate-100 overflow-hidden">
+        <div className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b bg-muted/10">
           System Language
         </div>
-        {LANGUAGES.map((lang) => (
-          <DropdownMenuItem
-            key={lang.code}
-            onClick={() => setLanguage(lang.code)}
-            className={cn(
-              "flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-colors font-bold",
-              language === lang.code ? "bg-indigo-50 text-accent" : "text-slate-600 focus:bg-slate-50"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-lg leading-none">{lang.flag}</span>
-              <span className="text-sm">{lang.label}</span>
-            </div>
-            {language === lang.code && <Check className="size-4" />}
-          </DropdownMenuItem>
-        ))}
+        <ScrollArea className="h-64">
+          <div className="p-1">
+            {LANGUAGES.map((lang) => (
+              <DropdownMenuItem
+                key={lang.code}
+                onClick={() => {
+                  setLanguage(lang.code);
+                }}
+                className={cn(
+                  "flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-colors font-bold mb-0.5",
+                  language === lang.code ? "bg-black/5 text-black" : "text-slate-600 focus:bg-slate-50"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-lg leading-none">{lang.flag}</span>
+                  <span className="text-sm">{lang.label}</span>
+                </div>
+                {language === lang.code && <Check className="size-4" />}
+              </DropdownMenuItem>
+            ))}
+          </div>
+        </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
   );
