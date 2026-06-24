@@ -81,6 +81,7 @@ import { useLanguage } from "@/context/language-context";
 import { useAccount, AccountType } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -92,22 +93,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { activeAccount, availableAccounts, switchAccount, registerAccount, hasInitialized } = useAccount();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
   
-  const [touchStart, setTouchStart] = React.useState<number | null>(null);
-  
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientY);
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStart === null) return;
-    const touchEnd = e.changedTouches[0].clientY;
-    const distance = touchEnd - touchStart;
-    
-    if (distance > 70) {
-      setIsMoreMenuOpen(false);
-    }
-    setTouchStart(null);
-  };
+  // Sheet drag values
+  const sheetY = useMotionValue(0);
+  const opacity = useTransform(sheetY, [0, 300], [1, 0]);
 
   const [isRegModalOpen, setIsRegModalOpen] = React.useState(false);
   const [pendingType, setPendingType] = React.useState<AccountType | null>(null);
@@ -279,23 +267,53 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild><button className="flex flex-col items-center gap-1 hover:text-primary w-full py-1.5 outline-none transition-all"><Menu className="size-5 md:size-6" /><span>{t('more')}</span></button></SheetTrigger>
-              <SheetContent side="bottom" className="rounded-t-[2rem] border-none p-0 h-[80vh] bg-card overflow-hidden [&>button]:hidden outline-none shadow-2xl" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-                <div className="w-full flex flex-col items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing"><div className="sheet-handle w-10 h-1 bg-muted rounded-full" /></div>
-                <SheetHeader className="p-5 pt-1 pb-4 bg-primary/5 border-b border-border/50">
-                  <div className="flex items-center justify-between"><SheetTitle className="text-base font-black flex items-center gap-2 uppercase tracking-tight text-primary"><LayoutGrid className="size-4.5" />Tapp Hub</SheetTitle><Badge variant="secondary" className="bg-white border-border text-primary font-black px-3 py-0.5 uppercase text-[9px] shadow-sm">{activeAccount?.type}</Badge></div>
-                </SheetHeader>
-                <div className="overflow-y-auto h-full pb-32 no-scrollbar">
-                  <div className="flex flex-col divide-y divide-border/40">
-                    {drawerItems.map((item) => (
-                      <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-6 py-3.5 transition-all gap-5 group", pathname === item.href ? "bg-primary/5 text-primary" : "bg-transparent hover:bg-primary/5")}>
-                        <div className={cn("size-8 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", pathname === item.href ? "bg-primary text-primary-foreground shadow-primary/20" : "bg-muted text-muted-foreground")}><item.icon className="size-4" /></div>
-                        <span className="text-[12px] font-black uppercase tracking-widest">{item.label}</span>
-                        <ChevronRight className="ml-auto size-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
-                      </Link>
-                    ))}
-                    <div className="px-6 py-6 bg-muted/10"><div className="flex items-center gap-5 mb-4"><div className="size-8 rounded-xl bg-muted text-muted-foreground flex items-center justify-center shadow-sm"><Languages className="size-5" /></div><span className="text-[12px] font-black uppercase tracking-widest">Bahasa</span></div><LanguagePicker /></div>
+              <SheetContent side="bottom" className="rounded-t-[2rem] border-none p-0 h-[80vh] bg-card overflow-hidden [&>button]:hidden outline-none shadow-2xl">
+                <motion.div 
+                  drag="y"
+                  dragConstraints={{ top: 0, bottom: 0 }}
+                  dragElastic={{ bottom: 0.8 }}
+                  style={{ y: sheetY, opacity }}
+                  onDragEnd={(_, info) => {
+                    if (info.offset.y > 100) {
+                      setIsMoreMenuOpen(false);
+                    }
+                    sheetY.set(0);
+                  }}
+                  className="w-full h-full flex flex-col"
+                >
+                  <div className="w-full flex flex-col items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
+                    <div className="sheet-handle w-10 h-1 bg-muted rounded-full" />
                   </div>
-                </div>
+                  <SheetHeader className="p-5 pt-1 pb-4 bg-primary/5 border-b border-border/50">
+                    <div className="flex items-center justify-between">
+                      <SheetTitle className="text-base font-black flex items-center gap-2 uppercase tracking-tight text-primary">
+                        <LayoutGrid className="size-4.5" />
+                        Tapp Hub
+                      </SheetTitle>
+                      <Badge variant="secondary" className="bg-white border-border text-primary font-black px-3 py-0.5 uppercase text-[9px] shadow-sm">{activeAccount?.type}</Badge>
+                    </div>
+                  </SheetHeader>
+                  <div className="overflow-y-auto h-full pb-32 no-scrollbar">
+                    <div className="flex flex-col divide-y divide-border/40">
+                      {drawerItems.map((item) => (
+                        <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-6 py-3.5 transition-all gap-5 group", pathname === item.href ? "bg-primary/5 text-primary" : "bg-transparent hover:bg-primary/5")}>
+                          <div className={cn("size-8 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", pathname === item.href ? "bg-primary text-primary-foreground shadow-primary/20" : "bg-muted text-muted-foreground")}><item.icon className="size-4" /></div>
+                          <span className="text-[12px] font-black uppercase tracking-widest">{item.label}</span>
+                          <ChevronRight className="ml-auto size-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                        </Link>
+                      ))}
+                      <div className="px-6 py-6 bg-muted/10">
+                        <div className="flex items-center gap-5 mb-4">
+                          <div className="size-8 rounded-xl bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
+                            <Languages className="size-5" />
+                          </div>
+                          <span className="text-[12px] font-black uppercase tracking-widest">Bahasa</span>
+                        </div>
+                        <LanguagePicker />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
               </SheetContent>
             </Sheet>
           </div>

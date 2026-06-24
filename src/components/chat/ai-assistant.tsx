@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from 'react';
-import { Send, User, Globe, RefreshCw, Mic, Sparkles, X as XIcon } from 'lucide-react';
+import { Send, User, Globe, RefreshCw, Mic, X as XIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { translateText } from '@/ai/flows/translate-flow';
 import { useLanguage } from '@/context/language-context';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 
 type Message = {
   role: 'user' | 'model' | 'system';
@@ -21,7 +22,7 @@ type Message = {
   showTranslated?: boolean;
 };
 
-const STORAGE_KEY = 'ontapp_assistant_pos_v2';
+const STORAGE_KEY = 'ontapp_assistant_pos_v3';
 
 export function AIAssistant() {
   const { language, t } = useLanguage();
@@ -30,50 +31,33 @@ export function AIAssistant() {
   const [input, setInput] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [messages, setMessages] = React.useState<Message[]>([]);
-
-  const [position, setPosition] = React.useState({ x: 300, y: 500 });
-  const [isDragging, setIsDragging] = React.useState(false);
-  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
-  const [dragDistance, setDragDistance] = React.useState(0);
-
   const [isMounted, setIsMounted] = React.useState(false);
 
-  const clampPosition = React.useCallback((x: number, y: number) => {
-    if (typeof window === 'undefined') return { x, y };
-    const maxX = window.innerWidth - 60; 
-    const maxY = window.innerHeight - 100;
-    return {
-      x: Math.min(Math.max(10, x), maxX),
-      y: Math.min(Math.max(60, y), maxY)
-    };
-  }, []);
+  // Motion values for fluid dragging
+  const dragX = useMotionValue(0);
+  const dragY = useMotionValue(0);
 
   React.useEffect(() => {
     setIsMounted(true);
     const savedPos = localStorage.getItem(STORAGE_KEY);
     
-    let initialX = window.innerWidth - 70;
-    let initialY = window.innerHeight - 150;
-
     if (savedPos) {
       try {
-        const parsed = JSON.parse(savedPos);
-        const clamped = clampPosition(parsed.x, parsed.y);
-        setPosition(clamped);
+        const { x, y } = JSON.parse(savedPos);
+        // Clamp saved position to current viewport
+        const maxX = window.innerWidth - 60;
+        const maxY = window.innerHeight - 100;
+        dragX.set(Math.min(Math.max(10, x), maxX));
+        dragY.set(Math.min(Math.max(60, y), maxY));
       } catch (e) {
-        setPosition(clampPosition(initialX, initialY));
+        dragX.set(window.innerWidth - 70);
+        dragY.set(window.innerHeight - 150);
       }
     } else {
-      setPosition(clampPosition(initialX, initialY));
+      dragX.set(window.innerWidth - 70);
+      dragY.set(window.innerHeight - 150);
     }
-
-    const handleResize = () => {
-      setPosition(prev => clampPosition(prev.x, prev.y));
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [clampPosition]);
+  }, [dragX, dragY]);
 
   React.useEffect(() => {
     setMessages([{ role: 'model', content: t('ai_greet') }]);
@@ -85,42 +69,11 @@ export function AIAssistant() {
     return () => window.removeEventListener('open-ai-assistant', handleOpen);
   }, []);
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    setIsDragging(true);
-    setDragDistance(0);
-    setDragStart({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
-    });
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
-    
-    const newX = e.clientX - dragStart.x;
-    const newY = e.clientY - dragStart.y;
-    
-    const dx = newX - position.x;
-    const dy = newY - position.y;
-    setDragDistance(prev => prev + Math.sqrt(dx * dx + dy * dy));
-
-    setPosition({ x: newX, y: newY });
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-    
-    const finalPos = clampPosition(position.x, position.y);
-    setPosition(finalPos);
-    
-    if (dragDistance > 10) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(finalPos));
-    } else {
-      setIsOpen(!isOpen);
-    }
+  const handleDragEnd = () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ 
+      x: dragX.get(), 
+      y: dragY.get() 
+    }));
   };
 
   const handleSend = async () => {
@@ -173,25 +126,23 @@ export function AIAssistant() {
 
   return (
     <>
-      <div 
-        style={{ 
-          left: `${position.x}px`, 
-          top: `${position.y}px`,
-          touchAction: 'none'
-        }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
+      <motion.div 
+        drag
+        dragMomentum={false}
+        onDragEnd={handleDragEnd}
+        style={{ x: dragX, y: dragY }}
         className={cn(
-          "fixed z-[300] size-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-[0_10px_30px_rgba(37,99,235,0.3)] cursor-grab active:cursor-grabbing transition-all hover:scale-105 border-2 border-white/20 group",
-          isDragging && "opacity-80 scale-110 shadow-primary/60"
+          "fixed z-[300] size-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-[0_10px_30px_rgba(37,99,235,0.3)] cursor-grab active:cursor-grabbing border-2 border-white/20 group"
         )}
+        onTap={() => setIsOpen(!isOpen)}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
       >
-        <div className="relative group-hover:rotate-12 transition-transform">
+        <div className="relative group-hover:rotate-12 transition-transform pointer-events-none">
           <User className="size-6" />
           <div className="absolute -top-1 -right-1 size-2.5 bg-emerald-400 rounded-full border-2 border-primary animate-pulse" />
         </div>
-      </div>
+      </motion.div>
 
       {isOpen && (
         <div 
