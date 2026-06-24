@@ -42,7 +42,7 @@ export const translations = {
   view_profile: { en: 'View Profile', id: 'Lihat Profil' },
   
   // Search Page
-  search_placeholder: { en: 'Search anything in OnTapp...', id: 'Cari apa saja di OnTapp...' },
+  search_placeholder: { en: 'Search anything in Tapp...', id: 'Cari apa saja di Tapp...' },
   search_now: { en: 'Search Now', id: 'Cari Sekarang' },
   nearby: { en: 'Nearby (GPS)', id: 'Sekitar (GPS)' },
   results: { en: 'Results', id: 'Hasil' },
@@ -69,7 +69,7 @@ export const translations = {
   market_radar_desc: { en: 'Daily global AI signals for network efficiency.', id: 'Sinyal AI harian untuk efisiensi jaringan.' },
   opportunity_map: { en: 'Opportunity Map', id: 'Peta Peluang' },
   opportunity_map_desc: { en: 'Visualize global business leads and demands.', id: 'Visualisasikan prospek dan permintaan bisnis global.' },
-  registry: { en: 'OnTapp Registry', id: 'Registri OnTapp' },
+  registry: { en: 'Tapp Registry', id: 'Registri Tapp' },
   registry_desc: { en: 'Claim and verify your profile to unlock features.', id: 'Klaim dan verifikasi profil untuk buka fitur.' },
   matchmaker: { en: 'AI Matchmaker', id: 'Pencari Mitra' },
   matchmaker_desc: { en: 'Automated profile analysis every 24 hours.', id: 'Analisis profil otomatis setiap 24 jam.' },
@@ -118,7 +118,7 @@ export const translations = {
   market_sentiment: { en: 'Market Sentiment', id: 'Sentimen Pasar' },
   hot_products: { en: 'Hot Products', id: 'Produk Populer' },
   generate_report: { en: 'Generate Report', id: 'Buat Laporan' },
-  pitch_solution: { en: 'Pitch My Solution', id: 'Ajukan Solusi Saya' },
+  market_gap: { en: 'Market Gap', id: 'Celah Pasar' },
   potential_vol: { en: 'Potential Vol.', id: 'Potensi Volume' },
   leads_found: { en: 'Leads Found', id: 'Prospek Ditemukan' },
   sync_network: { en: 'Synchronizing Global Network', id: 'Menyelaraskan Jaringan Global' },
@@ -131,7 +131,7 @@ export const translations = {
   logout: { en: 'Logout', id: 'Keluar' },
 
   // AI Assistant
-  ai_greet: { en: 'Hello! I am your OnTapp assistant. How can I help you today?', id: 'Halo! Saya asisten OnTapp Anda. Bagaimana saya bisa membantu Anda hari ini?' },
+  ai_greet: { en: 'Hello! I am your Tapp assistant. How can I help you today?', id: 'Halo! Saya asisten Tapp Anda. Bagaimana saya bisa membantu Anda hari ini?' },
   ai_ask_strategy: { en: 'Ask strategy...', id: 'Tanya strategi...' },
   ai_translating: { en: 'Translating...', id: 'Menerjemahkan...' },
   ai_original: { en: 'Show Original', id: 'Lihat Asli' },

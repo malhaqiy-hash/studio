@@ -81,8 +81,8 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
 
   const handleExternalShare = async (app: typeof EXTERNAL_APPS[0]) => {
     const shareData = {
-      title: 'OnTapp - Business Network',
-      text: 'Lihat konten menarik ini di OnTapp!',
+      title: 'Tapp - Business Network',
+      text: 'Lihat konten menarik ini di Tapp!',
       url: postUrl,
     };
 
@@ -113,19 +113,17 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
         </div>
         
         <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-8">
-          {/* QR Profile Card Section */}
           {isProfile && (
             <div className="bg-muted/10 rounded-[2rem] p-6 border border-border flex flex-col items-center space-y-4 animate-in fade-in zoom-in-95 duration-500">
                <div className="relative p-4 bg-white rounded-3xl shadow-xl">
                   <div className="size-48 bg-slate-50 flex items-center justify-center relative overflow-hidden rounded-xl">
-                    {/* Mock QR Code Drawing */}
                     <div className="grid grid-cols-5 grid-rows-5 gap-1.5 opacity-80">
                       {[...Array(25)].map((_, i) => (
                         <div key={i} className={cn("size-6 rounded-[4px]", (i % 3 === 0 || i % 7 === 0) ? "bg-black" : "bg-transparent")} />
                       ))}
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                       <div className="size-12 rounded-2xl bg-black text-white flex items-center justify-center font-black text-xl shadow-2xl ring-4 ring-white">O</div>
+                       <div className="size-12 rounded-2xl bg-black text-white flex items-center justify-center font-black text-xl shadow-2xl ring-4 ring-white">T</div>
                     </div>
                   </div>
                </div>
@@ -152,7 +150,7 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
           </div>
 
           <div className="space-y-3">
-            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Koneksi OnTapp</span>
+            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Koneksi Tapp</span>
             <div className="grid grid-cols-4 gap-4">
               {filteredFriends.map((friend) => (
                 <button 

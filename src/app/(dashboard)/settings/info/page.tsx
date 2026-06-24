@@ -49,7 +49,7 @@ export default function AppInfoPage() {
                 <Info className="size-3" />
                 Informasi Sistem
               </div>
-              <h1 className="text-4xl font-black text-slate-900 tracking-tight">Info Aplikasi OnTapp</h1>
+              <h1 className="text-4xl font-black text-slate-900 tracking-tight">Info Aplikasi Tapp</h1>
               <p className="text-slate-500 font-medium text-lg">Pelajari cara kerja kecerdasan buatan dalam mendukung bisnis Anda.</p>
             </div>
             <Badge className="bg-slate-900 text-white px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest border-none shadow-lg">
@@ -64,9 +64,9 @@ export default function AppInfoPage() {
               <div className="size-14 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center rotate-6 shadow-inner">
                 <Brain className="size-8 text-white fill-white" />
               </div>
-              <h2 className="text-2xl font-black tracking-tight">Arsitektur OnTapp Intelligence</h2>
+              <h2 className="text-2xl font-black tracking-tight">Arsitektur Tapp Intelligence</h2>
               <p className="text-teal-50 font-medium leading-relaxed opacity-90">
-                OnTapp menggunakan model bahasa besar (LLM) tercanggih yang disesuaikan khusus untuk sektor B2B dan perdagangan global. Sistem kami mensintesis miliaran titik data untuk memberikan rekomendasi yang akurat, aman, dan hemat biaya bagi setiap member.
+                Tapp menggunakan model bahasa besar (LLM) tercanggih yang disesuaikan khusus untuk sektor B2B dan perdagangan global. Sistem kami mensintesis miliaran titik data untuk memberikan rekomendasi yang akurat, aman, dan hemat biaya bagi setiap member.
               </p>
               <div className="flex gap-4 pt-2">
                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-teal-100">

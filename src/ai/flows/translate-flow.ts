@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview AI Translation Flow for the OnTapp Global Network.
+ * @fileOverview AI Translation Flow for the Tapp Global Network.
  */
 
 import { ai } from '@/ai/genkit';
@@ -26,7 +26,7 @@ const translatePrompt = ai.definePrompt({
   name: 'translatePrompt',
   input: { schema: TranslateInputSchema },
   output: { schema: TranslateOutputSchema },
-  prompt: `You are an expert polyglot translator for the OnTapp B2B Network.
+  prompt: `You are an expert polyglot translator for the Tapp B2B Network.
 Translate the following business text into: {{{targetLanguage}}}
 
 Original Text: {{{text}}}`,

@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview A Hybrid Business Discovery Engine that intelligently ranks internal and external business results.
@@ -56,7 +55,7 @@ const AIIntentSearchOutputSchema = z.object({
       country: z.string().optional(),
       category: z.string().optional(),
     })
-  ).describe('A ranked list of results prioritizing OnTapp members and verified businesses.')
+  ).describe('A ranked list of results prioritizing Tapp members and verified businesses.')
 });
 export type AIIntentSearchOutput = z.infer<typeof AIIntentSearchOutputSchema>;
 
@@ -74,10 +73,10 @@ const aiIntentSearchPrompt = ai.definePrompt({
     maxOutputTokens: 500,
     temperature: 0.1
   },
-  prompt: `You are the OnTapp Hybrid Discovery Engine. Your goal is to find businesses that match a user's intent with high relevance.
+  prompt: `You are the Tapp Hybrid Discovery Engine. Your goal is to find businesses that match a user's intent with high relevance.
 
 ### SEARCH STRATEGY (HYBRID):
-1. **INTERNAL DATA**: Prioritize businesses from the "OnTapp Network" if available.
+1. **INTERNAL DATA**: Prioritize businesses from the "Tapp Network" if available.
 2. **GLOBAL KNOWLEDGE**: If internal data is insufficient, use your generative knowledge for real-world recommendations in {{{filters.location}}}.
 3. **SOURCE TAGGING**: 
    - Label internal as "ontapp_verified" or "ontapp_member".
@@ -102,11 +101,9 @@ const aiIntentSearchFlow = ai.defineFlow(
     outputSchema: AIIntentSearchOutputSchema,
   },
   async (input) => {
-    // Kurangi retries agar tidak timeout total terlalu lama (NextJS server action timeout)
     const maxRetries = 2; 
     let lastError;
     
-    // Pastikan query bersih dari prefiks sistem apa pun
     const cleanQuery = input.query.replace(/^Informasi Terkait:\s*/i, '');
 
     for (let i = 0; i < maxRetries; i++) {
@@ -117,24 +114,21 @@ const aiIntentSearchFlow = ai.defineFlow(
         });
         
         if (output) {
-          // Bersihkan nama hasil dari prefiks sistem jika ada
           output.results = output.results.map(r => ({
             ...r,
             name: r.name.replace(/^Informasi Terkait:\s*/i, '')
           }));
           
-          // Filter results for high relevance
           output.results = output.results.filter(r => r.matchScore >= 80);
           return output;
         }
       } catch (err: any) {
         lastError = err;
         const errMsg = String(err).toLowerCase();
-        // Cek apakah error bisa dicoba lagi
         const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('busy') || errMsg.includes('unexpected response');
                             
         if (isRetryable && i < maxRetries - 1) {
-          const delay = Math.pow(2, i) * 2000; // 2s, 4s backoff
+          const delay = Math.pow(2, i) * 2000; 
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
@@ -142,13 +136,12 @@ const aiIntentSearchFlow = ai.defineFlow(
       }
     }
     
-    // Final UI Fallback - Tanpa prefiks "Informasi Terkait"
     return {
       results: [
         {
           type: 'business',
           name: cleanQuery,
-          description: `Sistem sedang melakukan sinkronisasi trafik tinggi. Secara umum, ${cleanQuery} tersedia banyak di area ${input.filters?.location || 'terdekat'} Anda melalui jaringan OnTapp.`,
+          description: `Sistem sedang melakukan sinkronisasi trafik tinggi. Secara umum, ${cleanQuery} tersedia banyak di area ${input.filters?.location || 'terdekat'} Anda melalui jaringan Tapp.`,
           matchScore: 100,
           source: 'external',
           isVerified: false,

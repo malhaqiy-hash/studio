@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -63,7 +62,6 @@ const DEFAULT_SETTINGS: SettingsState = {
   theme: "system",
 };
 
-// Mock Data for Hubungan
 const MOCK_RELATIONS = {
   pengikut: [
     { id: 'u1', name: 'Andi Wijaya', avatar: 'https://picsum.photos/seed/u1/100', extra: 'Distributor Kopi' },
@@ -150,8 +148,6 @@ export default function SettingsPage() {
   };
 
   if (!mounted) return <DashboardLayout><div className="max-w-5xl mx-auto py-4 animate-pulse h-96 bg-card rounded-3xl" /></DashboardLayout>;
-
-  // --- SUB-MENU COMPONENTS ---
 
   const SubMenuLayout = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -407,8 +403,6 @@ export default function SettingsPage() {
     }
   };
 
-  // --- MAIN MENU RENDER ---
-
   const MenuRow = ({ item }: { item: any }) => {
     return (
       <button 
@@ -452,7 +446,6 @@ export default function SettingsPage() {
               <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Manajemen sistem dan ekosistem</p>
             </header>
 
-            {/* GROUP 1: AKUN */}
             <section className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Akun & Keamanan</h3>
               <MenuList items={[
@@ -461,7 +454,6 @@ export default function SettingsPage() {
               ]} />
             </section>
 
-            {/* GROUP 2: AKTIVITAS */}
             <section className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Aktivitas & Interaksi</h3>
               <MenuList items={[
@@ -473,23 +465,16 @@ export default function SettingsPage() {
               ]} />
             </section>
 
-            {/* GROUP 3: TAMPILAN */}
             <section className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Sistem & Tampilan</h3>
               <MenuList items={[
                 { icon: Palette, label: "Mode Tampilan", desc: "Tema Antarmuka", subMenu: "mode" },
-                { 
-                  icon: Languages, 
-                  label: "Bahasa", 
-                  desc: "Lokalisasi Aplikasi",
-                  subMenu: "bahasa"
-                },
+                { icon: Languages, label: "Bahasa", desc: "Lokalisasi Aplikasi", subMenu: "bahasa" },
                 { icon: Accessibility, label: "Aksesibilitas", desc: "Ukuran Teks, Auto-Play", href: "#" },
                 { icon: MapPin, label: "Kontak dan Lokasi", desc: "IP Geolocation, Sinkronisasi", subMenu: "kontak_lokasi" }
               ]} />
             </section>
 
-            {/* GROUP 4: PENYIMPANAN */}
             <section className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Penyimpanan</h3>
               <MenuList items={[
@@ -498,7 +483,6 @@ export default function SettingsPage() {
               ]} />
             </section>
 
-            {/* GROUP 5: DUKUNGAN */}
             <section className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Dukungan & Tentang</h3>
               <MenuList items={[
@@ -508,7 +492,6 @@ export default function SettingsPage() {
               ]} />
             </section>
 
-            {/* AKSES CEPAT PALING BAWAH */}
             <div className="space-y-3 pt-6">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Sesi</h3>
               <div className="flex flex-col bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border shadow-sm">
@@ -538,7 +521,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="text-center space-y-1">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">OnTapp Intelligence Network</p>
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Tapp Intelligence Network</p>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">© 2025 ALL RIGHTS RESERVED</p>
             </div>
           </>

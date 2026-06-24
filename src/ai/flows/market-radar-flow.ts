@@ -34,7 +34,7 @@ const marketRadarPrompt = ai.definePrompt({
   name: 'marketRadarPrompt',
   input: { schema: MarketRadarInputSchema },
   output: { schema: MarketRadarOutputSchema },
-  prompt: `You are the OnTapp AI Market Radar. Analyze current global trade signals for the region: {{{region}}}.
+  prompt: `You are the Tapp AI Market Radar. Analyze current global trade signals for the region: {{{region}}}.
 
 ### Task:
 1. Detect 3-5 industries with high growth potential.

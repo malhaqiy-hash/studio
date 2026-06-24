@@ -32,10 +32,10 @@ const businessAssistantPrompt = ai.definePrompt({
   input: { schema: BusinessAssistantInputSchema },
   output: { schema: z.string() },
   config: {
-    maxOutputTokens: 300, // Cost Efficiency: Shorter responses
+    maxOutputTokens: 300, 
     temperature: 0.7
   },
-  prompt: `You are an expert B2B strategic business consultant for the OnTapp Global Network.
+  prompt: `You are an expert B2B strategic business consultant for the Tapp Global Network.
 Your goal is to help users navigate the ecosystem, identify high-value strategic partners, and optimize their business pipeline.
 
 User Query: {{{message}}}
@@ -50,7 +50,6 @@ const businessAssistantFlow = ai.defineFlow(
     outputSchema: BusinessAssistantOutputSchema,
   },
   async (input) => {
-    // Context Windowing: Only send the last 5 messages to save input tokens
     const windowedHistory = input.history ? input.history.slice(-5) : [];
     
     let lastError;
@@ -75,7 +74,7 @@ const businessAssistantFlow = ai.defineFlow(
       }
     }
     return { 
-      response: "Terima kasih atas pertanyaannya. Saat ini trafik AI sedang sangat tinggi. Secara umum, saya menyarankan Anda untuk terus memperluas jaringan di OnTapp Hub. Silakan tanyakan kembali detailnya dalam beberapa saat." 
+      response: "Terima kasih atas pertanyaannya. Saat ini trafik AI sedang sangat tinggi. Secara umum, saya menyarankan Anda untuk terus memperluas jaringan di Tapp Hub. Silakan tanyakan kembali detailnya dalam beberapa saat." 
     };
   }
 );

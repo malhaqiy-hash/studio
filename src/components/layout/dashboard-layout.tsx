@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -221,8 +220,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-12 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <Link href="/feed" className="flex items-center gap-1.5 active:scale-95 transition-transform">
-            <div className="size-7 rounded-lg bg-black text-white flex items-center justify-center font-black text-lg shadow-lg">O</div>
-            <span className="font-black text-sm tracking-tight text-foreground uppercase">OnTapp</span>
+            <div className="size-7 rounded-lg bg-black text-white flex items-center justify-center font-black text-lg shadow-lg">T</div>
+            <span className="font-black text-sm tracking-tight text-foreground uppercase">Tapp</span>
           </Link>
           <Badge variant="outline" className="text-[9px] font-black uppercase px-2 py-0 border-black/10 text-black bg-black/5">{activeAccount?.type}</Badge>
         </div>
@@ -284,7 +283,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 h-[80vh] bg-card overflow-hidden [&>button]:hidden outline-none" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                 <div className="w-full flex flex-col items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing"><div className="sheet-handle" /></div>
                 <SheetHeader className="p-5 pt-1 pb-4 bg-muted/20 border-b border-border">
-                  <div className="flex items-center justify-between"><SheetTitle className="text-base font-black flex items-center gap-2 uppercase tracking-tight"><LayoutGrid className="size-4" />OnTapp Hub</SheetTitle><Badge variant="outline" className="bg-card border-border text-muted-foreground font-black px-3 py-0.5 uppercase text-[9px]">{activeAccount?.type}</Badge></div>
+                  <div className="flex items-center justify-between"><SheetTitle className="text-base font-black flex items-center gap-2 uppercase tracking-tight"><LayoutGrid className="size-4" />Tapp Hub</SheetTitle><Badge variant="outline" className="bg-card border-border text-muted-foreground font-black px-3 py-0.5 uppercase text-[9px]">{activeAccount?.type}</Badge></div>
                 </SheetHeader>
                 <div className="overflow-y-auto h-full pb-32 no-scrollbar">
                   <div className="flex flex-col divide-y divide-border/40">
@@ -308,7 +307,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <DialogContent className="w-[95%] md:max-w-md p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground rounded-2xl outline-none [&>button]:hidden">
           <div className="flex flex-col max-h-[85vh] overflow-y-auto no-scrollbar">
             <div className="flex flex-col items-center justify-center text-center space-y-3 pt-8 pb-4 px-6">
-              <div className="size-14 rounded-full bg-black text-white flex items-center justify-center font-black text-2xl shadow-xl">O</div>
+              <div className="size-14 rounded-full bg-black text-white flex items-center justify-center font-black text-2xl shadow-xl">T</div>
               <div className="space-y-1">
                 <DialogTitle className="text-xl font-black tracking-tight text-slate-900 uppercase">Selamat Datang</DialogTitle>
                 <DialogDescription className="font-medium text-slate-500 text-[13px] px-4">Pilih jenis profil untuk mulai membangun jaringan bisnis Anda.</DialogDescription>

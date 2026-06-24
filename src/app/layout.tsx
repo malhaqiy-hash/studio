@@ -6,7 +6,7 @@ import { LanguageProvider } from '@/context/language-context';
 import { AccountProvider } from '@/context/account-context';
 
 export const metadata: Metadata = {
-  title: 'OnTapp - Business Discovery Network',
+  title: 'Tapp - Business Discovery Network',
   description: 'AI-powered business social network for discovering products, services, and strategic partners.',
 };
 

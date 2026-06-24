@@ -33,7 +33,7 @@ const businessScoutPrompt = ai.definePrompt({
   name: 'businessScoutPrompt',
   input: { schema: BusinessScoutInputSchema },
   output: { schema: BusinessScoutOutputSchema },
-  prompt: `You are the OnTapp AI Business Scout. Your mission is to analyze business signals and identify unmet market demand.
+  prompt: `You are the Tapp AI Business Scout. Your mission is to analyze business signals and identify unmet market demand.
 
 ### Input Data Context:
 {{{context}}}
@@ -50,7 +50,7 @@ const businessScoutPrompt = ai.definePrompt({
 - Suggest a tactical "Suggested Action".
 - Estimate "Potential Value".
 
-Focus on high-growth and emerging niches within the OnTapp network.`
+Focus on high-growth and emerging niches within the Tapp network.`
 });
 
 const businessScoutFlow = ai.defineFlow(

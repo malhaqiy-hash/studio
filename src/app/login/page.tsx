@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -90,7 +89,6 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Redirect ke Beranda (Feed)
       router.push("/feed");
     } catch (error: any) {
       handleAuthError(error);
@@ -105,7 +103,6 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signInWithPopup(auth, provider);
-      // Redirect ke Beranda (Feed)
       router.push("/feed");
     } catch (error: any) {
       handleAuthError(error);
@@ -147,10 +144,10 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-10">
         <div className="text-center space-y-4">
           <div className="inline-flex items-center justify-center size-16 rounded-2xl bg-accent text-white font-black text-4xl shadow-2xl shadow-indigo-200 mb-2 transform transition-transform hover:rotate-6 select-none">
-            O
+            T
           </div>
           <div className="space-y-1">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-none">OnTapp</h1>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-none">Tapp</h1>
             <p className="text-slate-500 font-semibold text-lg tracking-tight">Enterprise Discovery Network</p>
           </div>
         </div>
@@ -321,7 +318,7 @@ export default function LoginPage() {
             </div>
             <AlertDialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Registration Closed</AlertDialogTitle>
             <AlertDialogDescription className="text-slate-500 font-medium text-base">
-              The OnTapp network is currently operating on a private beta invitation basis. We are not accepting new public registration requests at this time.
+              The Tapp network is currently operating on a private beta invitation basis. We are not accepting new public registration requests at this time.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

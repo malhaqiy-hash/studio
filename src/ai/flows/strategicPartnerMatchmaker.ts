@@ -55,7 +55,7 @@ const strategicPartnerMatchmakerPrompt = ai.definePrompt({
   name: 'strategicPartnerMatchmakerPrompt',
   input: { schema: StrategicPartnerMatchmakerInputSchema },
   output: { schema: StrategicPartnerMatchmakerOutputSchema },
-  prompt: `You are the OnTapp Network Intelligence Engine. Your goal is to identify high-value strategic matches based on a complex set of business parameters.
+  prompt: `You are the Tapp Network Intelligence Engine. Your goal is to identify high-value strategic matches based on a complex set of business parameters.
 
 ### Match Parameters to Analyze:
 - **Industry & Location**: Geographic and sector alignment.
