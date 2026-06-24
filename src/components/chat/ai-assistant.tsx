@@ -155,7 +155,7 @@ export function AIAssistant() {
         )}
       >
         <div className="relative group-hover:scale-110 transition-transform">
-          <Sparkles className="size-8" />
+          <User className="size-8" />
           <div className="absolute -top-1 -right-1 size-3.5 bg-emerald-400 rounded-full border-2 border-primary animate-pulse" />
         </div>
       </div>
