@@ -126,11 +126,19 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     setHasInitialized(true);
   }, []);
 
-  // Simpan ke localStorage setiap kali ada perubahan state
+  // Simpan ke localStorage setiap kali ada perubahan state dengan proteksi kuota
   useEffect(() => {
     if (hasInitialized) {
-      localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(accounts));
-      localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeAccountId);
+      try {
+        localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(accounts));
+        localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeAccountId);
+      } catch (e: any) {
+        if (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014) {
+          console.warn("⚠️ LocalStorage penuh. Gambar profil atau postingan terlalu besar. Data tetap berjalan di memori namun gagal disimpan permanen.");
+        } else {
+          console.error("Gagal menyimpan ke storage:", e);
+        }
+      }
     }
   }, [accounts, activeAccountId, hasInitialized]);
 
