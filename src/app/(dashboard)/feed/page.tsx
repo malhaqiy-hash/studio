@@ -125,7 +125,9 @@ function PostMedia({ images }: { images?: string[] }) {
   return (
     <div 
       className="relative group/carousel w-full overflow-hidden rounded-xl border border-border/40 bg-muted/5"
-      onPointerDown={(e) => e.stopPropagation()} // Kunci: Stop event bubbling agar tidak memicu drag halaman
+      style={{ touchAction: 'pan-y' }}
+      onPointerDownCapture={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
     >
       <Swiper
         modules={[Navigation, Pagination]}
@@ -230,7 +232,8 @@ export default function FeedPage() {
   const swipePlusScale = useTransform(dragX, [0, 100], [0.5, 1.2]);
 
   const handleDragEnd = (event: any, info: any) => {
-    if (info.offset.x > 80) {
+    // Only trigger if swiped to the right and above threshold
+    if (info.offset.x > 100) {
       setIsPostModalOpen(true);
     }
   };
@@ -319,10 +322,10 @@ export default function FeedPage() {
       <motion.div 
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.2}
+        dragElastic={0.15}
         onDragEnd={handleDragEnd}
         style={{ x: dragX }}
-        className="flex flex-col max-w-2xl mx-auto relative px-1 md:px-0 min-h-[calc(100vh-8rem)] touch-pan-y"
+        className="flex flex-col max-w-2xl mx-auto relative px-1 md:px-0 min-h-[calc(100vh-8rem)]"
       >
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
@@ -353,7 +356,7 @@ export default function FeedPage() {
           ))}
         </div>
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1">
           <div className="space-y-4 pb-20">
             {combinedPosts.map((post) => {
               const trans = translations[post.id];
