@@ -31,13 +31,11 @@ export function AIAssistant() {
   const [loading, setLoading] = React.useState(false);
   const [messages, setMessages] = React.useState<Message[]>([]);
 
-  // Draggable State with Persistence
   const [position, setPosition] = React.useState({ x: 20, y: 150 });
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
   const [hasMoved, setHasMoved] = React.useState(false);
 
-  // Load saved position on mount
   React.useEffect(() => {
     const savedPos = localStorage.getItem(STORAGE_KEY);
     if (savedPos) {
@@ -74,7 +72,6 @@ export function AIAssistant() {
     const newX = e.clientX - dragStart.x;
     const newY = e.clientY - dragStart.y;
     
-    // Boundary check
     const boundedX = Math.min(Math.max(10, newX), window.innerWidth - 70);
     const boundedY = Math.min(Math.max(10, newY), window.innerHeight - 70);
     
@@ -89,10 +86,8 @@ export function AIAssistant() {
     (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     
     if (hasMoved) {
-      // Save position to localStorage after drag ends
       localStorage.setItem(STORAGE_KEY, JSON.stringify(position));
     } else {
-      // It was a tap, toggle open
       setIsOpen(!isOpen);
     }
   };
@@ -145,7 +140,6 @@ export function AIAssistant() {
 
   return (
     <>
-      {/* Floating Draggable Bubble */}
       <div 
         style={{ 
           left: `${position.x}px`, 
@@ -156,87 +150,87 @@ export function AIAssistant() {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         className={cn(
-          "fixed z-[250] size-14 rounded-full bg-black text-white flex items-center justify-center shadow-2xl cursor-grab active:cursor-grabbing transition-transform active:scale-95 border-2 border-white/20",
-          isDragging && "opacity-80 scale-110 shadow-black/40"
+          "fixed z-[250] size-15 rounded-3xl bg-primary text-primary-foreground flex items-center justify-center shadow-[0_20px_50px_rgba(37,99,235,0.3)] cursor-grab active:cursor-grabbing transition-all active:scale-90 border-2 border-white/20 group",
+          isDragging && "opacity-80 scale-110 shadow-primary/40"
         )}
       >
-        <div className="relative">
-          <User className="size-7" />
-          <div className="absolute -top-1 -right-1 size-3 bg-emerald-500 rounded-full border-2 border-black animate-pulse" />
+        <div className="relative group-hover:scale-110 transition-transform">
+          <Sparkles className="size-8" />
+          <div className="absolute -top-1 -right-1 size-3.5 bg-emerald-400 rounded-full border-2 border-primary animate-pulse" />
         </div>
       </div>
 
-      {/* Chat Window */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/20 backdrop-blur-[2px] animate-in fade-in duration-200"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/10 backdrop-blur-sm animate-in fade-in duration-300"
           onClick={() => setIsOpen(false)}
         >
           <Card 
-            className="w-full max-sm h-[550px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] rounded-[2.5rem] border-none flex flex-col overflow-hidden bg-card animate-in zoom-in-95 duration-300"
+            className="w-full max-sm h-[600px] shadow-[0_32px_80px_-12px_rgba(0,0,0,0.15)] rounded-[2.5rem] border-none flex flex-col overflow-hidden bg-card animate-in zoom-in-95 duration-400"
             onClick={(e) => e.stopPropagation()}
           >
-            <CardHeader className="bg-black text-white p-6 flex flex-row items-center justify-between border-none">
+            <CardHeader className="bg-primary text-primary-foreground p-7 flex flex-row items-center justify-between border-none">
               <div className="flex items-center gap-4">
-                <div className="size-11 rounded-2xl bg-white/10 flex items-center justify-center shadow-inner">
-                  <User className="size-6" />
+                <div className="size-12 rounded-[1.25rem] bg-white/10 flex items-center justify-center shadow-inner group transition-all">
+                  <User className="size-6 group-hover:scale-110 transition-transform" />
                 </div>
                 <div className="flex flex-col">
-                  <CardTitle className="text-[16px] font-black tracking-tight leading-none uppercase">Tapp Assistant</CardTitle>
-                  <div className="flex items-center gap-1.5 mt-1.5">
-                    <div className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{t('ai_active')}</span>
+                  <CardTitle className="text-[18px] font-black tracking-tight leading-none uppercase">Tapp Intelligence</CardTitle>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[11px] font-black text-white/60 uppercase tracking-widest">{t('ai_active')}</span>
                   </div>
                 </div>
               </div>
               <button 
                 onClick={() => setIsOpen(false)} 
-                className="text-white/40 hover:text-white font-black text-[10px] uppercase tracking-widest transition-colors"
+                className="size-10 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all active:scale-90"
               >
-                Tutup
+                <RefreshCw className="size-4 rotate-45" />
               </button>
             </CardHeader>
             
-            <CardContent className="flex-1 overflow-hidden p-0 bg-muted/5">
-              <ScrollArea className="h-full px-6 py-6">
-                <div className="space-y-6 pb-4">
+            <CardContent className="flex-1 overflow-hidden p-0 bg-slate-50/30">
+              <ScrollArea className="h-full px-6 py-8">
+                <div className="space-y-8 pb-4">
                   {messages.map((msg, i) => (
-                    <div key={i} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}>
-                      <Avatar className="size-9 border border-border shadow-sm shrink-0 rounded-xl">
-                        <AvatarFallback className={cn("flex items-center justify-center rounded-xl", msg.role === 'user' ? "bg-slate-100 text-slate-900" : "bg-black text-white")}>
-                          <User className="size-4" />
+                    <div key={i} className={cn("flex gap-4", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}>
+                      <Avatar className="size-10 border border-border shadow-sm shrink-0 rounded-2xl">
+                        <AvatarFallback className={cn("flex items-center justify-center rounded-2xl font-black", msg.role === 'user' ? "bg-primary/5 text-primary" : "bg-primary text-primary-foreground")}>
+                          {msg.role === 'user' ? 'ME' : 'AI'}
                         </AvatarFallback>
                       </Avatar>
-                      <div className={cn("flex flex-col gap-2", msg.role === 'user' ? "items-end" : "items-start", "max-w-[80%]")}>
+                      <div className={cn("flex flex-col gap-2.5", msg.role === 'user' ? "items-end" : "items-start", "max-w-[85%]")}>
                         <div className={cn(
-                          "p-4 rounded-[1.25rem] text-[14px] md:text-[15px] font-medium shadow-sm leading-snug", 
+                          "p-5 rounded-[1.5rem] text-[15px] font-medium shadow-sm leading-relaxed", 
                           msg.role === 'user' 
-                            ? "bg-black text-white rounded-tr-none" 
-                            : "bg-white text-slate-700 border border-border/50 rounded-tl-none"
+                            ? "bg-primary text-primary-foreground rounded-tr-none" 
+                            : "bg-white text-slate-700 border border-border/40 rounded-tl-none"
                         )}>
                           {msg.showTranslated ? msg.translatedContent : msg.content}
                         </div>
                         <button 
                           onClick={() => handleTranslateMessage(i)} 
                           className={cn(
-                            "transition-all active:scale-75 flex items-center p-1.5 rounded-full bg-muted/10", 
-                            msg.showTranslated ? "text-black" : "text-muted-foreground hover:text-black"
+                            "transition-all active:scale-75 flex items-center gap-2 p-2 rounded-xl bg-white border border-border/40 shadow-sm", 
+                            msg.showTranslated ? "text-primary border-primary/20" : "text-muted-foreground hover:text-primary"
                           )}
                         >
-                          {msg.isTranslating ? <RefreshCw className="size-3.5 animate-spin" /> : <Globe className="size-3.5" />}
+                          {msg.isTranslating ? <RefreshCw className="size-4 animate-spin" /> : <Globe className="size-4" />}
+                          <span className="text-[10px] font-black uppercase tracking-widest">{msg.showTranslated ? 'Original' : 'Translate'}</span>
                         </button>
                       </div>
                     </div>
                   ))}
                   {loading && (
-                    <div className="flex gap-3">
-                      <Avatar className="size-9 border bg-black/5 rounded-xl">
-                        <AvatarFallback className="text-black rounded-xl"><User className="size-4" /></AvatarFallback>
+                    <div className="flex gap-4">
+                      <Avatar className="size-10 border bg-primary/5 rounded-2xl">
+                        <AvatarFallback className="text-primary rounded-2xl font-black">AI</AvatarFallback>
                       </Avatar>
-                      <div className="bg-white border border-border/50 p-5 rounded-[1.25rem] rounded-tl-none flex gap-2 items-center shadow-sm">
-                        <div className="size-1.5 bg-black/30 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                        <div className="size-1.5 bg-black/30 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                        <div className="size-1.5 bg-black/30 rounded-full animate-bounce" />
+                      <div className="bg-white border border-border/40 p-6 rounded-[1.5rem] rounded-tl-none flex gap-2 items-center shadow-sm">
+                        <div className="size-2 bg-primary/30 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                        <div className="size-2 bg-primary/30 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                        <div className="size-2 bg-primary/30 rounded-full animate-bounce" />
                       </div>
                     </div>
                   )}
@@ -244,20 +238,20 @@ export function AIAssistant() {
               </ScrollArea>
             </CardContent>
 
-            <CardFooter className="p-5 bg-white border-t border-border/50">
+            <CardFooter className="p-6 bg-white border-t border-border/40">
               <form 
                 onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
-                className="flex w-full gap-2 bg-muted/20 p-1.5 rounded-2xl border border-border/50 items-center focus-within:border-black/30 transition-all shadow-inner"
+                className="flex w-full gap-3 bg-slate-50 p-2 rounded-2xl border border-border/60 items-center focus-within:ring-4 focus-within:ring-primary/5 focus-within:border-primary/30 transition-all shadow-inner"
               >
                 <Input 
                   value={input} 
                   onChange={(e) => setInput(e.target.value)} 
                   placeholder={t('ai_ask_strategy')} 
-                  className="border-none bg-transparent focus-visible:ring-0 text-[14px] font-medium h-10 px-3" 
+                  className="border-none bg-transparent focus-visible:ring-0 text-[15px] font-medium h-12 px-4" 
                 />
-                <div className="flex items-center gap-1.5 pr-1">
-                  <Button type="button" variant="ghost" size="icon" onClick={handleVoiceInput} className="size-10 rounded-xl text-muted-foreground hover:text-black hover:bg-black/5 shrink-0 transition-all active:scale-90"><Mic className="size-5" /></Button>
-                  <Button type="submit" size="icon" disabled={loading || !input.trim()} className="size-10 rounded-xl bg-black hover:bg-black/90 text-white shrink-0 shadow-lg transition-all active:scale-90"><Send className="size-5" /></Button>
+                <div className="flex items-center gap-2 pr-1">
+                  <Button type="button" variant="ghost" size="icon" onClick={handleVoiceInput} className="size-11 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5 shrink-0 transition-all active:scale-90"><Mic className="size-5" /></Button>
+                  <Button type="submit" size="icon" disabled={loading || !input.trim()} className="size-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 shadow-lg shadow-primary/20 transition-all active:scale-90"><Send className="size-5" /></Button>
                 </div>
               </form>
             </CardFooter>

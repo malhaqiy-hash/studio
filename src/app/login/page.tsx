@@ -53,17 +53,14 @@ export default function LoginPage() {
       return;
     }
 
-    let title = "Authentication Failed";
-    let message = error.message || "Please check your credentials and try again.";
+    let title = "Autentikasi Gagal";
+    let message = error.message || "Silakan periksa kredensial Anda.";
 
     if (error.code === 'auth/unauthorized-domain') {
-      title = "Unauthorized Domain";
-      message = "This domain is not authorized for Firebase Auth. Go to Firebase Console -> Authentication -> Settings -> Authorized Domains and add this domain.";
-    } else if (error.code === 'auth/api-keys-are-not-supported-by-this-api' || error.message?.includes('api-keys-are-not-supported')) {
-      title = "API Configuration Error";
-      message = "Identity Toolkit API is disabled. Enable Email/Password in Firebase Console -> Authentication.";
+      title = "Domain Tidak Diizinkan";
+      message = "Domain ini belum diotorisasi di konsol Firebase.";
     } else if (error.code === 'auth/invalid-credential') {
-      message = "Invalid email or password. Please try again.";
+      message = "Email atau password salah. Silakan coba lagi.";
     }
 
     toast({
@@ -80,8 +77,8 @@ export default function LoginPage() {
     if (!isConfigValid) {
       toast({
         variant: "destructive",
-        title: "Configuration Error",
-        description: "Firebase configuration is missing. Please set your environment variables.",
+        title: "Kesalahan Konfigurasi",
+        description: "Konfigurasi Firebase belum diatur dengan benar.",
       });
       return;
     }
@@ -115,8 +112,8 @@ export default function LoginPage() {
     if (!email) {
       toast({
         variant: "destructive",
-        title: "Email Required",
-        description: "Please enter your business email first to reset your password.",
+        title: "Email Diperlukan",
+        description: "Masukkan email bisnis Anda untuk mengatur ulang password.",
       });
       return;
     }
@@ -124,87 +121,68 @@ export default function LoginPage() {
     try {
       await sendPasswordResetEmail(auth, email);
       toast({
-        title: "Reset Link Sent",
-        description: "A password reset link has been dispatched to your email address.",
+        title: "Tautan Terkirim",
+        description: "Tautan pengaturan ulang password telah dikirim ke email Anda.",
       });
     } catch (error: any) {
       handleAuthError(error);
     }
   };
 
-  const handlePhoneLoginPlaceholder = () => {
-    toast({
-      title: "Security Update",
-      description: "Mobile OTP authentication is being provisioned for your region.",
-    });
-  };
-
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#F8FAFC] p-4 font-body">
-      <div className="max-w-md w-full space-y-10">
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#FDFDFD] p-6 font-body">
+      <div className="max-w-md w-full space-y-12">
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center size-16 rounded-2xl bg-accent text-white font-black text-4xl shadow-2xl shadow-indigo-200 mb-2 transform transition-transform hover:rotate-6 select-none">
+          <div className="inline-flex items-center justify-center size-20 rounded-3xl bg-primary text-primary-foreground font-black text-4xl shadow-2xl shadow-primary/20 mb-2 transform transition-all hover:rotate-6 hover:scale-110 select-none">
             T
           </div>
-          <div className="space-y-1">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-none">Tapp</h1>
-            <p className="text-slate-500 font-semibold text-lg tracking-tight">Enterprise Discovery Network</p>
+          <div className="space-y-1.5">
+            <h1 className="text-5xl font-black text-slate-900 tracking-tight leading-none">Tapp</h1>
+            <p className="text-slate-500 font-bold text-xl tracking-tight">Business Discovery Network</p>
           </div>
         </div>
 
-        {!isConfigValid && (
-          <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl flex flex-col gap-3 text-amber-800 text-sm font-medium shadow-sm">
-            <div className="flex gap-3 items-center">
-              <AlertCircle className="size-5 shrink-0 text-amber-600" />
-              <p className="font-bold">Missing Firebase Configuration</p>
-            </div>
-            <p className="text-xs text-amber-700 leading-relaxed">
-              Firebase API Key or Project ID is not set. Please ensure your <code className="bg-amber-100 px-1 rounded">.env</code> file or Project Settings include the necessary Firebase keys.
-            </p>
-          </div>
-        )}
-
-        <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white">
+        <Card className="border-none shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] rounded-[2.5rem] overflow-hidden bg-white">
           <CardHeader className="p-10 pb-4">
-            <div className="flex items-center gap-2 text-accent font-black text-[10px] uppercase tracking-widest mb-2">
-              <ShieldCheck className="size-3" />
-              Secure Gateway
+            <div className="flex items-center gap-2 text-primary font-black text-[11px] uppercase tracking-widest mb-3">
+              <ShieldCheck className="size-4" />
+              Secure Business Access
             </div>
             <CardTitle className="text-3xl font-black text-slate-900 tracking-tight">Login</CardTitle>
-            <CardDescription className="font-medium text-slate-500 text-base">
-              Enter your credentials to manage your business ecosystem.
+            <CardDescription className="font-medium text-slate-500 text-lg">
+              Kelola ekosistem bisnis Anda dengan aman.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-10 pt-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="font-bold text-slate-700 ml-1 text-sm">Business Email</Label>
+              <div className="space-y-2.5">
+                <Label htmlFor="email" className="font-bold text-slate-700 ml-1 text-sm">Email Bisnis</Label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
                   <input 
                     id="email" 
                     type="email" 
-                    placeholder="name@company.com" 
+                    placeholder="nama@perusahaan.com" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required 
-                    className="flex h-14 w-full pl-12 rounded-2xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-accent/10 focus:outline-none transition-all font-medium text-sm px-3"
+                    className="flex h-14 w-full pl-12 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary/30 focus:outline-none transition-all font-medium text-[15px] px-3 shadow-inner"
                   />
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <div className="flex justify-between items-center ml-1">
                   <Label htmlFor="password" className="font-bold text-slate-700 text-sm">Password</Label>
                   <button 
                     type="button" 
                     onClick={handleForgotPassword}
-                    className="text-xs font-black text-accent hover:text-indigo-700 transition-colors uppercase tracking-wider"
+                    className="text-xs font-black text-primary hover:opacity-80 transition-all uppercase tracking-wider"
                   >
-                    Forgot Key?
+                    Lupa Kunci?
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
                   <input 
                     id="password" 
                     type={showPassword ? "text" : "password"} 
@@ -212,26 +190,26 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required 
-                    className="flex h-14 w-full pl-12 pr-12 rounded-2xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-accent/10 focus:outline-none transition-all font-medium text-sm px-3"
+                    className="flex h-14 w-full pl-12 pr-12 rounded-2xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary/30 focus:outline-none transition-all font-medium text-[15px] px-3 shadow-inner"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
                   >
                     {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                   </button>
                 </div>
               </div>
-              <div className="space-y-4 pt-2">
+              <div className="space-y-5 pt-4">
                 <Button 
                   type="submit" 
                   disabled={loading || !isConfigValid}
-                  className="w-full h-14 rounded-2xl bg-accent hover:bg-indigo-600 text-white font-black text-lg shadow-xl shadow-indigo-100 transition-all active:scale-[0.98] group relative overflow-hidden"
+                  className="w-full h-15 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-[0.98] group relative overflow-hidden"
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    {loading ? "Verifying..." : "Authorize Login"}
-                    {!loading && <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />}
+                  <span className="relative z-10 flex items-center justify-center gap-3">
+                    {loading ? "Memverifikasi..." : "Akses Jaringan"}
+                    {!loading && <ArrowRight className="size-6 group-hover:translate-x-1 transition-transform" />}
                   </span>
                 </Button>
 
@@ -240,7 +218,7 @@ export default function LoginPage() {
                     <span className="w-full border-t border-slate-100" />
                   </div>
                   <div className="relative flex justify-center text-[10px] uppercase font-black text-slate-400 tracking-widest">
-                    <span className="bg-white px-4">Alternative Secure Access</span>
+                    <span className="bg-white px-5">Metode Alternatif</span>
                   </div>
                 </div>
 
@@ -248,7 +226,7 @@ export default function LoginPage() {
                   <Button 
                     type="button"
                     variant="outline"
-                    className="h-14 rounded-2xl border-slate-200 hover:bg-slate-50 font-bold flex gap-2"
+                    className="h-14 rounded-2xl border-slate-100 hover:bg-primary/5 hover:border-primary/30 font-bold flex gap-3 shadow-sm transition-all"
                     onClick={handleGoogleSignIn}
                     disabled={loading || !isConfigValid}
                   >
@@ -263,67 +241,56 @@ export default function LoginPage() {
                   <Button 
                     type="button"
                     variant="outline"
-                    className="h-14 rounded-2xl border-slate-200 hover:bg-slate-50 font-bold flex gap-2"
-                    onClick={handlePhoneLoginPlaceholder}
+                    className="h-14 rounded-2xl border-slate-100 hover:bg-primary/5 hover:border-primary/30 font-bold flex gap-3 shadow-sm transition-all"
                     disabled={loading || !isConfigValid}
                   >
-                    <Phone className="size-4" />
-                    Phone
+                    <Phone className="size-5 text-primary" />
+                    Telepon
                   </Button>
                 </div>
               </div>
             </form>
           </CardContent>
-          <CardFooter className="bg-slate-50/50 p-8 border-t border-slate-100 flex flex-col gap-4 text-center">
+          <CardFooter className="bg-slate-50/30 p-8 border-t border-slate-50 flex flex-col gap-4 text-center">
             <p className="text-sm font-bold text-slate-500">
-              New to the ecosystem? 
+              Belum terdaftar di ekosistem? 
               <button 
                 onClick={() => setIsRegistrationAlertOpen(true)}
-                className="text-accent font-black hover:text-indigo-700 transition-colors ml-1 uppercase tracking-tight text-xs"
+                className="text-primary font-black hover:opacity-80 transition-all ml-1 uppercase tracking-tight text-xs"
               >
-                Request Access
+                Minta Akses
               </button>
             </p>
-            {!isConfigValid && (
-              <a 
-                href="https://console.firebase.google.com/" 
-                target="_blank" 
-                rel="noreferrer"
-                className="text-[10px] text-slate-400 hover:text-accent font-bold flex items-center justify-center gap-1 uppercase tracking-wider"
-              >
-                Open Firebase Console <ExternalLink className="size-2.5" />
-              </a>
-            )}
           </CardFooter>
         </Card>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-2">
-          <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-            <Globe className="size-3.5" />
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 pt-4">
+          <div className="flex items-center gap-3 text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">
+            <Globe className="size-4 text-primary/40" />
             Global Reach
           </div>
-          <div className="hidden sm:block w-1.5 h-1.5 bg-slate-300 rounded-full" />
-          <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-            <ShieldCheck className="size-3.5" />
+          <div className="hidden sm:block w-1 h-1 bg-slate-300 rounded-full" />
+          <div className="flex items-center gap-3 text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">
+            <ShieldCheck className="size-4 text-primary/40" />
             Enterprise Grade
           </div>
         </div>
       </div>
 
       <AlertDialog open={isRegistrationAlertOpen} onOpenChange={setIsRegistrationAlertOpen}>
-        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl">
+        <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl p-8">
           <AlertDialogHeader>
-            <div className="size-12 bg-indigo-50 text-accent rounded-xl flex items-center justify-center mb-2">
-              <AlertCircle className="size-6" />
+            <div className="size-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-4">
+              <AlertCircle className="size-7" />
             </div>
-            <AlertDialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Registration Closed</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-500 font-medium text-base">
-              The Tapp network is currently operating on a private beta invitation basis. We are not accepting new public registration requests at this time.
+            <AlertDialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Pendaftaran Ditutup</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-600 font-medium text-lg leading-relaxed">
+              Jaringan Tapp saat ini beroperasi dalam basis undangan beta privat. Kami belum menerima permintaan pendaftaran publik baru saat ini.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction className="bg-accent hover:bg-indigo-600 rounded-xl font-bold px-8">
-              Acknowledge
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogAction className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl font-black px-10 h-14 shadow-lg shadow-primary/20">
+              Dimengerti
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
