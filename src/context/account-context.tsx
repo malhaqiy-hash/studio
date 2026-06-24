@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
@@ -14,6 +13,9 @@ export interface ContentItem {
   categoryName?: string; 
   price?: string;
   visibility?: 'public' | 'private';
+  displayLocation: 'profile' | 'feed' | 'both';
+  isPinned?: boolean;
+  isArchived?: boolean;
   timestamp?: string;
   locationLink?: string;
   externalLink?: string;
@@ -56,6 +58,8 @@ interface AccountContextProps {
   updateActiveAccount: (data: Partial<Account>) => void;
   addPost: (post: Omit<ContentItem, 'id' | 'timestamp'>) => void;
   removePost: (id: string) => void;
+  togglePinPost: (id: string) => void;
+  toggleArchivePost: (id: string) => void;
   hasInitialized: boolean;
 }
 
@@ -81,13 +85,8 @@ const DEFAULT_PRIBADI: Account = {
   items: []
 };
 
-// Kunci penyimpanan baru
 const STORAGE_KEY_ACCOUNTS = 'tapp_user_accounts_v1';
 const STORAGE_KEY_ACTIVE_ID = 'tapp_active_account_id_v1';
-
-// Kunci penyimpanan lama (untuk migrasi)
-const OLD_KEY_ACCOUNTS = 'ontapp_user_accounts';
-const OLD_KEY_ACTIVE_ID = 'ontapp_active_account_id';
 
 const AccountContext = createContext<AccountContextProps | undefined>(undefined);
 
@@ -96,10 +95,9 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
   const [activeAccountId, setActiveAccountId] = useState<string>('acc-temp');
   const [hasInitialized, setHasInitialized] = useState(false);
 
-  // Inisialisasi data dari localStorage
   useEffect(() => {
-    const savedActive = localStorage.getItem(STORAGE_KEY_ACTIVE_ID) || localStorage.getItem(OLD_KEY_ACTIVE_ID);
-    const savedAccounts = localStorage.getItem(STORAGE_KEY_ACCOUNTS) || localStorage.getItem(OLD_KEY_ACCOUNTS);
+    const savedActive = localStorage.getItem(STORAGE_KEY_ACTIVE_ID);
+    const savedAccounts = localStorage.getItem(STORAGE_KEY_ACCOUNTS);
     
     if (savedAccounts) {
       try {
@@ -108,7 +106,12 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
           const migratedAccounts = parsed.map((acc: Account) => ({
             ...acc,
             preferences: acc.preferences || DEFAULT_PREFERENCES,
-            items: acc.items || []
+            items: (acc.items || []).map(item => ({
+              ...item,
+              displayLocation: item.displayLocation || 'both',
+              isPinned: item.isPinned || false,
+              isArchived: item.isArchived || false
+            }))
           }));
           
           setAccounts(migratedAccounts);
@@ -126,18 +129,13 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     setHasInitialized(true);
   }, []);
 
-  // Simpan ke localStorage setiap kali ada perubahan state dengan proteksi kuota
   useEffect(() => {
     if (hasInitialized) {
       try {
         localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(accounts));
         localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeAccountId);
       } catch (e: any) {
-        if (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014) {
-          console.warn("⚠️ LocalStorage penuh. Gambar profil atau postingan terlalu besar. Data tetap berjalan di memori namun gagal disimpan permanen.");
-        } else {
-          console.error("Gagal menyimpan ke storage:", e);
-        }
+        console.error("Gagal menyimpan ke storage:", e);
       }
     }
   }, [accounts, activeAccountId, hasInitialized]);
@@ -181,7 +179,9 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     const newItem: ContentItem = {
       ...post,
       id: `post-${Date.now()}`,
-      timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' hari ini'
+      timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' hari ini',
+      isPinned: false,
+      isArchived: false
     };
     
     setAccounts(prev => prev.map(acc => {
@@ -201,6 +201,34 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     }));
   }, [activeAccountId]);
 
+  const togglePinPost = useCallback((id: string) => {
+    setAccounts(prev => prev.map(acc => {
+      if (acc.id === activeAccountId) {
+        return {
+          ...acc,
+          items: (acc.items || []).map(item => 
+            item.id === id ? { ...item, isPinned: !item.isPinned } : { ...item, isPinned: false } // Only one can be pinned usually
+          )
+        };
+      }
+      return acc;
+    }));
+  }, [activeAccountId]);
+
+  const toggleArchivePost = useCallback((id: string) => {
+    setAccounts(prev => prev.map(acc => {
+      if (acc.id === activeAccountId) {
+        return {
+          ...acc,
+          items: (acc.items || []).map(item => 
+            item.id === id ? { ...item, isArchived: !item.isArchived } : item
+          )
+        };
+      }
+      return acc;
+    }));
+  }, [activeAccountId]);
+
   const activeAccount = accounts.find(a => a.id === activeAccountId) || accounts[0] || DEFAULT_PRIBADI;
 
   return (
@@ -212,6 +240,8 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
       updateActiveAccount, 
       addPost, 
       removePost, 
+      togglePinPost,
+      toggleArchivePost,
       hasInitialized 
     }}>
       {children}

@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -23,6 +22,7 @@ import {
   Facebook,
   Link as LinkIcon,
   Smartphone,
+  LayoutGrid,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAccount } from "@/context/account-context";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -189,6 +190,7 @@ const INITIAL_POSTS = [
     stats: { likes: 1200, comments: 84 },
     verified: true,
     visibility: 'public',
+    displayLocation: 'both',
     images: ["https://picsum.photos/seed/tech1/800/500", "https://picsum.photos/seed/tech2/800/600", "https://picsum.photos/seed/tech3/800/700"],
     locationLink: "https://maps.google.com"
   },
@@ -202,7 +204,8 @@ const INITIAL_POSTS = [
     stats: { likes: 452, comments: 12 },
     verified: true,
     images: ["https://picsum.photos/seed/truck/800/400"],
-    visibility: 'public'
+    visibility: 'public',
+    displayLocation: 'both',
   },
 ];
 
@@ -221,6 +224,7 @@ export default function FeedPage() {
   const [postImages, setPostImages] = React.useState<string[]>([]);
   const [postLocationLink, setPostLocationLink] = React.useState("");
   const [postVisibility, setPostVisibility] = React.useState<'public' | 'private'>('public');
+  const [postDisplayLocation, setPostDisplayLocation] = React.useState<'profile' | 'feed' | 'both'>('both');
   
   const [isShareSheetOpen, setIsShareSheetOpen] = React.useState(false);
   const [shareUrl, setShareUrl] = React.useState("");
@@ -233,18 +237,17 @@ export default function FeedPage() {
   const swipePlusOpacity = useTransform(dragX, [0, 100], [0, 1]);
   const swipePlusScale = useTransform(dragX, [0, 100], [0.5, 1.2]);
 
-  // Logic: Reset form state when account changes or modal closes
   const resetForm = React.useCallback(() => {
     setPostContent("");
     setPostImages([]);
     setPostLocationLink("");
     setPostVisibility('public');
+    setPostDisplayLocation('both');
   }, []);
 
-  // Watch for account changes to isolate state per account
   React.useEffect(() => {
     resetForm();
-    setIsPostModalOpen(false); // Close modal if open during switch
+    setIsPostModalOpen(false); 
   }, [activeAccount.id, resetForm]);
 
   const handleDragEnd = (event: any, info: any) => {
@@ -301,11 +304,13 @@ export default function FeedPage() {
       description: postContent,
       images: postImages,
       visibility: postVisibility,
+      displayLocation: postDisplayLocation,
       locationLink: postLocationLink,
       source: 'feed'
     });
     setIsPostModalOpen(false);
     resetForm();
+    toast({ title: "Postingan terkirim" });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -321,6 +326,7 @@ export default function FeedPage() {
 
   const combinedPosts = React.useMemo(() => {
     const userPosts = (activeAccount.items || [])
+      .filter(item => !item.isArchived && (item.displayLocation === 'feed' || item.displayLocation === 'both'))
       .map(item => ({
         id: item.id,
         author: activeAccount.name,
@@ -334,6 +340,7 @@ export default function FeedPage() {
         visibility: item.visibility,
         locationLink: item.locationLink
       }));
+    
     const all = [...userPosts, ...INITIAL_POSTS].filter(p => p.visibility !== 'private' || p.author === activeAccount.name);
     return all.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
   }, [activeAccount.items, activeAccount.name, activeAccount.avatar, activeAccount.extra, activeAccount.verificationStatus]);
@@ -458,21 +465,36 @@ export default function FeedPage() {
         open={isPostModalOpen} 
         onOpenChange={(open) => {
           setIsPostModalOpen(open);
-          if (!open) resetForm(); // Explicit cleanup on modal close
+          if (!open) resetForm(); 
         }}
       >
-        <DialogContent className="w-[95%] md:max-lg rounded-3xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
+        <DialogContent className="w-[95%] md:max-w-lg rounded-3xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
           <div className="p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-black uppercase tracking-tight text-slate-900">Buat Postingan</h2>
-              <div className="w-32">
+              <div className="flex gap-2">
                  <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
                   <SelectTrigger className="h-9 rounded-xl bg-slate-50 border-none text-[10px] font-black uppercase tracking-widest px-3 shadow-inner focus:ring-2 focus:ring-primary/10 transition-all"><SelectValue /></SelectTrigger>
                   <SelectContent className="rounded-xl shadow-xl"><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
                 </Select>
               </div>
             </div>
-            <div className="space-y-3">
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Lokasi Tampilan Postingan</Label>
+                <Select value={postDisplayLocation} onValueChange={(val: any) => setPostDisplayLocation(val)}>
+                  <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none px-4 text-xs font-bold shadow-inner">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl shadow-xl">
+                    <SelectItem value="both">🌍 Beranda & Profil</SelectItem>
+                    <SelectItem value="feed">🏠 Hanya Beranda</SelectItem>
+                    <SelectItem value="profile">👤 Hanya Profil</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[140px] rounded-2xl border-none bg-slate-50/50 p-4 text-[15px] font-medium focus-visible:ring-2 focus-visible:ring-primary/10 resize-none shadow-inner" />
               
               <div className="relative group">

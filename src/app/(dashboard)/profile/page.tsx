@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -31,6 +30,7 @@ import {
   Share2,
   Users,
   Zap,
+  Pin,
 } from 'lucide-react';
 import {
   Dialog,
@@ -76,9 +76,9 @@ export default function ProfilePage() {
   const [isNewCategory, setIsNewCategory] = React.useState(false);
   const [isCloudLoading, setIsCloudLoading] = React.useState(false);
   
-  // New Item State
   const [newItem, setNewItem] = React.useState<Partial<ContentItem>>({
     visibility: 'public',
+    displayLocation: 'both',
     images: [],
     locationLink: '',
     categoryName: ''
@@ -87,10 +87,10 @@ export default function ProfilePage() {
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Logic: Reset form state when account changes
   const resetContentForm = React.useCallback(() => {
     setNewItem({
       visibility: 'public',
+      displayLocation: 'both',
       images: [],
       locationLink: '',
       categoryName: '',
@@ -100,25 +100,35 @@ export default function ProfilePage() {
     setIsNewCategory(false);
   }, []);
 
-  // Isolate state per account switch
   React.useEffect(() => {
     resetContentForm();
     setIsContentModalOpen(false);
     setIsBioModalOpen(false);
   }, [activeAccount.id, resetContentForm]);
 
+  const profileVisibleItems = React.useMemo(() => {
+    const items = (activeAccount.items || []).filter(i => 
+      !i.isArchived && (i.displayLocation === 'profile' || i.displayLocation === 'both')
+    );
+    // Sort so pinned items are first
+    return [...items].sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return 0;
+    });
+  }, [activeAccount.items]);
+
   const groupedItems = React.useMemo(() => {
-    const items = (activeAccount.items || []).filter(i => i.source === 'profile');
-    if (activeAccount.type === 'pribadi') return { 'Inspirasi': items };
+    if (activeAccount.type === 'pribadi') return { 'Inspirasi': profileVisibleItems };
     
     const groups: Record<string, ContentItem[]> = {};
-    items.forEach(item => {
+    profileVisibleItems.forEach(item => {
       const cat = item.categoryName || 'Lainnya';
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(item);
     });
     return groups;
-  }, [activeAccount.items, activeAccount.type]);
+  }, [profileVisibleItems, activeAccount.type]);
 
   const existingCategories = React.useMemo(() => {
     return Array.from(new Set((activeAccount.items || []).map(i => i.categoryName).filter(Boolean)));
@@ -195,6 +205,7 @@ export default function ProfilePage() {
       title: newItem.title || 'Katalog Baru',
       description: newItem.description || '',
       visibility: newItem.visibility || 'public',
+      displayLocation: newItem.displayLocation || 'both',
       locationLink: newItem.locationLink,
       categoryName: newItem.categoryName,
       source: 'profile'
@@ -309,50 +320,31 @@ export default function ProfilePage() {
                    <Badge variant="secondary" className="text-[10px] font-black">{items.length} Item</Badge>
                 </div>
                 
-                {activeAccount.type === 'pribadi' ? (
-                  <div className="grid grid-cols-2 gap-4">
-                    {items.map((item) => (
-                      <Card key={item.id} className="rounded-xl border-none shadow-sm overflow-hidden bg-card hover:shadow-lg transition-all group">
+                <div className={cn(
+                  activeAccount.type === 'pribadi' ? "grid grid-cols-2 gap-4" : "flex overflow-x-auto no-scrollbar space-x-4 px-1 pb-4 snap-x"
+                )}>
+                  {items.map((item) => (
+                    <div key={item.id} className={cn(activeAccount.type === 'pribadi' ? "" : "w-36 md:w-40 flex-shrink-0 snap-start")}>
+                      <Card className="rounded-2xl border-none shadow-md overflow-hidden bg-card hover:shadow-xl transition-all relative group">
                         {item.images && item.images.length > 0 && (
                           <div className="aspect-square w-full overflow-hidden relative cursor-zoom-in" onClick={() => setZoomedImage(item.images![0])}>
                             <img src={item.images[0]} className="w-full h-full object-cover" alt={item.title} />
-                            {item.images.length > 1 && <div className="absolute bottom-1 right-1 bg-black/60 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">{item.images.length} Foto</div>}
+                            {item.images.length > 1 && <div className="absolute bottom-1 right-1 bg-black/60 text-white px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase">{item.images.length} Foto</div>}
+                            {item.isPinned && <div className="absolute top-2 right-2 bg-accent text-white p-1.5 rounded-full shadow-lg"><Pin className="size-3 fill-white" /></div>}
                           </div>
                         )}
-                        <CardContent className="p-3 space-y-1">
-                          <div className="flex items-center justify-between">
-                            <h5 className="font-bold text-[14px] line-clamp-1">{item.title}</h5>
-                            <button onClick={(e) => { e.stopPropagation(); handleSharePost(item.id); }} className="p-1.5 rounded-full hover:bg-muted text-muted-foreground transition-colors"><Share2 className="size-3.5" /></button>
-                          </div>
-                          <p className="text-muted-foreground text-[12px] line-clamp-2">{item.description}</p>
+                        <div className="absolute top-1 left-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                          <button onClick={(e) => { e.stopPropagation(); handleSharePost(item.id); }} className="size-7 bg-black/60 text-white rounded-lg flex items-center justify-center shadow-lg"><Share2 className="size-3.5" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); removePost(item.id); }} className="size-7 bg-rose-500 text-white rounded-lg flex items-center justify-center shadow-lg"><Trash2 className="size-3.5" /></button>
+                        </div>
+                        <CardContent className="p-3 space-y-0.5">
+                          <h5 className="font-black text-slate-900 text-[13px] truncate leading-none">{item.title}</h5>
+                          <p className="text-slate-400 text-[11px] font-medium line-clamp-2 leading-tight h-7">{item.description}</p>
                         </CardContent>
                       </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex overflow-x-auto no-scrollbar space-x-4 px-1 pb-4 snap-x">
-                    {items.map((item) => (
-                      <div key={item.id} className="w-36 md:w-40 flex-shrink-0 snap-start">
-                        <Card className="rounded-2xl border-none shadow-md overflow-hidden bg-card hover:shadow-xl transition-all relative group">
-                          {item.images && item.images.length > 0 && (
-                            <div className="aspect-square w-full overflow-hidden relative cursor-zoom-in" onClick={() => setZoomedImage(item.images![0])}>
-                              <img src={item.images[0]} className="w-full h-full object-cover" alt={item.title} />
-                              {item.images.length > 1 && <div className="absolute top-1 right-1 bg-black/60 text-white px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase">{item.images.length} Foto</div>}
-                            </div>
-                          )}
-                          <div className="absolute top-1 left-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                            <button onClick={(e) => { e.stopPropagation(); handleSharePost(item.id); }} className="size-7 bg-black/60 text-white rounded-lg flex items-center justify-center shadow-lg"><Share2 className="size-3.5" /></button>
-                            <button onClick={(e) => { e.stopPropagation(); removePost(item.id); }} className="size-7 bg-rose-500 text-white rounded-lg flex items-center justify-center shadow-lg"><Trash2 className="size-3.5" /></button>
-                          </div>
-                          <CardContent className="p-3 space-y-0.5">
-                            <h5 className="font-black text-slate-900 text-[13px] truncate leading-none">{item.title}</h5>
-                            <p className="text-slate-400 text-[11px] font-medium line-clamp-2 leading-tight h-7">{item.description}</p>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -381,7 +373,7 @@ export default function ProfilePage() {
         open={isContentModalOpen} 
         onOpenChange={(open) => {
           setIsContentModalOpen(open);
-          if (!open) resetContentForm(); // Explicit cleanup on modal close
+          if (!open) resetContentForm(); 
         }}
       >
         <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden">
@@ -395,6 +387,20 @@ export default function ProfilePage() {
             </div>
           </DialogHeader>
           <div className="space-y-5 pt-4 overflow-y-auto max-h-[65vh] no-scrollbar">
+            <div className="space-y-3 p-4 bg-muted/20 rounded-2xl">
+              <Label className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Lokasi Tampilan Konten</Label>
+              <Select value={newItem.displayLocation} onValueChange={(val: any) => setNewItem({ ...newItem, displayLocation: val })}>
+                <SelectTrigger className="rounded-xl h-11 bg-card border-none shadow-sm font-bold text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="both">🌍 Beranda & Profil</SelectItem>
+                  <SelectItem value="feed">🏠 Hanya Beranda</SelectItem>
+                  <SelectItem value="profile">👤 Hanya Profil</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="grid grid-cols-3 gap-3">
               {(newItem.images || []).map((src, i) => (
                 <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-border">

@@ -38,6 +38,7 @@ import {
   Heart,
   UserCheck,
   UserPlus,
+  LayoutGrid,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage, LANGUAGES } from "@/context/language-context";
@@ -457,10 +458,9 @@ export default function SettingsPage() {
             <section className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Aktivitas & Interaksi</h3>
               <MenuList items={[
-                { icon: UserCheck, label: "Hubungan Jaringan", desc: activeAccount.type === 'pribadi' ? "Pengikut, Mengikuti, Suka" : "Subscribe & Suka", subMenu: "hubungan", bg: "bg-primary text-white shadow-primary/20 shadow-lg" },
+                { icon: LayoutGrid, label: "Kelola Postingan", desc: "Arsip, Pin, Seluruh Aktivitas", href: "/settings/posts", bg: "bg-primary text-white shadow-primary/20 shadow-lg" },
+                { icon: UserCheck, label: "Hubungan Jaringan", desc: activeAccount.type === 'pribadi' ? "Pengikut, Mengikuti, Suka" : "Subscribe & Suka", subMenu: "hubungan" },
                 { icon: Activity, label: "Kelola Aktivitas", desc: "Log, Waktu Layar", href: "/dashboard" },
-                { icon: History, label: "Preferensi", desc: "Filter Minat, Muted Words", href: "#" },
-                { icon: MessageSquare, label: "Interaksi & Pesan", desc: "Izin Komentar, Balasan Otomatis", href: "/messages" },
                 { icon: Bell, label: "Notifikasi", desc: "Push, Chat, Email", href: "/notifications" }
               ]} />
             </section>
@@ -470,7 +470,6 @@ export default function SettingsPage() {
               <MenuList items={[
                 { icon: Palette, label: "Mode Tampilan", desc: "Tema Antarmuka", subMenu: "mode" },
                 { icon: Languages, label: "Bahasa", desc: "Lokalisasi Aplikasi", subMenu: "bahasa" },
-                { icon: Accessibility, label: "Aksesibilitas", desc: "Ukuran Teks, Auto-Play", href: "#" },
                 { icon: MapPin, label: "Kontak dan Lokasi", desc: "IP Geolocation, Sinkronisasi", subMenu: "kontak_lokasi" }
               ]} />
             </section>
