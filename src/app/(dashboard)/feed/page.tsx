@@ -50,7 +50,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { ShareSheet } from "@/components/share-sheet";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion, useMotionValue, useTransform, useDragControls } from "framer-motion";
 
 const CATEGORIES = [
   { id: 'saran', label: 'Saran' },
@@ -124,7 +124,7 @@ function PostMedia({ images }: { images?: string[] }) {
 
   return (
     <div 
-      className="relative group/carousel w-full overflow-hidden rounded-xl border border-border/40 bg-muted/5"
+      className="relative group/carousel w-full overflow-hidden rounded-xl border border-border/40 bg-muted/5 swiper-media-wrapper"
       style={{ touchAction: 'pan-y' }}
       onPointerDown={(e) => e.stopPropagation()}
     >
@@ -226,15 +226,24 @@ export default function FeedPage() {
   const [zoomedAvatar, setExpandedAvatar] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  const dragControls = useDragControls();
   const dragX = useMotionValue(0);
   const swipePlusOpacity = useTransform(dragX, [0, 100], [0, 1]);
   const swipePlusScale = useTransform(dragX, [0, 100], [0.5, 1.2]);
 
   const handleDragEnd = (event: any, info: any) => {
-    // Hanya picu jika diseret ke kanan dan melewati batas
     if (info.offset.x > 100) {
       setIsPostModalOpen(true);
     }
+  };
+
+  const startDrag = (event: React.PointerEvent) => {
+    // Kunci gesture pergeseran halaman jika pengguna menyentuh karosel foto atau tombol
+    const target = event.target as HTMLElement;
+    if (target.closest('.swiper-media-wrapper') || target.closest('button')) {
+      return;
+    }
+    dragControls.start(event);
   };
 
   const handleLike = (postId: string) => {
@@ -320,6 +329,9 @@ export default function FeedPage() {
     <DashboardLayout>
       <motion.div 
         drag="x"
+        dragControls={dragControls}
+        dragListener={false}
+        onPointerDown={startDrag}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.15}
         onDragEnd={handleDragEnd}
