@@ -126,7 +126,6 @@ function PostMedia({ images }: { images?: string[] }) {
     <div 
       className="relative group/carousel w-full overflow-hidden rounded-xl border border-border/40 bg-muted/5"
       style={{ touchAction: 'pan-y' }}
-      onPointerDownCapture={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
     >
       <Swiper
@@ -232,7 +231,7 @@ export default function FeedPage() {
   const swipePlusScale = useTransform(dragX, [0, 100], [0.5, 1.2]);
 
   const handleDragEnd = (event: any, info: any) => {
-    // Only trigger if swiped to the right and above threshold
+    // Hanya picu jika diseret ke kanan dan melewati batas
     if (info.offset.x > 100) {
       setIsPostModalOpen(true);
     }
