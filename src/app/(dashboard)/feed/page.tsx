@@ -367,7 +367,7 @@ export default function FeedPage() {
           ))}
           <button 
             onClick={() => setIsPostModalOpen(true)}
-            className="flex items-center justify-center size-8 rounded-full bg-primary/5 text-primary hover:bg-primary/10 transition-all ml-auto shrink-0 active:scale-90"
+            className="flex items-center justify-center size-8 rounded-full bg-primary/5 text-primary hover:bg-primary/10 transition-all shrink-0 active:scale-90"
           >
             <Plus className="size-5" />
           </button>
@@ -442,7 +442,7 @@ export default function FeedPage() {
       </motion.div>
 
       <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
-        <DialogContent className="w-[95%] md:max-w-lg rounded-3xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
+        <DialogContent className="w-[95%] md:max-lg rounded-3xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
           <div className="p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-black uppercase tracking-tight text-slate-900">Buat Postingan</h2>
