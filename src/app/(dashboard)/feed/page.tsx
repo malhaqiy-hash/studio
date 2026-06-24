@@ -49,6 +49,7 @@ import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { ShareSheet } from "@/components/share-sheet";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 
 const CATEGORIES = [
   { id: 'saran', label: 'Saran' },
@@ -197,6 +198,17 @@ export default function FeedPage() {
   const [zoomedAvatar, setExpandedAvatar] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Swipe logic
+  const dragX = useMotionValue(0);
+  const swipePlusOpacity = useTransform(dragX, [0, 100], [0, 1]);
+  const swipePlusScale = useTransform(dragX, [0, 100], [0.5, 1.2]);
+
+  const handleDragEnd = (event: any, info: any) => {
+    if (info.offset.x > 100) {
+      setIsPostModalOpen(true);
+    }
+  };
+
   const handleLike = (postId: string) => {
     setLikes(prev => {
       const current = prev[postId] || { count: 0, active: false };
@@ -278,9 +290,27 @@ export default function FeedPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col max-w-2xl mx-auto relative px-1 md:px-0 min-h-[calc(100vh-8rem)]">
+      <motion.div 
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragEnd={handleDragEnd}
+        style={{ x: dragX }}
+        className="flex flex-col max-w-2xl mx-auto relative px-1 md:px-0 min-h-[calc(100vh-8rem)] touch-pan-y"
+      >
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
+        {/* Swipe Indicator */}
+        <motion.div 
+          style={{ opacity: swipePlusOpacity, scale: swipePlusScale }}
+          className="fixed left-6 top-1/2 -translate-y-1/2 z-50 pointer-events-none text-primary flex flex-col items-center gap-2"
+        >
+          <div className="size-16 rounded-3xl bg-primary/10 backdrop-blur-sm border-2 border-primary/20 flex items-center justify-center shadow-xl shadow-primary/10">
+            <Plus className="size-10" />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-widest bg-primary text-white px-3 py-1 rounded-full">Buat Postingan</span>
+        </motion.div>
+
         <div className="flex items-center justify-center gap-1 mb-2 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 overflow-x-auto no-scrollbar">
           {CATEGORIES.map((cat) => (
             <button
@@ -289,7 +319,7 @@ export default function FeedPage() {
               className={cn(
                 "px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border shrink-0",
                 activeCategory === cat.id 
-                  ? "bg-black text-white border-black shadow-sm" 
+                  ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" 
                   : "bg-card text-muted-foreground hover:bg-muted border-border"
               )}
             >
@@ -313,14 +343,14 @@ export default function FeedPage() {
                         onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
                       >
                         <AvatarImage src={post.avatar} className="object-cover" />
-                        <AvatarFallback className="bg-black/5 text-black font-black text-xs">{post.author[0]}</AvatarFallback>
+                        <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">{post.author[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
                         <div className="flex items-center gap-1">
                           <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[15px]">{post.author}</h3></Link>
-                          {post.verified && <ShieldCheck className="size-3.5 text-black" />}
+                          {post.verified && <ShieldCheck className="size-3.5 text-primary" />}
                           {post.locationLink && (
-                            <a href={post.locationLink} target="_blank" rel="noopener noreferrer" className="ml-1 text-muted-foreground hover:text-black transition-colors">
+                            <a href={post.locationLink} target="_blank" rel="noopener noreferrer" className="ml-1 text-muted-foreground hover:text-primary transition-colors">
                               {getSmartIcon(post.locationLink)}
                             </a>
                           )}
@@ -332,7 +362,7 @@ export default function FeedPage() {
                     </div>
                     <div className="flex items-center gap-1">
                         {post.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
-                        <button className="p-2 rounded-full text-muted-foreground hover:bg-muted"><Bookmark className="size-5" /></button>
+                        <button className="p-2 rounded-full text-muted-foreground hover:bg-primary/5 hover:text-primary transition-colors"><Bookmark className="size-5" /></button>
                     </div>
                   </div>
 
@@ -345,26 +375,26 @@ export default function FeedPage() {
 
                   <div className="p-2 md:p-3 pt-1 border-t border-border/40 bg-muted/5 flex items-center justify-between">
                     <div className="flex items-center gap-6 text-muted-foreground">
-                      <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1.5 py-1 transition-all", postLike.active ? "text-black" : "hover:text-black")}>
-                        <Heart className={cn("size-5", postLike.active && "fill-black")} />
+                      <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1.5 py-1 transition-all", postLike.active ? "text-primary" : "hover:text-primary")}>
+                        <Heart className={cn("size-5", postLike.active && "fill-primary")} />
                         <span className="text-xs font-bold">{postLike.count > 0 ? postLike.count : 'Suka'}</span>
                       </button>
-                      <button className="flex items-center gap-1.5 py-1 hover:text-black">
+                      <button className="flex items-center gap-1.5 py-1 hover:text-primary transition-colors">
                         <MessageCircle className="size-5" />
                         <span className="text-xs font-bold">{post.stats.comments > 0 ? post.stats.comments : 'Komentar'}</span>
                       </button>
-                      <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center py-1", trans?.show ? "text-black" : "hover:text-black")}>
+                      <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center py-1", trans?.show ? "text-primary" : "hover:text-primary transition-colors")}>
                         {trans?.loading ? <RefreshCw className="size-5 animate-spin" /> : <Globe className="size-5" />}
                       </button>
                     </div>
-                    <button onClick={() => handleShare(post.id)} className="p-2 text-muted-foreground hover:text-foreground active:scale-90 transition-transform"><Share2 className="size-5" /></button>
+                    <button onClick={() => handleShare(post.id)} className="p-2 text-muted-foreground hover:text-primary active:scale-90 transition-all"><Share2 className="size-5" /></button>
                   </div>
                 </Card>
               );
             })}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
         <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
@@ -373,35 +403,35 @@ export default function FeedPage() {
               <h2 className="text-lg font-bold">Buat Postingan</h2>
               <div className="w-32">
                  <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
-                  <SelectTrigger className="h-9 rounded-lg bg-muted/50 border-none text-[11px] font-black uppercase tracking-widest px-3 shadow-inner"><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                  <SelectTrigger className="h-9 rounded-lg bg-muted/50 border-none text-[11px] font-black uppercase tracking-widest px-3 shadow-inner focus:ring-2 focus:ring-primary/10 transition-all"><SelectValue /></SelectTrigger>
+                  <SelectContent className="rounded-xl shadow-xl"><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
                 </Select>
               </div>
             </div>
             <div className="space-y-3">
-              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-0 resize-none shadow-inner" />
+              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-2 focus-visible:ring-primary/10 resize-none shadow-inner" />
               
               <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{postLocationLink ? getSmartIcon(postLocationLink) : <LinkIcon className="size-4" />}</div>
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary">{postLocationLink ? getSmartIcon(postLocationLink) : <LinkIcon className="size-4" />}</div>
                 <Input 
                   placeholder="Link Alamat/Web (opsional)" 
                   value={postLocationLink} 
                   onChange={(e) => setPostLocationLink(e.target.value)}
-                  className="h-11 pl-10 rounded-xl border-none bg-muted/30 text-[14px] font-medium shadow-inner focus-visible:ring-0" 
+                  className="h-11 pl-10 rounded-xl border-none bg-muted/30 text-[14px] font-medium shadow-inner focus-visible:ring-2 focus-visible:ring-primary/10 transition-all" 
                 />
               </div>
 
               <div className="flex flex-wrap gap-2">
                 {postImages.map((src, i) => (
-                  <div key={i} className="relative size-16 rounded-lg overflow-hidden border">
+                  <div key={i} className="relative size-16 rounded-lg overflow-hidden border border-border">
                     <img src={src} className="w-full h-full object-cover" />
-                    <button onClick={() => setPostImages(postImages.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5"><Plus className="size-2.5 rotate-45" /></button>
+                    <button onClick={() => setPostImages(postImages.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5 hover:bg-rose-500 transition-colors"><Plus className="size-2.5 rotate-45" /></button>
                   </div>
                 ))}
-                <button onClick={() => fileInputRef.current?.click()} className="size-16 rounded-lg bg-muted/50 border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-black hover:text-black transition-colors"><Plus size={20} /></button>
+                <button onClick={() => fileInputRef.current?.click()} className="size-16 rounded-lg bg-muted/50 border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-all"><Plus size={20} /></button>
               </div>
             </div>
-            <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-12 rounded-xl bg-black font-bold text-white shadow-lg active:scale-[0.98] transition-all">Posting</Button>
+            <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 font-bold text-white shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">Posting</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -421,13 +451,6 @@ export default function FeedPage() {
 
       <ShareSheet isOpen={isShareSheetOpen} onOpenChange={setIsShareSheetOpen} postUrl={shareUrl} />
       
-      {/* Floating Add Post Button for mobile */}
-      <button 
-        onClick={() => setIsPostModalOpen(true)}
-        className="fixed bottom-20 right-4 size-14 rounded-full bg-black text-white shadow-2xl flex items-center justify-center active:scale-90 transition-transform z-40 md:hidden"
-      >
-        <Plus className="size-8" />
-      </button>
     </DashboardLayout>
   );
 }

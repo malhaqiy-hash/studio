@@ -154,11 +154,11 @@ export default function SettingsPage() {
       <div className="flex items-center gap-4 border-b border-border/40 pb-4">
         <button 
           onClick={() => setActiveSubMenu(null)}
-          className="size-10 rounded-xl bg-muted/30 flex items-center justify-center text-muted-foreground hover:text-black transition-all active:scale-90"
+          className="size-10 rounded-xl bg-muted/30 flex items-center justify-center text-muted-foreground hover:text-primary transition-all active:scale-90"
         >
           <ChevronLeft className="size-5" />
         </button>
-        <h2 className="text-lg font-black uppercase tracking-tight">{title}</h2>
+        <h2 className="text-lg font-black uppercase tracking-tight"> {title}</h2>
       </div>
       <div className="px-1">{children}</div>
     </div>
@@ -169,14 +169,14 @@ export default function SettingsPage() {
       <div className="flex items-center gap-3">
         <Avatar className="size-10 rounded-xl border border-border">
           <AvatarImage src={user.avatar} className="object-cover" />
-          <AvatarFallback className="bg-black/5 font-bold text-xs">{user.name[0]}</AvatarFallback>
+          <AvatarFallback className="bg-primary/5 font-bold text-xs text-primary">{user.name[0]}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
           <span className="font-bold text-[14px] leading-none mb-1">{user.name}</span>
           <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{user.extra}</span>
         </div>
       </div>
-      <Button variant="outline" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest px-3">
+      <Button variant="outline" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest px-3 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all">
         {actionLabel || 'Lihat'}
       </Button>
     </div>
@@ -192,14 +192,14 @@ export default function SettingsPage() {
               <TabsList className="w-full grid h-12 bg-muted/20 rounded-xl p-1 gap-1 mb-6" style={{ gridTemplateColumns: isPribadi ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>
                 {isPribadi ? (
                   <>
-                    <TabsTrigger value="pengikut" className="rounded-lg font-black text-[10px] uppercase tracking-widest">Pengikut</TabsTrigger>
-                    <TabsTrigger value="mengikuti" className="rounded-lg font-black text-[10px] uppercase tracking-widest">Mengikuti</TabsTrigger>
-                    <TabsTrigger value="suka" className="rounded-lg font-black text-[10px] uppercase tracking-widest">Suka</TabsTrigger>
+                    <TabsTrigger value="pengikut" className="rounded-lg font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Pengikut</TabsTrigger>
+                    <TabsTrigger value="mengikuti" className="rounded-lg font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Mengikuti</TabsTrigger>
+                    <TabsTrigger value="suka" className="rounded-lg font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Suka</TabsTrigger>
                   </>
                 ) : (
                   <>
-                    <TabsTrigger value="subscribe" className="rounded-lg font-black text-[10px] uppercase tracking-widest">Subscriber</TabsTrigger>
-                    <TabsTrigger value="suka" className="rounded-lg font-black text-[10px] uppercase tracking-widest">Penyuka</TabsTrigger>
+                    <TabsTrigger value="subscribe" className="rounded-lg font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Subscriber</TabsTrigger>
+                    <TabsTrigger value="suka" className="rounded-lg font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Penyuka</TabsTrigger>
                   </>
                 )}
               </TabsList>
@@ -227,8 +227,8 @@ export default function SettingsPage() {
               <div className="space-y-3">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Kredensial</h3>
                 <div className="grid grid-cols-2 gap-2">
-                   <button className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-[11px] font-black uppercase tracking-tight text-center hover:bg-muted/30 transition-all">Ubah Password</button>
-                   <button className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-[11px] font-black uppercase tracking-tight text-center hover:bg-muted/30 transition-all">Aktifkan 2FA</button>
+                   <button className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-[11px] font-black uppercase tracking-tight text-center hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all">Ubah Password</button>
+                   <button className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-[11px] font-black uppercase tracking-tight text-center hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all">Aktifkan 2FA</button>
                 </div>
               </div>
 
@@ -247,10 +247,10 @@ export default function SettingsPage() {
                         value={activeAccount.preferences?.[item.key as keyof typeof activeAccount.preferences] as string || 'public'} 
                         onValueChange={(v) => updatePrivacy(item.key, v)}
                       >
-                        <SelectTrigger className="rounded-xl h-11 bg-muted/20 border-none font-bold text-xs shadow-inner">
+                        <SelectTrigger className="rounded-xl h-11 bg-muted/20 border-none font-bold text-xs shadow-inner focus:ring-2 focus:ring-primary/10 transition-all">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="rounded-xl shadow-xl">
                           <SelectItem value="public">🌍 Publik</SelectItem>
                           <SelectItem value="friends">👥 Diikuti</SelectItem>
                           <SelectItem value="private">🔒 Privat</SelectItem>
@@ -280,7 +280,7 @@ export default function SettingsPage() {
                     onClick={() => handleThemeChange(m.id)}
                     className={cn(
                       "w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all active:scale-[0.98]",
-                      settings.theme === m.id ? "border-black bg-black/[0.02]" : "border-transparent bg-muted/20 hover:border-muted-foreground/20"
+                      settings.theme === m.id ? "border-primary bg-primary/[0.02]" : "border-transparent bg-muted/20 hover:border-muted-foreground/20"
                     )}
                   >
                     <div className="flex items-center gap-4">
@@ -289,7 +289,7 @@ export default function SettingsPage() {
                       </div>
                       <span className="font-black text-sm uppercase tracking-wide">{m.label}</span>
                     </div>
-                    {settings.theme === m.id && <Check className="size-5 text-black" />}
+                    {settings.theme === m.id && <Check className="size-5 text-primary" />}
                   </button>
                 ))}
               </div>
@@ -314,7 +314,7 @@ export default function SettingsPage() {
                         }}
                         className={cn(
                           "w-full flex items-center justify-between p-5 hover:bg-muted/50 transition-colors text-left",
-                          language === lang.code ? "bg-black/[0.02]" : "bg-transparent"
+                          language === lang.code ? "bg-primary/[0.02]" : "bg-transparent"
                         )}
                       >
                         <div className="flex items-center gap-4">
@@ -324,14 +324,14 @@ export default function SettingsPage() {
                             <span className="text-[10px] font-black uppercase text-muted-foreground opacity-60">{lang.code}</span>
                           </div>
                         </div>
-                        {language === lang.code && <Check className="size-5 text-black" />}
+                        {language === lang.code && <Check className="size-5 text-primary" />}
                       </button>
                     ))}
                   </div>
                 </ScrollArea>
               </Card>
               <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex items-start gap-3">
-                <Info className="size-4 text-accent mt-0.5" />
+                <Info className="size-4 text-primary mt-0.5" />
                 <p className="text-[11px] text-slate-600 leading-relaxed">Daftar ini mencakup bahasa-bahasa utama dunia untuk mendukung ekspansi bisnis global Anda.</p>
               </div>
             </div>
@@ -356,7 +356,7 @@ export default function SettingsPage() {
               </Card>
               <Button 
                 onClick={() => toast({ title: "Cache Berhasil Dihapus", description: "Sistem sekarang lebih ringan." })}
-                className="w-full h-14 rounded-2xl bg-black text-white font-black uppercase tracking-[0.15em] shadow-xl hover:bg-black/90 active:scale-95 transition-all"
+                className="w-full h-14 rounded-2xl bg-primary text-white font-black uppercase tracking-[0.15em] shadow-xl shadow-primary/20 hover:bg-primary/90 active:scale-95 transition-all"
               >
                 Bersihkan Sekarang
               </Button>
@@ -391,7 +391,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex items-start gap-3">
-                <Info className="size-4 text-accent mt-0.5" />
+                <Info className="size-4 text-primary mt-0.5" />
                 <p className="text-[11px] text-slate-600 leading-relaxed">Informasi lokasi digunakan hanya untuk memberikan hasil pencarian yang relevan di halaman Cari AI.</p>
               </div>
             </div>
@@ -417,11 +417,11 @@ export default function SettingsPage() {
             <item.icon className="size-4.5" />
           </div>
           <div className="flex flex-col">
-            <h4 className="font-bold text-[14px] leading-none">{item.label}</h4>
+            <h4 className="font-bold text-[14px] leading-none group-hover:text-primary transition-colors">{item.label}</h4>
             {item.desc && <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}
           </div>
         </div>
-        <ChevronRight className="size-4 text-muted-foreground/30 group-hover:text-black transition-colors" />
+        <ChevronRight className="size-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
       </button>
     );
   };
@@ -449,7 +449,7 @@ export default function SettingsPage() {
             <section className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Akun & Keamanan</h3>
               <MenuList items={[
-                { icon: User, label: "Kelola Akun", desc: "Profil, Tipe Akun, Lencana", href: "/profile", bg: "bg-black text-white" },
+                { icon: User, label: "Kelola Akun", desc: "Profil, Tipe Akun, Lencana", href: "/profile", bg: "bg-primary text-white shadow-primary/20 shadow-lg" },
                 { icon: ShieldCheck, label: "Izin Keamanan & Privasi Sosial", desc: "Enkripsi & Manajemen Perangkat", subMenu: "keamanan_privasi" }
               ]} />
             </section>
@@ -457,7 +457,7 @@ export default function SettingsPage() {
             <section className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Aktivitas & Interaksi</h3>
               <MenuList items={[
-                { icon: UserCheck, label: "Hubungan Jaringan", desc: activeAccount.type === 'pribadi' ? "Pengikut, Mengikuti, Suka" : "Subscribe & Suka", subMenu: "hubungan", bg: "bg-black text-white" },
+                { icon: UserCheck, label: "Hubungan Jaringan", desc: activeAccount.type === 'pribadi' ? "Pengikut, Mengikuti, Suka" : "Subscribe & Suka", subMenu: "hubungan", bg: "bg-primary text-white shadow-primary/20 shadow-lg" },
                 { icon: Activity, label: "Kelola Aktivitas", desc: "Log, Waktu Layar", href: "/dashboard" },
                 { icon: History, label: "Preferensi", desc: "Filter Minat, Muted Words", href: "#" },
                 { icon: MessageSquare, label: "Interaksi & Pesan", desc: "Izin Komentar, Balasan Otomatis", href: "/messages" },
@@ -502,13 +502,13 @@ export default function SettingsPage() {
                     toast({ title: `Beralih ke ${nextAcc.name}` });
                     router.push("/profile");
                   }}
-                  className="w-full flex items-center justify-between p-5 hover:bg-muted/50 transition-colors"
+                  className="w-full flex items-center justify-between p-5 hover:bg-muted/50 transition-colors group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="size-9 rounded-xl bg-black text-white flex items-center justify-center"><Users className="size-4.5" /></div>
-                    <span className="font-bold text-[14px]">Beralih Akun</span>
+                    <div className="size-9 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/10"><Users className="size-4.5" /></div>
+                    <span className="font-bold text-[14px] group-hover:text-primary transition-colors">Beralih Akun</span>
                   </div>
-                  <ChevronRight className="size-4 text-muted-foreground/30" />
+                  <ChevronRight className="size-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
                 </button>
                 <button onClick={handleLogout} className="w-full flex items-center justify-between p-5 hover:bg-rose-50 transition-colors group">
                   <div className="flex items-center gap-4 text-rose-600">
@@ -520,7 +520,7 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="text-center space-y-1">
+            <div className="text-center space-y-1 mt-10">
               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Tapp Intelligence Network</p>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">© 2025 ALL RIGHTS RESERVED</p>
             </div>
