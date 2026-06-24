@@ -217,84 +217,84 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-body relative">
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       
-      <header className="sticky top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-14 flex items-center justify-between shadow-sm">
+      <header className="sticky top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-12 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <Link href="/feed" className="flex items-center gap-2 active:scale-95 transition-transform">
-            <div className="size-8 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-black text-xl shadow-lg shadow-primary/20">T</div>
-            <span className="font-black text-lg tracking-tight text-foreground uppercase">Tapp</span>
+            <div className="size-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-black text-lg shadow-lg shadow-primary/20">T</div>
+            <span className="font-black text-base tracking-tight text-foreground uppercase">Tapp</span>
           </Link>
-          <Badge variant="secondary" className="text-[10px] font-black uppercase px-2 py-0.5 border-none bg-primary/10 text-primary">{activeAccount?.type}</Badge>
+          <Badge variant="secondary" className="text-[8px] font-black uppercase px-1.5 py-0.5 border-none bg-primary/10 text-primary">{activeAccount?.type}</Badge>
         </div>
         
-        <div className="flex items-center gap-2">
-          <Link href="/messages"><Button variant="ghost" size="icon" className="size-9 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><MessageSquare className="size-5" /></Button></Link>
-          <Link href="/notifications"><Button variant="ghost" size="icon" className="relative size-9 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><Bell className="size-5" /><span className="absolute top-2 right-2 size-2.5 bg-primary rounded-full ring-2 ring-background"></span></Button></Link>
+        <div className="flex items-center gap-1.5">
+          <Link href="/messages"><Button variant="ghost" size="icon" className="size-8 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><MessageSquare className="size-4.5" /></Button></Link>
+          <Link href="/notifications"><Button variant="ghost" size="icon" className="relative size-8 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><Bell className="size-4.5" /><span className="absolute top-1.5 right-1.5 size-2 bg-primary rounded-full ring-2 ring-background"></span></Button></Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center rounded-full border-2 border-primary/10 hover:border-primary transition p-0.5 outline-none">
-                <Avatar className="h-8 w-8 rounded-full shadow-sm"><AvatarImage src={activeAccount.avatar} className="object-cover" /><AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs">{activeAccount.name[0]}</AvatarFallback></Avatar>
+                <Avatar className="h-7 w-7 rounded-full shadow-sm"><AvatarImage src={activeAccount.avatar} className="object-cover" /><AvatarFallback className="bg-primary text-primary-foreground font-bold text-[10px]">{activeAccount.name[0]}</AvatarFallback></Avatar>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 rounded-2xl p-2 shadow-2xl border-border bg-card outline-none">
-              <DropdownMenuLabel className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b mb-1">Profil</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-60 rounded-xl p-1.5 shadow-2xl border-border bg-card outline-none">
+              <DropdownMenuLabel className="px-2.5 py-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-widest border-b mb-1">Profil</DropdownMenuLabel>
               <DropdownMenuGroup>
-                <Link href="/profile"><DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold cursor-pointer hover:bg-primary/5"><div className="size-9 rounded-xl bg-primary/5 flex items-center justify-center text-primary"><User className="size-5" /></div><span className="text-[14px]">{t('view_profile')}</span></DropdownMenuItem></Link>
+                <Link href="/profile"><DropdownMenuItem className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg font-bold cursor-pointer hover:bg-primary/5"><div className="size-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary"><User className="size-4" /></div><span className="text-[13px]">{t('view_profile')}</span></DropdownMenuItem></Link>
                 <DropdownMenuSeparator className="my-1" />
                 {availableAccounts.filter(a => !a.isNew).map((acc) => (
-                  <DropdownMenuItem key={acc.id} onSelect={() => { switchAccount(acc.id); router.push("/profile"); }} className={cn("flex items-center justify-between px-3 py-3 rounded-xl font-bold cursor-pointer mb-0.5", activeAccount.id === acc.id ? "bg-primary/5 text-primary" : "focus:bg-primary/5")}>
-                    <div className="flex items-center gap-3"><Avatar className="size-9 rounded-xl shadow-sm"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="text-xs bg-muted font-black">{acc.name[0]}</AvatarFallback></Avatar><div className="flex flex-col"><span className="text-[14px] leading-none mb-1">{acc.name}</span><span className="text-[10px] uppercase font-black opacity-60 tracking-tight">{acc.type}</span></div></div>
-                    {activeAccount.id === acc.id && <Check className="size-4" />}
+                  <DropdownMenuItem key={acc.id} onSelect={() => { switchAccount(acc.id); router.push("/profile"); }} className={cn("flex items-center justify-between px-2.5 py-2.5 rounded-lg font-bold cursor-pointer mb-0.5", activeAccount.id === acc.id ? "bg-primary/5 text-primary" : "focus:bg-primary/5")}>
+                    <div className="flex items-center gap-2.5"><Avatar className="size-8 rounded-lg shadow-sm"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="text-[10px] bg-muted font-black">{acc.name[0]}</AvatarFallback></Avatar><div className="flex flex-col"><span className="text-[13px] leading-none mb-0.5">{acc.name}</span><span className="text-[9px] uppercase font-black opacity-60 tracking-tight">{acc.type}</span></div></div>
+                    {activeAccount.id === acc.id && <Check className="size-3.5" />}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
               <DropdownMenuSeparator className="my-1" />
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="gap-3 px-3 py-3 rounded-xl font-bold text-[14px]"><UserPlus className="size-5" /> Tambah Profil</DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger className="gap-2.5 px-2.5 py-2.5 rounded-lg font-bold text-[13px]"><UserPlus className="size-4" /> Tambah Profil</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[150px] bg-card">
-                    <DropdownMenuItem onSelect={() => { setPendingType('pribadi'); setIsRegModalOpen(true); }} className="font-bold text-[14px] px-3 py-2.5 rounded-lg cursor-pointer hover:bg-primary/5">Pribadi</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => { setPendingType('professional'); setIsRegModalOpen(true); }} className="font-bold text-[14px] px-3 py-2.5 rounded-lg cursor-pointer hover:bg-primary/5">Professional</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => { setPendingType('bisnis'); setIsRegModalOpen(true); }} className="font-bold text-[14px] px-3 py-2.5 rounded-lg cursor-pointer hover:bg-primary/5">Bisnis</DropdownMenuItem>
+                  <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card">
+                    <DropdownMenuItem onSelect={() => { setPendingType('pribadi'); setIsRegModalOpen(true); }} className="font-bold text-[13px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Pribadi</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => { setPendingType('professional'); setIsRegModalOpen(true); }} className="font-bold text-[13px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Professional</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => { setPendingType('bisnis'); setIsRegModalOpen(true); }} className="font-bold text-[13px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Bisnis</DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
               <DropdownMenuSeparator className="my-1" />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive font-bold text-[14px] px-3 py-3 rounded-xl focus:bg-destructive/5 cursor-pointer flex gap-3"><LogOut className="size-5" /> Keluar</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive font-bold text-[13px] px-2.5 py-2.5 rounded-lg focus:bg-destructive/5 cursor-pointer flex gap-2.5"><LogOut className="size-4" /> Keluar</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
 
-      <main className="flex-1 pb-24 pt-4 px-4 w-full overflow-x-hidden relative max-w-2xl mx-auto">
+      <main className="flex-1 pb-20 pt-3 px-3 w-full overflow-x-hidden relative max-w-2xl mx-auto">
         {children}
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t bg-background/95 backdrop-blur-md pb-safe shadow-xl">
-        <div className="grid grid-cols-3 h-16 md:h-20 items-center justify-items-center text-[11px] md:text-[12px] font-bold uppercase tracking-widest text-muted-foreground relative">
-          <Link href="/feed" className={cn("flex flex-col items-center gap-1.5 w-full py-2 transition-all", pathname === "/feed" ? "text-primary scale-110" : "hover:text-primary")}>
-            <Rss className="size-6 md:size-7" /><span>{t('feed')}</span>
+        <div className="grid grid-cols-3 h-14 md:h-16 items-center justify-items-center text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-muted-foreground relative">
+          <Link href="/feed" className={cn("flex flex-col items-center gap-1 w-full py-1.5 transition-all", pathname === "/feed" ? "text-primary scale-105" : "hover:text-primary")}>
+            <Rss className="size-5 md:size-6" /><span>{t('feed')}</span>
           </Link>
-          <Link href="/cari" className={cn("flex flex-col items-center gap-1.5 w-full py-2 transition-all", pathname === "/cari" ? "text-primary scale-110" : "hover:text-primary")}>
-            <Search className="size-6 md:size-7" /><span>{t('search')}</span>
+          <Link href="/cari" className={cn("flex flex-col items-center gap-1 w-full py-1.5 transition-all", pathname === "/cari" ? "text-primary scale-105" : "hover:text-primary")}>
+            <Search className="size-5 md:size-6" /><span>{t('search')}</span>
           </Link>
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
-              <SheetTrigger asChild><button className="flex flex-col items-center gap-1.5 hover:text-primary w-full py-2 outline-none transition-all"><Menu className="size-6 md:size-7" /><span>{t('more')}</span></button></SheetTrigger>
-              <SheetContent side="bottom" className="rounded-t-[2.5rem] border-none p-0 h-[85vh] bg-card overflow-hidden [&>button]:hidden outline-none shadow-2xl" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-                <div className="w-full flex flex-col items-center justify-center pt-4 pb-2 cursor-grab active:cursor-grabbing"><div className="sheet-handle w-12 h-1.5 bg-muted rounded-full" /></div>
-                <SheetHeader className="p-6 pt-2 pb-5 bg-primary/5 border-b border-border/50">
-                  <div className="flex items-center justify-between"><SheetTitle className="text-lg font-black flex items-center gap-2 uppercase tracking-tight text-primary"><LayoutGrid className="size-5" />Tapp Hub</SheetTitle><Badge variant="secondary" className="bg-white border-border text-primary font-black px-4 py-1 uppercase text-[10px] shadow-sm">{activeAccount?.type}</Badge></div>
+              <SheetTrigger asChild><button className="flex flex-col items-center gap-1 hover:text-primary w-full py-1.5 outline-none transition-all"><Menu className="size-5 md:size-6" /><span>{t('more')}</span></button></SheetTrigger>
+              <SheetContent side="bottom" className="rounded-t-[2rem] border-none p-0 h-[80vh] bg-card overflow-hidden [&>button]:hidden outline-none shadow-2xl" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                <div className="w-full flex flex-col items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing"><div className="sheet-handle w-10 h-1 bg-muted rounded-full" /></div>
+                <SheetHeader className="p-5 pt-1 pb-4 bg-primary/5 border-b border-border/50">
+                  <div className="flex items-center justify-between"><SheetTitle className="text-base font-black flex items-center gap-2 uppercase tracking-tight text-primary"><LayoutGrid className="size-4.5" />Tapp Hub</SheetTitle><Badge variant="secondary" className="bg-white border-border text-primary font-black px-3 py-0.5 uppercase text-[9px] shadow-sm">{activeAccount?.type}</Badge></div>
                 </SheetHeader>
                 <div className="overflow-y-auto h-full pb-32 no-scrollbar">
                   <div className="flex flex-col divide-y divide-border/40">
                     {drawerItems.map((item) => (
-                      <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-8 py-5 transition-all gap-6 group", pathname === item.href ? "bg-primary/5 text-primary" : "bg-transparent hover:bg-primary/5")}>
-                        <div className={cn("size-10 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", pathname === item.href ? "bg-primary text-primary-foreground shadow-primary/20" : "bg-muted text-muted-foreground")}><item.icon className="size-5" /></div>
-                        <span className="text-[14px] font-black uppercase tracking-widest">{item.label}</span>
-                        <ChevronRight className="ml-auto size-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                      <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-6 py-3.5 transition-all gap-5 group", pathname === item.href ? "bg-primary/5 text-primary" : "bg-transparent hover:bg-primary/5")}>
+                        <div className={cn("size-8 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", pathname === item.href ? "bg-primary text-primary-foreground shadow-primary/20" : "bg-muted text-muted-foreground")}><item.icon className="size-4" /></div>
+                        <span className="text-[12px] font-black uppercase tracking-widest">{item.label}</span>
+                        <ChevronRight className="ml-auto size-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
                       </Link>
                     ))}
-                    <div className="px-8 py-8 bg-muted/10"><div className="flex items-center gap-6 mb-5"><div className="size-10 rounded-2xl bg-muted text-muted-foreground flex items-center justify-center shadow-sm"><Languages className="size-6" /></div><span className="text-[14px] font-black uppercase tracking-widest">Bahasa</span></div><LanguagePicker /></div>
+                    <div className="px-6 py-6 bg-muted/10"><div className="flex items-center gap-5 mb-4"><div className="size-8 rounded-xl bg-muted text-muted-foreground flex items-center justify-center shadow-sm"><Languages className="size-5" /></div><span className="text-[12px] font-black uppercase tracking-widest">Bahasa</span></div><LanguagePicker /></div>
                   </div>
                 </div>
               </SheetContent>
