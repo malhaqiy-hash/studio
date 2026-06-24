@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 
 export type AccountType = 'pribadi' | 'professional' | 'bisnis';
 
@@ -81,16 +81,25 @@ const DEFAULT_PRIBADI: Account = {
   items: []
 };
 
+// Kunci penyimpanan baru
+const STORAGE_KEY_ACCOUNTS = 'tapp_user_accounts_v1';
+const STORAGE_KEY_ACTIVE_ID = 'tapp_active_account_id_v1';
+
+// Kunci penyimpanan lama (untuk migrasi)
+const OLD_KEY_ACCOUNTS = 'ontapp_user_accounts';
+const OLD_KEY_ACTIVE_ID = 'ontapp_active_account_id';
+
 const AccountContext = createContext<AccountContextProps | undefined>(undefined);
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
-  const [activeAccountId, setActiveAccountId] = useState<string>('acc-temp');
   const [accounts, setAccounts] = useState<Account[]>([DEFAULT_PRIBADI]);
+  const [activeAccountId, setActiveAccountId] = useState<string>('acc-temp');
   const [hasInitialized, setHasInitialized] = useState(false);
 
+  // Inisialisasi data dari localStorage
   useEffect(() => {
-    const savedActive = localStorage.getItem('ontapp_active_account_id');
-    const savedAccounts = localStorage.getItem('ontapp_user_accounts');
+    const savedActive = localStorage.getItem(STORAGE_KEY_ACTIVE_ID) || localStorage.getItem(OLD_KEY_ACTIVE_ID);
+    const savedAccounts = localStorage.getItem(STORAGE_KEY_ACCOUNTS) || localStorage.getItem(OLD_KEY_ACCOUNTS);
     
     if (savedAccounts) {
       try {
@@ -101,7 +110,9 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
             preferences: acc.preferences || DEFAULT_PREFERENCES,
             items: acc.items || []
           }));
+          
           setAccounts(migratedAccounts);
+          
           if (savedActive && migratedAccounts.some((a: any) => a.id === savedActive)) {
             setActiveAccountId(savedActive);
           } else {
@@ -109,21 +120,29 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
           }
         }
       } catch (e) {
-        console.error("Failed to parse accounts", e);
+        console.error("Gagal memuat data akun:", e);
       }
     }
     setHasInitialized(true);
   }, []);
 
-  const switchAccount = (id: string) => {
-    setActiveAccountId(id);
-    localStorage.setItem('ontapp_active_account_id', id);
-  };
+  // Simpan ke localStorage setiap kali ada perubahan state
+  useEffect(() => {
+    if (hasInitialized) {
+      localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(accounts));
+      localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeAccountId);
+    }
+  }, [accounts, activeAccountId, hasInitialized]);
 
-  const registerAccount = (data: Omit<Account, 'id' | 'avatar' | 'items'>) => {
+  const switchAccount = useCallback((id: string) => {
+    setActiveAccountId(id);
+  }, []);
+
+  const registerAccount = useCallback((data: Omit<Account, 'id' | 'avatar' | 'items'>) => {
+    const newId = `acc-${Date.now()}`;
     const newAccount: Account = {
       ...data,
-      id: `acc-${Date.now()}`,
+      id: newId,
       avatar: data.type === 'bisnis' 
         ? `https://picsum.photos/seed/biz${Date.now()}/100` 
         : data.type === 'professional' 
@@ -136,56 +155,57 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
       preferences: DEFAULT_PREFERENCES
     };
 
-    const filteredAccounts = accounts.filter(acc => acc.id !== 'acc-temp');
-    const updatedAccounts = [...filteredAccounts, newAccount];
+    setAccounts(prev => {
+      const filtered = prev.filter(acc => acc.id !== 'acc-temp');
+      return [...filtered, newAccount];
+    });
     
-    setAccounts(updatedAccounts);
-    localStorage.setItem('ontapp_user_accounts', JSON.stringify(updatedAccounts));
-    switchAccount(newAccount.id);
-  };
+    setActiveAccountId(newId);
+  }, []);
 
-  const updateActiveAccount = (data: Partial<Account>) => {
-    const updatedAccounts = accounts.map(acc => 
+  const updateActiveAccount = useCallback((data: Partial<Account>) => {
+    setAccounts(prev => prev.map(acc => 
       acc.id === activeAccountId ? { ...acc, ...data, isNew: false } : acc
-    );
-    setAccounts(updatedAccounts);
-    localStorage.setItem('ontapp_user_accounts', JSON.stringify(updatedAccounts));
-  };
+    ));
+  }, [activeAccountId]);
 
-  const addPost = (post: Omit<ContentItem, 'id' | 'timestamp'>) => {
+  const addPost = useCallback((post: Omit<ContentItem, 'id' | 'timestamp'>) => {
     const newItem: ContentItem = {
       ...post,
       id: `post-${Date.now()}`,
       timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' hari ini'
     };
     
-    const updatedAccounts = accounts.map(acc => {
+    setAccounts(prev => prev.map(acc => {
       if (acc.id === activeAccountId) {
         return { ...acc, items: [newItem, ...(acc.items || [])] };
       }
       return acc;
-    });
-    
-    setAccounts(updatedAccounts);
-    localStorage.setItem('ontapp_user_accounts', JSON.stringify(updatedAccounts));
-  };
+    }));
+  }, [activeAccountId]);
 
-  const removePost = (id: string) => {
-    const updatedAccounts = accounts.map(acc => {
+  const removePost = useCallback((id: string) => {
+    setAccounts(prev => prev.map(acc => {
       if (acc.id === activeAccountId) {
         return { ...acc, items: (acc.items || []).filter(item => item.id !== id) };
       }
       return acc;
-    });
-    
-    setAccounts(updatedAccounts);
-    localStorage.setItem('ontapp_user_accounts', JSON.stringify(updatedAccounts));
-  };
+    }));
+  }, [activeAccountId]);
 
-  const activeAccount = accounts.find(a => a.id === activeAccountId) || accounts[0];
+  const activeAccount = accounts.find(a => a.id === activeAccountId) || accounts[0] || DEFAULT_PRIBADI;
 
   return (
-    <AccountContext.Provider value={{ activeAccount, availableAccounts: accounts, switchAccount, registerAccount, updateActiveAccount, addPost, removePost, hasInitialized }}>
+    <AccountContext.Provider value={{ 
+      activeAccount, 
+      availableAccounts: accounts, 
+      switchAccount, 
+      registerAccount, 
+      updateActiveAccount, 
+      addPost, 
+      removePost, 
+      hasInitialized 
+    }}>
       {children}
     </AccountContext.Provider>
   );
