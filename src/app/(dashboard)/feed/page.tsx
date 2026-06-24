@@ -45,7 +45,7 @@ import { useAccount } from "@/context/account-context";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -97,12 +97,6 @@ function getSmartIcon(url: string) {
   return <Globe className="size-3.5" />;
 }
 
-/**
- * DYNAMIC ASPECT RATIO FRAME
- * Logika: 
- * - Jika 1 foto: h-auto w-full agar browser menentukan tinggi asli.
- * - Jika >1 foto: Swiper dengan autoHeight={true} agar bingkai menyusut/melebar per slide.
- */
 function PostMedia({ images }: { images?: string[] }) {
   const [activeIdx, setActiveIdx] = React.useState(0);
   const [isZoomOpen, setIsZoomOpen] = React.useState(false);
@@ -110,7 +104,6 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
-  // Kasus 1: Postingan Berisi 1 Foto (Dynamic Content Fit)
   if (images.length === 1) {
     return (
       <div className="relative w-full overflow-hidden rounded-xl border border-border/40 bg-muted/5">
@@ -129,12 +122,14 @@ function PostMedia({ images }: { images?: string[] }) {
     );
   }
 
-  // Kasus 2: Multiple Photos (Auto-Height Carousel)
   return (
-    <div className="relative group/carousel w-full overflow-hidden rounded-xl border border-border/40 bg-muted/5">
+    <div 
+      className="relative group/carousel w-full overflow-hidden rounded-xl border border-border/40 bg-muted/5"
+      onPointerDown={(e) => e.stopPropagation()} // Kunci: Stop event bubbling agar tidak memicu drag halaman
+    >
       <Swiper
         modules={[Navigation, Pagination]}
-        autoHeight={true} // MAGIC: Bingkai menyesuaikan tinggi foto di setiap slide
+        autoHeight={true}
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => setActiveIdx(swiper.activeIndex)}
         className="w-full transition-[height] duration-300 ease-out"
@@ -152,7 +147,6 @@ function PostMedia({ images }: { images?: string[] }) {
         ))}
       </Swiper>
 
-      {/* Carousel Controls */}
       <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 pointer-events-none z-10">
         <button 
           onClick={(e) => { e.stopPropagation(); swiperRef.current?.slidePrev(); }}
@@ -174,7 +168,6 @@ function PostMedia({ images }: { images?: string[] }) {
         </button>
       </div>
 
-      {/* Indicator */}
       <div className="absolute top-3 right-3 bg-slate-900/40 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black z-10 text-white tracking-widest shadow-sm pointer-events-none">
         {activeIdx + 1} / {images.length}
       </div>
@@ -232,7 +225,6 @@ export default function FeedPage() {
   const [zoomedAvatar, setExpandedAvatar] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Swipe logic for adding post
   const dragX = useMotionValue(0);
   const swipePlusOpacity = useTransform(dragX, [0, 100], [0, 1]);
   const swipePlusScale = useTransform(dragX, [0, 100], [0.5, 1.2]);
@@ -334,7 +326,6 @@ export default function FeedPage() {
       >
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
-        {/* Swipe Indicator for adding post */}
         <motion.div 
           style={{ opacity: swipePlusOpacity, scale: swipePlusScale }}
           className="fixed left-6 top-1/2 -translate-y-1/2 z-50 pointer-events-none text-primary flex flex-col items-center gap-2"
