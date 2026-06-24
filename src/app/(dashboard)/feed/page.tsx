@@ -59,34 +59,6 @@ const CATEGORIES = [
   { id: 'trending', label: 'Trending' },
 ];
 
-const INITIAL_POSTS = [
-  {
-    id: "p1",
-    author: "Tapp Intelligence",
-    extra: "Enterprise AI Analyst",
-    avatar: "https://picsum.photos/seed/ontapp/200",
-    content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
-    time: "Baru saja",
-    stats: { likes: 1200, comments: 84 },
-    verified: true,
-    visibility: 'public',
-    images: ["https://picsum.photos/seed/tech1/800/500", "https://picsum.photos/seed/tech2/800/600", "https://picsum.photos/seed/tech3/800/700"],
-    locationLink: "https://maps.google.com"
-  },
-  {
-    id: "p2",
-    author: "Global Logistics Co.",
-    extra: "Logistics & Supply Chain",
-    avatar: "https://picsum.photos/seed/log/100",
-    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member Tapp hari ini.",
-    time: "2 jam yang lalu",
-    stats: { likes: 452, comments: 12 },
-    verified: true,
-    images: ["https://picsum.photos/seed/truck/800/400"],
-    visibility: 'public'
-  },
-];
-
 function getSmartIcon(url: string) {
   const lower = url.toLowerCase();
   if (lower.includes('maps.google') || lower.includes('goo.gl/maps') || lower.includes('apple.com/maps')) return <MapPin className="size-3.5" />;
@@ -205,6 +177,34 @@ function PostMedia({ images }: { images?: string[] }) {
   );
 }
 
+const INITIAL_POSTS = [
+  {
+    id: "p1",
+    author: "Tapp Intelligence",
+    extra: "Enterprise AI Analyst",
+    avatar: "https://picsum.photos/seed/ontapp/200",
+    content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
+    time: "Baru saja",
+    stats: { likes: 1200, comments: 84 },
+    verified: true,
+    visibility: 'public',
+    images: ["https://picsum.photos/seed/tech1/800/500", "https://picsum.photos/seed/tech2/800/600", "https://picsum.photos/seed/tech3/800/700"],
+    locationLink: "https://maps.google.com"
+  },
+  {
+    id: "p2",
+    author: "Global Logistics Co.",
+    extra: "Logistics & Supply Chain",
+    avatar: "https://picsum.photos/seed/log/100",
+    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member Tapp hari ini.",
+    time: "2 jam yang lalu",
+    stats: { likes: 452, comments: 12 },
+    verified: true,
+    images: ["https://picsum.photos/seed/truck/800/400"],
+    visibility: 'public'
+  },
+];
+
 export default function FeedPage() {
   const { language, t } = useLanguage();
   const { toast } = useToast();
@@ -238,7 +238,6 @@ export default function FeedPage() {
   };
 
   const startDrag = (event: React.PointerEvent) => {
-    // Kunci gesture pergeseran halaman jika pengguna menyentuh karosel foto atau tombol
     const target = event.target as HTMLElement;
     if (target.closest('.swiper-media-wrapper') || target.closest('button')) {
       return;
@@ -350,21 +349,28 @@ export default function FeedPage() {
           <span className="text-[10px] font-black uppercase tracking-widest bg-primary text-white px-3 py-1 rounded-full">Buat Postingan</span>
         </motion.div>
 
-        <div className="flex items-center justify-center gap-1 mb-2 sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-2 overflow-x-auto no-scrollbar">
+        {/* Updated simplified categories */}
+        <div className="flex items-center justify-start gap-6 mb-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md py-3 overflow-x-auto no-scrollbar border-b border-border/40 px-2">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
               className={cn(
-                "px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border shrink-0",
+                "text-[13px] font-black uppercase tracking-widest transition-all shrink-0",
                 activeCategory === cat.id 
-                  ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" 
-                  : "bg-card text-slate-500 hover:bg-slate-50 border-border"
+                  ? "text-primary scale-105" 
+                  : "text-slate-400 hover:text-slate-600"
               )}
             >
               {cat.label}
             </button>
           ))}
+          <button 
+            onClick={() => setIsPostModalOpen(true)}
+            className="flex items-center justify-center size-8 rounded-full bg-primary/5 text-primary hover:bg-primary/10 transition-all ml-auto shrink-0 active:scale-90"
+          >
+            <Plus className="size-5" />
+          </button>
         </div>
 
         <div className="flex-1">
