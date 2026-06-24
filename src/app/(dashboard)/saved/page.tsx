@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -15,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/language-context";
+import { useAccount } from "@/context/account-context";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -54,12 +56,14 @@ function PostMedia({ images }: { images?: string[] }) {
       {images.length > 1 && (
         <>
           <button 
+            type="button"
             onClick={() => swiperRef.current?.slidePrev()}
             className="absolute left-2 top-1/2 -translate-y-1/2 z-10 size-7 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
           >
             <ChevronLeft className="size-4" />
           </button>
           <button 
+            type="button"
             onClick={() => swiperRef.current?.slideNext()}
             className="absolute right-2 top-1/2 -translate-y-1/2 z-10 size-7 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
           >
@@ -106,21 +110,32 @@ function PostMedia({ images }: { images?: string[] }) {
 export default function SavedPostsPage() {
   const { toast } = useToast();
   const { language, t } = useLanguage();
+  const { activeAccount } = useAccount();
   const [savedPosts, setSavedPosts] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [zoomedAvatar, setExpandedAvatar] = React.useState<string | null>(null);
 
+  const getStorageKey = React.useCallback(() => `ontapp_saved_posts_${activeAccount.id}`, [activeAccount.id]);
+
   React.useEffect(() => {
-    const saved = localStorage.getItem('ontapp_saved_posts_data');
-    if (saved) setSavedPosts(JSON.parse(saved));
+    const saved = localStorage.getItem(getStorageKey());
+    if (saved) {
+      try {
+        setSavedPosts(JSON.parse(saved));
+      } catch (e) {
+        setSavedPosts([]);
+      }
+    } else {
+      setSavedPosts([]);
+    }
     setLoading(false);
-  }, []);
+  }, [activeAccount.id, getStorageKey]);
 
   const handleRemove = (postId: string) => {
     const updated = savedPosts.filter(p => p.id !== postId);
     setSavedPosts(updated);
-    localStorage.setItem('ontapp_saved_posts_data', JSON.stringify(updated));
-    toast({ title: "Dihapus" });
+    localStorage.setItem(getStorageKey(), JSON.stringify(updated));
+    toast({ title: "Dihapus dari Koleksi" });
   };
 
   return (
@@ -146,7 +161,7 @@ export default function SavedPostsPage() {
                         onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
                       >
                         <AvatarImage src={post.avatar} />
-                        <AvatarFallback className="bg-indigo-50 text-accent font-black text-[9px]">{post.author[0]}</AvatarFallback>
+                        <AvatarFallback className="bg-indigo-50 text-accent font-black text-[9px]">{post.author?.[0] || '?'}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">

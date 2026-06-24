@@ -1,7 +1,7 @@
+
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
+import { useAccount } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -64,18 +65,19 @@ const INITIAL_NOTIFICATIONS = [
   }
 ];
 
-const STORAGE_KEY = "ontapp_notifications_data_v1";
-
 export default function NotificationsPage() {
   const { t } = useLanguage();
+  const { activeAccount } = useAccount();
   const { toast } = useToast();
   const [notifications, setNotifications] = React.useState<any[]>([]);
   const [isAllRead, setIsAllRead] = React.useState(false);
   const [isLoaded, setIsLoaded] = React.useState(false);
 
+  const getStorageKey = React.useCallback(() => `ontapp_notifications_data_${activeAccount.id}`, [activeAccount.id]);
+
   // Load from localStorage
   React.useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem(getStorageKey());
     if (saved) {
       try {
         setNotifications(JSON.parse(saved));
@@ -86,16 +88,16 @@ export default function NotificationsPage() {
       setNotifications(INITIAL_NOTIFICATIONS);
     }
     setIsLoaded(true);
-  }, []);
+  }, [activeAccount.id, getStorageKey]);
 
   // Save to localStorage
   React.useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
+      localStorage.setItem(getStorageKey(), JSON.stringify(notifications));
       const allRead = notifications.length > 0 && notifications.every(n => !n.unread);
       setIsAllRead(allRead);
     }
-  }, [notifications, isLoaded]);
+  }, [notifications, isLoaded, getStorageKey]);
 
   const toggleAllRead = () => {
     const nextStatus = !isAllRead;

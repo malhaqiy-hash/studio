@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Send, Phone, Video, MoreVertical, Trash2, MessageSquare } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
+import { useAccount } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -16,22 +18,24 @@ const INITIAL_CHATS = [
   { id: 3, name: "Skyline Ventures", avatar: "https://picsum.photos/seed/invest/100", lastMsg: "Sync next week?", time: "2 days ago", unread: 0, status: "online" },
 ];
 
-const STORAGE_KEY = "ontapp_chats_data_v1";
-
 export default function MessagesPage() {
   const { t } = useLanguage();
+  const { activeAccount } = useAccount();
   const [chats, setChats] = React.useState<any[]>([]);
   const [selectedChat, setSelectedChat] = React.useState<any>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
 
-  // Load from localStorage on mount
+  const getStorageKey = React.useCallback(() => `ontapp_chats_data_${activeAccount.id}`, [activeAccount.id]);
+
+  // Load from localStorage on mount and account change
   React.useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem(getStorageKey());
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         setChats(parsed);
         if (parsed.length > 0) setSelectedChat(parsed[0]);
+        else setSelectedChat(null);
       } catch (e) {
         setChats(INITIAL_CHATS);
         setSelectedChat(INITIAL_CHATS[0]);
@@ -41,14 +45,14 @@ export default function MessagesPage() {
       setSelectedChat(INITIAL_CHATS[0]);
     }
     setIsLoaded(true);
-  }, []);
+  }, [activeAccount.id, getStorageKey]);
 
   // Save to localStorage on changes
   React.useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+      localStorage.setItem(getStorageKey(), JSON.stringify(chats));
     }
-  }, [chats, isLoaded]);
+  }, [chats, isLoaded, getStorageKey]);
 
   const handleClearAll = () => {
     setChats([]);
