@@ -45,9 +45,10 @@ import { useAccount } from "@/context/account-context";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
-import { Navigation } from 'swiper/modules';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import { ShareSheet } from "@/components/share-sheet";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 
@@ -96,6 +97,12 @@ function getSmartIcon(url: string) {
   return <Globe className="size-3.5" />;
 }
 
+/**
+ * DYNAMIC ASPECT RATIO FRAME
+ * Logika: 
+ * - Jika 1 foto: h-auto w-full agar browser menentukan tinggi asli.
+ * - Jika >1 foto: Swiper dengan autoHeight={true} agar bingkai menyusut/melebar per slide.
+ */
 function PostMedia({ images }: { images?: string[] }) {
   const [activeIdx, setActiveIdx] = React.useState(0);
   const [isZoomOpen, setIsZoomOpen] = React.useState(false);
@@ -103,47 +110,74 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (!images || images.length === 0) return null;
 
+  // Kasus 1: Postingan Berisi 1 Foto (Dynamic Content Fit)
+  if (images.length === 1) {
+    return (
+      <div className="relative w-full overflow-hidden rounded-xl border border-border/40 bg-muted/5">
+        <img 
+          src={images[0]} 
+          className="w-full h-auto block max-h-[75vh] object-contain cursor-zoom-in transition-transform duration-500 hover:scale-[1.01]" 
+          alt="Post Content"
+          onClick={() => setIsZoomOpen(true)}
+        />
+        <Dialog open={isZoomOpen} onOpenChange={setIsZoomOpen}>
+          <DialogContent className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-zoom-out" onClick={() => setIsZoomOpen(false)}>
+            <img src={images[0]} className="max-w-full max-h-full object-contain animate-in zoom-in-95 duration-200" alt="Zoomed View" />
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
+  // Kasus 2: Multiple Photos (Auto-Height Carousel)
   return (
-    <div className="relative group/carousel w-full overflow-hidden rounded-xl border border-border bg-muted/5 touch-pan-x select-none">
+    <div className="relative group/carousel w-full overflow-hidden rounded-xl border border-border/40 bg-muted/5">
       <Swiper
-        modules={[Navigation]}
-        nested={true}
+        modules={[Navigation, Pagination]}
+        autoHeight={true} // MAGIC: Bingkai menyesuaikan tinggi foto di setiap slide
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => setActiveIdx(swiper.activeIndex)}
-        className="w-full"
+        className="w-full transition-[height] duration-300 ease-out"
         slidesPerView={1}
       >
         {images.map((src, idx) => (
-          <SwiperSlide key={idx}>
+          <SwiperSlide key={idx} className="flex items-center justify-center bg-muted/5">
             <img 
               src={src} 
-              className="w-full h-auto object-contain max-h-[500px] cursor-pointer" 
-              alt={`Content ${idx + 1}`}
+              className="w-full h-auto object-contain max-h-[75vh] cursor-zoom-in" 
+              alt={`Slide ${idx + 1}`}
               onClick={() => setIsZoomOpen(true)}
             />
           </SwiperSlide>
         ))}
       </Swiper>
 
-      {images.length > 1 && (
-        <>
-          <button 
-            onClick={(e) => { e.stopPropagation(); swiperRef.current?.slidePrev(); }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
-          >
-            <ChevronLeft className="size-5" />
-          </button>
-          <button 
-            onClick={(e) => { e.stopPropagation(); swiperRef.current?.slideNext(); }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
-          >
-            <ChevronRight className="size-5" />
-          </button>
-          <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black z-10 text-white shadow-sm pointer-events-none tracking-widest">
-            {activeIdx + 1} / {images.length}
-          </div>
-        </>
-      )}
+      {/* Carousel Controls */}
+      <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 pointer-events-none z-10">
+        <button 
+          onClick={(e) => { e.stopPropagation(); swiperRef.current?.slidePrev(); }}
+          className={cn(
+            "size-9 rounded-full bg-white/80 backdrop-blur shadow-lg border border-border flex items-center justify-center pointer-events-auto transition-all active:scale-90",
+            activeIdx === 0 ? "opacity-0 invisible" : "opacity-0 group-hover/carousel:opacity-100"
+          )}
+        >
+          <ChevronLeft className="size-5 text-slate-900" />
+        </button>
+        <button 
+          onClick={(e) => { e.stopPropagation(); swiperRef.current?.slideNext(); }}
+          className={cn(
+            "size-9 rounded-full bg-white/80 backdrop-blur shadow-lg border border-border flex items-center justify-center pointer-events-auto transition-all active:scale-90",
+            activeIdx === images.length - 1 ? "opacity-0 invisible" : "opacity-0 group-hover/carousel:opacity-100"
+          )}
+        >
+          <ChevronRight className="size-5 text-slate-900" />
+        </button>
+      </div>
+
+      {/* Indicator */}
+      <div className="absolute top-3 right-3 bg-slate-900/40 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black z-10 text-white tracking-widest shadow-sm pointer-events-none">
+        {activeIdx + 1} / {images.length}
+      </div>
 
       <Dialog open={isZoomOpen} onOpenChange={setIsZoomOpen}>
         <DialogContent 
@@ -198,13 +232,13 @@ export default function FeedPage() {
   const [zoomedAvatar, setExpandedAvatar] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Swipe logic
+  // Swipe logic for adding post
   const dragX = useMotionValue(0);
   const swipePlusOpacity = useTransform(dragX, [0, 100], [0, 1]);
   const swipePlusScale = useTransform(dragX, [0, 100], [0.5, 1.2]);
 
   const handleDragEnd = (event: any, info: any) => {
-    if (info.offset.x > 100) {
+    if (info.offset.x > 80) {
       setIsPostModalOpen(true);
     }
   };
@@ -300,7 +334,7 @@ export default function FeedPage() {
       >
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
-        {/* Swipe Indicator */}
+        {/* Swipe Indicator for adding post */}
         <motion.div 
           style={{ opacity: swipePlusOpacity, scale: swipePlusScale }}
           className="fixed left-6 top-1/2 -translate-y-1/2 z-50 pointer-events-none text-primary flex flex-col items-center gap-2"
@@ -320,7 +354,7 @@ export default function FeedPage() {
                 "px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border shrink-0",
                 activeCategory === cat.id 
                   ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" 
-                  : "bg-card text-muted-foreground hover:bg-muted border-border"
+                  : "bg-card text-slate-500 hover:bg-slate-50 border-border"
               )}
             >
               {cat.label}
@@ -329,14 +363,14 @@ export default function FeedPage() {
         </div>
 
         <div className="flex-1 overflow-hidden">
-          <div className="space-y-3 pb-20">
+          <div className="space-y-4 pb-20">
             {combinedPosts.map((post) => {
               const trans = translations[post.id];
               const postLike = likes[post.id] || { count: 0, active: false };
               
               return (
-                <Card key={post.id} className="border-border shadow-sm rounded-xl overflow-hidden bg-card">
-                  <div className="p-3 md:p-4 pb-2 flex items-center justify-between">
+                <Card key={post.id} className="border-border shadow-sm rounded-2xl overflow-hidden bg-card">
+                  <div className="p-4 pb-2 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Avatar 
                         className="size-10 border border-border cursor-pointer"
@@ -350,33 +384,33 @@ export default function FeedPage() {
                           <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[15px]">{post.author}</h3></Link>
                           {post.verified && <ShieldCheck className="size-3.5 text-primary" />}
                           {post.locationLink && (
-                            <a href={post.locationLink} target="_blank" rel="noopener noreferrer" className="ml-1 text-muted-foreground hover:text-primary transition-colors">
+                            <a href={post.locationLink} target="_blank" rel="noopener noreferrer" className="ml-1 text-slate-400 hover:text-primary transition-colors">
                               {getSmartIcon(post.locationLink)}
                             </a>
                           )}
                         </div>
-                        <div className="flex items-center gap-1 text-[12px] text-muted-foreground font-medium uppercase tracking-tight">
+                        <div className="flex items-center gap-1 text-[11px] text-slate-400 font-bold uppercase tracking-tight">
                           {post.time}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                        {post.visibility === 'private' && <Lock className="size-3 text-muted-foreground" />}
-                        <button className="p-2 rounded-full text-muted-foreground hover:bg-primary/5 hover:text-primary transition-colors"><Bookmark className="size-5" /></button>
+                        {post.visibility === 'private' && <Lock className="size-3 text-slate-300" />}
+                        <button className="p-2 rounded-full text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors"><Bookmark className="size-5" /></button>
                     </div>
                   </div>
 
-                  <CardContent className="px-3 md:px-4 py-2 space-y-3">
-                    <p className="text-slate-800 leading-normal font-normal text-[14px] md:text-[15px] whitespace-pre-wrap">
+                  <CardContent className="px-4 py-2 space-y-3">
+                    <p className="text-slate-700 leading-normal font-medium text-[14px] md:text-[15px] whitespace-pre-wrap">
                       {trans?.show ? trans.text : post.content}
                     </p>
                     <PostMedia images={post.images} />
                   </CardContent>
 
-                  <div className="p-2 md:p-3 pt-1 border-t border-border/40 bg-muted/5 flex items-center justify-between">
-                    <div className="flex items-center gap-6 text-muted-foreground">
-                      <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1.5 py-1 transition-all", postLike.active ? "text-primary" : "hover:text-primary")}>
-                        <Heart className={cn("size-5", postLike.active && "fill-primary")} />
+                  <div className="p-3 pt-1 border-t border-border/40 bg-slate-50/30 flex items-center justify-between">
+                    <div className="flex items-center gap-6 text-slate-500">
+                      <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1.5 py-1 transition-all", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
+                        <Heart className={cn("size-5", postLike.active && "fill-rose-500")} />
                         <span className="text-xs font-bold">{postLike.count > 0 ? postLike.count : 'Suka'}</span>
                       </button>
                       <button className="flex items-center gap-1.5 py-1 hover:text-primary transition-colors">
@@ -387,7 +421,7 @@ export default function FeedPage() {
                         {trans?.loading ? <RefreshCw className="size-5 animate-spin" /> : <Globe className="size-5" />}
                       </button>
                     </div>
-                    <button onClick={() => handleShare(post.id)} className="p-2 text-muted-foreground hover:text-primary active:scale-90 transition-all"><Share2 className="size-5" /></button>
+                    <button onClick={() => handleShare(post.id)} className="p-2 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-5" /></button>
                   </div>
                 </Card>
               );
@@ -397,41 +431,41 @@ export default function FeedPage() {
       </motion.div>
 
       <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
-        <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
-          <div className="p-5 md:p-6 space-y-4">
+        <DialogContent className="w-[95%] md:max-w-lg rounded-3xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
+          <div className="p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold">Buat Postingan</h2>
+              <h2 className="text-lg font-black uppercase tracking-tight text-slate-900">Buat Postingan</h2>
               <div className="w-32">
                  <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
-                  <SelectTrigger className="h-9 rounded-lg bg-muted/50 border-none text-[11px] font-black uppercase tracking-widest px-3 shadow-inner focus:ring-2 focus:ring-primary/10 transition-all"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-9 rounded-xl bg-slate-50 border-none text-[10px] font-black uppercase tracking-widest px-3 shadow-inner focus:ring-2 focus:ring-primary/10 transition-all"><SelectValue /></SelectTrigger>
                   <SelectContent className="rounded-xl shadow-xl"><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
                 </Select>
               </div>
             </div>
             <div className="space-y-3">
-              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-muted/30 p-4 text-[15px] focus-visible:ring-2 focus-visible:ring-primary/10 resize-none shadow-inner" />
+              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[140px] rounded-2xl border-none bg-slate-50/50 p-4 text-[15px] font-medium focus-visible:ring-2 focus-visible:ring-primary/10 resize-none shadow-inner" />
               
               <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary">{postLocationLink ? getSmartIcon(postLocationLink) : <LinkIcon className="size-4" />}</div>
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary">{postLocationLink ? getSmartIcon(postLocationLink) : <LinkIcon className="size-4" />}</div>
                 <Input 
                   placeholder="Link Alamat/Web (opsional)" 
                   value={postLocationLink} 
                   onChange={(e) => setPostLocationLink(e.target.value)}
-                  className="h-11 pl-10 rounded-xl border-none bg-muted/30 text-[14px] font-medium shadow-inner focus-visible:ring-2 focus-visible:ring-primary/10 transition-all" 
+                  className="h-11 pl-10 rounded-xl border-none bg-slate-50/50 text-[14px] font-bold shadow-inner focus-visible:ring-2 focus-visible:ring-primary/10 transition-all" 
                 />
               </div>
 
               <div className="flex flex-wrap gap-2">
                 {postImages.map((src, i) => (
-                  <div key={i} className="relative size-16 rounded-lg overflow-hidden border border-border">
+                  <div key={i} className="relative size-16 rounded-xl overflow-hidden border border-border">
                     <img src={src} className="w-full h-full object-cover" />
-                    <button onClick={() => setPostImages(postImages.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5 hover:bg-rose-500 transition-colors"><Plus className="size-2.5 rotate-45" /></button>
+                    <button onClick={() => setPostImages(postImages.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 bg-slate-900/60 text-white rounded-full p-0.5 hover:bg-rose-500 transition-colors"><Plus className="size-3 rotate-45" /></button>
                   </div>
                 ))}
-                <button onClick={() => fileInputRef.current?.click()} className="size-16 rounded-lg bg-muted/50 border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-all"><Plus size={20} /></button>
+                <button onClick={() => fileInputRef.current?.click()} className="size-16 rounded-xl bg-slate-50 border-2 border-dashed border-border flex items-center justify-center text-slate-400 hover:border-primary hover:text-primary transition-all"><Plus size={20} /></button>
               </div>
             </div>
-            <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 font-bold text-white shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">Posting</Button>
+            <Button onClick={handleCreatePost} disabled={!postContent.trim() && postImages.length === 0} className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 font-black text-white shadow-xl shadow-primary/20 active:scale-[0.98] transition-all uppercase tracking-widest text-xs">Posting Sekarang</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -443,7 +477,7 @@ export default function FeedPage() {
         >
           {zoomedAvatar && (
             <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4">
-              <img src={zoomedAvatar} alt="Expanded Avatar" className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300 shadow-none border-none" />
+              <img src={zoomedAvatar} alt="Expanded Avatar" className="max-w-full max-h-full object-contain rounded-2xl animate-in zoom-in-95 duration-300 shadow-none border-none" />
             </div>
           )}
         </DialogContent>
