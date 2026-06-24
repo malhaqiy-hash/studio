@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 
 export type Language = 
   | 'en' | 'id' | 'ja' | 'zh' | 'ko' | 'ar' | 'es' | 'fr' 
@@ -155,19 +155,25 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     if (savedLang) setInternalLanguage(savedLang);
   }, []);
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = useCallback((lang: Language) => {
     setInternalLanguage(lang);
     localStorage.setItem('ontapp_system_lang', lang);
-  };
+  }, []);
 
-  const t = (key: keyof typeof translations): string => {
+  const t = useCallback((key: keyof typeof translations): string => {
     const entry = translations[key];
     if (!entry) return key as string;
     return (entry as any)[language] || (entry as any).en || key;
-  };
+  }, [language]);
+
+  const contextValue = useMemo(() => ({
+    language,
+    setLanguage,
+    t
+  }), [language, setLanguage, t]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );

@@ -18,7 +18,6 @@ import {
   Camera,
   X,
   Heart,
-  Lock,
   Smartphone,
   Cloud,
   MapPin,
@@ -104,7 +103,7 @@ export default function ProfilePage() {
     resetContentForm();
     setIsContentModalOpen(false);
     
-    // Deteksi parameter edit dari URL
+    // Deteksi parameter edit dari URL hanya jika baru saja memuat halaman atau ganti akun
     const params = new URLSearchParams(window.location.search);
     if (params.get('edit') === 'true') {
       setTempAccount({ 
@@ -113,11 +112,9 @@ export default function ProfilePage() {
         locationLink: activeAccount.locationLink 
       });
       setIsBioModalOpen(true);
-      // Bersihkan param edit agar tidak terbuka lagi saat refresh manual
+      // Bersihkan param edit agar tidak terbuka lagi saat re-render
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
-    } else {
-      setIsBioModalOpen(false);
     }
   }, [activeAccount.id, resetContentForm]);
 
@@ -370,13 +367,13 @@ export default function ProfilePage() {
         <DialogContent className="w-[90%] md:max-sm rounded-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden">
           <DialogHeader><DialogTitle className="text-lg font-bold text-slate-900">Ubah Profil</DialogTitle></DialogHeader>
           <div className="space-y-5 py-4">
-            <div className="space-y-2"><Label className="text-xs font-bold uppercase text-muted-foreground">Nama Tampilan</Label><Input value={tempAccount.name} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-xl h-12 bg-muted/20 border-none px-4 text-sm font-bold" /></div>
-            <div className="space-y-2"><Label className="text-xs font-bold uppercase text-muted-foreground">Bio</Label><Textarea value={tempAccount.bio} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} className="rounded-xl bg-muted/20 border-none min-h-[100px] px-4 text-sm font-medium" /></div>
+            <div className="space-y-2"><Label className="text-xs font-bold uppercase text-muted-foreground">Nama Tampilan</Label><Input value={tempAccount.name || ''} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-xl h-12 bg-muted/20 border-none px-4 text-sm font-bold" /></div>
+            <div className="space-y-2"><Label className="text-xs font-bold uppercase text-muted-foreground">Bio</Label><Textarea value={tempAccount.bio || ''} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} className="rounded-xl bg-muted/20 border-none min-h-[100px] px-4 text-sm font-medium" /></div>
             <div className="space-y-2">
               <Label className="text-xs font-bold uppercase text-muted-foreground">Link Alamat/Web</Label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{tempAccount.locationLink ? getSmartIcon(tempAccount.locationLink) : <LinkIcon className="size-4" />}</div>
-                <Input value={tempAccount.locationLink} onChange={(e) => setTempAccount({ ...tempAccount, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-xl h-11 bg-muted/20 border-none pl-10 text-sm font-medium shadow-inner" />
+                <Input value={tempAccount.locationLink || ''} onChange={(e) => setTempAccount({ ...tempAccount, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-xl h-11 bg-muted/20 border-none pl-10 text-sm font-medium shadow-inner" />
               </div>
             </div>
           </div>
@@ -432,7 +429,7 @@ export default function ProfilePage() {
               <div className="space-y-3 p-4 bg-muted/20 rounded-2xl">
                  <Label className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Kategori Postingan *</Label>
                  <Select 
-                   value={isNewCategory ? "new" : newItem.categoryName} 
+                   value={isNewCategory ? "new" : (newItem.categoryName || '')} 
                    onValueChange={(val) => {
                      if (val === 'new') {
                        setIsNewCategory(true);
@@ -458,7 +455,7 @@ export default function ProfilePage() {
                    <Input 
                      autoFocus
                      placeholder="Nama Kategori Baru" 
-                     value={newItem.categoryName} 
+                     value={newItem.categoryName || ''} 
                      onChange={(e) => setNewItem({...newItem, categoryName: e.target.value})} 
                      className="rounded-xl h-11 bg-white border-black/10 focus:border-black transition-all font-bold px-4"
                    />
@@ -466,13 +463,13 @@ export default function ProfilePage() {
               </div>
             )}
 
-            <div className="space-y-2"><Label className="font-bold text-xs uppercase text-muted-foreground">Judul Item</Label><Input value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-xl h-12 bg-muted/20 border-none px-4 text-sm font-bold" /></div>
-            <div className="space-y-2"><Label className="font-bold text-xs uppercase text-muted-foreground">Deskripsi</Label><Textarea value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="rounded-xl bg-muted/20 border-none min-h-[100px] px-4 text-sm font-medium" /></div>
+            <div className="space-y-2"><Label className="font-bold text-xs uppercase text-muted-foreground">Judul Item</Label><Input value={newItem.title || ''} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-xl h-12 bg-muted/20 border-none px-4 text-sm font-bold" /></div>
+            <div className="space-y-2"><Label className="font-bold text-xs uppercase text-muted-foreground">Deskripsi</Label><Textarea value={newItem.description || ''} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="rounded-xl bg-muted/20 border-none min-h-[100px] px-4 text-sm font-medium" /></div>
             <div className="space-y-2">
               <Label className="font-bold text-xs uppercase text-muted-foreground">Link Alamat/Web</Label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{newItem.locationLink ? getSmartIcon(newItem.locationLink) : <LinkIcon className="size-4" />}</div>
-                <Input value={newItem.locationLink} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-xl h-11 bg-muted/20 border-none pl-10 text-sm font-medium shadow-inner" />
+                <Input value={newItem.locationLink || ''} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-xl h-11 bg-muted/20 border-none pl-10 text-sm font-medium shadow-inner" />
               </div>
             </div>
           </div>
@@ -491,7 +488,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!zoomedImage} onOpenChange={setZoomedImage(null)}>
+      <Dialog open={!!zoomedImage} onOpenChange={(open) => !open && setZoomedImage(null)}>
         <DialogContent 
           className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
           onClick={() => setZoomedImage(null)}

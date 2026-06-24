@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode, useEffect, useState } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect, useState, useMemo } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Firestore } from 'firebase/firestore';
 import { Auth } from 'firebase/auth';
@@ -37,8 +37,16 @@ export const FirebaseProvider = ({
     getMessagingInstance().then(setMessaging).catch(console.error);
   }, []);
 
+  const contextValue = useMemo(() => ({
+    firebaseApp,
+    firestore,
+    auth,
+    storage,
+    messaging
+  }), [firebaseApp, firestore, auth, storage, messaging]);
+
   return (
-    <FirebaseContext.Provider value={{ firebaseApp, firestore, auth, storage, messaging }}>
+    <FirebaseContext.Provider value={contextValue}>
       {children}
     </FirebaseContext.Provider>
   );

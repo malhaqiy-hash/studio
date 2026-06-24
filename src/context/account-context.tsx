@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 
 export type AccountType = 'pribadi' | 'professional' | 'bisnis';
 
@@ -135,7 +135,10 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(accounts));
         localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeAccountId);
       } catch (e: any) {
-        console.error("Gagal menyimpan ke storage:", e);
+        // Handle QuotaExceededError silently to prevent crash
+        if (e.name === 'QuotaExceededError') {
+          console.warn("Storage quota exceeded. Data will be kept in memory only.");
+        }
       }
     }
   }, [accounts, activeAccountId, hasInitialized]);
@@ -207,7 +210,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
         return {
           ...acc,
           items: (acc.items || []).map(item => 
-            item.id === id ? { ...item, isPinned: !item.isPinned } : { ...item, isPinned: false } // Only one can be pinned usually
+            item.id === id ? { ...item, isPinned: !item.isPinned } : { ...item, isPinned: false }
           )
         };
       }
@@ -229,21 +232,25 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
     }));
   }, [activeAccountId]);
 
-  const activeAccount = accounts.find(a => a.id === activeAccountId) || accounts[0] || DEFAULT_PRIBADI;
+  const activeAccount = useMemo(() => {
+    return accounts.find(a => a.id === activeAccountId) || accounts[0] || DEFAULT_PRIBADI;
+  }, [accounts, activeAccountId]);
+
+  const contextValue = useMemo(() => ({ 
+    activeAccount, 
+    availableAccounts: accounts, 
+    switchAccount, 
+    registerAccount, 
+    updateActiveAccount, 
+    addPost, 
+    removePost, 
+    togglePinPost,
+    toggleArchivePost,
+    hasInitialized 
+  }), [activeAccount, accounts, switchAccount, registerAccount, updateActiveAccount, addPost, removePost, togglePinPost, toggleArchivePost, hasInitialized]);
 
   return (
-    <AccountContext.Provider value={{ 
-      activeAccount, 
-      availableAccounts: accounts, 
-      switchAccount, 
-      registerAccount, 
-      updateActiveAccount, 
-      addPost, 
-      removePost, 
-      togglePinPost,
-      toggleArchivePost,
-      hasInitialized 
-    }}>
+    <AccountContext.Provider value={contextValue}>
       {children}
     </AccountContext.Provider>
   );
