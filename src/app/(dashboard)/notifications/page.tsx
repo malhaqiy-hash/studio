@@ -31,6 +31,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// Map string keys to Lucide components to ensure safe localStorage serialization
+const ICON_MAP = {
+  match: Handshake,
+  message: MessageSquare,
+  zap: Zap,
+  bell: Bell,
+  alert: AlertTriangle
+};
+
 const INITIAL_NOTIFICATIONS = [
   {
     id: "n1",
@@ -39,7 +48,7 @@ const INITIAL_NOTIFICATIONS = [
     description: "Our AI identified 'EcoPack Global' as a 94% match for your packaging requirements.",
     time: "10m ago",
     unread: true,
-    icon: Handshake,
+    iconKey: "match",
     color: "bg-teal-500/10 text-teal-500"
   },
   {
@@ -49,7 +58,7 @@ const INITIAL_NOTIFICATIONS = [
     description: "Hi! We've reviewed your request for the bulk order. Let's discuss terms.",
     time: "1h ago",
     unread: true,
-    icon: MessageSquare,
+    iconKey: "message",
     color: "bg-black/5 text-black"
   }
 ];
@@ -156,109 +165,114 @@ export default function NotificationsPage() {
 
         <div className="space-y-1.5 min-h-[300px]">
           <AnimatePresence initial={false}>
-            {notifications.map((notification) => (
-              <motion.div
-                key={notification.id}
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                className="overflow-hidden"
-              >
-                <div className="relative rounded-xl bg-card border border-border shadow-sm overflow-hidden touch-pan-y">
-                  
-                  <div className="absolute inset-y-0 right-0 w-14 flex items-center justify-center bg-rose-500 rounded-r-xl">
-                    <button 
-                      onClick={() => deleteNotification(notification.id)}
-                      className="w-full h-full flex flex-col items-center justify-center text-white active:scale-90 transition-transform"
-                    >
-                      <Trash2 className="size-3.5" />
-                      <span className="text-[7px] font-black uppercase mt-0.5">Hapus</span>
-                    </button>
-                  </div>
+            {notifications.map((notification) => {
+              // Resolve icon component from the map safely
+              const IconComp = ICON_MAP[notification.iconKey as keyof typeof ICON_MAP] || Bell;
+              
+              return (
+                <motion.div
+                  key={notification.id}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                  className="overflow-hidden"
+                >
+                  <div className="relative rounded-xl bg-card border border-border shadow-sm overflow-hidden touch-pan-y">
+                    
+                    <div className="absolute inset-y-0 right-0 w-14 flex items-center justify-center bg-rose-500 rounded-r-xl">
+                      <button 
+                        onClick={() => deleteNotification(notification.id)}
+                        className="w-full h-full flex flex-col items-center justify-center text-white active:scale-90 transition-transform"
+                      >
+                        <Trash2 className="size-3.5" />
+                        <span className="text-[7px] font-black uppercase mt-0.5">Hapus</span>
+                      </button>
+                    </div>
 
-                  <motion.div 
-                    drag="x"
-                    dragConstraints={{ left: -56, right: 0 }}
-                    dragElastic={0.05}
-                    dragDirectionLock
-                    onDragStart={() => {}} 
-                    style={{ touchAction: 'pan-y' }}
-                    className={cn(
-                      "relative z-10 bg-card",
-                      notification.unread ? 'border-l-[3px] border-l-black' : 'opacity-90'
-                    )}
-                  >
-                    <CardContent className="p-3 md:p-3.5">
-                      <div className="flex items-start gap-2.5">
-                        <div className={cn("size-9 rounded-xl flex items-center justify-center shrink-0 shadow-inner", notification.color)}>
-                          <notification.icon className="size-4" />
-                        </div>
-                        <div className="flex-1 min-w-0 space-y-0.5">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1">
-                              <h3 className={cn("font-black tracking-tight uppercase text-[11px] truncate", notification.unread ? 'text-foreground' : 'text-muted-foreground')}>
-                                {notification.title}
-                              </h3>
-                              {notification.unread && (
-                                <span className="size-1.5 bg-black rounded-full animate-pulse shrink-0" />
-                              )}
+                    <motion.div 
+                      drag="x"
+                      dragConstraints={{ left: -56, right: 0 }}
+                      dragElastic={0.05}
+                      dragDirectionLock
+                      onDragStart={() => {}} 
+                      style={{ touchAction: 'pan-y' }}
+                      className={cn(
+                        "relative z-10 bg-card",
+                        notification.unread ? 'border-l-[3px] border-l-black' : 'opacity-90'
+                      )}
+                    >
+                      <CardContent className="p-3 md:p-3.5">
+                        <div className="flex items-start gap-2.5">
+                          <div className={cn("size-9 rounded-xl flex items-center justify-center shrink-0 shadow-inner", notification.color)}>
+                            <IconComp className="size-4" />
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-0.5">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1">
+                                <h3 className={cn("font-black tracking-tight uppercase text-[11px] truncate", notification.unread ? 'text-foreground' : 'text-muted-foreground')}>
+                                  {notification.title}
+                                </h3>
+                                {notification.unread && (
+                                  <span className="size-1.5 bg-black rounded-full animate-pulse shrink-0" />
+                                )}
+                              </div>
+                              <span className="text-[8px] text-muted-foreground font-black uppercase flex items-center gap-0.5 whitespace-nowrap">
+                                <Clock className="size-2" />
+                                {notification.time}
+                              </span>
                             </div>
-                            <span className="text-[8px] text-muted-foreground font-black uppercase flex items-center gap-0.5 whitespace-nowrap">
-                              <Clock className="size-2" />
-                              {notification.time}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-muted-foreground font-medium leading-snug line-clamp-2">
-                            {notification.description}
-                          </p>
-                          <div className="pt-1 flex items-center justify-between">
-                             <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[8px] font-black uppercase text-black hover:bg-black/5 rounded-lg transition-colors">
-                               {t('take_action')}
-                               <ChevronRight className="size-2 ml-0.5" />
-                             </Button>
-                             
-                             <div className="flex items-center gap-0.5">
-                               <DropdownMenu>
-                                 <DropdownMenuTrigger asChild>
-                                   <button className="size-7 rounded-lg text-muted-foreground hover:text-black hover:bg-black/5 transition-all active:scale-90 outline-none flex items-center justify-center">
-                                     <MoreVertical className="size-3" />
-                                   </button>
-                                 </DropdownMenuTrigger>
-                                 <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card animate-in zoom-in-95 duration-200">
-                                   <DropdownMenuItem 
-                                     onClick={() => toggleReadStatus(notification.id)}
-                                     className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-[11px]"
-                                   >
-                                     {notification.unread ? (
-                                       <><Eye className="size-3" /> Ditandai Dibaca</>
-                                     ) : (
-                                       <><EyeOff className="size-3" /> Belum Dibaca</>
-                                     )}
-                                   </DropdownMenuItem>
-                                   <DropdownMenuItem 
-                                     onClick={() => handleMute(notification.title)}
-                                     className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-[11px]"
-                                   >
-                                     <VolumeX className="size-3" /> Senyapkan Akun
-                                   </DropdownMenuItem>
-                                   <DropdownMenuItem 
-                                     onClick={handleReport}
-                                     className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer text-rose-500 hover:bg-rose-50 text-[11px]"
-                                   >
-                                     <AlertTriangle className="size-3" /> Laporkan
-                                   </DropdownMenuItem>
-                                 </DropdownMenuContent>
-                               </DropdownMenu>
-                             </div>
+                            <p className="text-[11px] text-muted-foreground font-medium leading-snug line-clamp-2">
+                              {notification.description}
+                            </p>
+                            <div className="pt-1 flex items-center justify-between">
+                               <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[8px] font-black uppercase text-black hover:bg-black/5 rounded-lg transition-colors">
+                                 {t('take_action')}
+                                 <ChevronRight className="size-2 ml-0.5" />
+                               </Button>
+                               
+                               <div className="flex items-center gap-0.5">
+                                 <DropdownMenu>
+                                   <DropdownMenuTrigger asChild>
+                                     <button className="size-7 rounded-lg text-muted-foreground hover:text-black hover:bg-black/5 transition-all active:scale-90 outline-none flex items-center justify-center">
+                                       <MoreVertical className="size-3" />
+                                     </button>
+                                   </DropdownMenuTrigger>
+                                   <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card animate-in zoom-in-95 duration-200">
+                                     <DropdownMenuItem 
+                                       onClick={() => toggleReadStatus(notification.id)}
+                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-[11px]"
+                                     >
+                                       {notification.unread ? (
+                                         <><Eye className="size-3" /> Ditandai Dibaca</>
+                                       ) : (
+                                         <><EyeOff className="size-3" /> Belum Dibaca</>
+                                       )}
+                                     </DropdownMenuItem>
+                                     <DropdownMenuItem 
+                                       onClick={() => handleMute(notification.title)}
+                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-[11px]"
+                                     >
+                                       <VolumeX className="size-3" /> Senyapkan Akun
+                                     </DropdownMenuItem>
+                                     <DropdownMenuItem 
+                                       onClick={handleReport}
+                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer text-rose-500 hover:bg-rose-50 text-[11px]"
+                                     >
+                                       <AlertTriangle className="size-3" /> Laporkan
+                                     </DropdownMenuItem>
+                                   </DropdownMenuContent>
+                                 </DropdownMenu>
+                               </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </motion.div>
-                </div>
-              </motion.div>
-            ))}
+                      </CardContent>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
 
           {notifications.length === 0 && (
