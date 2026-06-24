@@ -80,7 +80,7 @@ import { useLanguage } from "@/context/language-context";
 import { useAccount, AccountType } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -93,7 +93,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
   
   const sheetY = useMotionValue(0);
-  const dragOpacity = useTransform(sheetY, [0, 150], [1, 0]);
+  const dragOpacity = useTransform(sheetY, [0, 200], [1, 0]);
 
   const [isRegModalOpen, setIsRegModalOpen] = React.useState(false);
   const [pendingType, setPendingType] = React.useState<AccountType | null>(null);
@@ -142,6 +142,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       setIsRegModalOpen(true);
     }
   }, [hasInitialized, activeAccount, isRegModalOpen]);
+
+  // Reset Y when menu is closed to prevent flicker on next open
+  React.useEffect(() => {
+    if (!isMoreMenuOpen) {
+      sheetY.set(0);
+    }
+  }, [isMoreMenuOpen, sheetY]);
 
   const handleLogout = async () => {
     try {
@@ -199,7 +206,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground font-body relative">
+    <div className="min-h-screen flex flex-col bg-background text-foreground font-body relative overflow-x-hidden">
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       
       <header className="sticky top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-11 flex items-center justify-between shadow-sm">
@@ -250,12 +257,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 pb-20 pt-2 px-3 w-full overflow-x-hidden relative max-w-2xl mx-auto">
+      <main className="flex-1 pb-20 pt-2 px-3 w-full relative max-w-2xl mx-auto">
         {children}
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t bg-background/95 backdrop-blur-md pb-safe shadow-xl">
-        <div className="grid grid-cols-3 h-12 items-center justify-items-center text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-muted-foreground relative">
+        <div className="grid grid-cols-3 h-12 md:h-14 items-center justify-items-center text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-muted-foreground relative">
           <Link href="/feed" className={cn("flex flex-col items-center gap-1 w-full py-1 transition-all", pathname === "/feed" ? "text-primary scale-105" : "hover:text-primary")}>
             <Rss className="size-4 md:size-5" /><span>{t('feed')}</span>
           </Link>
@@ -265,33 +272,32 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild><button className="flex flex-col items-center gap-1 hover:text-primary w-full py-1 outline-none transition-all"><Menu className="size-4 md:size-5" /><span>{t('more')}</span></button></SheetTrigger>
-              <SheetContent side="bottom" className="p-0 h-[80vh] bg-transparent border-none [&>button]:hidden outline-none shadow-none overflow-visible">
+              <SheetContent side="bottom" className="p-0 h-[80vh] bg-transparent border-none [&>button]:hidden outline-none shadow-none overflow-hidden">
                 <motion.div 
                   drag="y"
                   dragConstraints={{ top: 0, bottom: 0 }}
-                  dragElastic={{ bottom: 0.8 }}
+                  dragElastic={{ top: 0, bottom: 0.6 }}
                   style={{ y: sheetY }}
                   onDragEnd={(_, info) => {
-                    if (info.offset.y > 100) {
+                    if (info.offset.y > 100 || info.velocity.y > 500) {
                       setIsMoreMenuOpen(false);
-                      sheetY.set(0);
                     } else {
                       sheetY.set(0);
                     }
                   }}
-                  className="w-full h-full flex flex-col"
+                  className="w-full h-full flex flex-col pointer-events-auto"
                 >
                   <motion.div 
                     style={{ opacity: dragOpacity }} 
-                    className="w-full h-full flex flex-col bg-card rounded-t-[2rem] border-t border-border/50 shadow-2xl overflow-hidden pointer-events-auto"
+                    className="w-full h-full flex flex-col bg-card rounded-t-[2rem] border-t border-border shadow-2xl overflow-hidden"
                   >
                     <div className="w-full flex flex-col items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
                       <div className="sheet-handle w-10 h-1 bg-muted rounded-full" />
                     </div>
                     <SheetHeader className="p-4 pt-1 pb-3 bg-primary/5 border-b border-border/50">
                       <div className="flex items-center justify-between">
-                        <SheetTitle className="text-sm font-black flex items-center gap-2 uppercase tracking-tight text-primary">
-                          <LayoutGrid className="size-4" />
+                        <SheetTitle className="text-xs font-black flex items-center gap-2 uppercase tracking-tight text-primary">
+                          <LayoutGrid className="size-3.5" />
                           Tapp Hub
                         </SheetTitle>
                         <span className="font-latin text-lg text-primary italic lowercase select-none">{activeAccount?.type}</span>
@@ -300,16 +306,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     <div className="overflow-y-auto h-full pb-32 no-scrollbar">
                       <div className="flex flex-col divide-y divide-border/40">
                         {drawerItems.map((item) => (
-                          <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-6 py-3 transition-all gap-5 group", pathname === item.href ? "bg-primary/5 text-primary" : "bg-transparent hover:bg-primary/5")}>
-                            <div className={cn("size-7 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", pathname === item.href ? "bg-primary text-primary-foreground shadow-primary/20" : "bg-muted text-muted-foreground")}><item.icon className="size-3.5" /></div>
-                            <span className="text-[11px] font-black uppercase tracking-widest">{item.label}</span>
+                          <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-6 py-3.5 transition-all gap-5 group", pathname === item.href ? "bg-primary/5 text-primary" : "bg-transparent hover:bg-primary/5")}>
+                            <div className={cn("size-8 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", pathname === item.href ? "bg-primary text-primary-foreground shadow-primary/20" : "bg-muted text-muted-foreground")}><item.icon className="size-4" /></div>
+                            <span className="text-[12px] font-black uppercase tracking-widest">{item.label}</span>
                             <ChevronRight className="ml-auto size-3 text-muted-foreground/30 group-hover:text-primary transition-colors" />
                           </Link>
                         ))}
                         <div className="px-6 py-5 bg-muted/10">
                           <div className="flex items-center gap-5 mb-3">
-                            <div className="size-7 rounded-xl bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
-                              <Languages className="size-4" />
+                            <div className="size-8 rounded-xl bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
+                              <Languages className="size-4.5" />
                             </div>
                             <span className="text-[11px] font-black uppercase tracking-widest">Bahasa</span>
                           </div>
