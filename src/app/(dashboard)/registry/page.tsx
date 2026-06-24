@@ -40,31 +40,50 @@ export default function BusinessRegistryPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-10 py-6">
-        <header className="space-y-4">
-           <div className="flex items-center gap-2 bg-indigo-50 text-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase"><Globe className="size-3" />Public Business Registry</div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">{t('registry')}</h1>
-          <p className="text-slate-500 font-medium text-lg max-w-2xl">{t('registry_desc')}</p>
-          <div className="relative max-w-2xl">
-             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
-             <Input placeholder={t('search_placeholder')} className="h-14 pl-12 rounded-2xl border-slate-200 shadow-xl" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+      <div className="max-w-xl mx-auto space-y-4 py-2 px-1">
+        <header className="space-y-1.5">
+          <div className="flex items-center gap-1.5 text-accent font-black text-[8px] uppercase tracking-widest">
+            <Globe className="size-2.5" />
+            Public Business Registry
+          </div>
+          <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none">{t('registry')}</h1>
+          <p className="text-slate-500 font-medium text-[11px] leading-snug">{t('registry_desc')}</p>
+          <div className="relative pt-2">
+             <Search className="absolute left-3 top-[calc(50%+4px)] -translate-y-1/2 size-3.5 text-slate-400" />
+             <Input placeholder={t('search_placeholder')} className="h-10 pl-9 pr-4 rounded-xl border-slate-100 bg-white shadow-sm text-[13px] font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </header>
 
-        <div className="grid gap-6">
+        <div className="grid gap-2">
            {MOCK_REGISTRY.filter(b => b.name.toLowerCase().includes(searchTerm.toLowerCase())).map((biz) => (
-             <Card key={biz.id} className="rounded-[2.5rem] border-slate-100 shadow-sm hover:shadow-xl transition-all group overflow-hidden bg-white">
-                <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-                   <div className="flex items-center gap-5">
-                      <div className="size-16 rounded-3xl bg-slate-50 flex items-center justify-center group-hover:bg-indigo-50 group-hover:text-accent transition-colors"><Building2 className="size-8 text-slate-300" /></div>
-                      <div className="space-y-1">
-                         <div className="flex items-center gap-2"><h3 className="text-xl font-black text-slate-900">{biz.name}</h3>{biz.verification === 'Verified' && <ShieldCheck className="size-4 text-emerald-500 fill-emerald-50" />}</div>
-                         <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase"><div className="flex items-center gap-1.5"><MapPin className="size-3" /> {biz.location}</div><div className="size-1 bg-slate-200 rounded-full" /><div>{biz.industry}</div></div>
+             <Card key={biz.id} className="rounded-2xl border-slate-100 shadow-sm hover:shadow-md transition-all group overflow-hidden bg-white">
+                <CardContent className="p-4 flex items-center justify-between gap-3">
+                   <div className="flex items-center gap-3 min-w-0">
+                      <div className="size-11 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-indigo-50 group-hover:text-accent transition-colors"><Building2 className="size-5 text-slate-300" /></div>
+                      <div className="space-y-0 min-w-0">
+                         <div className="flex items-center gap-1.5 truncate">
+                            <h3 className="text-[13px] font-black text-slate-900 truncate">{biz.name}</h3>
+                            {biz.verification === 'Verified' && <ShieldCheck className="size-3.5 text-emerald-500 shrink-0" />}
+                         </div>
+                         <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase">
+                            <div className="flex items-center gap-1 truncate"><MapPin className="size-2.5 shrink-0" /> {biz.location}</div>
+                            <div className="size-1 bg-slate-200 rounded-full shrink-0" />
+                            <div className="truncate">{biz.industry}</div>
+                         </div>
                       </div>
                    </div>
-                   <div className="flex items-center gap-3 w-full md:w-auto">
-                      {biz.isClaimed ? <Badge className="rounded-xl px-4 py-2 font-black text-[10px] uppercase bg-emerald-100 text-emerald-600">Claimed</Badge> : <Button onClick={() => handleClaimRequest(biz)} className="w-full md:w-auto rounded-xl bg-accent text-white font-black px-8 h-12 flex gap-2"><UserCheck className="size-4" />{t('claim_profile')}</Button>}
-                      <Button variant="ghost" size="icon" className="rounded-xl border border-slate-100 h-12 w-12"><ExternalLink className="size-5" /></Button>
+                   <div className="flex items-center gap-1.5 shrink-0">
+                      {biz.isClaimed ? (
+                        <Badge className="rounded-lg px-2 py-0.5 font-black text-[7px] uppercase bg-emerald-100 text-emerald-600 border-none shadow-none">Claimed</Badge>
+                      ) : (
+                        <Button onClick={() => handleClaimRequest(biz)} size="sm" className="rounded-lg bg-accent text-white font-black h-7 px-2.5 flex gap-1 text-[8px] uppercase tracking-widest active:scale-95 transition-all">
+                          <UserCheck className="size-2.5" />
+                          {t('claim_profile')}
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="icon" className="rounded-lg border border-slate-50 h-7 w-7 text-slate-300 hover:text-accent">
+                        <ExternalLink className="size-3.5" />
+                      </Button>
                    </div>
                 </CardContent>
              </Card>
@@ -73,13 +92,27 @@ export default function BusinessRegistryPage() {
       </div>
 
       <Dialog open={isClaimModalOpen} onOpenChange={setIsClaimModalOpen}>
-        <DialogContent className="max-w-xl rounded-[2.5rem] p-8">
-          <DialogHeader><DialogTitle className="text-2xl font-black">Ownership Verification</DialogTitle><DialogDescription>Claiming <strong>"{selectedBiz?.name}"</strong>. AI will verify within 24h.</DialogDescription></DialogHeader>
-          <div className="space-y-6 py-4">
-             <div className="p-10 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center text-center space-y-3"><Upload className="size-8 text-slate-300" /><p className="text-sm font-bold">Upload Business License (NIB/SSM/UEN)</p></div>
-             <div className="flex items-start gap-3 p-4 rounded-2xl bg-indigo-50/50"><Info className="size-4 text-accent" /><p className="text-xs font-medium">By claiming, you agree to OnTapp Enterprise Terms.</p></div>
+        <DialogContent className="max-w-[320px] rounded-2xl p-6 bg-card text-foreground border-none outline-none shadow-2xl">
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="text-base font-black uppercase tracking-tight">Klaim Profil</DialogTitle>
+            <DialogDescription className="text-[10px] font-medium leading-tight">Melakukan verifikasi kepemilikan untuk <strong>"{selectedBiz?.name}"</strong>.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+             <div className="p-6 border-2 border-dashed border-slate-100 rounded-xl flex flex-col items-center justify-center text-center space-y-2 group cursor-pointer hover:border-accent/30 transition-all">
+                <Upload className="size-6 text-slate-300 group-hover:text-accent transition-colors" />
+                <p className="text-[10px] font-black uppercase text-slate-400">Upload Lisensi Bisnis</p>
+             </div>
+             <div className="flex items-start gap-2 p-2.5 rounded-xl bg-indigo-50/50">
+                <Info className="size-3 text-accent shrink-0 mt-0.5" />
+                <p className="text-[9px] font-medium text-indigo-700 leading-snug">Data akan diproses oleh AI dalam waktu 24 jam kerja.</p>
+             </div>
           </div>
-          <DialogFooter className="flex gap-3"><Button variant="ghost" onClick={() => setIsClaimModalOpen(false)}>Cancel</Button><Button onClick={submitClaim} disabled={isSubmitting} className="flex-1 bg-slate-900 text-white font-black h-12">{isSubmitting ? <RefreshCw className="size-4 animate-spin" /> : "Authorize Claim"}</Button></DialogFooter>
+          <DialogFooter className="flex flex-col gap-2">
+            <Button onClick={submitClaim} disabled={isSubmitting} className="w-full bg-slate-900 text-white font-black h-10 rounded-xl text-[10px] uppercase tracking-widest shadow-lg">
+              {isSubmitting ? <RefreshCw className="size-3.5 animate-spin" /> : "Ajukan Klaim"}
+            </Button>
+            <Button variant="ghost" onClick={() => setIsClaimModalOpen(false)} className="w-full text-[9px] font-black uppercase text-slate-400 tracking-widest h-8">Batal</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </DashboardLayout>

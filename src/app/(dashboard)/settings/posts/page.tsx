@@ -55,34 +55,34 @@ export default function ManagePostsPage() {
 
   const getDisplayLocationLabel = (loc: string) => {
     switch (loc) {
-      case 'feed': return { label: 'Hanya Beranda', icon: Home };
-      case 'profile': return { label: 'Hanya Profil', icon: User };
-      default: return { label: 'Beranda & Profil', icon: Globe };
+      case 'feed': return { label: 'Beranda', icon: Home };
+      case 'profile': return { label: 'Profil', icon: User };
+      default: return { label: 'Semua', icon: Globe };
     }
   };
 
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto space-y-8 py-6 pb-24 px-1">
-        <header className="space-y-4">
+      <div className="max-w-xl mx-auto space-y-4 py-2 px-1">
+        <header className="space-y-3">
           <Link href="/settings">
-            <Button variant="ghost" size="sm" className="pl-0 text-slate-500 hover:text-primary font-bold gap-2">
-              <ChevronLeft className="size-4" />
-              Kembali ke Pengaturan
+            <Button variant="ghost" size="sm" className="pl-0 h-6 text-[10px] text-slate-400 hover:text-primary font-black uppercase tracking-widest gap-1.5 active:scale-95 transition-all">
+              <ChevronLeft className="size-3" />
+              Kembali
             </Button>
           </Link>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest w-fit border border-primary/20">
-              <LayoutGrid className="size-3" />
-              Aktivitas Postingan
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1.5 text-primary font-black text-[8px] uppercase tracking-[0.2em]">
+              <LayoutGrid className="size-2.5" />
+              Post Activity
             </div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Kelola Postingan</h1>
-            <p className="text-slate-500 font-medium text-sm">Lihat, arsipkan, atau sematkan seluruh aktivitas konten Anda.</p>
+            <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none uppercase">Kelola Postingan</h1>
+            <p className="text-slate-500 font-medium text-[11px] leading-snug">Kelola seluruh aktivitas konten dan visibilitas Anda.</p>
           </div>
         </header>
 
         {allPosts.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {allPosts.map((post) => {
               const locInfo = getDisplayLocationLabel(post.displayLocation);
               return (
@@ -90,53 +90,51 @@ export default function ManagePostsPage() {
                   "rounded-2xl border border-border shadow-sm overflow-hidden transition-all",
                   post.isArchived && "opacity-60 grayscale bg-muted/30"
                 )}>
-                  <CardContent className="p-4 flex gap-4">
-                    <div className="size-20 rounded-xl bg-slate-50 overflow-hidden shrink-0 border border-border shadow-inner">
+                  <CardContent className="p-3 flex gap-3">
+                    <div className="size-16 rounded-xl bg-slate-50 overflow-hidden shrink-0 border border-slate-50 shadow-inner flex items-center justify-center text-slate-200 font-black text-xs">
                       {post.images?.[0] ? (
                         <img src={post.images[0]} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-300 font-black text-xl">T</div>
-                      )}
+                      ) : "T"}
                     </div>
                     
-                    <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-slate-900 truncate max-w-[150px]">{post.title || "Postingan Baru"}</h3>
-                          {post.isPinned && <Pin className="size-3 text-accent fill-accent" />}
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <h3 className="font-bold text-[13px] text-slate-900 truncate">{post.title || "Postingan Baru"}</h3>
+                          {post.isPinned && <Pin className="size-2.5 text-accent fill-accent" />}
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="size-8 rounded-lg hover:bg-slate-50">
-                              <MoreVertical className="size-4 text-slate-400" />
+                            <Button variant="ghost" size="icon" className="size-7 rounded-lg hover:bg-slate-50">
+                              <MoreVertical className="size-3.5 text-slate-400" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 rounded-xl p-1.5 shadow-2xl">
-                            <DropdownMenuItem onClick={() => handleAction('pin', post)} className="flex items-center gap-3 px-3 py-2 rounded-lg font-bold cursor-pointer">
-                              <Pin className="size-4" /> {post.isPinned ? "Lepas Sematan" : "Sematkan di Profil"}
+                          <DropdownMenuContent align="end" className="w-40 rounded-xl p-1 shadow-2xl">
+                            <DropdownMenuItem onClick={() => handleAction('pin', post)} className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer text-[10px]">
+                              <Pin className="size-3" /> {post.isPinned ? "Lepas Pin" : "Sematkan"}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleAction('archive', post)} className="flex items-center gap-3 px-3 py-2 rounded-lg font-bold cursor-pointer">
-                              {post.isArchived ? <><Eye className="size-4" /> Pulihkan</> : <><EyeOff className="size-4" /> Arsipkan</>}
+                            <DropdownMenuItem onClick={() => handleAction('archive', post)} className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer text-[10px]">
+                              {post.isArchived ? <><Eye className="size-3" /> Pulihkan</> : <><EyeOff className="size-3" /> Arsipkan</>}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleAction('delete', post)} className="flex items-center gap-3 px-3 py-2 rounded-lg font-bold cursor-pointer text-rose-500 hover:bg-rose-50 hover:text-rose-600">
-                              <Trash2 className="size-4" /> Hapus Permanen
+                            <DropdownMenuItem onClick={() => handleAction('delete', post)} className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer text-rose-500 hover:bg-rose-50 text-[10px]">
+                              <Trash2 className="size-3" /> Hapus
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
 
-                      <p className="text-xs text-slate-500 line-clamp-1 font-medium">{post.description}</p>
+                      <p className="text-[10px] text-slate-500 line-clamp-1 font-medium leading-tight">{post.description}</p>
                       
-                      <div className="flex flex-wrap items-center gap-3 pt-1">
-                        <Badge variant="secondary" className="bg-slate-100 text-[9px] font-black uppercase px-2 py-0.5 border-none flex gap-1.5 items-center">
-                          <locInfo.icon className="size-2.5" /> {locInfo.label}
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <Badge variant="secondary" className="bg-slate-100 text-[7px] font-black uppercase px-1.5 h-4 border-none flex gap-1 items-center shadow-none">
+                          <locInfo.icon className="size-2" /> {locInfo.label}
                         </Badge>
                         {post.visibility === 'private' && (
-                          <Badge className="bg-amber-50 text-amber-600 border-none text-[9px] font-black uppercase px-2 py-0.5 flex gap-1.5 items-center">
-                            <Lock className="size-2.5" /> Privat
+                          <Badge className="bg-amber-50 text-amber-600 border-none text-[7px] font-black uppercase px-1.5 h-4 flex gap-1 items-center shadow-none">
+                            <Lock className="size-2" /> Privat
                           </Badge>
                         )}
-                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{post.timestamp}</span>
+                        <span className="text-[8px] font-black uppercase text-slate-400 tracking-widest">{post.timestamp}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -145,19 +143,12 @@ export default function ManagePostsPage() {
             })}
           </div>
         ) : (
-          <div className="py-24 text-center space-y-6 bg-card rounded-[3rem] border-2 border-dashed border-border/50">
-            <div className="size-24 rounded-full bg-muted/20 flex items-center justify-center mx-auto shadow-inner">
-               <Archive className="size-10 text-muted-foreground/30" />
+          <div className="py-12 text-center space-y-4 bg-card rounded-[2rem] border-2 border-dashed border-border/50">
+            <Archive className="size-8 text-muted-foreground/30 mx-auto" />
+            <div className="space-y-0.5">
+               <h3 className="text-sm font-black text-slate-900 uppercase">Tidak Ada Konten</h3>
+               <p className="text-slate-400 text-[10px] font-medium">Aktivitas postingan akan muncul di sini.</p>
             </div>
-            <div className="space-y-2">
-               <h3 className="text-xl font-black text-slate-900 uppercase">Tidak Ada Postingan</h3>
-               <p className="text-slate-400 max-w-xs mx-auto font-medium text-sm">
-                 Anda belum memiliki aktivitas postingan untuk dikelola saat ini.
-               </p>
-            </div>
-            <Button onClick={() => window.location.href = '/feed'} className="rounded-2xl bg-primary text-white px-10 h-14 font-black shadow-xl uppercase tracking-widest text-[11px] active:scale-95 transition-all">
-               Buat Postingan Pertama
-            </Button>
           </div>
         )}
       </div>
