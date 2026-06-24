@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -450,7 +451,7 @@ export default function SettingsPage() {
             <section className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Akun & Keamanan</h3>
               <MenuList items={[
-                { icon: User, label: "Kelola Akun", desc: "Profil, Tipe Akun, Lencana", href: "/profile", bg: "bg-primary text-white shadow-primary/20 shadow-lg" },
+                { icon: User, label: "Kelola Akun", desc: "Profil, Tipe Akun, Lencana", href: "/profile?edit=true", bg: "bg-primary text-white shadow-primary/20 shadow-lg" },
                 { icon: ShieldCheck, label: "Izin Keamanan & Privasi Sosial", desc: "Enkripsi & Manajemen Perangkat", subMenu: "keamanan_privasi" }
               ]} />
             </section>

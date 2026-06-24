@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -103,8 +104,23 @@ export default function ProfilePage() {
   React.useEffect(() => {
     resetContentForm();
     setIsContentModalOpen(false);
-    setIsBioModalOpen(false);
-  }, [activeAccount.id, resetContentForm]);
+    
+    // Deteksi parameter edit dari URL
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('edit') === 'true') {
+      setTempAccount({ 
+        name: activeAccount.name, 
+        bio: activeAccount.bio, 
+        locationLink: activeAccount.locationLink 
+      });
+      setIsBioModalOpen(true);
+      // Bersihkan param edit agar tidak terbuka lagi saat refresh manual
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    } else {
+      setIsBioModalOpen(false);
+    }
+  }, [activeAccount.id, resetContentValue]);
 
   const profileVisibleItems = React.useMemo(() => {
     const items = (activeAccount.items || []).filter(i => 
