@@ -146,6 +146,18 @@ export default function CariPage() {
     }
   };
 
+  const handleImageSelection = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsSourcePickerOpen(false);
+      toast({ title: "Visual AI Aktif", description: "Menganalisis objek dalam gambar..." });
+      
+      // Simulasi ekstraksi query dari gambar
+      setQuery("Analisis Gambar...");
+      handleSearch(undefined, "Analisis Gambar");
+    }
+  };
+
   const openInGoogleMaps = (name: string, location?: string) => {
     const searchQuery = encodeURIComponent(`${name} ${location || ''}`);
     window.open(`https://www.google.com/maps/search/?api=1&query=${searchQuery}`, '_blank');
@@ -224,9 +236,18 @@ export default function CariPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('search_placeholder')}
-                className="h-10 pl-9 pr-20 rounded-xl border-slate-100 bg-slate-50/50 text-[13px] font-medium focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all shadow-inner"
+                className="h-10 pl-9 pr-24 rounded-xl border-slate-100 bg-slate-50/50 text-[13px] font-medium focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all shadow-inner"
               />
               <div className="absolute inset-y-1 right-1 flex items-center gap-0.5">
+                {query && (
+                  <button 
+                    type="button" 
+                    onClick={() => { setQuery(""); setResults(null); }}
+                    className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 transition-colors"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                )}
                 <button type="button" onClick={handleVoiceSearch} className="size-8 flex items-center justify-center rounded-lg bg-white text-slate-400 border border-slate-100 shadow-sm hover:text-primary active:scale-90 transition-all"><Mic className="size-3.5" /></button>
                 <button type="button" onClick={() => setIsSourcePickerOpen(true)} className="size-8 flex items-center justify-center rounded-lg bg-white text-slate-400 border border-slate-100 shadow-sm hover:text-primary active:scale-90 transition-all"><Camera className="size-3.5" /></button>
               </div>
@@ -370,6 +391,8 @@ export default function CariPage() {
             </div>
             <button onClick={() => setIsSourcePickerOpen(false)} className="w-full text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-destructive">Batalkan</button>
           </div>
+          <input type="file" ref={cameraInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleImageSelection} />
+          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageSelection} />
         </DialogContent>
       </Dialog>
     </DashboardLayout>
