@@ -76,7 +76,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
-import { AIAssistant } from "@/components/chat/ai-assistant";
 import { LanguagePicker } from "@/components/language-picker";
 import { useLanguage } from "@/context/language-context";
 import { useAccount, AccountType } from "@/context/account-context";
@@ -270,7 +269,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t bg-background/95 backdrop-blur-md pb-safe shadow-xl">
-        <div className="grid grid-cols-3 h-14 md:h-16 items-center justify-items-center text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-muted-foreground relative">
+        <div className="grid grid-cols-3 h-14 items-center justify-items-center text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-muted-foreground relative">
           <Link href="/feed" className={cn("flex flex-col items-center gap-1 w-full py-1.5 transition-all", pathname === "/feed" ? "text-primary scale-105" : "hover:text-primary")}>
             <Rss className="size-5 md:size-6" /><span>{t('feed')}</span>
           </Link>
@@ -380,8 +379,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-black text-[12px] uppercase text-muted-foreground hover:bg-transparent">Batal</Button>
         </DialogContent>
       </Dialog>
-
-      <AIAssistant />
     </div>
   );
 }

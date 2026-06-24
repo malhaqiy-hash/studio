@@ -4,6 +4,7 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { LanguageProvider } from '@/context/language-context';
 import { AccountProvider } from '@/context/account-context';
+import { AIAssistant } from '@/components/chat/ai-assistant';
 
 export const metadata: Metadata = {
   title: 'Tapp - Business Discovery Network',
@@ -28,6 +29,7 @@ export default function RootLayout({
             <FirebaseClientProvider>
               {children}
               <Toaster />
+              <AIAssistant />
             </FirebaseClientProvider>
           </AccountProvider>
         </LanguageProvider>
