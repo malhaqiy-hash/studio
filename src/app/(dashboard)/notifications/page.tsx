@@ -18,7 +18,8 @@ import {
   Eye,
   EyeOff,
   VolumeX,
-  AlertTriangle
+  AlertTriangle,
+  AlertCircle
 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { cn } from "@/lib/utils";
@@ -37,7 +38,7 @@ const ICON_MAP = {
   message: MessageSquare,
   zap: Zap,
   bell: Bell,
-  alert: AlertTriangle
+  alert: AlertCircle
 };
 
 const INITIAL_NOTIFICATIONS = [
@@ -137,8 +138,8 @@ export default function NotificationsPage() {
               <Bell className="size-2.5" />
               {t('notifications')}
             </div>
-            <h1 className="text-lg font-black tracking-tight uppercase">{t('activity_center')}</h1>
-            <p className="text-muted-foreground font-medium text-[10px]">{t('activity_desc')}</p>
+            <h1 className="text-base font-black tracking-tight uppercase">{t('activity_center')}</h1>
+            <p className="text-muted-foreground font-medium text-[9px] uppercase tracking-widest">{t('activity_desc')}</p>
           </div>
           
           <div className="flex items-center gap-1">
@@ -157,7 +158,7 @@ export default function NotificationsPage() {
                 className="text-[8px] font-black uppercase tracking-widest text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg h-7 px-2.5 transition-colors flex gap-1"
               >
                 <Trash2 className="size-2.5" />
-                Hapus
+                Hapus Semua
               </Button>
             )}
           </div>
@@ -210,23 +211,23 @@ export default function NotificationsPage() {
                           <div className="flex-1 min-w-0 space-y-0.5">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1">
-                                <h3 className={cn("font-black tracking-tight uppercase text-[11px] truncate", notification.unread ? 'text-foreground' : 'text-muted-foreground')}>
+                                <h3 className={cn("font-black tracking-tight uppercase text-[10px] truncate", notification.unread ? 'text-foreground' : 'text-muted-foreground')}>
                                   {notification.title}
                                 </h3>
                                 {notification.unread && (
                                   <span className="size-1.5 bg-black rounded-full animate-pulse shrink-0" />
                                 )}
                               </div>
-                              <span className="text-[8px] text-muted-foreground font-black uppercase flex items-center gap-0.5 whitespace-nowrap">
+                              <span className="text-[7px] text-muted-foreground font-black uppercase flex items-center gap-0.5 whitespace-nowrap">
                                 <Clock className="size-2" />
                                 {notification.time}
                               </span>
                             </div>
-                            <p className="text-[11px] text-muted-foreground font-medium leading-snug line-clamp-2">
+                            <p className="text-[10px] text-muted-foreground font-medium leading-snug line-clamp-2">
                               {notification.description}
                             </p>
                             <div className="pt-1 flex items-center justify-between">
-                               <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[8px] font-black uppercase text-black hover:bg-black/5 rounded-lg transition-colors">
+                               <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[7px] font-black uppercase text-black hover:bg-black/5 rounded-lg transition-colors">
                                  {t('take_action')}
                                  <ChevronRight className="size-2 ml-0.5" />
                                </Button>
@@ -241,7 +242,7 @@ export default function NotificationsPage() {
                                    <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card animate-in zoom-in-95 duration-200">
                                      <DropdownMenuItem 
                                        onClick={() => toggleReadStatus(notification.id)}
-                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-[11px]"
+                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-[10px]"
                                      >
                                        {notification.unread ? (
                                          <><Eye className="size-3" /> Ditandai Dibaca</>
@@ -251,13 +252,13 @@ export default function NotificationsPage() {
                                      </DropdownMenuItem>
                                      <DropdownMenuItem 
                                        onClick={() => handleMute(notification.title)}
-                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-[11px]"
+                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-[10px]"
                                      >
                                        <VolumeX className="size-3" /> Senyapkan Akun
                                      </DropdownMenuItem>
                                      <DropdownMenuItem 
                                        onClick={handleReport}
-                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer text-rose-500 hover:bg-rose-50 text-[11px]"
+                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer text-rose-500 hover:bg-rose-50 text-[10px]"
                                      >
                                        <AlertTriangle className="size-3" /> Laporkan
                                      </DropdownMenuItem>
@@ -281,8 +282,8 @@ export default function NotificationsPage() {
                   <Inbox className="size-7 text-muted-foreground/30" />
                </div>
                <div className="space-y-1 px-4">
-                  <h3 className="text-[12px] font-black text-slate-900 uppercase">Kotak Masuk Bersih</h3>
-                  <p className="text-slate-400 max-w-xs mx-auto font-medium text-[9px]">
+                  <h3 className="text-[11px] font-black text-slate-900 uppercase">Kotak Masuk Bersih</h3>
+                  <p className="text-slate-400 max-w-xs mx-auto font-medium text-[8px] uppercase tracking-widest">
                     Kami akan memberi tahu Anda jika ada interaksi baru di jaringan.
                   </p>
                </div>
@@ -295,8 +296,8 @@ export default function NotificationsPage() {
             <Zap className="size-3.5 text-white fill-white" />
           </div>
           <div className="space-y-0.5">
-            <h3 className="text-sm font-black uppercase tracking-tight">{t('notif_intel')}</h3>
-            <p className="text-white/60 text-[10px] font-medium leading-snug">
+            <h3 className="text-[12px] font-black uppercase tracking-tight">{t('notif_intel')}</h3>
+            <p className="text-white/60 text-[9px] font-medium leading-snug uppercase tracking-widest">
               Mesin OnTapp memberikan saran personal berdasarkan interaksi jaringan bisnis Anda secara cerdas.
             </p>
           </div>

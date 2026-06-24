@@ -74,19 +74,19 @@ export default function MessagesPage() {
         <div className="w-full md:w-72 lg:w-80 border-r border-border flex flex-col bg-muted/5">
           <div className="p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-black tracking-tight uppercase">{t('global_pulse')}</h2>
+              <h2 className="text-[12px] font-black tracking-tight uppercase">{t('global_pulse')}</h2>
               {chats.length > 0 && (
                 <button 
                   onClick={handleClearAll}
                   className="text-[9px] font-black uppercase text-rose-500 hover:text-rose-600 transition-colors"
                 >
-                  Bersihkan
+                  Hapus Semua
                 </button>
               )}
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
-              <Input placeholder={t('search_chats')} className="pl-9 h-8 bg-background border-border rounded-lg text-[11px] font-medium" />
+              <Input placeholder={t('search_chats')} className="pl-9 h-8 bg-background border-border rounded-lg text-[10px] font-medium" />
             </div>
           </div>
           
@@ -135,10 +135,10 @@ export default function MessagesPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline mb-0.5">
-                        <h4 className="font-bold text-[12px] truncate">{chat.name}</h4>
+                        <h4 className="font-bold text-[11px] truncate">{chat.name}</h4>
                         <span className="text-[7px] text-muted-foreground font-black uppercase">{chat.time}</span>
                       </div>
-                      <p className="text-[10px] text-muted-foreground font-medium truncate">{chat.lastMsg}</p>
+                      <p className="text-[9px] text-muted-foreground font-medium truncate">{chat.lastMsg}</p>
                     </div>
                   </motion.div>
                 </motion.div>
@@ -147,7 +147,7 @@ export default function MessagesPage() {
             
             {chats.length === 0 && (
               <div className="py-12 text-center space-y-2 opacity-50">
-                <p className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Tidak ada pesan</p>
+                <p className="font-bold text-[9px] uppercase tracking-widest text-muted-foreground">Tidak ada pesan</p>
               </div>
             )}
           </div>
@@ -162,7 +162,7 @@ export default function MessagesPage() {
                   <AvatarFallback className="text-[9px]">{selectedChat.name[0]}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="font-bold text-[13px] leading-none">{selectedChat.name}</h3>
+                  <h3 className="font-bold text-[12px] leading-none">{selectedChat.name}</h3>
                   <div className="flex items-center gap-1 mt-1">
                     <div className={cn("size-1.5 rounded-full", selectedChat.status === 'online' ? 'bg-emerald-500' : 'bg-muted-foreground')} />
                     <span className="text-[8px] font-bold text-muted-foreground uppercase">{selectedChat.status}</span>
@@ -178,12 +178,12 @@ export default function MessagesPage() {
 
             <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-muted/5 no-scrollbar">
               <div className="flex flex-col gap-1 max-w-[75%]">
-                <div className="bg-muted rounded-xl rounded-tl-none p-2.5 text-[12px] font-medium shadow-sm border border-border leading-relaxed">
+                <div className="bg-muted rounded-xl rounded-tl-none p-2.5 text-[11px] font-medium shadow-sm border border-border leading-relaxed">
                   Hi! We're reviewing your request for the eco-packaging bulk order.
                 </div>
               </div>
               <div className="flex flex-col gap-1 max-w-[75%] ml-auto items-end">
-                <div className="bg-accent text-accent-foreground rounded-xl rounded-tr-none p-2.5 text-[12px] font-medium shadow-lg leading-relaxed">
+                <div className="bg-accent text-accent-foreground rounded-xl rounded-tr-none p-2.5 text-[11px] font-medium shadow-lg leading-relaxed">
                   Great. Let me know when it's ready for dispatch.
                 </div>
               </div>
@@ -191,15 +191,15 @@ export default function MessagesPage() {
 
             <footer className="p-3 border-t border-border bg-background/50">
               <div className="flex items-center gap-2.5 bg-muted/50 p-1 rounded-xl border border-border">
-                <Input placeholder={t('type_message')} className="border-none bg-transparent h-8 focus-visible:ring-0 text-[12px]" />
+                <Input placeholder={t('type_message')} className="border-none bg-transparent h-8 focus-visible:ring-0 text-[11px]" />
                 <Button className="size-8 rounded-lg bg-accent text-accent-foreground p-0 active:scale-95 transition-transform"><Send className="size-3.5" /></Button>
               </div>
             </footer>
           </div>
         ) : (
           <div className="flex-1 hidden md:flex flex-col items-center justify-center bg-muted/5 opacity-30 select-none">
-             <MessageSquare className="size-12 mb-2" />
-             <p className="font-black uppercase tracking-[0.2em] text-[9px]">Pilih Obrolan</p>
+             <MessageSquare className="size-10 mb-2" />
+             <p className="font-black uppercase tracking-[0.2em] text-[8px]">Pilih Obrolan</p>
           </div>
         )}
       </div>
