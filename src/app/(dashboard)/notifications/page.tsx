@@ -19,7 +19,8 @@ import {
   EyeOff,
   VolumeX,
   AlertTriangle,
-  AlertCircle
+  AlertCircle,
+  X
 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
@@ -32,8 +33,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-// Map string keys to Lucide components to ensure safe localStorage serialization
 const ICON_MAP = {
   match: Handshake,
   message: MessageSquare,
@@ -72,10 +78,10 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = React.useState<any[]>([]);
   const [isAllRead, setIsAllRead] = React.useState(false);
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [selectedNotification, setSelectedNotification] = React.useState<any>(null);
 
   const getStorageKey = React.useCallback(() => `ontapp_notifications_data_${activeAccount.id}`, [activeAccount.id]);
 
-  // Load from localStorage
   React.useEffect(() => {
     const saved = localStorage.getItem(getStorageKey());
     if (saved) {
@@ -90,7 +96,6 @@ export default function NotificationsPage() {
     setIsLoaded(true);
   }, [activeAccount.id, getStorageKey]);
 
-  // Save to localStorage
   React.useEffect(() => {
     if (isLoaded) {
       localStorage.setItem(getStorageKey(), JSON.stringify(notifications));
@@ -113,6 +118,7 @@ export default function NotificationsPage() {
 
   const deleteNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
+    if (selectedNotification?.id === id) setSelectedNotification(null);
   };
 
   const toggleReadStatus = (id: string) => {
@@ -127,6 +133,13 @@ export default function NotificationsPage() {
 
   const handleReport = () => {
     toast({ variant: "destructive", title: "Laporan Terkirim", description: "Tim moderasi akan meninjau notifikasi ini." });
+  };
+
+  const handleOpenDetail = (notification: any) => {
+    setSelectedNotification(notification);
+    if (notification.unread) {
+      toggleReadStatus(notification.id);
+    }
   };
 
   if (!isLoaded) return null;
@@ -169,7 +182,6 @@ export default function NotificationsPage() {
         <div className="space-y-1.5 min-h-[300px]">
           <AnimatePresence initial={false}>
             {notifications.map((notification) => {
-              // Resolve icon component from the map safely
               const IconComp = ICON_MAP[notification.iconKey as keyof typeof ICON_MAP] || Bell;
               
               return (
@@ -181,11 +193,14 @@ export default function NotificationsPage() {
                   transition={{ type: "spring", stiffness: 500, damping: 35 }}
                   className="overflow-hidden"
                 >
-                  <div className="relative rounded-xl bg-card border border-border shadow-sm overflow-hidden touch-pan-y">
+                  <div 
+                    className="relative rounded-xl bg-card border border-border shadow-sm overflow-hidden touch-pan-y cursor-pointer group/card"
+                    onClick={() => handleOpenDetail(notification)}
+                  >
                     
                     <div className="absolute inset-y-0 right-0 w-14 flex items-center justify-center bg-rose-500 rounded-r-xl">
                       <button 
-                        onClick={() => deleteNotification(notification.id)}
+                        onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
                         className="w-full h-full flex flex-col items-center justify-center text-white active:scale-90 transition-transform"
                       >
                         <Trash2 className="size-3.5" />
@@ -198,10 +213,9 @@ export default function NotificationsPage() {
                       dragConstraints={{ left: -56, right: 0 }}
                       dragElastic={0.05}
                       dragDirectionLock
-                      onDragStart={() => {}} 
                       style={{ touchAction: 'pan-y' }}
                       className={cn(
-                        "relative z-10 bg-card",
+                        "relative z-10 bg-card transition-colors hover:bg-slate-50/50",
                         notification.unread ? 'border-l-[3px] border-l-black' : 'opacity-90'
                       )}
                     >
@@ -237,11 +251,14 @@ export default function NotificationsPage() {
                                <div className="flex items-center gap-0.5">
                                  <DropdownMenu>
                                    <DropdownMenuTrigger asChild>
-                                     <button className="size-7 rounded-lg text-muted-foreground hover:text-black hover:bg-black/5 transition-all active:scale-90 outline-none flex items-center justify-center">
+                                     <button 
+                                       onClick={(e) => e.stopPropagation()}
+                                       className="size-7 rounded-lg text-muted-foreground hover:text-black hover:bg-black/5 transition-all active:scale-90 outline-none flex items-center justify-center"
+                                     >
                                        <MoreVertical className="size-3" />
                                      </button>
                                    </DropdownMenuTrigger>
-                                   <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card animate-in zoom-in-95 duration-200">
+                                   <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
                                      <DropdownMenuItem 
                                        onClick={() => toggleReadStatus(notification.id)}
                                        className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-[10px]"
@@ -292,6 +309,47 @@ export default function NotificationsPage() {
             </div>
           )}
         </div>
+
+        {/* Notification Detail Dialog (Tap Outside to Close) */}
+        <Dialog open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
+          <DialogContent className="w-[90%] md:max-w-md rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden overflow-hidden animate-in zoom-in-95 duration-200">
+             {selectedNotification && (
+               <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className={cn("size-10 rounded-xl flex items-center justify-center shadow-inner", selectedNotification.color)}>
+                      {React.createElement(ICON_MAP[selectedNotification.iconKey as keyof typeof ICON_MAP] || Bell, { className: "size-5" })}
+                    </div>
+                    <button onClick={() => setSelectedNotification(null)} className="p-2 rounded-lg bg-muted/30 text-muted-foreground hover:text-foreground active:scale-90 transition-all">
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                     <DialogTitle className="text-xl font-black text-slate-900 leading-tight uppercase tracking-tight">
+                        {selectedNotification.title}
+                     </DialogTitle>
+                     <div className="flex items-center gap-1.5 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                        <Clock className="size-2.5" />
+                        {selectedNotification.time} • AI Activity Hub
+                     </div>
+                  </div>
+
+                  <p className="text-sm font-medium text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    {selectedNotification.description}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2">
+                     <Button onClick={() => setSelectedNotification(null)} className="h-11 rounded-xl bg-primary text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20">
+                        {t('take_action')}
+                     </Button>
+                     <Button variant="outline" onClick={() => deleteNotification(selectedNotification.id)} className="h-11 rounded-xl border-slate-200 text-rose-600 font-black text-[10px] uppercase tracking-widest hover:bg-rose-50">
+                        Hapus
+                     </Button>
+                  </div>
+               </div>
+             )}
+          </DialogContent>
+        </Dialog>
 
         <CardContent className="rounded-2xl bg-black text-white overflow-hidden relative shadow-2xl mt-4 border-none p-5 space-y-2.5">
           <div className="size-7 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg">

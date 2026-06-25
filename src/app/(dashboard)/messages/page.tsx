@@ -24,7 +24,8 @@ import {
   Link as LinkIcon,
   X,
   Smartphone,
-  Globe
+  Globe,
+  ChevronLeft
 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
@@ -36,6 +37,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 const INITIAL_CHATS = [
@@ -60,6 +65,7 @@ export default function MessagesPage() {
   const [inputText, setInputText] = React.useState("");
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [isMuted, setIsMuted] = React.useState<Record<number, boolean>>({});
+  const [isMobileChatOpen, setIsMobileChatOpen] = React.useState(false);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
@@ -69,7 +75,6 @@ export default function MessagesPage() {
   const getChatsKey = React.useCallback(() => `ontapp_chats_v3_${activeAccount.id}`, [activeAccount.id]);
   const getMsgsKey = React.useCallback(() => `ontapp_msgs_v3_${activeAccount.id}`, [activeAccount.id]);
 
-  // Load Data
   React.useEffect(() => {
     const savedChats = localStorage.getItem(getChatsKey());
     const savedMsgs = localStorage.getItem(getMsgsKey());
@@ -78,7 +83,7 @@ export default function MessagesPage() {
       try {
         const parsed = JSON.parse(savedChats);
         setChats(parsed);
-        if (parsed.length > 0) setSelectedChat(parsed[0]);
+        if (parsed.length > 0 && !selectedChat) setSelectedChat(parsed[0]);
       } catch (e) { setChats(INITIAL_CHATS); setSelectedChat(INITIAL_CHATS[0]); }
     } else {
       setChats(INITIAL_CHATS);
@@ -90,9 +95,8 @@ export default function MessagesPage() {
     }
     
     setIsLoaded(true);
-  }, [activeAccount.id, getChatsKey, getMsgsKey]);
+  }, [activeAccount.id, getChatsKey, getMsgsKey, selectedChat]);
 
-  // Save Data
   React.useEffect(() => {
     if (isLoaded) {
       localStorage.setItem(getChatsKey(), JSON.stringify(chats));
@@ -100,12 +104,11 @@ export default function MessagesPage() {
     }
   }, [chats, messagesByChat, isLoaded, getChatsKey, getMsgsKey]);
 
-  // Scroll to bottom
   React.useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [selectedChat, messagesByChat]);
+  }, [selectedChat, messagesByChat, isMobileChatOpen]);
 
   const addMessage = (chatId: number, msg: any) => {
     setMessagesByChat(prev => ({
@@ -113,7 +116,6 @@ export default function MessagesPage() {
       [chatId]: [...(prev[chatId] || DEFAULT_MESSAGES), { ...msg, id: `msg-${Date.now()}` }]
     }));
     
-    // Update last msg in chat list
     setChats(prev => prev.map(c => c.id === chatId ? { ...c, lastMsg: msg.text || "Media sent", time: "Just now" } : c));
   };
 
@@ -144,7 +146,6 @@ export default function MessagesPage() {
 
   const handleAction = (action: string) => {
     if (!selectedChat) return;
-    
     switch(action) {
       case 'location':
         addMessage(selectedChat.id, { sender: 'me', text: "Shared Location", type: 'location', detail: "Jakarta, Indonesia" });
@@ -181,6 +182,120 @@ export default function MessagesPage() {
     toast({ title: !isMuted[id] ? "Obrolan Disenyapkan" : "Suara Diaktifkan" });
   };
 
+  const handleChatSelection = (chat: any) => {
+    setSelectedChat(chat);
+    if (window.innerWidth < 768) {
+      setIsMobileChatOpen(true);
+    }
+  };
+
+  const ChatHeader = ({ chat }: { chat: any }) => (
+    <header className="h-14 border-b border-border px-4 flex items-center justify-between bg-background/50">
+      <div className="flex items-center gap-2.5">
+        <button onClick={() => setIsMobileChatOpen(false)} className="md:hidden size-8 flex items-center justify-center text-muted-foreground hover:text-primary active:scale-90 transition-all">
+          <ChevronLeft className="size-5" />
+        </button>
+        <Avatar className="size-8 border border-border">
+          <AvatarImage src={chat.avatar} className="object-cover" />
+          <AvatarFallback className="text-[9px]">{chat.name[0]}</AvatarFallback>
+        </Avatar>
+        <div>
+          <h3 className="font-bold text-[12px] leading-none">{chat.name}</h3>
+          <div className="flex items-center gap-1 mt-1">
+            <div className={cn("size-1.5 rounded-full", chat.status === 'online' ? 'bg-emerald-500' : 'bg-muted-foreground')} />
+            <span className="text-[8px] font-bold text-muted-foreground uppercase">{chat.status}</span>
+          </div>
+        </div>
+      </div>
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="size-8 rounded-lg text-muted-foreground hover:text-primary flex items-center justify-center outline-none"><MoreVertical className="size-4" /></button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card">
+          <DropdownMenuItem onClick={() => toggleMute(chat.id)} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><BellOff className="size-3.5" /> {isMuted[chat.id] ? "Aktifkan Suara" : "Senyapkan"}</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleClearHistory} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><Eraser className="size-3.5" /> Bersihkan Riwayat</DropdownMenuItem>
+          <div className="h-px bg-border my-1" />
+          <DropdownMenuItem onClick={() => deleteChat(chat.id)} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-rose-500 hover:bg-rose-50 text-[10px] cursor-pointer"><Trash2 className="size-3.5" /> Hapus Obrolan</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </header>
+  );
+
+  const ChatMessages = ({ chatId }: { chatId: number }) => (
+    <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4 bg-muted/5 no-scrollbar">
+      {(messagesByChat[chatId] || DEFAULT_MESSAGES).map((msg, i) => (
+        <div key={i} className={cn("flex flex-col gap-1 max-w-[75%]", msg.sender === 'me' ? "ml-auto items-end" : "items-start")}>
+          <div className={cn(
+            "p-2.5 text-[11px] font-medium shadow-sm border border-border leading-relaxed rounded-xl",
+            msg.sender === 'me' ? "bg-accent text-accent-foreground rounded-tr-none" : "bg-card text-foreground rounded-tl-none"
+          )}>
+            {msg.type === 'text' && msg.text}
+            {msg.type === 'image' && (
+              <div className="space-y-1.5">
+                <img src={msg.media} className="rounded-lg max-w-full max-h-48 object-cover" />
+                {msg.text && <p className="opacity-70 text-[9px]">{msg.text}</p>}
+              </div>
+            )}
+            {msg.type === 'doc' && (
+              <div className="flex items-center gap-2 bg-black/10 p-2 rounded-lg">
+                <FileText className="size-4" />
+                <span className="truncate max-w-[120px]">{msg.text}</span>
+              </div>
+            )}
+            {msg.type === 'location' && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2"><MapPin className="size-4 text-rose-500" /> <span className="font-bold">{msg.detail}</span></div>
+                <div className="w-full aspect-video bg-slate-100 rounded-lg flex items-center justify-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">Map Preview</div>
+              </div>
+            )}
+            {msg.type === 'contact' && (
+              <div className="flex items-center gap-3 bg-black/5 p-2 rounded-lg border border-black/10">
+                <div className="size-8 rounded-lg bg-white flex items-center justify-center shadow-sm"><User className="size-4 text-accent" /></div>
+                <div><p className="font-bold leading-none">{msg.text}</p><p className="text-[9px] opacity-60 uppercase font-black tracking-widest mt-1">{msg.detail}</p></div>
+              </div>
+            )}
+            {msg.type === 'link' && (
+              <a href={msg.text} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-indigo-200 underline decoration-indigo-200/50 underline-offset-2">
+                 <LinkIcon className="size-3" /> {msg.text}
+              </a>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const ChatFooter = () => (
+    <footer className="p-3 border-t border-border bg-background/50">
+      <form onSubmit={handleSendText} className="flex items-center gap-2 bg-muted/50 p-1 rounded-xl border border-border">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="size-8 rounded-lg text-muted-foreground hover:text-primary transition-all">
+              <Plus className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" side="top" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card animate-in slide-in-from-bottom-2">
+            <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><ImageIcon className="size-3.5 text-blue-500" /> Foto</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => cameraInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><Camera className="size-3.5 text-rose-500" /> Kamera</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleAction('location')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><MapPin className="size-3.5 text-emerald-500" /> Lokasi</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleAction('contact')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><User className="size-3.5 text-amber-500" /> Kontak</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => docInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><FileText className="size-3.5 text-indigo-500" /> Dokumen</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleAction('link')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><LinkIcon className="size-3.5 text-slate-500" /> Link</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
+        <Input 
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder={t('type_message')} 
+          className="border-none bg-transparent h-8 focus-visible:ring-0 text-[11px] flex-1" 
+        />
+        <Button type="submit" className="size-8 rounded-lg bg-accent text-accent-foreground p-0 active:scale-95 transition-transform"><Send className="size-3.5" /></Button>
+      </form>
+    </footer>
+  );
+
   if (!isLoaded) return null;
 
   return (
@@ -206,7 +321,7 @@ export default function MessagesPage() {
             {chats.map((chat) => (
               <motion.div
                 key={chat.id}
-                onClick={() => setSelectedChat(chat)}
+                onClick={() => handleChatSelection(chat)}
                 className={cn(
                   "relative flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer bg-card border border-transparent transition-all",
                   selectedChat?.id === chat.id ? 'bg-background shadow-sm border-border' : 'hover:bg-muted/50'
@@ -232,106 +347,12 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        {/* Chat Area */}
+        {/* Desktop Chat Area */}
         {selectedChat ? (
           <div className="flex-1 hidden md:flex flex-col animate-in fade-in duration-300">
-            <header className="h-14 border-b border-border px-5 flex items-center justify-between bg-background/50">
-              <div className="flex items-center gap-2.5">
-                <Avatar className="size-8 border border-border">
-                  <AvatarImage src={selectedChat.avatar} className="object-cover" />
-                  <AvatarFallback className="text-[9px]">{selectedChat.name[0]}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-bold text-[12px] leading-none">{selectedChat.name}</h3>
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className={cn("size-1.5 rounded-full", selectedChat.status === 'online' ? 'bg-emerald-500' : 'bg-muted-foreground')} />
-                    <span className="text-[8px] font-bold text-muted-foreground uppercase">{selectedChat.status}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="size-8 rounded-lg text-muted-foreground hover:text-primary flex items-center justify-center outline-none"><MoreVertical className="size-4" /></button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card">
-                  <DropdownMenuItem onClick={() => toggleMute(selectedChat.id)} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><BellOff className="size-3.5" /> {isMuted[selectedChat.id] ? "Aktifkan Suara" : "Senyapkan"}</DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleClearHistory} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><Eraser className="size-3.5" /> Bersihkan Riwayat</DropdownMenuItem>
-                  <div className="h-px bg-border my-1" />
-                  <DropdownMenuItem onClick={() => deleteChat(selectedChat.id)} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-rose-500 hover:bg-rose-50 text-[10px] cursor-pointer"><Trash2 className="size-3.5" /> Hapus Obrolan</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </header>
-
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4 bg-muted/5 no-scrollbar">
-              {(messagesByChat[selectedChat.id] || DEFAULT_MESSAGES).map((msg, i) => (
-                <div key={i} className={cn("flex flex-col gap-1 max-w-[75%]", msg.sender === 'me' ? "ml-auto items-end" : "items-start")}>
-                  <div className={cn(
-                    "p-2.5 text-[11px] font-medium shadow-sm border border-border leading-relaxed rounded-xl",
-                    msg.sender === 'me' ? "bg-accent text-accent-foreground rounded-tr-none" : "bg-card text-foreground rounded-tl-none"
-                  )}>
-                    {msg.type === 'text' && msg.text}
-                    {msg.type === 'image' && (
-                      <div className="space-y-1.5">
-                        <img src={msg.media} className="rounded-lg max-w-full max-h-48 object-cover" />
-                        {msg.text && <p className="opacity-70 text-[9px]">{msg.text}</p>}
-                      </div>
-                    )}
-                    {msg.type === 'doc' && (
-                      <div className="flex items-center gap-2 bg-black/10 p-2 rounded-lg">
-                        <FileText className="size-4" />
-                        <span className="truncate max-w-[120px]">{msg.text}</span>
-                      </div>
-                    )}
-                    {msg.type === 'location' && (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2"><MapPin className="size-4 text-rose-500" /> <span className="font-bold">{msg.detail}</span></div>
-                        <div className="w-full aspect-video bg-slate-100 rounded-lg flex items-center justify-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">Map Preview</div>
-                      </div>
-                    )}
-                    {msg.type === 'contact' && (
-                      <div className="flex items-center gap-3 bg-black/5 p-2 rounded-lg border border-black/10">
-                        <div className="size-8 rounded-lg bg-white flex items-center justify-center shadow-sm"><User className="size-4 text-accent" /></div>
-                        <div><p className="font-bold leading-none">{msg.text}</p><p className="text-[9px] opacity-60 uppercase font-black tracking-widest mt-1">{msg.detail}</p></div>
-                      </div>
-                    )}
-                    {msg.type === 'link' && (
-                      <a href={msg.text} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-indigo-200 underline decoration-indigo-200/50 underline-offset-2">
-                         <LinkIcon className="size-3" /> {msg.text}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <footer className="p-3 border-t border-border bg-background/50">
-              <form onSubmit={handleSendText} className="flex items-center gap-2 bg-muted/50 p-1 rounded-xl border border-border">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="size-8 rounded-lg text-muted-foreground hover:text-primary transition-all">
-                      <Plus className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" side="top" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card animate-in slide-in-from-bottom-2">
-                    <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><ImageIcon className="size-3.5 text-blue-500" /> Foto</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => cameraInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><Camera className="size-3.5 text-rose-500" /> Kamera</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleAction('location')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><MapPin className="size-3.5 text-emerald-500" /> Lokasi</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleAction('contact')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><User className="size-3.5 text-amber-500" /> Kontak</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => docInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><FileText className="size-3.5 text-indigo-500" /> Dokumen</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleAction('link')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><LinkIcon className="size-3.5 text-slate-500" /> Link</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                
-                <Input 
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder={t('type_message')} 
-                  className="border-none bg-transparent h-8 focus-visible:ring-0 text-[11px] flex-1" 
-                />
-                <Button type="submit" className="size-8 rounded-lg bg-accent text-accent-foreground p-0 active:scale-95 transition-transform"><Send className="size-3.5" /></Button>
-              </form>
-            </footer>
+            <ChatHeader chat={selectedChat} />
+            <ChatMessages chatId={selectedChat.id} />
+            <ChatFooter />
           </div>
         ) : (
           <div className="flex-1 hidden md:flex flex-col items-center justify-center bg-muted/5 opacity-30 select-none">
@@ -339,6 +360,19 @@ export default function MessagesPage() {
              <p className="font-black uppercase tracking-[0.2em] text-[8px]">Pilih Obrolan</p>
           </div>
         )}
+
+        {/* Mobile Chat View Dialog (Tap Outside to Close) */}
+        <Dialog open={isMobileChatOpen} onOpenChange={setIsMobileChatOpen}>
+          <DialogContent className="w-[95%] h-[90vh] md:hidden p-0 border-none rounded-t-[2rem] bg-card text-foreground outline-none shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5 duration-300 [&>button]:hidden">
+            {selectedChat && (
+              <div className="flex flex-col h-full">
+                <ChatHeader chat={selectedChat} />
+                <ChatMessages chatId={selectedChat.id} />
+                <ChatFooter />
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Hidden Inputs */}
         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'image')} />
