@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -155,7 +156,7 @@ export default function SettingsPage() {
         >
           <ChevronLeft className="size-4" />
         </button>
-        <h2 className="text-base font-black uppercase tracking-tight"> {title}</h2>
+        <h2 className="text-[13px] font-black uppercase tracking-tight"> {title}</h2>
       </div>
       <div className="px-1">{children}</div>
     </div>

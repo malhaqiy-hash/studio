@@ -161,7 +161,7 @@ export default function ProfilePage() {
       if (mediaTarget === 'post') {
         Array.from(files).forEach(file => {
           const reader = new FileReader();
-          reader.onload = () => {
+          reader.onloadend = () => {
             setNewItem(prev => ({ ...prev, images: [...(prev.images || []), reader.result as string] }));
           };
           reader.readAsDataURL(file);
@@ -169,7 +169,7 @@ export default function ProfilePage() {
         setIsMediaPickerOpen(false);
       } else {
         const reader = new FileReader();
-        reader.onload = () => {
+        reader.onloadend = () => {
           const result = reader.result as string;
           if (mediaTarget === 'avatar') updateActiveAccount({ avatar: result });
           if (mediaTarget === 'cover') updateActiveAccount({ cover: result });
@@ -279,7 +279,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2">
                 <h1 className="text-base md:text-lg font-bold text-slate-900 tracking-tight">{activeAccount.name}</h1>
                 {activeAccount.verificationStatus === 'Verified' && <ShieldCheck className="size-3 text-emerald-500" />}
-                <span className="font-aesthetic text-2xl text-primary/80 italic lowercase select-none ml-1 leading-none">{activeAccount.type}</span>
+                <span className="font-aesthetic text-lg text-primary/80 italic lowercase select-none ml-1 leading-none">{activeAccount.type}</span>
               </div>
               <div className="flex flex-col gap-0.5">
                 <div className="flex flex-wrap items-center gap-3 text-muted-foreground font-medium text-[11px] md:text-[13px]">
