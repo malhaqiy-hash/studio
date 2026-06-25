@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -278,7 +279,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2">
                 <h1 className="text-base md:text-lg font-bold text-slate-900 tracking-tight">{activeAccount.name}</h1>
                 {activeAccount.verificationStatus === 'Verified' && <ShieldCheck className="size-3 text-emerald-500" />}
-                <span className="font-latin text-xl text-primary/80 italic lowercase select-none ml-1 leading-none">{activeAccount.type}</span>
+                <span className="font-aesthetic text-2xl text-primary/80 italic lowercase select-none ml-1 leading-none">{activeAccount.type}</span>
               </div>
               <div className="flex flex-col gap-0.5">
                 <div className="flex flex-wrap items-center gap-3 text-muted-foreground font-medium text-[11px] md:text-[13px]">

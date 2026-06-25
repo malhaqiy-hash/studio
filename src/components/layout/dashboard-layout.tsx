@@ -94,7 +94,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
   
   const sheetY = useMotionValue(0);
-  // Improved opacity mapping to avoid flicker at edges
   const dragOpacity = useTransform(sheetY, [0, 300], [1, 0]);
 
   const [isRegModalOpen, setIsRegModalOpen] = React.useState(false);
@@ -145,7 +144,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     }
   }, [hasInitialized, activeAccount, isRegModalOpen]);
 
-  // Ensure coordinates are reset immediately when the state changes
   React.useEffect(() => {
     if (!isMoreMenuOpen) {
       sheetY.set(0);
@@ -217,7 +215,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <div className="size-6 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-black text-base shadow-lg shadow-primary/20">T</div>
             <span className="font-black text-sm tracking-tight text-foreground uppercase">Tapp</span>
           </Link>
-          <span className="font-latin text-base text-primary/80 lowercase italic select-none ml-1 leading-none">{activeAccount?.type}</span>
+          <span className="font-aesthetic text-xl text-primary/80 lowercase italic select-none ml-1 leading-none">{activeAccount?.type}</span>
         </div>
         
         <div className="flex items-center gap-1.5">
@@ -236,7 +234,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuSeparator className="my-1" />
                 {availableAccounts.filter(a => !a.isNew).map((acc) => (
                   <DropdownMenuItem key={acc.id} onSelect={() => { switchAccount(acc.id); router.push("/profile"); }} className={cn("flex items-center justify-between px-2.5 py-2 rounded-lg font-bold cursor-pointer mb-0.5", activeAccount.id === acc.id ? "bg-primary/5 text-primary" : "focus:bg-primary/5")}>
-                    <div className="flex items-center gap-2.5"><Avatar className="size-7 rounded-lg shadow-sm"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="text-[9px] bg-muted font-black">{acc.name[0]}</AvatarFallback></Avatar><div className="flex flex-col"><span className="text-[12px] leading-none mb-0.5">{acc.name}</span><span className="font-latin text-xs text-muted-foreground opacity-70 italic lowercase leading-none">{acc.type}</span></div></div>
+                    <div className="flex items-center gap-2.5"><Avatar className="size-7 rounded-lg shadow-sm"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="text-[9px] bg-muted font-black">{acc.name[0]}</AvatarFallback></Avatar><div className="flex flex-col"><span className="text-[12px] leading-none mb-0.5">{acc.name}</span><span className="font-aesthetic text-base text-muted-foreground opacity-70 italic lowercase leading-none">{acc.type}</span></div></div>
                     {activeAccount.id === acc.id && <Check className="size-3" />}
                   </DropdownMenuItem>
                 ))}
@@ -284,7 +282,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   dragElastic={{ top: 0, bottom: 0.6 }}
                   style={{ y: sheetY }}
                   onDragEnd={(_, info) => {
-                    // Logic to close when swipe threshold exceeded
                     if (info.offset.y > 100 || info.velocity.y > 500) {
                       setIsMoreMenuOpen(false);
                     } else {
@@ -306,7 +303,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                           <LayoutGrid className="size-3.5" />
                           Tapp Hub
                         </SheetTitle>
-                        <span className="font-latin text-lg text-primary italic lowercase select-none leading-none">{activeAccount?.type}</span>
+                        <span className="font-aesthetic text-xl text-primary italic lowercase select-none leading-none">{activeAccount?.type}</span>
                       </div>
                     </SheetHeader>
                     <div className="overflow-y-auto h-full pb-32 no-scrollbar">
@@ -359,7 +356,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       </div>
                       <div>
                         <h4 className="font-bold text-[14px] text-slate-900 capitalize flex items-center gap-2">
-                          Profil <span className="font-latin text-lg text-primary italic lowercase font-normal leading-none">{type}</span>
+                          Profil <span className="font-aesthetic text-xl text-primary italic lowercase font-normal leading-none">{type}</span>
                         </h4>
                         <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">{type === 'pribadi' ? 'Berbagi inspirasi dan relasi bisnis.' : type === 'professional' ? 'Tampilkan keahlian dan portofolio.' : 'Akses data pasar dan mitra eksklusif.'}</p>
                       </div>
@@ -370,7 +367,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
                   <div className="flex items-center justify-between">
                     <button type="button" onClick={() => setPendingType(null)} className="h-8 px-3 font-bold text-[11px] uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">← Kembali</button>
-                    <span className="font-latin text-2xl text-primary italic lowercase select-none leading-none">{pendingType}</span>
+                    <span className="font-aesthetic text-2xl text-primary italic lowercase select-none leading-none">{pendingType}</span>
                   </div>
                   
                   <div className="flex flex-col items-center gap-3">

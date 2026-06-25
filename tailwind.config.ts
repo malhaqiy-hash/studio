@@ -18,9 +18,9 @@ export default {
   				'Inter',
   				'sans-serif'
   			],
-  			latin: [
-  				'Dancing Script',
-  				'cursive'
+  			aesthetic: [
+  				'Instrument Serif',
+  				'serif'
   			],
   			code: [
   				'monospace'
