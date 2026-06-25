@@ -6,7 +6,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Send, Phone, Video, MoreVertical, Trash2, MessageSquare } from "lucide-react";
+import { Search, Send, MoreVertical, Trash2, MessageSquare } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
 import { cn } from "@/lib/utils";
@@ -174,8 +174,6 @@ export default function MessagesPage() {
                 </div>
               </div>
               <div className="flex items-center gap-0.5 text-muted-foreground">
-                <Button variant="ghost" size="icon" className="size-7 rounded-lg"><Phone className="size-3.5" /></Button>
-                <Button variant="ghost" size="icon" className="size-7 rounded-lg"><Video className="size-3.5" /></Button>
                 <Button variant="ghost" size="icon" className="size-7 rounded-lg"><MoreVertical className="size-3.5" /></Button>
               </div>
             </header>
