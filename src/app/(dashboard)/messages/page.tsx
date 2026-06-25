@@ -14,7 +14,14 @@ import {
   MessageSquare,
   BellOff,
   Eraser,
-  Check
+  Check,
+  Plus,
+  Image as ImageIcon,
+  Camera,
+  MapPin,
+  User,
+  FileText,
+  Link as LinkIcon
 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
@@ -99,6 +106,10 @@ export default function MessagesPage() {
       title: !isMuted[id] ? "Obrolan Disenyapkan" : "Suara Diaktifkan",
       description: !isMuted[id] ? "Anda tidak akan menerima notifikasi dari kontak ini." : "Notifikasi kembali aktif."
     });
+  };
+
+  const handleShareAction = (type: string) => {
+    toast({ title: `Fitur ${type} Aktif`, description: `Menyiapkan media untuk dibagikan...` });
   };
 
   if (!isLoaded) return null;
@@ -255,8 +266,36 @@ export default function MessagesPage() {
             </div>
 
             <footer className="p-3 border-t border-border bg-background/50">
-              <div className="flex items-center gap-2.5 bg-muted/50 p-1 rounded-xl border border-border">
-                <Input placeholder={t('type_message')} className="border-none bg-transparent h-8 focus-visible:ring-0 text-[11px]" />
+              <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-xl border border-border">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="size-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all">
+                      <Plus className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" side="top" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card animate-in slide-in-from-bottom-2">
+                    <DropdownMenuItem onClick={() => handleShareAction('Foto')} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-bold cursor-pointer text-[10px]">
+                      <ImageIcon className="size-3.5 text-blue-500" /> Foto
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleShareAction('Kamera')} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-bold cursor-pointer text-[10px]">
+                      <Camera className="size-3.5 text-rose-500" /> Kamera
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleShareAction('Lokasi')} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-bold cursor-pointer text-[10px]">
+                      <MapPin className="size-3.5 text-emerald-500" /> Lokasi
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleShareAction('Kontak')} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-bold cursor-pointer text-[10px]">
+                      <User className="size-3.5 text-amber-500" /> Kontak
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleShareAction('Dokumen')} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-bold cursor-pointer text-[10px]">
+                      <FileText className="size-3.5 text-indigo-500" /> Dokumen
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleShareAction('Link')} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-bold cursor-pointer text-[10px]">
+                      <LinkIcon className="size-3.5 text-slate-500" /> Link
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
+                <Input placeholder={t('type_message')} className="border-none bg-transparent h-8 focus-visible:ring-0 text-[11px] flex-1" />
                 <Button className="size-8 rounded-lg bg-accent text-accent-foreground p-0 active:scale-95 transition-transform"><Send className="size-3.5" /></Button>
               </div>
             </footer>
