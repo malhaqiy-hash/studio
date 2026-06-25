@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { TappLogo } from '@/components/ui/tapp-logo';
 
 const MOCK_FRIENDS = [
   { id: 'f1', name: 'Andi Wijaya', avatar: 'https://picsum.photos/seed/f1/100', status: 'online' },
@@ -101,7 +102,6 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md p-0 border-none bg-card text-foreground rounded-t-[2rem] sm:rounded-[2.5rem] overflow-hidden outline-none shadow-2xl flex flex-col max-h-[90vh] [&>button]:hidden">
-        {/* Drag Handle for mobile */}
         <div className="w-full flex flex-col items-center justify-center pt-4 pb-2">
           <div className="w-12 h-1.5 bg-muted rounded-full" />
         </div>
@@ -124,7 +124,7 @@ export function ShareSheet({ isOpen, onOpenChange, postUrl }: ShareSheetProps) {
                       ))}
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                       <div className="size-12 rounded-2xl bg-black text-white flex items-center justify-center font-black text-xl shadow-2xl ring-4 ring-white">T</div>
+                       <TappLogo className="size-14 rounded-2xl shadow-2xl ring-4 ring-white" />
                     </div>
                   </div>
                </div>

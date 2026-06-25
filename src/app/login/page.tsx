@@ -36,6 +36,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { isConfigValid } from "@/firebase/config";
+import { TappLogo } from "@/components/ui/tapp-logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -133,9 +134,7 @@ export default function LoginPage() {
     <div className="min-h-screen w-full flex items-center justify-center bg-[#FDFDFD] p-6 font-body">
       <div className="max-w-md w-full space-y-12">
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center size-20 rounded-3xl bg-primary text-primary-foreground font-black text-4xl shadow-2xl shadow-primary/20 mb-2 transform transition-all hover:rotate-6 hover:scale-110 select-none">
-            T
-          </div>
+          <TappLogo className="size-20 rounded-3xl shadow-2xl shadow-primary/20 mb-2 mx-auto transform transition-all hover:rotate-6 hover:scale-110" />
           <div className="space-y-1.5">
             <h1 className="text-5xl font-black text-slate-900 tracking-tight leading-none">Tapp</h1>
             <p className="text-slate-500 font-bold text-xl tracking-tight">Business Discovery Network</p>

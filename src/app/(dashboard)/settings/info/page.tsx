@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { APP_FEATURES, AppFeature } from '@/config/app-features';
 import Link from 'next/link';
+import { TappLogo } from '@/components/ui/tapp-logo';
 
 const ICON_MAP = {
   Search,
@@ -58,20 +59,18 @@ export default function AppInfoPage() {
         </header>
 
         <section className="space-y-4">
-          <div className="bg-teal-600 text-white p-6 rounded-[2rem] shadow-xl relative overflow-hidden group">
+          <div className="bg-[#0047BB] text-white p-6 rounded-[2rem] shadow-xl relative overflow-hidden group">
             <div className="relative z-10 space-y-3">
-              <div className="size-10 rounded-xl bg-white/20 backdrop-blur-xl flex items-center justify-center rotate-6 shadow-inner">
-                <Brain className="size-5 text-white fill-white" />
-              </div>
+              <TappLogo className="size-10 rounded-xl shadow-inner rotate-6" variant="white" />
               <h2 className="text-lg font-black tracking-tight leading-none">Tapp Intelligence</h2>
-              <p className="text-teal-50 font-medium text-[11px] leading-relaxed opacity-90">
+              <p className="text-blue-50 font-medium text-[11px] leading-relaxed opacity-90">
                 Sistem AI yang mensintesis data jaringan global untuk memberikan rekomendasi yang akurat, aman, dan hemat biaya bagi setiap member.
               </p>
               <div className="flex gap-3 pt-1">
-                 <div className="flex items-center gap-1.5 text-[7px] font-black uppercase tracking-widest text-teal-100">
+                 <div className="flex items-center gap-1.5 text-[7px] font-black uppercase tracking-widest text-blue-100">
                     <ShieldCheck className="size-3" /> Encrypted
                  </div>
-                 <div className="flex items-center gap-1.5 text-[7px] font-black uppercase tracking-widest text-teal-100">
+                 <div className="flex items-center gap-1.5 text-[7px] font-black uppercase tracking-widest text-blue-100">
                     <Cpu className="size-3" /> Optimized
                  </div>
               </div>

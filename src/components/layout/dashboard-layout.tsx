@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -82,6 +81,7 @@ import { useAccount, AccountType } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { motion, useMotionValue, useTransform } from "framer-motion";
+import { TappLogo } from "@/components/ui/tapp-logo";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -212,7 +212,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-11 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <Link href="/feed" className="flex items-center gap-2 active:scale-95 transition-transform">
-            <div className="size-6 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-black text-base shadow-lg shadow-primary/20">T</div>
+            <TappLogo className="size-6 rounded-lg shadow-lg shadow-primary/10" />
             <span className="font-black text-sm tracking-tight text-foreground uppercase">Tapp</span>
           </Link>
           <span className="font-aesthetic text-base text-primary/80 lowercase italic select-none ml-1 leading-none">{activeAccount?.type}</span>
@@ -339,7 +339,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <DialogContent className="w-[95%] md:max-w-md p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground rounded-[2rem] outline-none [&>button]:hidden">
           <div className="flex flex-col max-h-[90vh] overflow-y-auto no-scrollbar">
             <div className="flex flex-col items-center justify-center text-center space-y-3 pt-8 pb-5 px-8">
-              <div className="size-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center font-black text-2xl shadow-xl shadow-primary/20">T</div>
+              <TappLogo className="size-14 rounded-2xl shadow-xl shadow-primary/20" />
               <div className="space-y-1">
                 <DialogTitle className="text-xl font-black tracking-tight text-slate-900 uppercase">Selamat Datang</DialogTitle>
                 <DialogDescription className="font-medium text-slate-500 text-[12px] px-2">Pilih jenis profil untuk mulai membangun jaringan bisnis Anda yang cerdas.</DialogDescription>
