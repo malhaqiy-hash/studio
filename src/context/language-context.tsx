@@ -7,7 +7,11 @@ export type Language =
   | 'de' | 'pt' | 'ru' | 'it' | 'hi' | 'tr' | 'vi' | 'th'
   | 'nl' | 'pl' | 'sv' | 'el' | 'he' | 'ms' | 'tl' | 'bn'
   | 'pa' | 'fa' | 'sw' | 'ro' | 'hu' | 'cs' | 'uk' | 'da'
-  | 'fi' | 'no';
+  | 'fi' | 'no' | 'is' | 'ga' | 'cy' | 'et' | 'lv' | 'lt'
+  | 'sk' | 'sl' | 'hr' | 'sr' | 'bg' | 'sq' | 'mk' | 'ka'
+  | 'hy' | 'az' | 'kk' | 'uz' | 'km' | 'lo' | 'my' | 'mn'
+  | 'si' | 'ne' | 'ur' | 'ps' | 'zu' | 'af' | 'am' | 'yo'
+  | 'ig' | 'ha' | 'ca' | 'eu' | 'gl' | 'eo';
 
 export interface LanguageOption {
   code: Language;
@@ -33,7 +37,7 @@ export const LANGUAGES: LanguageOption[] = [
   { code: 'vi', label: 'Vietnamese', flag: '🇻🇳' },
   { code: 'th', label: 'Thai', flag: '🇹🇭' },
   { code: 'nl', label: 'Dutch', flag: '🇳🇱' },
-  { code: 'pl', label: 'Polish', flag: '🇵L' },
+  { code: 'pl', label: 'Polish', flag: '🇵🇱' },
   { code: 'sv', label: 'Swedish', flag: '🇸🇪' },
   { code: 'el', label: 'Greek', flag: '🇬🇷' },
   { code: 'he', label: 'Hebrew', flag: '🇮🇱' },
@@ -50,6 +54,42 @@ export const LANGUAGES: LanguageOption[] = [
   { code: 'da', label: 'Danish', flag: '🇩🇰' },
   { code: 'fi', label: 'Finnish', flag: '🇫🇮' },
   { code: 'no', label: 'Norwegian', flag: '🇳🇴' },
+  { code: 'is', label: 'Icelandic', flag: '🇮🇸' },
+  { code: 'ga', label: 'Irish', flag: '🇮🇪' },
+  { code: 'cy', label: 'Welsh', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+  { code: 'et', label: 'Estonian', flag: '🇪🇪' },
+  { code: 'lv', label: 'Latvian', flag: '🇱🇻' },
+  { code: 'lt', label: 'Lithuanian', flag: '🇱🇹' },
+  { code: 'sk', label: 'Slovak', flag: '🇸🇰' },
+  { code: 'sl', label: 'Slovenian', flag: '🇸🇮' },
+  { code: 'hr', label: 'Croatian', flag: '🇭🇷' },
+  { code: 'sr', label: 'Serbian', flag: '🇷🇸' },
+  { code: 'bg', label: 'Bulgarian', flag: '🇧🇬' },
+  { code: 'sq', label: 'Albanian', flag: '🇦🇱' },
+  { code: 'mk', label: 'Macedonian', flag: '🇲🇰' },
+  { code: 'ka', label: 'Georgian', flag: '🇬🇪' },
+  { code: 'hy', label: 'Armenian', flag: '🇦🇲' },
+  { code: 'az', label: 'Azerbaijani', flag: '🇦🇿' },
+  { code: 'kk', label: 'Kazakh', flag: '🇰🇿' },
+  { code: 'uz', label: 'Uzbek', flag: '🇺🇿' },
+  { code: 'km', label: 'Khmer', flag: '🇰🇭' },
+  { code: 'lo', label: 'Lao', flag: '🇱🇦' },
+  { code: 'my', label: 'Burmese', flag: '🇲🇲' },
+  { code: 'mn', label: 'Mongolian', flag: '🇲🇳' },
+  { code: 'si', label: 'Sinhalese', flag: '🇱🇰' },
+  { code: 'ne', label: 'Nepali', flag: '🇳🇵' },
+  { code: 'ur', label: 'Urdu', flag: '🇵🇰' },
+  { code: 'ps', label: 'Pashto', flag: '🇦🇫' },
+  { code: 'zu', label: 'Zulu', flag: '🇿🇦' },
+  { code: 'af', label: 'Afrikaans', flag: '🇿🇦' },
+  { code: 'am', label: 'Amharic', flag: '🇪🇹' },
+  { code: 'yo', label: 'Yoruba', flag: '🇳🇬' },
+  { code: 'ig', label: 'Igbo', flag: '🇳🇬' },
+  { code: 'ha', label: 'Hausa', flag: '🇳🇬' },
+  { code: 'ca', label: 'Catalan', flag: '🇪🇸' },
+  { code: 'eu', label: 'Basque', flag: '🇪🇸' },
+  { code: 'gl', label: 'Galician', flag: '🇪🇸' },
+  { code: 'eo', label: 'Esperanto', flag: '🏳️' },
 ];
 
 export const translations = {
