@@ -6,11 +6,27 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Send, MoreVertical, Trash2, MessageSquare } from "lucide-react";
+import { 
+  Search, 
+  Send, 
+  MoreVertical, 
+  Trash2, 
+  MessageSquare,
+  BellOff,
+  Eraser,
+  Check
+} from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 
 const INITIAL_CHATS = [
   { id: 1, name: "Eco Packaging Co", avatar: "https://picsum.photos/seed/eco/100", lastMsg: "The shipment was sent this morning.", time: "10:30 AM", unread: 2, status: "online" },
@@ -21,9 +37,11 @@ const INITIAL_CHATS = [
 export default function MessagesPage() {
   const { t } = useLanguage();
   const { activeAccount } = useAccount();
+  const { toast } = useToast();
   const [chats, setChats] = React.useState<any[]>([]);
   const [selectedChat, setSelectedChat] = React.useState<any>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isMuted, setIsMuted] = React.useState<Record<number, boolean>>({});
 
   const getStorageKey = React.useCallback(() => `ontapp_chats_data_${activeAccount.id}`, [activeAccount.id]);
 
@@ -57,6 +75,7 @@ export default function MessagesPage() {
   const handleClearAll = () => {
     setChats([]);
     setSelectedChat(null);
+    toast({ title: "Semua pesan dihapus" });
   };
 
   const deleteChat = (id: number) => {
@@ -66,6 +85,19 @@ export default function MessagesPage() {
         setSelectedChat(updated[0] || null);
       }
       return updated;
+    });
+    toast({ title: "Obrolan dihapus" });
+  };
+
+  const handleClearHistory = () => {
+    toast({ title: "Riwayat dibersihkan", description: `Percakapan dengan ${selectedChat?.name} telah dikosongkan.` });
+  };
+
+  const toggleMute = (id: number) => {
+    setIsMuted(prev => ({ ...prev, [id]: !prev[id] }));
+    toast({ 
+      title: !isMuted[id] ? "Obrolan Disenyapkan" : "Suara Diaktifkan",
+      description: !isMuted[id] ? "Anda tidak akan menerima notifikasi dari kontak ini." : "Notifikasi kembali aktif."
     });
   };
 
@@ -136,6 +168,7 @@ export default function MessagesPage() {
                         <AvatarFallback className="text-[9px]">{chat.name[0]}</AvatarFallback>
                       </Avatar>
                       {chat.status === 'online' && <div className="absolute bottom-0 right-0 size-2 bg-emerald-500 rounded-full border-2 border-card" />}
+                      {isMuted[chat.id] && <div className="absolute -top-1 -right-1 size-3.5 bg-slate-900 text-white rounded-full flex items-center justify-center"><BellOff className="size-2" /></div>}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline mb-0.5">
@@ -166,16 +199,46 @@ export default function MessagesPage() {
                   <AvatarFallback className="text-[9px]">{selectedChat.name[0]}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="font-bold text-[12px] leading-none">{selectedChat.name}</h3>
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-bold text-[12px] leading-none">{selectedChat.name}</h3>
+                    {isMuted[selectedChat.id] && <BellOff className="size-2.5 text-muted-foreground" />}
+                  </div>
                   <div className="flex items-center gap-1 mt-1">
                     <div className={cn("size-1.5 rounded-full", selectedChat.status === 'online' ? 'bg-emerald-500' : 'bg-muted-foreground')} />
                     <span className="text-[8px] font-bold text-muted-foreground uppercase">{selectedChat.status}</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-0.5 text-muted-foreground">
-                <Button variant="ghost" size="icon" className="size-7 rounded-lg"><MoreVertical className="size-3.5" /></Button>
-              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="size-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 flex items-center justify-center transition-all outline-none">
+                    <MoreVertical className="size-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card">
+                  <DropdownMenuItem 
+                    onClick={() => toggleMute(selectedChat.id)}
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-bold cursor-pointer text-[10px]"
+                  >
+                    <BellOff className="size-3.5" /> 
+                    {isMuted[selectedChat.id] ? "Aktifkan Suara" : "Senyapkan Obrolan"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={handleClearHistory}
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-bold cursor-pointer text-[10px]"
+                  >
+                    <Eraser className="size-3.5" /> Bersihkan Riwayat
+                  </DropdownMenuItem>
+                  <div className="h-px bg-border my-1" />
+                  <DropdownMenuItem 
+                    onClick={() => deleteChat(selectedChat.id)}
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-bold cursor-pointer text-rose-500 hover:bg-rose-50 text-[10px]"
+                  >
+                    <Trash2 className="size-3.5" /> Hapus Percakapan
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </header>
 
             <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-muted/5 no-scrollbar">
