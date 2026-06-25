@@ -134,7 +134,7 @@ export default function LoginPage() {
     <div className="min-h-screen w-full flex items-center justify-center bg-[#FDFDFD] p-6 font-body">
       <div className="max-w-md w-full space-y-12">
         <div className="text-center space-y-4">
-          <TappLogo className="size-20 rounded-3xl shadow-2xl shadow-primary/20 mb-2 mx-auto transform transition-all hover:rotate-6 hover:scale-110" />
+          <TappLogo className="size-24 rounded-[2rem] shadow-2xl shadow-primary/20 mb-2 mx-auto transform transition-all hover:scale-110" />
           <div className="space-y-1.5">
             <h1 className="text-5xl font-black text-slate-900 tracking-tight leading-none">Tapp</h1>
             <p className="text-slate-500 font-bold text-xl tracking-tight">Business Discovery Network</p>

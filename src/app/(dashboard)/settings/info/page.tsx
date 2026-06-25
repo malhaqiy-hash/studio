@@ -61,7 +61,7 @@ export default function AppInfoPage() {
         <section className="space-y-4">
           <div className="bg-[#0047BB] text-white p-6 rounded-[2rem] shadow-xl relative overflow-hidden group">
             <div className="relative z-10 space-y-3">
-              <TappLogo className="size-10 rounded-xl shadow-inner rotate-6" variant="white" />
+              <TappLogo className="size-12 rounded-2xl shadow-2xl" variant="white" />
               <h2 className="text-lg font-black tracking-tight leading-none">Tapp Intelligence</h2>
               <p className="text-blue-50 font-medium text-[11px] leading-relaxed opacity-90">
                 Sistem AI yang mensintesis data jaringan global untuk memberikan rekomendasi yang akurat, aman, dan hemat biaya bagi setiap member.

@@ -17,18 +17,23 @@ export function TappLogo({ className, iconClassName, variant = 'default' }: Tapp
         viewBox="0 0 100 100" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg" 
-        className={cn("w-[60%] h-[60%]", iconClassName)}
+        className={cn("w-[65%] h-[65%]", iconClassName)}
       >
+        {/* A modern, geometric T that doubles as a verification checkmark */}
         <path 
-          d="M28 45C28 45 28 62 38 72C42 62 65 28 78 18" 
+          d="M20 40H80M50 40V75C50 75 50 85 65 85H80" 
           stroke={variant === 'default' ? "white" : "#0047BB"} 
-          strokeWidth="10" 
+          strokeWidth="14" 
           strokeLinecap="round" 
           strokeLinejoin="round" 
         />
-        <path d="M42 82L75 42" stroke={variant === 'default' ? "white" : "#0047BB"} strokeWidth="10" strokeLinecap="round" />
-        <path d="M55 88L88 48" stroke={variant === 'default' ? "white" : "#0047BB"} strokeWidth="10" strokeLinecap="round" />
-        <path d="M68 94L98 54" stroke={variant === 'default' ? "white" : "#0047BB"} strokeWidth="10" strokeLinecap="round" />
+        {/* Accent dot symbolizing 'Tap' or connection point */}
+        <circle 
+          cx="80" 
+          cy="40" 
+          r="8" 
+          fill={variant === 'default' ? "white" : "#0047BB"} 
+        />
       </svg>
     </div>
   );
