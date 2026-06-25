@@ -4,7 +4,10 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 
 export type Language = 
   | 'en' | 'id' | 'ja' | 'zh' | 'ko' | 'ar' | 'es' | 'fr' 
-  | 'de' | 'pt' | 'ru' | 'it' | 'hi' | 'tr' | 'vi' | 'th';
+  | 'de' | 'pt' | 'ru' | 'it' | 'hi' | 'tr' | 'vi' | 'th'
+  | 'nl' | 'pl' | 'sv' | 'el' | 'he' | 'ms' | 'tl' | 'bn'
+  | 'pa' | 'fa' | 'sw' | 'ro' | 'hu' | 'cs' | 'uk' | 'da'
+  | 'fi' | 'no';
 
 export interface LanguageOption {
   code: Language;
@@ -29,6 +32,24 @@ export const LANGUAGES: LanguageOption[] = [
   { code: 'tr', label: 'Turkish', flag: '🇹🇷' },
   { code: 'vi', label: 'Vietnamese', flag: '🇻🇳' },
   { code: 'th', label: 'Thai', flag: '🇹🇭' },
+  { code: 'nl', label: 'Dutch', flag: '🇳🇱' },
+  { code: 'pl', label: 'Polish', flag: '🇵L' },
+  { code: 'sv', label: 'Swedish', flag: '🇸🇪' },
+  { code: 'el', label: 'Greek', flag: '🇬🇷' },
+  { code: 'he', label: 'Hebrew', flag: '🇮🇱' },
+  { code: 'ms', label: 'Malay', flag: '🇲🇾' },
+  { code: 'tl', label: 'Tagalog', flag: '🇵🇭' },
+  { code: 'bn', label: 'Bengali', flag: '🇧🇩' },
+  { code: 'pa', label: 'Punjabi', flag: '🇮🇳' },
+  { code: 'fa', label: 'Persian', flag: '🇮🇷' },
+  { code: 'sw', label: 'Swahili', flag: '🇰🇪' },
+  { code: 'ro', label: 'Romanian', flag: '🇷🇴' },
+  { code: 'hu', label: 'Hungarian', flag: '🇭🇺' },
+  { code: 'cs', label: 'Czech', flag: '🇨🇿' },
+  { code: 'uk', label: 'Ukrainian', flag: '🇺🇦' },
+  { code: 'da', label: 'Danish', flag: '🇩🇰' },
+  { code: 'fi', label: 'Finnish', flag: '🇫🇮' },
+  { code: 'no', label: 'Norwegian', flag: '🇳🇴' },
 ];
 
 export const translations = {
