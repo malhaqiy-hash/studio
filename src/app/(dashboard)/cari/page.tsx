@@ -80,6 +80,30 @@ const DAFTAR_DAERAH = [
   "Banten", "Depok", "Bekasi", "Tangerang", "Bogor"
 ];
 
+// Coordinate lookup for instant map jump
+const CITY_COORDS: Record<string, [number, number]> = {
+  "Jakarta Pusat": [-6.1805, 106.8284],
+  "Jakarta Selatan": [-6.2615, 106.8106],
+  "Jakarta Barat": [-6.1674, 106.7637],
+  "Jakarta Timur": [-6.2250, 106.9004],
+  "Jakarta Utara": [-6.1214, 106.8845],
+  "Bandung": [-6.9175, 107.6191],
+  "Surabaya": [-7.2575, 112.7521],
+  "Semarang": [-6.9932, 110.4203],
+  "Kendal": [-6.9178, 110.2017],
+  "Yogyakarta": [-7.7956, 110.3695],
+  "Medan": [3.5952, 98.6722],
+  "Makassar": [-5.1476, 119.4327],
+  "Palembang": [-2.9761, 104.7754],
+  "Denpasar": [-8.6705, 115.2126],
+  "Malang": [-7.9839, 112.6214],
+  "Banten": [-6.4058, 106.0640],
+  "Depok": [-6.4025, 106.7942],
+  "Bekasi": [-6.2383, 106.9756],
+  "Tangerang": [-6.1783, 106.6319],
+  "Bogor": [-6.5971, 106.8060]
+};
+
 export default function CariPage() {
   const { language, t } = useLanguage();
   const { activeAccount } = useAccount();
@@ -149,7 +173,11 @@ export default function CariPage() {
     
     setLoading(true);
     setShowSuggestions(false);
-    if (!overrideQuery) setResults(null);
+    
+    // Instant map jump if location matches our known coords
+    if (finalLocation && CITY_COORDS[finalLocation]) {
+      setMapCenter(CITY_COORDS[finalLocation]);
+    }
 
     try {
       const output = await aiIntentSearch({ 
@@ -232,6 +260,10 @@ export default function CariPage() {
   const handleSelectRegion = (region: string) => {
     setActiveLocation(region);
     setShowSuggestions(false);
+    // Instant map movement
+    if (CITY_COORDS[region]) {
+      setMapCenter(CITY_COORDS[region]);
+    }
     handleSearch(undefined, query, activeCategory, region);
   };
 

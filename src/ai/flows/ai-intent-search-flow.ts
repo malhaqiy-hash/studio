@@ -80,13 +80,13 @@ const aiIntentSearchPrompt = ai.definePrompt({
 ### SEARCH CONTEXT:
 - **QUERY**: "{{{query}}}"
 - **FILTERED LOCATION**: "{{{filters.location}}}"
-- **USER COORDINATES**: ({{{filters.lat}}}, {{{filters.lng}}})
+- **USER CURRENT COORDINATES**: ({{{filters.lat}}}, {{{filters.lng}}})
 
-### GEOGRAPHIC PRECISION RULES:
-1. **COORDINATES ARE MANDATORY**: You MUST provide realistic and precise 'lat' and 'lng' for every result.
-2. **STRICT LOCALITY**: If a location (city/area) is specified in the query or filters, all results MUST be physically located in that area.
-3. **GPS BIAS**: If user coordinates are provided, prioritize results within a 10km radius of ({{{filters.lat}}}, {{{filters.lng}}}).
-4. **REAL PLACES**: Use your knowledge of real-world businesses in {{{filters.location}}}.
+### GEOGRAPHIC PRECISION RULES (CRITICAL):
+1. **LOCATION PRECEDENCE**: If a city/area is specified in 'FILTERED LOCATION' or the 'QUERY' (e.g., "Yogyakarta", "Semarang"), you MUST ignore the 'USER CURRENT COORDINATES' if they are outside that city.
+2. **COORDINATES MUST MATCH CITY**: Every result returned MUST have 'lat' and 'lng' that physically reside within the specified city/area.
+3. **REALISTIC MAPPING**: Do not return generic city-center coordinates for all results. Provide realistic, distributed coordinates for different businesses within that city.
+4. **NO HALLUCINATION OF LOCATION**: If the user asks for "Yogyakarta", do not return coordinates for Jakarta (-6.2088). Yogyakarta is approx -7.7956, 110.3695.
 
 ### SOURCE CATEGORIZATION:
 - Label real-world established businesses you know as "external".
@@ -97,6 +97,18 @@ const aiIntentSearchPrompt = ai.definePrompt({
 - Be concise.
 - Ensure matchScore reflects actual relevance to the intent.`,
 });
+
+const CITY_FALLBACKS: Record<string, {lat: number, lng: number}> = {
+  "Yogyakarta": { lat: -7.7956, lng: 110.3695 },
+  "Semarang": { lat: -6.9932, lng: 110.4203 },
+  "Surabaya": { lat: -7.2575, lng: 112.7521 },
+  "Bandung": { lat: -6.9175, lng: 107.6191 },
+  "Jakarta": { lat: -6.2088, lng: 106.8456 },
+  "Medan": { lat: 3.5952, lng: 98.6722 },
+  "Makassar": { lat: -5.1476, lng: 119.4327 },
+  "Bali": { lat: -8.4095, lng: 115.1889 },
+  "Denpasar": { lat: -8.6705, lng: 115.2126 },
+};
 
 const aiIntentSearchFlow = ai.defineFlow(
   {
@@ -124,9 +136,19 @@ const aiIntentSearchFlow = ai.defineFlow(
       console.error('Precision Search Error:', err);
     }
     
-    // Fallback based on provided location if AI fails
-    const fallbackLat = input.filters?.lat || -6.2088;
-    const fallbackLng = input.filters?.lng || 106.8456;
+    // Fallback logic that respects the targeted location
+    let fallbackLat = input.filters?.lat || -6.2088;
+    let fallbackLng = input.filters?.lng || 106.8456;
+
+    if (input.filters?.location) {
+      for (const city in CITY_FALLBACKS) {
+        if (input.filters.location.toLowerCase().includes(city.toLowerCase())) {
+          fallbackLat = CITY_FALLBACKS[city].lat;
+          fallbackLng = CITY_FALLBACKS[city].lng;
+          break;
+        }
+      }
+    }
 
     return {
       results: [
@@ -137,7 +159,7 @@ const aiIntentSearchFlow = ai.defineFlow(
           matchScore: 80,
           source: 'external',
           isVerified: false,
-          matchReasons: ['Lokasi terdekat terdeteksi', 'Kategori sesuai'],
+          matchReasons: ['Lokasi terdeteksi', 'Kategori sesuai'],
           location: input.filters?.location || 'Area Terdekat',
           lat: fallbackLat,
           lng: fallbackLng
