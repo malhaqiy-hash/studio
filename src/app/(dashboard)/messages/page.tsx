@@ -231,13 +231,13 @@ export default function MessagesPage() {
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="size-8 rounded-lg text-muted-foreground hover:text-primary flex items-center justify-center outline-none"><MoreVertical className="size-4" /></button>
+          <button className="size-8 rounded-lg text-muted-foreground hover:text-primary flex items-center justify-center outline-none" onClick={(e) => e.stopPropagation()}><MoreVertical className="size-4" /></button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card">
-          <DropdownMenuItem onClick={() => toggleMute(chat.id)} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><BellOff className="size-3.5" /> {isMuted[chat.id] ? "Aktifkan Suara" : "Senyapkan"}</DropdownMenuItem>
-          <DropdownMenuItem onClick={handleClearHistory} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><Eraser className="size-3.5" /> Bersihkan Riwayat</DropdownMenuItem>
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); toggleMute(chat.id); }} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><BellOff className="size-3.5" /> {isMuted[chat.id] ? "Aktifkan Suara" : "Senyapkan"}</DropdownMenuItem>
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleClearHistory(); }} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><Eraser className="size-3.5" /> Bersihkan Riwayat</DropdownMenuItem>
           <div className="h-px bg-border my-1" />
-          <DropdownMenuItem onClick={() => deleteChat(chat.id)} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-rose-500 hover:bg-rose-50 text-[10px] cursor-pointer"><Trash2 className="size-3.5" /> Hapus Obrolan</DropdownMenuItem>
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); deleteChat(chat.id); }} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-rose-500 hover:bg-rose-50 text-[10px] cursor-pointer"><Trash2 className="size-3.5" /> Hapus Obrolan</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>
@@ -369,7 +369,7 @@ export default function MessagesPage() {
                       style={{ touchAction: 'pan-y' }}
                       onClick={() => handleChatSelection(chat)}
                       className={cn(
-                        "relative z-10 flex items-center gap-3 p-3 rounded-xl cursor-pointer bg-card border border-transparent transition-all",
+                        "relative z-10 flex items-center gap-3 p-3 rounded-xl cursor-pointer bg-card border border-transparent transition-colors",
                         selectedChat?.id === chat.id ? 'bg-background shadow-sm border-border' : 'hover:bg-muted/50'
                       )}
                     >
