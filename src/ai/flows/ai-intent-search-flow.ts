@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Hybrid Business Discovery Engine that intelligently ranks internal and external business results.
@@ -54,6 +55,8 @@ const AIIntentSearchOutputSchema = z.object({
       location: z.string().optional(),
       country: z.string().optional(),
       category: z.string().optional(),
+      lat: z.number().optional().describe('Latitude for map display'),
+      lng: z.number().optional().describe('Longitude for map display')
     })
   ).describe('A ranked list of results prioritizing Tapp members and verified businesses.')
 });
@@ -70,7 +73,7 @@ const aiIntentSearchPrompt = ai.definePrompt({
   },
   output: { schema: AIIntentSearchOutputSchema },
   config: {
-    maxOutputTokens: 500,
+    maxOutputTokens: 1000,
     temperature: 0.1
   },
   prompt: `You are the Tapp Hybrid Discovery Engine. Your goal is to find businesses that match a user's intent with high relevance.
@@ -82,9 +85,13 @@ const aiIntentSearchPrompt = ai.definePrompt({
    - Label internal as "ontapp_verified" or "ontapp_member".
    - Label generative as "external".
 
+### GEO-LOCATION (CRITICAL):
+- For each result, provide realistic 'lat' and 'lng' coordinates within or near {{{filters.location}}}. 
+- If user lat/lng is ({{{filters.lat}}}, {{{filters.lng}}}), generate results within 10-20km radius.
+
 ### INTENT RELEVANCE (STRICT):
 - **QUERY**: "{{{query}}}"
-- **STRICT MATCHING**: Only return businesses that directly match the core intent. If user asks for "coffee", DO NOT return "Pharmacy".
+- **STRICT MATCHING**: Only return businesses that directly match the core intent.
 - **GPS**: If coordinates ({{{filters.lat}}}, {{{filters.lng}}}) are given, focus results within that specific area.
 
 ### COST OPTIMIZATION:
@@ -116,10 +123,13 @@ const aiIntentSearchFlow = ai.defineFlow(
         if (output) {
           output.results = output.results.map(r => ({
             ...r,
-            name: r.name.replace(/^Informasi Terkait:\s*/i, '')
+            name: r.name.replace(/^Informasi Terkait:\s*/i, ''),
+            // Ensure every result has some coordinates for the map
+            lat: r.lat || (input.filters?.lat ? input.filters.lat + (Math.random() - 0.5) * 0.05 : -6.2088 + (Math.random() - 0.5) * 0.1),
+            lng: r.lng || (input.filters?.lng ? input.filters.lng + (Math.random() - 0.5) * 0.05 : 106.8456 + (Math.random() - 0.5) * 0.1)
           }));
           
-          output.results = output.results.filter(r => r.matchScore >= 80);
+          output.results = output.results.filter(r => r.matchScore >= 70);
           return output;
         }
       } catch (err: any) {
@@ -136,6 +146,7 @@ const aiIntentSearchFlow = ai.defineFlow(
       }
     }
     
+    // Default fallback with coordinates for Jakarta
     return {
       results: [
         {
@@ -146,7 +157,9 @@ const aiIntentSearchFlow = ai.defineFlow(
           source: 'external',
           isVerified: false,
           matchReasons: ['Optimalisasi beban server aktif', 'Trafik jaringan meningkat'],
-          location: input.filters?.location || 'Area Terdekat'
+          location: input.filters?.location || 'Area Terdekat',
+          lat: input.filters?.lat || -6.2088,
+          lng: input.filters?.lng || 106.8456
         }
       ]
     };

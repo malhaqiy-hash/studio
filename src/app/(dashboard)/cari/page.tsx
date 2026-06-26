@@ -1,6 +1,8 @@
+
 'use client';
 
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -31,6 +33,7 @@ import {
   Car,
   X,
   History,
+  Navigation,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
@@ -47,6 +50,13 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { useAccount } from "@/context/account-context";
+import 'leaflet/dist/leaflet.css';
+
+// Dynamic import for Leaflet (SSR Fix)
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 
 const SEARCH_CATEGORIES = [
   { id: 'professional_personal', label: 'Profesional/Pribadi', icon: User },
@@ -87,17 +97,25 @@ export default function CariPage() {
   const [activeLocation, setActiveLocation] = React.useState("");
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [filteredRegions, setFilteredRegions] = React.useState<string[]>([]);
+  const [coords, setCoords] = React.useState<{lat: number, lng: number} | null>(null);
   
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
-  
+  const [L, setL] = React.useState<any>(null);
+
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
   const suggestionRef = React.useRef<HTMLDivElement>(null);
 
+  // Initialize Leaflet Icons on Client Side
+  React.useEffect(() => {
+    import('leaflet').then((leaflet) => {
+      setL(leaflet);
+    });
+  }, []);
+
   const getRecentQueriesKey = React.useCallback(() => `ontapp_recent_queries_${activeAccount.id}`, [activeAccount.id]);
   const getHistoryKey = React.useCallback(() => `ontapp_discovery_history_${activeAccount.id}`, [activeAccount.id]);
 
-  // Load account-specific recent queries
   React.useEffect(() => {
     const saved = localStorage.getItem(getRecentQueriesKey());
     if (saved) {
@@ -114,6 +132,7 @@ export default function CariPage() {
         const data = await response.json();
         if (data.city && data.country_name) {
           setActiveLocation(`${data.city}, ${data.country_name}`);
+          setCoords({ lat: data.latitude, lng: data.longitude });
         }
       } catch (err) {
         console.warn("Gagal mendeteksi lokasi otomatis.");
@@ -146,7 +165,9 @@ export default function CariPage() {
         query: finalQuery || (finalCategory ? `Cari ${finalCategory}` : "Analisis Gambar"), 
         filters: {
           category: finalCategory || undefined,
-          location: finalLocation || undefined
+          location: finalLocation || undefined,
+          lat: coords?.lat,
+          lng: coords?.lng
         } 
       });
 
@@ -154,7 +175,6 @@ export default function CariPage() {
         output.results = output.results.map(r => ({ ...r, name: cleanTitle(r.name) }));
         setResults(output);
 
-        // Save to Discovery History (segmented by account)
         const historyKey = getHistoryKey();
         const existingHistory = JSON.parse(localStorage.getItem(historyKey) || '[]');
         const newDiscoveryItems = output.results.map(r => ({
@@ -165,7 +185,6 @@ export default function CariPage() {
         const updatedHistory = [...newDiscoveryItems, ...existingHistory].slice(0, 50);
         localStorage.setItem(historyKey, JSON.stringify(updatedHistory));
 
-        // Save to Recent Queries (segmented by account)
         if (finalQuery && finalQuery !== "Analisis Gambar") {
           const qKey = getRecentQueriesKey();
           const updatedQueries = [finalQuery, ...recentQueries.filter(q => q !== finalQuery)].slice(0, 5);
@@ -190,9 +209,15 @@ export default function CariPage() {
     }
   };
 
-  const openInGoogleMaps = (name: string, location?: string) => {
-    const searchQuery = encodeURIComponent(`${name} ${location || ''}`);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${searchQuery}`, '_blank');
+  const openInGoogleMaps = (name: string, location?: string, lat?: number, lng?: number) => {
+    let url = "";
+    if (lat && lng) {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    } else {
+      const searchQuery = encodeURIComponent(`${name} ${location || ''}`);
+      url = `https://www.google.com/maps/search/?api=1&query=${searchQuery}`;
+    }
+    window.open(url, '_blank');
   };
 
   const handleLocationChange = (val: string) => {
@@ -255,10 +280,31 @@ export default function CariPage() {
     }
   };
 
+  // Helper to create custom icons for internal/external
+  const getIcon = (source: string) => {
+    if (!L) return undefined;
+    const color = (source === 'ontapp_verified' || source === 'ontapp_member') ? '#0047BB' : '#EF4444';
+    
+    return new L.DivIcon({
+      className: 'custom-marker',
+      html: `
+        <div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; items-center; justify-center; border: 2px solid white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+           <div style="transform: rotate(45deg); width: 100%; height: 100%; display: flex; align-items: center; justify-center; color: white;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+           </div>
+        </div>
+      `,
+      iconSize: [30, 30],
+      iconAnchor: [15, 30],
+      popupAnchor: [0, -30]
+    });
+  };
+
   return (
     <DashboardLayout>
-      <div className="max-w-xl mx-auto space-y-3 py-2 px-1 md:px-0">
-        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.05)] space-y-2.5">
+      <div className="max-w-7xl mx-auto space-y-4 py-2 px-1 md:px-0 h-full flex flex-col">
+        {/* Search Header */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2.5 max-w-xl mx-auto w-full">
           <form onSubmit={(e) => handleSearch(e)} className="space-y-2.5">
             <div className="relative group w-full">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -364,65 +410,122 @@ export default function CariPage() {
           )}
         </div>
 
-        {results && (
-          <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-1.5"><h3 className="font-black text-slate-900 text-[10px] uppercase tracking-widest">{t('results')}</h3><Badge className="bg-primary/10 text-primary font-black px-1.5 py-0.5 rounded-full text-[9px] border-none">{results.results.length} Item</Badge></div>
-            </div>
-            <div className="grid gap-2">
-              {results.results.map((result, idx) => (
-                <Card key={idx} className="rounded-xl border-none shadow-[0_3px_15px_-5px_rgba(0,0,0,0.05)] bg-white overflow-hidden hover:shadow-[0_10px_20px_-5px_rgba(0,0,0,0.08)] transition-all group">
-                  <CardContent className="p-0 flex flex-col">
-                    <div className="p-3.5 md:p-4 flex gap-3 items-start">
+        {/* Content Area: Grid Side by Side on Desktop */}
+        <div className={cn("grid grid-cols-1 md:grid-cols-12 gap-4 flex-1 min-h-0", !results && "hidden")}>
+          {/* Results List */}
+          <div className="md:col-span-5 lg:col-span-4 space-y-2 overflow-y-auto no-scrollbar h-full pr-1">
+             <div className="flex items-center gap-1.5 px-2 py-1 sticky top-0 bg-background z-10">
+               <h3 className="font-black text-slate-900 text-[10px] uppercase tracking-widest">{t('results')}</h3>
+               <Badge className="bg-primary/10 text-primary font-black px-1.5 py-0.5 rounded-full text-[9px] border-none">{results?.results.length} Item</Badge>
+             </div>
+             
+             {results?.results.map((result, idx) => (
+                <Card key={idx} className="rounded-xl border-none shadow-sm bg-white overflow-hidden hover:shadow-md transition-all group">
+                  <CardContent className="p-0">
+                    <div className="p-3.5 flex gap-3 items-start">
                       <div className="size-9 rounded-lg bg-slate-50 text-primary flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary group-hover:text-white transition-all duration-300">{getTypeIcon(result.type)}</div>
-                      <div className="flex-1 space-y-0.5">
+                      <div className="flex-1 min-w-0 space-y-0.5">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <h4 className="text-[14px] font-bold text-slate-900 leading-tight group-hover:text-primary transition-colors">{cleanTitle(result.name)}</h4>
-                          <Badge className={cn("text-[8px] font-black uppercase tracking-widest rounded-full px-1.5 py-0.5 border-none", result.source === 'external' ? 'bg-slate-100 text-slate-600' : 'bg-primary/10 text-primary')}>
-                            {result.source === 'external' ? 'Eksternal' : 'Verified'}
+                          <h4 className="text-[13px] font-bold text-slate-900 leading-tight group-hover:text-primary transition-colors truncate">{cleanTitle(result.name)}</h4>
+                          <Badge className={cn("text-[7px] font-black uppercase tracking-widest rounded-full px-1.5 py-0.5 border-none", (result.source === 'ontapp_verified' || result.source === 'ontapp_member') ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-600')}>
+                            {(result.source === 'ontapp_verified' || result.source === 'ontapp_member') ? 'Verified' : 'Eksternal'}
                           </Badge>
                         </div>
-                        <p className="text-slate-500 font-medium text-[12px] leading-snug line-clamp-2">{result.description}</p>
-                        <div className="flex flex-wrap items-center gap-2.5 text-[9px] font-black text-slate-400 uppercase tracking-widest pt-1">
+                        <p className="text-slate-500 font-medium text-[11px] leading-snug line-clamp-2">{result.description}</p>
+                        <div className="flex flex-wrap items-center gap-2.5 text-[8px] font-black text-slate-400 uppercase tracking-widest pt-1">
                           {result.location && (
                             <button 
-                              onClick={() => openInGoogleMaps(result.name, result.location)}
-                              className="flex items-center gap-1 hover:text-primary transition-all"
+                              onClick={() => openInGoogleMaps(result.name, result.location, result.lat, result.lng)}
+                              className="flex items-center gap-1 hover:text-primary transition-all truncate max-w-[150px]"
                             >
                               <MapPin className="size-2.5" />
-                              <span className="underline decoration-primary/20 underline-offset-2">{result.location}</span>
+                              <span className="underline decoration-primary/20 underline-offset-2 truncate">{result.location}</span>
                             </button>
                           )}
                           <div className="flex items-center gap-1 text-primary bg-primary/5 px-1.5 py-0.5 rounded-md"><Target className="size-2.5" />{result.matchScore}% Synergy</div>
                         </div>
                       </div>
-                      <div className="shrink-0">
-                        <Button variant="outline" className="rounded-lg h-7 border-slate-100 hover:bg-primary hover:text-white text-[8px] font-black uppercase tracking-widest transition-all px-2.5">{t('view_profile')}</Button>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
-            </div>
           </div>
-        )}
 
+          {/* Map Section */}
+          <div className="md:col-span-7 lg:col-span-8 rounded-3xl border border-slate-100 shadow-inner bg-slate-50 relative min-h-[300px] md:min-h-0 h-full overflow-hidden">
+             {typeof window !== 'undefined' && results && results.results.length > 0 && (
+                <MapContainer 
+                  center={[results.results[0].lat || -6.2088, results.results[0].lng || 106.8456]} 
+                  zoom={11} 
+                  style={{ height: '100%', width: '100%', zIndex: 0 }}
+                  scrollWheelZoom={true}
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  {results.results.map((result, idx) => result.lat && result.lng ? (
+                    <Marker 
+                      key={idx} 
+                      position={[result.lat, result.lng]} 
+                      icon={getIcon(result.source)}
+                    >
+                      <Popup className="rounded-xl overflow-hidden shadow-2xl border-none p-0">
+                         <div className="p-3 space-y-2 min-w-[200px]">
+                            <div className="space-y-0.5">
+                               <h4 className="font-black text-[13px] text-slate-900 leading-tight">{result.name}</h4>
+                               <p className="text-[10px] text-slate-500 font-bold uppercase">{result.location || 'Lokasi Terdeteksi'}</p>
+                            </div>
+                            <div className="h-px bg-slate-100" />
+                            <div className="flex items-center justify-between gap-3">
+                               <div className="flex items-center gap-1.5 text-primary">
+                                  <Target className="size-3" />
+                                  <span className="font-black text-[10px]">{result.matchScore}% Synergy</span>
+                               </div>
+                               <Button 
+                                 size="sm" 
+                                 onClick={() => openInGoogleMaps(result.name, result.location, result.lat, result.lng)}
+                                 className="h-7 px-2.5 rounded-lg bg-slate-900 text-white font-black text-[8px] uppercase tracking-widest gap-1 active:scale-95"
+                               >
+                                  <Navigation className="size-2.5" />
+                                  Navigasi
+                               </Button>
+                            </div>
+                         </div>
+                      </Popup>
+                    </Marker>
+                  ) : null)}
+                </MapContainer>
+             )}
+             
+             {!results && (
+                <div className="w-full h-full flex flex-col items-center justify-center p-10 text-center opacity-30 gap-4">
+                   <MapPin className="size-16 text-slate-200" />
+                   <p className="font-black uppercase tracking-[0.2em] text-[10px]">Peta akan aktif setelah hasil ditemukan</p>
+                </div>
+             )}
+          </div>
+        </div>
+
+        {/* Empty State / Welcome */}
         {!loading && !results && (
-          <div className="py-10 px-6 text-center space-y-4 bg-gradient-to-br from-primary/5 to-accent/5 rounded-[2rem] border border-primary/10 shadow-inner overflow-hidden relative group">
-             <div className="absolute -top-10 -right-10 size-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
-             <div className="size-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mx-auto text-primary animate-bounce">
-                <Target className="size-6" />
-             </div>
-             <div className="space-y-2 relative z-10">
-               <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">
-                 {language === 'id' ? "Jaringan Anda Adalah Kekayaan Anda" : "Your Network is Your Net Worth"}
-               </h3>
-               <p className="text-[10px] text-slate-500 max-w-xs mx-auto font-medium leading-relaxed italic">
-                 {language === 'id' 
-                   ? "Setiap koneksi adalah pintu menuju peluang baru. Tapp membantu Anda membuka pintu tersebut secara cerdas." 
-                   : "Every connection is a gateway to new opportunities. Tapp helps you open those doors intelligently."}
-               </p>
-             </div>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="max-w-md w-full py-10 px-6 text-center space-y-4 bg-gradient-to-br from-primary/5 to-accent/5 rounded-[2rem] border border-primary/10 shadow-inner overflow-hidden relative group">
+               <div className="absolute -top-10 -right-10 size-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
+               <div className="size-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mx-auto text-primary animate-bounce">
+                  <Target className="size-6" />
+               </div>
+               <div className="space-y-2 relative z-10">
+                 <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">
+                   {language === 'id' ? "Jaringan Anda Adalah Kekayaan Anda" : "Your Network is Your Net Worth"}
+                 </h3>
+                 <p className="text-[10px] text-slate-500 max-w-xs mx-auto font-medium leading-relaxed italic">
+                   {language === 'id' 
+                     ? "Setiap koneksi adalah pintu menuju peluang baru. Tapp membantu Anda membuka pintu tersebut secara cerdas melalui pemetaan real-time." 
+                     : "Every connection is a gateway to new opportunities. Tapp helps you open those doors intelligently with real-time mapping."}
+                 </p>
+               </div>
+            </div>
           </div>
         )}
       </div>
