@@ -14,41 +14,15 @@ import {
   Truck, 
   Network, 
   Target, 
-  Sparkles, 
-  Filter, 
-  History, 
-  TrendingUp, 
-  ArrowRight,
+  RefreshCw,
   ShieldCheck,
-  Zap,
   MapPin,
-  CheckCircle2,
-  Cpu,
-  Star,
-  Award,
-  ExternalLink,
-  Info,
   Globe,
   Building2,
-  ChevronDown,
-  LayoutGrid,
   Camera,
-  Mic,
-  X,
-  RefreshCw,
-  Brain,
-  Image as ImageIcon,
-  Navigation
+  Navigation,
+  ExternalLink
 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -107,132 +81,131 @@ export default function SearchHubPage() {
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-6 py-4 px-2">
-        <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white">
-          <CardContent className="p-6 md:p-10 space-y-8">
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                <Search className="size-6 text-slate-400 group-focus-within:text-accent transition-colors" />
-              </div>
-              <Input 
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="What are you looking for?"
-                className="h-20 pl-16 pr-44 rounded-[2rem] border-slate-100 bg-slate-50/50 text-xl font-medium focus:bg-white focus:ring-accent/10 transition-all shadow-inner"
-              />
-              
-              <div className="absolute inset-y-4 right-4 flex items-center gap-2">
-                 <button 
-                   onClick={() => setIsSourcePickerOpen(true)}
-                   className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-accent transition-all active:scale-90"
-                 >
-                    <Camera className="size-6" />
-                 </button>
-                 <Button 
-                   onClick={() => handleSearch()}
-                   disabled={loading}
-                   className="h-12 rounded-2xl px-8 bg-black hover:bg-slate-800 text-white font-black text-base shadow-lg active:scale-95 transition-all"
-                 >
-                   {loading ? <RefreshCw className="size-5 animate-spin" /> : "Search"}
-                 </Button>
-              </div>
+        <div className="space-y-8">
+          {/* Search Header - No Banner */}
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+              <Search className="size-6 text-slate-400 group-focus-within:text-primary transition-colors" />
             </div>
+            <Input 
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="What are you looking for?"
+              className="h-16 pl-16 pr-44 rounded-2xl border-slate-100 bg-white text-xl font-medium focus:ring-4 focus:ring-primary/5 transition-all shadow-sm"
+            />
+            
+            <div className="absolute inset-y-2 right-2 flex items-center gap-2">
+               <button 
+                 onClick={() => setIsSourcePickerOpen(true)}
+                 className="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-primary transition-all active:scale-90"
+               >
+                  <Camera className="size-6" />
+               </button>
+               <Button 
+                 onClick={() => handleSearch()}
+                 disabled={loading}
+                 className="h-12 rounded-xl px-8 bg-black hover:bg-slate-800 text-white font-black text-base shadow-lg active:scale-95 transition-all"
+               >
+                 {loading ? <RefreshCw className="size-5 animate-spin" /> : "Search"}
+               </Button>
+            </div>
+          </div>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="bg-slate-50 p-1 rounded-2xl h-auto flex flex-wrap gap-1 border border-slate-100">
-                {SEARCH_SCOPES.map((scope) => (
-                  <TabsTrigger 
-                    key={scope.id} 
-                    value={scope.id}
-                    className="flex-1 min-w-[120px] rounded-xl py-2.5 data-[state=active]:bg-white data-[state=active]:text-accent data-[state=active]:shadow-md font-bold text-[11px] uppercase tracking-widest gap-2 transition-all"
-                  >
-                    <scope.icon className="size-3.5" />
-                    {scope.label.split(' ')[0]}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="bg-slate-50 p-1 rounded-2xl h-auto flex flex-wrap gap-1 border border-slate-100">
+              {SEARCH_SCOPES.map((scope) => (
+                <TabsTrigger 
+                  key={scope.id} 
+                  value={scope.id}
+                  className="flex-1 min-w-[120px] rounded-xl py-2.5 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md font-bold text-[11px] uppercase tracking-widest gap-2 transition-all"
+                >
+                  <scope.icon className="size-3.5" />
+                  {scope.label.split(' ')[0]}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-              <TabsContent value={activeTab} className="mt-8 space-y-6 outline-none">
-                {loading ? (
-                   <div className="space-y-4">
-                     {[1, 2, 3].map(i => <div key={i} className="h-32 w-full bg-slate-50 animate-pulse rounded-3xl" />)}
-                   </div>
-                ) : results && results.results.length > 0 ? (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-2 px-2">
-                       <Globe className="size-4 text-blue-500" />
-                       <h2 className="text-sm font-black uppercase tracking-tight text-slate-900">Hasil Eksternal</h2>
-                    </div>
-                    <div className="grid gap-6">
-                      {results.results.map((result, idx) => (
-                        <Card key={idx} className="group overflow-hidden border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 bg-white relative rounded-[2rem]">
-                          <div className="absolute top-4 right-4 z-10">
-                            <Badge className="bg-white/90 backdrop-blur-md text-blue-600 font-black text-[8px] uppercase px-3 py-1 rounded-full shadow-lg border-none">
-                              {result.matchScore}% Match
-                            </Badge>
-                          </div>
-
-                          <div className="flex flex-col md:flex-row">
-                            {result.imageUrl && (
-                              <div className="md:w-64 h-48 md:h-auto relative overflow-hidden bg-slate-100">
-                                 <img src={result.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={result.name} />
-                              </div>
-                            )}
-                            <CardContent className="p-8 flex-1 flex flex-col justify-center space-y-4">
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-3">
-                                  <h4 className="text-2xl font-black text-slate-900 group-hover:text-primary transition-colors">{result.name}</h4>
-                                  {result.isVerified && <ShieldCheck className="size-5 text-emerald-500" />}
-                                </div>
-                                <p className="text-slate-500 font-medium leading-relaxed line-clamp-2">{result.description}</p>
-                              </div>
-
-                              <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-50">
-                                <div className="flex items-center gap-6">
-                                  <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                    <MapPin className="size-3.5 text-rose-500" />
-                                    {result.location || 'Global'}
-                                  </div>
-                                  <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                    <Building2 className="size-3.5 text-blue-500" />
-                                    {result.type}
-                                  </div>
-                                </div>
-                                <div className="flex gap-2">
-                                  <Button 
-                                    onClick={() => openInGoogleMaps(result.name, result.location, result.lat, result.lng)}
-                                    size="sm" 
-                                    variant="outline" 
-                                    className="rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest gap-2"
-                                  >
-                                    <Navigation className="size-3.5" />
-                                    Maps
-                                  </Button>
-                                  <Button className="rounded-xl h-10 px-6 bg-black text-white font-black text-[10px] uppercase tracking-widest shadow-lg">
-                                    Details
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
+            <TabsContent value={activeTab} className="mt-8 space-y-6 outline-none">
+              {loading ? (
+                 <div className="space-y-4">
+                   {[1, 2, 3].map(i => <div key={i} className="h-32 w-full bg-slate-50 animate-pulse rounded-3xl" />)}
+                 </div>
+              ) : results && results.results.length > 0 ? (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2 px-2">
+                     <Globe className="size-4 text-blue-500" />
+                     <h2 className="text-sm font-black uppercase tracking-tight text-slate-900">Hasil Eksternal</h2>
                   </div>
-                ) : (
-                  <div className="py-20 text-center space-y-6">
-                    <div className="size-20 rounded-[2rem] bg-slate-50 flex items-center justify-center mx-auto shadow-inner rotate-3">
-                       <Target className="size-10 text-slate-200" />
-                    </div>
-                    <div className="space-y-1">
-                       <h3 className="text-xl font-black text-slate-900 uppercase">Discover Opportunities</h3>
-                       <p className="text-sm text-slate-400 max-w-sm mx-auto font-medium">Search the global business network using AI-powered intent synthesis.</p>
-                    </div>
+                  <div className="grid gap-6">
+                    {results.results.map((result, idx) => (
+                      <Card key={idx} className="group overflow-hidden border-none shadow-sm hover:shadow-xl transition-all duration-300 bg-white relative rounded-[2rem]">
+                        <div className="absolute top-4 right-4 z-10">
+                          <Badge className="bg-white/90 backdrop-blur-md text-blue-600 font-black text-[8px] uppercase px-3 py-1 rounded-full shadow-lg border-none">
+                            {result.matchScore}% Match
+                          </Badge>
+                        </div>
+
+                        <div className="flex flex-col md:flex-row">
+                          {result.imageUrl && (
+                            <div className="md:w-64 h-48 md:h-auto relative overflow-hidden bg-slate-100">
+                               <img src={result.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={result.name} />
+                            </div>
+                          )}
+                          <CardContent className="p-8 flex-1 flex flex-col justify-center space-y-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-3">
+                                <h4 className="text-2xl font-black text-slate-900 group-hover:text-primary transition-colors">{result.name}</h4>
+                                {result.isVerified && <ShieldCheck className="size-5 text-emerald-500" />}
+                              </div>
+                              <p className="text-slate-500 font-medium leading-relaxed line-clamp-2">{result.description}</p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-50">
+                              <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                  <MapPin className="size-3.5 text-rose-500" />
+                                  {result.location || 'Global'}
+                                </div>
+                                <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                  <Building2 className="size-3.5 text-blue-500" />
+                                  {result.type}
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button 
+                                  onClick={() => openInGoogleMaps(result.name, result.location, result.lat, result.lng)}
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest gap-2"
+                                >
+                                  <Navigation className="size-3.5" />
+                                  Maps
+                                </Button>
+                                <Button className="rounded-xl h-10 px-6 bg-black text-white font-black text-[10px] uppercase tracking-widest shadow-lg">
+                                  Details
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+                </div>
+              ) : (
+                <div className="py-20 text-center space-y-6">
+                  <div className="size-20 rounded-[2rem] bg-slate-50 flex items-center justify-center mx-auto shadow-inner rotate-3">
+                     <Target className="size-10 text-slate-200" />
+                  </div>
+                  <div className="space-y-1">
+                     <h3 className="text-xl font-black text-slate-900 uppercase">Discover Opportunities</h3>
+                     <p className="text-sm text-slate-400 max-w-sm mx-auto font-medium">Search the global business network using AI-powered intent synthesis.</p>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
       <Dialog open={isSourcePickerOpen} onOpenChange={setIsSourcePickerOpen}>

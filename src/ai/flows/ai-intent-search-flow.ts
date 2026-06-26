@@ -46,7 +46,7 @@ const AIIntentSearchOutputSchema = z.object({
       ]).describe('The type of the discovered item.'),
       name: z.string().describe('The name of the business or product.'),
       description: z.string().describe('A brief description.'),
-      imageUrl: z.string().optional().describe('A relevant image URL or keyword for image generation.'),
+      imageUrl: z.string().optional().describe('A relevant keyword for image generation (e.g. "coffee shop interior", "modern truck").'),
       matchScore: z.number().int().min(0).max(100).describe('Relevance score.'),
       source: z.enum(['ontapp_verified', 'ontapp_member', 'external']).describe('The source of the data.'),
       isVerified: z.boolean().describe('Whether the business is verified.'),
@@ -84,7 +84,7 @@ const aiIntentSearchPrompt = ai.definePrompt({
 
 ### RULES:
 1. **MAX RESULTS**: Return EXACTLY 5 high-quality results.
-2. **RELEVANT MEDIA**: For the 'imageUrl' field, provide a short 2-word keyword that perfectly describes the visual of the business/product (e.g., "coffee warehouse", "modern office", "industrial truck").
+2. **RELEVANT MEDIA**: For the 'imageUrl' field, provide a descriptive 2-3 word keyword that perfectly describes the visual of the business/product (e.g., "coffee beans pile", "modern logistic warehouse", "tech office team"). This will be used as an image seed.
 3. **NAVIGATION**: Provide accurate 'lat' and 'lng' for Google Maps navigation if available.
 4. **NO HALLUCINATION**: Results must be realistically relevant to the query and location.
 
@@ -113,10 +113,10 @@ const aiIntentSearchFlow = ai.defineFlow(
           results: output.results.slice(0, 5).map(r => ({
             ...r,
             name: r.name.replace(/^Informasi Terkait:\s*/i, ''),
-            // Generate a seed-based relevant image if AI didn't provide a URL
+            // Generate a seed-based relevant image using the AI-provided keyword
             imageUrl: r.imageUrl?.startsWith('http') 
               ? r.imageUrl 
-              : `https://picsum.photos/seed/${encodeURIComponent(r.name + (r.imageUrl || ''))}/800/500`
+              : `https://picsum.photos/seed/${encodeURIComponent(r.imageUrl || r.name)}/800/500`
           }))
         };
       }

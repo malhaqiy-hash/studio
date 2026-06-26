@@ -219,8 +219,8 @@ export default function CariPage() {
   return (
     <DashboardLayout>
       <div className="max-w-xl mx-auto space-y-4 py-2 px-1 md:px-0 flex flex-col min-h-screen pb-24">
-        {/* Search Input Area */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2.5 w-full sticky top-0 z-50">
+        {/* Search Input Area - No Banner, Clean Integration */}
+        <div className="space-y-2.5 w-full">
           <form onSubmit={(e) => handleSearch(e)} className="space-y-2.5">
             <div className="relative group w-full">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
