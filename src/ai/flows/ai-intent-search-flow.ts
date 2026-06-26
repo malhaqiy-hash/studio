@@ -1,7 +1,7 @@
 'use server';
 /**
  * @fileOverview A Hybrid Business Discovery Engine that intelligently ranks internal and external business results.
- * Optimized for maximum 5 results with media support.
+ * Optimized for EXACTLY 5 results with query-relevant media generation.
  */
 
 import { ai } from '@/ai/genkit';
@@ -46,7 +46,7 @@ const AIIntentSearchOutputSchema = z.object({
       ]).describe('The type of the discovered item.'),
       name: z.string().describe('The name of the business or product.'),
       description: z.string().describe('A brief description.'),
-      imageUrl: z.string().optional().describe('URL to an image representing the business or product.'),
+      imageUrl: z.string().optional().describe('A relevant image URL or keyword for image generation.'),
       matchScore: z.number().int().min(0).max(100).describe('Relevance score.'),
       source: z.enum(['ontapp_verified', 'ontapp_member', 'external']).describe('The source of the data.'),
       isVerified: z.boolean().describe('Whether the business is verified.'),
@@ -58,7 +58,7 @@ const AIIntentSearchOutputSchema = z.object({
       lat: z.number().optional().describe('Latitude for Google Maps navigation'),
       lng: z.number().optional().describe('Longitude for Google Maps navigation')
     })
-  ).describe('Top 5 results with media data.')
+  ).describe('Exactly 5 high-quality results.')
 });
 export type AIIntentSearchOutput = z.infer<typeof AIIntentSearchOutputSchema>;
 
@@ -76,7 +76,7 @@ const aiIntentSearchPrompt = ai.definePrompt({
     maxOutputTokens: 1500,
     temperature: 0.2
   },
-  prompt: `You are the Tapp Precision Discovery Engine. Your goal is to find the TOP 5 businesses/products that match a user's intent.
+  prompt: `You are the Tapp Precision Discovery Engine. Find EXACTLY 5 businesses or products matching the user's intent.
 
 ### SEARCH CONTEXT:
 - **QUERY**: "{{{query}}}"
@@ -84,9 +84,9 @@ const aiIntentSearchPrompt = ai.definePrompt({
 
 ### RULES:
 1. **MAX RESULTS**: Return EXACTLY 5 high-quality results.
-2. **MEDIA DATA**: For each result, include a realistic 'imageUrl' if it represents a well-known external business. If not sure, leave empty.
+2. **RELEVANT MEDIA**: For the 'imageUrl' field, provide a short 2-word keyword that perfectly describes the visual of the business/product (e.g., "coffee warehouse", "modern office", "industrial truck").
 3. **NAVIGATION**: Provide accurate 'lat' and 'lng' for Google Maps navigation if available.
-4. **NO HALLUCINATION**: If the user asks for a specific city, ensure results are realistically within that city.
+4. **NO HALLUCINATION**: Results must be realistically relevant to the query and location.
 
 ### OUTPUT:
 - Be concise and professional.
@@ -112,7 +112,11 @@ const aiIntentSearchFlow = ai.defineFlow(
         return {
           results: output.results.slice(0, 5).map(r => ({
             ...r,
-            name: r.name.replace(/^Informasi Terkait:\s*/i, '')
+            name: r.name.replace(/^Informasi Terkait:\s*/i, ''),
+            // Generate a seed-based relevant image if AI didn't provide a URL
+            imageUrl: r.imageUrl?.startsWith('http') 
+              ? r.imageUrl 
+              : `https://picsum.photos/seed/${encodeURIComponent(r.name + (r.imageUrl || ''))}/800/500`
           }))
         };
       }
@@ -120,6 +124,7 @@ const aiIntentSearchFlow = ai.defineFlow(
       console.error('Search Flow Error:', err);
     }
     
+    // Fallback if AI fails
     return {
       results: [
         {
@@ -131,7 +136,7 @@ const aiIntentSearchFlow = ai.defineFlow(
           isVerified: false,
           matchReasons: ['Lokasi terdeteksi', 'Kategori sesuai'],
           location: input.filters?.location || 'Area Terdekat',
-          imageUrl: `https://picsum.photos/seed/${cleanQuery}/600/400`
+          imageUrl: `https://picsum.photos/seed/${encodeURIComponent(cleanQuery)}/800/500`
         }
       ]
     };

@@ -140,7 +140,7 @@ export default function CariPage() {
 
     setInternalResults(matchedAccounts);
 
-    // 2. Search External via AI
+    // 2. Search External via AI (Limited to 5 results)
     try {
       const output = await aiIntentSearch({ 
         query: finalQuery || (finalCategory ? `Cari ${finalCategory}` : "Bisnis Terdekat"), 
@@ -220,7 +220,7 @@ export default function CariPage() {
   return (
     <DashboardLayout>
       <div className="max-w-xl mx-auto space-y-4 py-2 px-1 md:px-0 flex flex-col min-h-screen pb-24">
-        {/* Search Header */}
+        {/* Search Input Area (Banner Removed) */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2.5 w-full sticky top-0 z-50">
           <form onSubmit={(e) => handleSearch(e)} className="space-y-2.5">
             <div className="relative group w-full">
