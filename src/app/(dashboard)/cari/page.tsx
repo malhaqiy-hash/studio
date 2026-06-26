@@ -36,7 +36,6 @@ import {
   ShieldCheck,
   Navigation
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
 import { useLanguage } from "@/context/language-context";
 import {
@@ -220,7 +219,7 @@ export default function CariPage() {
   return (
     <DashboardLayout>
       <div className="max-w-xl mx-auto space-y-4 py-2 px-1 md:px-0 flex flex-col min-h-screen pb-24">
-        {/* Search Input Area (Banner Removed) */}
+        {/* Search Input Area */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2.5 w-full sticky top-0 z-50">
           <form onSubmit={(e) => handleSearch(e)} className="space-y-2.5">
             <div className="relative group w-full">
@@ -363,7 +362,7 @@ export default function CariPage() {
                    <div className="space-y-3 py-2">
                      <div className="flex items-center gap-2 px-1">
                         <Globe className="size-4 text-blue-500" />
-                        <h2 className="text-sm font-black uppercase tracking-tight text-slate-900">Hasil Pencarian AI (Eksternal)</h2>
+                        <h2 className="text-sm font-black uppercase tracking-tight text-slate-900">Hasil Eksternal</h2>
                      </div>
                      <div className="grid gap-3">
                         {results.results.map((result, idx) => (
