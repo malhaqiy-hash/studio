@@ -217,7 +217,7 @@ export default function NotificationsPage() {
                       style={{ touchAction: 'pan-y' }}
                       className={cn(
                         "relative z-10 bg-card transition-colors hover:bg-slate-50/50",
-                        notification.unread ? 'border-l-[3px] border-l-black' : 'bg-slate-50/30'
+                        notification.unread ? 'border-l-[3px] border-l-black' : 'bg-slate-50'
                       )}
                     >
                       <CardContent className="p-3 md:p-3.5">
@@ -283,7 +283,7 @@ export default function NotificationsPage() {
                                        <AlertTriangle className="size-3" /> Laporkan
                                      </DropdownMenuItem>
                                    </DropdownMenuContent>
-                                 </                 </DropdownMenu>
+                                 </DropdownMenu>
                                </div>
                             </div>
                           </div>
