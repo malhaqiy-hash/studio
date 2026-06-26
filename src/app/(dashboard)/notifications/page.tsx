@@ -213,15 +213,16 @@ export default function NotificationsPage() {
                       dragConstraints={{ left: -56, right: 0 }}
                       dragElastic={0.05}
                       dragDirectionLock
+                      dragMomentum={false}
                       style={{ touchAction: 'pan-y' }}
                       className={cn(
                         "relative z-10 bg-card transition-colors hover:bg-slate-50/50",
-                        notification.unread ? 'border-l-[3px] border-l-black' : 'opacity-90'
+                        notification.unread ? 'border-l-[3px] border-l-black' : 'bg-slate-50/30'
                       )}
                     >
                       <CardContent className="p-3 md:p-3.5">
                         <div className="flex items-start gap-2.5">
-                          <div className={cn("size-9 rounded-xl flex items-center justify-center shrink-0 shadow-inner", notification.color)}>
+                          <div className={cn("size-9 rounded-xl flex items-center justify-center shrink-0 shadow-inner", notification.color, !notification.unread && "opacity-60")}>
                             <IconComp className="size-4" />
                           </div>
                           <div className="flex-1 min-w-0 space-y-0.5">
@@ -239,7 +240,7 @@ export default function NotificationsPage() {
                                 {notification.time}
                               </span>
                             </div>
-                            <p className="text-[10px] text-muted-foreground font-medium leading-snug line-clamp-2">
+                            <p className={cn("text-[10px] font-medium leading-snug line-clamp-2", notification.unread ? "text-muted-foreground" : "text-slate-400")}>
                               {notification.description}
                             </p>
                             <div className="pt-1 flex items-center justify-between">
@@ -282,7 +283,7 @@ export default function NotificationsPage() {
                                        <AlertTriangle className="size-3" /> Laporkan
                                      </DropdownMenuItem>
                                    </DropdownMenuContent>
-                                 </DropdownMenu>
+                                 </                 </DropdownMenu>
                                </div>
                             </div>
                           </div>
