@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -5,7 +6,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Button } from '@/components/ui/button';
-import { Navigation, Target } from 'lucide-react';
+import { Navigation, Target, ExternalLink } from 'lucide-react';
 
 interface DiscoveryMapProps {
   center: [number, number];
@@ -62,10 +63,10 @@ export default function DiscoveryMap({ center, results, onNavigate }: DiscoveryM
              <div className="p-3 space-y-2 min-w-[200px]">
                 <div className="space-y-0.5">
                    <h4 className="font-black text-[13px] text-slate-900 leading-tight">{result.name}</h4>
-                   <p className="text-[10px] text-slate-500 font-bold uppercase">{result.location || 'Lokasi Terdeteksi'}</p>
+                   <p className="text-[10px] text-slate-500 font-bold uppercase">{result.location || (result.source === 'ontapp_verified' ? 'Internal Network' : 'Lokasi Terdeteksi')}</p>
                 </div>
                 <div className="h-px bg-slate-100" />
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-col gap-2">
                    <div className="flex items-center gap-1.5 text-primary">
                       <Target className="size-3" />
                       <span className="font-black text-[10px]">{result.matchScore}% Synergy</span>
@@ -73,10 +74,10 @@ export default function DiscoveryMap({ center, results, onNavigate }: DiscoveryM
                    <Button 
                      size="sm" 
                      onClick={() => onNavigate(result.name, result.location, result.lat, result.lng)}
-                     className="h-7 px-2.5 rounded-lg bg-slate-900 text-white font-black text-[8px] uppercase tracking-widest gap-1 active:scale-95"
+                     className="w-full h-8 rounded-lg bg-slate-900 text-white font-black text-[8px] uppercase tracking-widest gap-2 active:scale-95 shadow-lg"
                    >
-                      <Navigation className="size-2.5" />
-                      Navigasi
+                      <ExternalLink className="size-3" />
+                      Google Maps
                    </Button>
                 </div>
              </div>
