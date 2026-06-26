@@ -31,7 +31,6 @@ import {
   Calendar,
   Car,
   X,
-  History,
   Navigation,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -49,23 +48,12 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { useAccount } from "@/context/account-context";
-import 'leaflet/dist/leaflet.css';
 
-// Dynamic imports for Leaflet
-const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
-const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
-const useMap = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false });
-
-// Component to handle map re-centering
-function MapController({ center, zoom }: { center: [number, number], zoom: number }) {
-  const map = (useMap as any)();
-  React.useEffect(() => {
-    map.setView(center, zoom, { animate: true });
-  }, [center, zoom, map]);
-  return null;
-}
+// Dynamic import for the Map component to avoid SSR issues
+const DiscoveryMap = dynamic(() => import('@/components/discovery-map'), { 
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center font-black text-slate-300 uppercase tracking-widest text-xs">Memuat Peta...</div>
+});
 
 const SEARCH_CATEGORIES = [
   { id: 'professional_personal', label: 'Profesional/Pribadi', icon: User },
@@ -110,17 +98,10 @@ export default function CariPage() {
   const [mapCenter, setMapCenter] = React.useState<[number, number]>([-6.2088, 106.8456]);
   
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
-  const [L, setL] = React.useState<any>(null);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
   const suggestionRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    import('leaflet').then((leaflet) => {
-      setL(leaflet);
-    });
-  }, []);
 
   const getRecentQueriesKey = React.useCallback(() => `ontapp_recent_queries_${activeAccount.id}`, [activeAccount.id]);
   const getHistoryKey = React.useCallback(() => `ontapp_discovery_history_${activeAccount.id}`, [activeAccount.id]);
@@ -185,7 +166,6 @@ export default function CariPage() {
         output.results = output.results.map(r => ({ ...r, name: cleanTitle(r.name) }));
         setResults(output);
         
-        // Center map on the first result
         const first = output.results[0];
         if (first.lat && first.lng) {
           setMapCenter([first.lat, first.lng]);
@@ -264,7 +244,7 @@ export default function CariPage() {
   };
 
   const handleVoiceSearch = () => {
-    if (!('webkitSpeechRecognition' in window)) return;
+    if (typeof window === 'undefined' || !('webkitSpeechRecognition' in window)) return;
     const recognition = new (window as any).webkitSpeechRecognition();
     recognition.lang = language === 'id' ? 'id-ID' : 'en-US';
     recognition.onresult = (event: any) => {
@@ -294,25 +274,6 @@ export default function CariPage() {
       case 'business': return <Building2 className="size-4" />;
       default: return <Building2 className="size-4" />;
     }
-  };
-
-  const getIcon = (source: string) => {
-    if (!L) return undefined;
-    const color = (source === 'ontapp_verified' || source === 'ontapp_member') ? '#0047BB' : '#EF4444';
-    
-    return new L.DivIcon({
-      className: 'custom-marker',
-      html: `
-        <div style="background-color: ${color}; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; items-center; justify-center; border: 2.5px solid white; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);">
-           <div style="transform: rotate(45deg); width: 100%; height: 100%; display: flex; align-items: center; justify-center; color: white;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg>
-           </div>
-        </div>
-      `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32]
-    });
   };
 
   return (
@@ -451,50 +412,12 @@ export default function CariPage() {
 
           {/* Map Section */}
           <div className="md:col-span-7 lg:col-span-8 rounded-3xl border border-slate-100 shadow-inner bg-slate-50 relative min-h-[350px] md:min-h-0 h-full overflow-hidden">
-             {typeof window !== 'undefined' && results && results.results.length > 0 && (
-                <MapContainer 
+             {results && results.results.length > 0 && (
+                <DiscoveryMap 
                   center={mapCenter} 
-                  zoom={13} 
-                  style={{ height: '100%', width: '100%', zIndex: 0 }}
-                  scrollWheelZoom={true}
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  <MapController center={mapCenter} zoom={13} />
-                  {results.results.map((result, idx) => result.lat && result.lng ? (
-                    <Marker 
-                      key={idx} 
-                      position={[result.lat, result.lng]} 
-                      icon={getIcon(result.source)}
-                    >
-                      <Popup className="rounded-xl overflow-hidden shadow-2xl border-none p-0">
-                         <div className="p-3 space-y-2 min-w-[200px]">
-                            <div className="space-y-0.5">
-                               <h4 className="font-black text-[13px] text-slate-900 leading-tight">{result.name}</h4>
-                               <p className="text-[10px] text-slate-500 font-bold uppercase">{result.location || 'Lokasi Terdeteksi'}</p>
-                            </div>
-                            <div className="h-px bg-slate-100" />
-                            <div className="flex items-center justify-between gap-3">
-                               <div className="flex items-center gap-1.5 text-primary">
-                                  <Target className="size-3" />
-                                  <span className="font-black text-[10px]">{result.matchScore}% Synergy</span>
-                               </div>
-                               <Button 
-                                 size="sm" 
-                                 onClick={() => openInGoogleMaps(result.name, result.location, result.lat, result.lng)}
-                                 className="h-7 px-2.5 rounded-lg bg-slate-900 text-white font-black text-[8px] uppercase tracking-widest gap-1 active:scale-95"
-                               >
-                                  <Navigation className="size-2.5" />
-                                  Navigasi
-                               </Button>
-                            </div>
-                         </div>
-                      </Popup>
-                    </Marker>
-                  ) : null)}
-                </MapContainer>
+                  results={results.results} 
+                  onNavigate={openInGoogleMaps} 
+                />
              )}
           </div>
         </div>
