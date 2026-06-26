@@ -318,32 +318,61 @@ export default function MessagesPage() {
           </div>
           
           <div className="flex-1 overflow-y-auto px-2 pb-6 space-y-1 no-scrollbar overflow-x-hidden">
-            {chats.map((chat) => (
-              <motion.div
-                key={chat.id}
-                onClick={() => handleChatSelection(chat)}
-                className={cn(
-                  "relative flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer bg-card border border-transparent transition-all",
-                  selectedChat?.id === chat.id ? 'bg-background shadow-sm border-border' : 'hover:bg-muted/50'
-                )}
-              >
-                <div className="relative">
-                  <Avatar className="size-9 border border-border">
-                    <AvatarImage src={chat.avatar} className="object-cover" />
-                    <AvatarFallback className="text-[9px]">{chat.name[0]}</AvatarFallback>
-                  </Avatar>
-                  {chat.status === 'online' && <div className="absolute bottom-0 right-0 size-2 bg-emerald-500 rounded-full border-2 border-card" />}
-                  {isMuted[chat.id] && <div className="absolute -top-1 -right-1 size-3.5 bg-slate-900 text-white rounded-full flex items-center justify-center"><BellOff className="size-2" /></div>}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-baseline mb-0.5">
-                    <h4 className="font-bold text-[11px] truncate">{chat.name}</h4>
-                    <span className="text-[7px] text-muted-foreground font-black uppercase">{chat.time}</span>
+            <AnimatePresence initial={false}>
+              {chats.map((chat) => (
+                <motion.div
+                  key={chat.id}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                  className="overflow-hidden"
+                >
+                  <div className="relative group/card mb-1">
+                    {/* Delete Button Behind */}
+                    <div className="absolute inset-y-0 right-0 w-14 flex items-center justify-center bg-rose-500 rounded-xl">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); deleteChat(chat.id); }}
+                        className="w-full h-full flex flex-col items-center justify-center text-white active:scale-90 transition-transform"
+                      >
+                        <Trash2 className="size-3.5" />
+                        <span className="text-[7px] font-black uppercase mt-0.5">Hapus</span>
+                      </button>
+                    </div>
+
+                    {/* Swipeable Content */}
+                    <motion.div
+                      drag="x"
+                      dragConstraints={{ left: -56, right: 0 }}
+                      dragElastic={0.05}
+                      dragDirectionLock
+                      style={{ touchAction: 'pan-y' }}
+                      onClick={() => handleChatSelection(chat)}
+                      className={cn(
+                        "relative z-10 flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer bg-card border border-transparent transition-all",
+                        selectedChat?.id === chat.id ? 'bg-background shadow-sm border-border' : 'hover:bg-muted/50'
+                      )}
+                    >
+                      <div className="relative shrink-0">
+                        <Avatar className="size-9 border border-border">
+                          <AvatarImage src={chat.avatar} className="object-cover" />
+                          <AvatarFallback className="text-[9px]">{chat.name[0]}</AvatarFallback>
+                        </Avatar>
+                        {chat.status === 'online' && <div className="absolute bottom-0 right-0 size-2 bg-emerald-500 rounded-full border-2 border-card" />}
+                        {isMuted[chat.id] && <div className="absolute -top-1 -right-1 size-3.5 bg-slate-900 text-white rounded-full flex items-center justify-center"><BellOff className="size-2" /></div>}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <h4 className="font-bold text-[11px] truncate">{chat.name}</h4>
+                          <span className="text-[7px] text-muted-foreground font-black uppercase">{chat.time}</span>
+                        </div>
+                        <p className="text-[9px] text-muted-foreground font-medium truncate">{chat.lastMsg}</p>
+                      </div>
+                    </motion.div>
                   </div>
-                  <p className="text-[9px] text-muted-foreground font-medium truncate">{chat.lastMsg}</p>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
 
