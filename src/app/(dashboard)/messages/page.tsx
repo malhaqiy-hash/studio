@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -364,7 +363,7 @@ export default function MessagesPage() {
                     <motion.div
                       drag="x"
                       dragConstraints={{ left: -56, right: 0 }}
-                      dragElastic={0.12}
+                      dragElastic={0.05}
                       dragDirectionLock
                       dragMomentum={false}
                       style={{ touchAction: 'pan-y' }}
