@@ -190,7 +190,7 @@ export default function MessagesPage() {
   };
 
   const ChatHeader = ({ chat }: { chat: any }) => (
-    <header className="h-14 border-b border-border px-4 flex items-center justify-between bg-background/50">
+    <header className="h-14 border-b border-border px-4 flex items-center justify-between bg-background/50 shrink-0">
       <div className="flex items-center gap-2.5">
         <button onClick={() => setIsMobileChatOpen(false)} className="md:hidden size-8 flex items-center justify-center text-muted-foreground hover:text-primary active:scale-90 transition-all">
           <ChevronLeft className="size-5" />
@@ -199,8 +199,8 @@ export default function MessagesPage() {
           <AvatarImage src={chat.avatar} className="object-cover" />
           <AvatarFallback className="text-[9px]">{chat.name[0]}</AvatarFallback>
         </Avatar>
-        <div>
-          <h3 className="font-bold text-[12px] leading-none">{chat.name}</h3>
+        <div className="min-w-0">
+          <h3 className="font-bold text-[12px] leading-none truncate max-w-[120px]">{chat.name}</h3>
           <div className="flex items-center gap-1 mt-1">
             <div className={cn("size-1.5 rounded-full", chat.status === 'online' ? 'bg-emerald-500' : 'bg-muted-foreground')} />
             <span className="text-[8px] font-bold text-muted-foreground uppercase">{chat.status}</span>
@@ -223,18 +223,18 @@ export default function MessagesPage() {
   );
 
   const ChatMessages = ({ chatId }: { chatId: number }) => (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4 bg-muted/5 no-scrollbar">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/5 scroll-smooth">
       {(messagesByChat[chatId] || DEFAULT_MESSAGES).map((msg, i) => (
-        <div key={i} className={cn("flex flex-col gap-1 max-w-[75%]", msg.sender === 'me' ? "ml-auto items-end" : "items-start")}>
+        <div key={i} className={cn("flex flex-col gap-1 max-w-[85%]", msg.sender === 'me' ? "ml-auto items-end" : "items-start")}>
           <div className={cn(
-            "p-2.5 text-[11px] font-medium shadow-sm border border-border leading-relaxed rounded-xl",
+            "p-3 text-[11px] font-medium shadow-sm border border-border leading-relaxed rounded-xl",
             msg.sender === 'me' ? "bg-accent text-accent-foreground rounded-tr-none" : "bg-card text-foreground rounded-tl-none"
           )}>
             {msg.type === 'text' && msg.text}
             {msg.type === 'image' && (
               <div className="space-y-1.5">
-                <img src={msg.media} className="rounded-lg max-w-full max-h-48 object-cover" />
-                {msg.text && <p className="opacity-70 text-[9px]">{msg.text}</p>}
+                <img src={msg.media} className="rounded-lg max-w-full max-h-60 object-cover" alt="Sent media" />
+                {msg.text && <p className="opacity-70 text-[9px] truncate">{msg.text}</p>}
               </div>
             )}
             {msg.type === 'doc' && (
@@ -256,7 +256,7 @@ export default function MessagesPage() {
               </div>
             )}
             {msg.type === 'link' && (
-              <a href={msg.text} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-indigo-200 underline decoration-indigo-200/50 underline-offset-2">
+              <a href={msg.text} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-indigo-500 underline decoration-indigo-500/30 underline-offset-2">
                  <LinkIcon className="size-3" /> {msg.text}
               </a>
             )}
@@ -267,7 +267,7 @@ export default function MessagesPage() {
   );
 
   const ChatFooter = () => (
-    <footer className="p-3 border-t border-border bg-background/50">
+    <footer className="p-3 border-t border-border bg-background/50 shrink-0">
       <form onSubmit={handleSendText} className="flex items-center gap-2 bg-muted/50 p-1 rounded-xl border border-border">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -279,9 +279,9 @@ export default function MessagesPage() {
             <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><ImageIcon className="size-3.5 text-blue-500" /> Foto</DropdownMenuItem>
             <DropdownMenuItem onClick={() => cameraInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><Camera className="size-3.5 text-rose-500" /> Kamera</DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleAction('location')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><MapPin className="size-3.5 text-emerald-500" /> Lokasi</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleAction('contact')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><User className="size-3.5 text-amber-500" /> Kontak</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleAction('contact')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><User className="size-3.5" /> Kontak</DropdownMenuItem>
             <DropdownMenuItem onClick={() => docInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><FileText className="size-3.5 text-indigo-500" /> Dokumen</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleAction('link')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><LinkIcon className="size-3.5 text-slate-500" /> Link</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleAction('link')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><LinkIcon className="size-3.5" /> Link</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         
@@ -289,9 +289,9 @@ export default function MessagesPage() {
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           placeholder={t('type_message')} 
-          className="border-none bg-transparent h-8 focus-visible:ring-0 text-[11px] flex-1" 
+          className="border-none bg-transparent h-9 focus-visible:ring-0 text-[13px] flex-1" 
         />
-        <Button type="submit" className="size-8 rounded-lg bg-accent text-accent-foreground p-0 active:scale-95 transition-transform"><Send className="size-3.5" /></Button>
+        <Button type="submit" size="icon" className="size-9 rounded-lg bg-accent text-accent-foreground p-0 active:scale-95 transition-transform"><Send className="size-4" /></Button>
       </form>
     </footer>
   );
@@ -300,11 +300,11 @@ export default function MessagesPage() {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-10rem)] flex overflow-hidden bg-card rounded-2xl border border-border shadow-xl relative text-foreground max-w-5xl mx-auto">
+      <div className="h-[calc(100dvh-12rem)] flex overflow-hidden bg-card rounded-2xl border border-border shadow-xl relative text-foreground max-w-5xl mx-auto">
         
         {/* Chat List */}
         <div className="w-full md:w-72 lg:w-80 border-r border-border flex flex-col bg-muted/5">
-          <div className="p-4 space-y-3">
+          <div className="p-4 space-y-3 shrink-0">
             <div className="flex items-center justify-between">
               <h2 className="text-[12px] font-black tracking-tight uppercase">{t('global_pulse')}</h2>
               {chats.length > 0 && (
@@ -313,11 +313,11 @@ export default function MessagesPage() {
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
-              <Input placeholder={t('search_chats')} className="pl-9 h-8 bg-background border-border rounded-lg text-[10px] font-medium" />
+              <Input placeholder={t('search_chats')} className="pl-9 h-9 bg-background border-border rounded-lg text-[11px] font-medium" />
             </div>
           </div>
           
-          <div className="flex-1 overflow-y-auto px-2 pb-6 space-y-1 no-scrollbar overflow-x-hidden">
+          <div className="flex-1 overflow-y-auto px-2 pb-6 space-y-1 overflow-x-hidden scroll-smooth">
             <AnimatePresence initial={false}>
               {chats.map((chat) => (
                 <motion.div
@@ -329,7 +329,6 @@ export default function MessagesPage() {
                   className="overflow-hidden"
                 >
                   <div className="relative group/card mb-1">
-                    {/* Delete Button Behind */}
                     <div className="absolute inset-y-0 right-0 w-14 flex items-center justify-center bg-rose-500 rounded-xl">
                       <button 
                         onClick={(e) => { e.stopPropagation(); deleteChat(chat.id); }}
@@ -340,7 +339,6 @@ export default function MessagesPage() {
                       </button>
                     </div>
 
-                    {/* Swipeable Content */}
                     <motion.div
                       drag="x"
                       dragConstraints={{ left: -56, right: 0 }}
@@ -349,24 +347,24 @@ export default function MessagesPage() {
                       style={{ touchAction: 'pan-y' }}
                       onClick={() => handleChatSelection(chat)}
                       className={cn(
-                        "relative z-10 flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer bg-card border border-transparent transition-all",
+                        "relative z-10 flex items-center gap-3 p-3 rounded-xl cursor-pointer bg-card border border-transparent transition-all",
                         selectedChat?.id === chat.id ? 'bg-background shadow-sm border-border' : 'hover:bg-muted/50'
                       )}
                     >
                       <div className="relative shrink-0">
-                        <Avatar className="size-9 border border-border">
+                        <Avatar className="size-10 border border-border">
                           <AvatarImage src={chat.avatar} className="object-cover" />
-                          <AvatarFallback className="text-[9px]">{chat.name[0]}</AvatarFallback>
+                          <AvatarFallback className="text-[10px]">{chat.name[0]}</AvatarFallback>
                         </Avatar>
-                        {chat.status === 'online' && <div className="absolute bottom-0 right-0 size-2 bg-emerald-500 rounded-full border-2 border-card" />}
-                        {isMuted[chat.id] && <div className="absolute -top-1 -right-1 size-3.5 bg-slate-900 text-white rounded-full flex items-center justify-center"><BellOff className="size-2" /></div>}
+                        {chat.status === 'online' && <div className="absolute bottom-0 right-0 size-2.5 bg-emerald-500 rounded-full border-2 border-card" />}
+                        {isMuted[chat.id] && <div className="absolute -top-1 -right-1 size-4 bg-slate-900 text-white rounded-full flex items-center justify-center"><BellOff className="size-2.5" /></div>}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h4 className="font-bold text-[11px] truncate">{chat.name}</h4>
+                          <h4 className="font-bold text-[12px] truncate">{chat.name}</h4>
                           <span className="text-[7px] text-muted-foreground font-black uppercase">{chat.time}</span>
                         </div>
-                        <p className="text-[9px] text-muted-foreground font-medium truncate">{chat.lastMsg}</p>
+                        <p className="text-[10px] text-muted-foreground font-medium truncate">{chat.lastMsg}</p>
                       </div>
                     </motion.div>
                   </div>
@@ -390,11 +388,11 @@ export default function MessagesPage() {
           </div>
         )}
 
-        {/* Mobile Chat View Dialog (Tap Outside to Close) */}
+        {/* Mobile Chat View Dialog */}
         <Dialog open={isMobileChatOpen} onOpenChange={setIsMobileChatOpen}>
-          <DialogContent className="w-[95%] h-[90vh] md:hidden p-0 border-none rounded-t-[2rem] bg-card text-foreground outline-none shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5 duration-300 [&>button]:hidden">
+          <DialogContent className="w-[95%] h-[85dvh] md:hidden p-0 border-none rounded-t-3xl bg-card text-foreground outline-none shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 duration-300 [&>button]:hidden">
             {selectedChat && (
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col h-full overflow-hidden">
                 <ChatHeader chat={selectedChat} />
                 <ChatMessages chatId={selectedChat.id} />
                 <ChatFooter />
