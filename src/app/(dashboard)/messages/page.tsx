@@ -78,6 +78,18 @@ export default function MessagesPage() {
   const getChatsKey = React.useCallback(() => `ontapp_chats_full_${activeAccount.id}`, [activeAccount.id]);
   const getMsgsKey = React.useCallback(() => `ontapp_msgs_full_${activeAccount.id}`, [activeAccount.id]);
 
+  // Handle popstate for Smart-Back navigation
+  React.useEffect(() => {
+    const handlePopState = () => {
+      if (isChatOpen) {
+        setIsChatOpen(false);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isChatOpen]);
+
   React.useEffect(() => {
     const savedChats = localStorage.getItem(getChatsKey());
     const savedMsgs = localStorage.getItem(getMsgsKey());
@@ -110,6 +122,22 @@ export default function MessagesPage() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [selectedChat, messagesByChat, isChatOpen]);
+
+  const handleChatSelection = (chat: any) => {
+    setSelectedChat(chat);
+    setIsChatOpen(true);
+    // Push state for mobile back navigation
+    if (window.innerWidth < 768) {
+      window.history.pushState({ chatOpen: true }, '');
+    }
+  };
+
+  const closeChat = () => {
+    if (isChatOpen && window.history.state?.chatOpen) {
+      window.history.back();
+    }
+    setIsChatOpen(false);
+  };
 
   const addMessage = (chatId: number, msg: any) => {
     setMessagesByChat(prev => ({
@@ -166,8 +194,7 @@ export default function MessagesPage() {
   const deleteChat = (id: number) => {
     setChats(prev => prev.filter(c => c.id !== id));
     if (selectedChat?.id === id) {
-      setSelectedChat(null);
-      setIsChatOpen(false);
+      closeChat();
     }
     toast({ title: "Obrolan dihapus" });
   };
@@ -183,15 +210,10 @@ export default function MessagesPage() {
     toast({ title: !isMuted[id] ? "Obrolan Disenyapkan" : "Suara Diaktifkan" });
   };
 
-  const handleChatSelection = (chat: any) => {
-    setSelectedChat(chat);
-    setIsChatOpen(true);
-  };
-
   const ChatHeader = ({ chat }: { chat: any }) => (
     <header className="h-14 border-b border-border px-4 flex items-center justify-between bg-card shrink-0">
       <div className="flex items-center gap-2.5">
-        <button onClick={() => setIsChatOpen(false)} className="size-8 flex items-center justify-center text-muted-foreground hover:text-primary active:scale-90 transition-all">
+        <button onClick={closeChat} className="size-8 flex items-center justify-center text-muted-foreground hover:text-primary active:scale-90 transition-all">
           <ChevronLeft className="size-5" />
         </button>
         <Avatar className="size-8 border border-border">
@@ -266,7 +288,7 @@ export default function MessagesPage() {
   );
 
   const ChatFooter = () => (
-    <footer className="p-3 border-t border-border bg-card shrink-0">
+    <footer className="p-3 border-t border-border bg-card shrink-0 pb-safe">
       <form onSubmit={handleSendText} className="flex items-center gap-2 bg-muted/50 p-1 rounded-xl border border-border">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -347,7 +369,7 @@ export default function MessagesPage() {
                     style={{ touchAction: 'pan-y' }}
                     onClick={() => handleChatSelection(chat)}
                     className={cn(
-                      "relative z-10 bg-card transition-colors hover:bg-slate-50/50 cursor-pointer",
+                      "relative z-10 bg-card transition-colors hover:bg-slate-50 cursor-pointer",
                       chat.unread > 0 ? 'border-l-[3px] border-l-black' : ''
                     )}
                   >
@@ -413,9 +435,9 @@ export default function MessagesPage() {
           )}
         </div>
 
-        {/* Chat Interface Dialog (Tap Outside to Close) */}
+        {/* Chat Interface Dialog */}
         <Dialog open={isChatOpen} onOpenChange={(open) => {
-          if (!open) setIsChatOpen(false);
+          if (!open) closeChat();
         }}>
           <DialogContent 
             className="w-[95%] h-[85dvh] max-w-lg p-0 border-none rounded-t-3xl sm:rounded-3xl bg-card text-foreground outline-none shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 duration-300 [&>button]:hidden"
