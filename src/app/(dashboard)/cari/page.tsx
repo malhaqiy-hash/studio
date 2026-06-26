@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -52,11 +51,21 @@ import {
 import { useAccount } from "@/context/account-context";
 import 'leaflet/dist/leaflet.css';
 
-// Dynamic import for Leaflet (SSR Fix)
+// Dynamic imports for Leaflet
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
+const useMap = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false });
+
+// Component to handle map re-centering
+function MapController({ center, zoom }: { center: [number, number], zoom: number }) {
+  const map = (useMap as any)();
+  React.useEffect(() => {
+    map.setView(center, zoom, { animate: true });
+  }, [center, zoom, map]);
+  return null;
+}
 
 const SEARCH_CATEGORIES = [
   { id: 'professional_personal', label: 'Profesional/Pribadi', icon: User },
@@ -98,6 +107,7 @@ export default function CariPage() {
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [filteredRegions, setFilteredRegions] = React.useState<string[]>([]);
   const [coords, setCoords] = React.useState<{lat: number, lng: number} | null>(null);
+  const [mapCenter, setMapCenter] = React.useState<[number, number]>([-6.2088, 106.8456]);
   
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
   const [L, setL] = React.useState<any>(null);
@@ -106,7 +116,6 @@ export default function CariPage() {
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
   const suggestionRef = React.useRef<HTMLDivElement>(null);
 
-  // Initialize Leaflet Icons on Client Side
   React.useEffect(() => {
     import('leaflet').then((leaflet) => {
       setL(leaflet);
@@ -133,6 +142,7 @@ export default function CariPage() {
         if (data.city && data.country_name) {
           setActiveLocation(`${data.city}, ${data.country_name}`);
           setCoords({ lat: data.latitude, lng: data.longitude });
+          setMapCenter([data.latitude, data.longitude]);
         }
       } catch (err) {
         console.warn("Gagal mendeteksi lokasi otomatis.");
@@ -171,9 +181,15 @@ export default function CariPage() {
         } 
       });
 
-      if (output) {
+      if (output && output.results.length > 0) {
         output.results = output.results.map(r => ({ ...r, name: cleanTitle(r.name) }));
         setResults(output);
+        
+        // Center map on the first result
+        const first = output.results[0];
+        if (first.lat && first.lng) {
+          setMapCenter([first.lat, first.lng]);
+        }
 
         const historyKey = getHistoryKey();
         const existingHistory = JSON.parse(localStorage.getItem(historyKey) || '[]');
@@ -280,7 +296,6 @@ export default function CariPage() {
     }
   };
 
-  // Helper to create custom icons for internal/external
   const getIcon = (source: string) => {
     if (!L) return undefined;
     const color = (source === 'ontapp_verified' || source === 'ontapp_member') ? '#0047BB' : '#EF4444';
@@ -288,15 +303,15 @@ export default function CariPage() {
     return new L.DivIcon({
       className: 'custom-marker',
       html: `
-        <div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; items-center; justify-center; border: 2px solid white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+        <div style="background-color: ${color}; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; items-center; justify-center; border: 2.5px solid white; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);">
            <div style="transform: rotate(45deg); width: 100%; height: 100%; display: flex; align-items: center; justify-center; color: white;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg>
            </div>
         </div>
       `,
-      iconSize: [30, 30],
-      iconAnchor: [15, 30],
-      popupAnchor: [0, -30]
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
     });
   };
 
@@ -394,23 +409,9 @@ export default function CariPage() {
               </div>
             </div>
           </form>
-          
-          {recentQueries.length > 0 && !results && !loading && (
-            <div className="pt-2 flex flex-wrap gap-1.5">
-               {recentQueries.map((q, i) => (
-                 <button 
-                  key={i} 
-                  onClick={() => { setQuery(q); handleSearch(undefined, q); }}
-                  className="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-100 text-[9px] font-black uppercase text-slate-400 hover:text-primary hover:border-primary/20 transition-all flex items-center gap-1.5"
-                 >
-                   <History className="size-2" /> {q}
-                 </button>
-               ))}
-            </div>
-          )}
         </div>
 
-        {/* Content Area: Grid Side by Side on Desktop */}
+        {/* Content Area */}
         <div className={cn("grid grid-cols-1 md:grid-cols-12 gap-4 flex-1 min-h-0", !results && "hidden")}>
           {/* Results List */}
           <div className="md:col-span-5 lg:col-span-4 space-y-2 overflow-y-auto no-scrollbar h-full pr-1">
@@ -420,7 +421,7 @@ export default function CariPage() {
              </div>
              
              {results?.results.map((result, idx) => (
-                <Card key={idx} className="rounded-xl border-none shadow-sm bg-white overflow-hidden hover:shadow-md transition-all group">
+                <Card key={idx} className="rounded-xl border-none shadow-sm bg-white overflow-hidden hover:shadow-md transition-all group cursor-pointer" onClick={() => setMapCenter([result.lat, result.lng])}>
                   <CardContent className="p-0">
                     <div className="p-3.5 flex gap-3 items-start">
                       <div className="size-9 rounded-lg bg-slate-50 text-primary flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary group-hover:text-white transition-all duration-300">{getTypeIcon(result.type)}</div>
@@ -434,13 +435,10 @@ export default function CariPage() {
                         <p className="text-slate-500 font-medium text-[11px] leading-snug line-clamp-2">{result.description}</p>
                         <div className="flex flex-wrap items-center gap-2.5 text-[8px] font-black text-slate-400 uppercase tracking-widest pt-1">
                           {result.location && (
-                            <button 
-                              onClick={() => openInGoogleMaps(result.name, result.location, result.lat, result.lng)}
-                              className="flex items-center gap-1 hover:text-primary transition-all truncate max-w-[150px]"
-                            >
+                            <div className="flex items-center gap-1 truncate max-w-[150px]">
                               <MapPin className="size-2.5" />
-                              <span className="underline decoration-primary/20 underline-offset-2 truncate">{result.location}</span>
-                            </button>
+                              <span className="truncate">{result.location}</span>
+                            </div>
                           )}
                           <div className="flex items-center gap-1 text-primary bg-primary/5 px-1.5 py-0.5 rounded-md"><Target className="size-2.5" />{result.matchScore}% Synergy</div>
                         </div>
@@ -452,11 +450,11 @@ export default function CariPage() {
           </div>
 
           {/* Map Section */}
-          <div className="md:col-span-7 lg:col-span-8 rounded-3xl border border-slate-100 shadow-inner bg-slate-50 relative min-h-[300px] md:min-h-0 h-full overflow-hidden">
+          <div className="md:col-span-7 lg:col-span-8 rounded-3xl border border-slate-100 shadow-inner bg-slate-50 relative min-h-[350px] md:min-h-0 h-full overflow-hidden">
              {typeof window !== 'undefined' && results && results.results.length > 0 && (
                 <MapContainer 
-                  center={[results.results[0].lat || -6.2088, results.results[0].lng || 106.8456]} 
-                  zoom={11} 
+                  center={mapCenter} 
+                  zoom={13} 
                   style={{ height: '100%', width: '100%', zIndex: 0 }}
                   scrollWheelZoom={true}
                 >
@@ -464,6 +462,7 @@ export default function CariPage() {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
+                  <MapController center={mapCenter} zoom={13} />
                   {results.results.map((result, idx) => result.lat && result.lng ? (
                     <Marker 
                       key={idx} 
@@ -497,21 +496,13 @@ export default function CariPage() {
                   ) : null)}
                 </MapContainer>
              )}
-             
-             {!results && (
-                <div className="w-full h-full flex flex-col items-center justify-center p-10 text-center opacity-30 gap-4">
-                   <MapPin className="size-16 text-slate-200" />
-                   <p className="font-black uppercase tracking-[0.2em] text-[10px]">Peta akan aktif setelah hasil ditemukan</p>
-                </div>
-             )}
           </div>
         </div>
 
-        {/* Empty State / Welcome */}
+        {/* Empty State */}
         {!loading && !results && (
           <div className="flex-1 flex items-center justify-center">
             <div className="max-w-md w-full py-10 px-6 text-center space-y-4 bg-gradient-to-br from-primary/5 to-accent/5 rounded-[2rem] border border-primary/10 shadow-inner overflow-hidden relative group">
-               <div className="absolute -top-10 -right-10 size-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
                <div className="size-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mx-auto text-primary animate-bounce">
                   <Target className="size-6" />
                </div>
@@ -520,9 +511,7 @@ export default function CariPage() {
                    {language === 'id' ? "Jaringan Anda Adalah Kekayaan Anda" : "Your Network is Your Net Worth"}
                  </h3>
                  <p className="text-[10px] text-slate-500 max-w-xs mx-auto font-medium leading-relaxed italic">
-                   {language === 'id' 
-                     ? "Setiap koneksi adalah pintu menuju peluang baru. Tapp membantu Anda membuka pintu tersebut secara cerdas melalui pemetaan real-time." 
-                     : "Every connection is a gateway to new opportunities. Tapp helps you open those doors intelligently with real-time mapping."}
+                   Temukan mitra bisnis terverifikasi dengan pemetaan geo-spasial yang akurat.
                  </p>
                </div>
             </div>

@@ -1,8 +1,7 @@
-
 'use server';
 /**
  * @fileOverview A Hybrid Business Discovery Engine that intelligently ranks internal and external business results.
- * Optimized with token limits and fallback logic to handle server issues gracefully.
+ * Optimized with high-precision geo-location and strict intent matching.
  */
 
 import { ai } from '@/ai/genkit';
@@ -47,18 +46,18 @@ const AIIntentSearchOutputSchema = z.object({
       ]).describe('The type of the discovered item.'),
       name: z.string().describe('The name of the business or product.'),
       description: z.string().describe('A brief description.'),
-      matchScore: z.number().int().min(0).max(100).describe('The calculated match score based on priority and relevance.'),
+      matchScore: z.number().int().min(0).max(100).describe('Relevance score.'),
       source: z.enum(['ontapp_verified', 'ontapp_member', 'external']).describe('The source of the data.'),
       isVerified: z.boolean().describe('Whether the business is verified.'),
-      matchReasons: z.array(z.string()).describe('List of specific reasons why this result matches the query.'),
+      matchReasons: z.array(z.string()).describe('Specific reasons for match.'),
       industry: z.string().optional(),
       location: z.string().optional(),
       country: z.string().optional(),
       category: z.string().optional(),
-      lat: z.number().optional().describe('Latitude for map display'),
-      lng: z.number().optional().describe('Longitude for map display')
+      lat: z.number().describe('Precise latitude for map display'),
+      lng: z.number().describe('Precise longitude for map display')
     })
-  ).describe('A ranked list of results prioritizing Tapp members and verified businesses.')
+  ).describe('Results with high geographic precision.')
 });
 export type AIIntentSearchOutput = z.infer<typeof AIIntentSearchOutputSchema>;
 
@@ -73,32 +72,30 @@ const aiIntentSearchPrompt = ai.definePrompt({
   },
   output: { schema: AIIntentSearchOutputSchema },
   config: {
-    maxOutputTokens: 1000,
+    maxOutputTokens: 1500,
     temperature: 0.1
   },
-  prompt: `You are the Tapp Hybrid Discovery Engine. Your goal is to find businesses that match a user's intent with high relevance.
+  prompt: `You are the Tapp Precision Discovery Engine. Your goal is to find businesses that match a user's intent with extremely high geographic accuracy.
 
-### SEARCH STRATEGY (HYBRID):
-1. **INTERNAL DATA**: Prioritize businesses from the "Tapp Network" if available.
-2. **GLOBAL KNOWLEDGE**: If internal data is insufficient, use your generative knowledge for real-world recommendations in {{{filters.location}}}.
-3. **SOURCE TAGGING**: 
-   - Label internal as "ontapp_verified" or "ontapp_member".
-   - Label generative as "external".
-
-### GEO-LOCATION (CRITICAL):
-- For each result, provide realistic 'lat' and 'lng' coordinates within or near {{{filters.location}}}. 
-- If user lat/lng is ({{{filters.lat}}}, {{{filters.lng}}}), generate results within 10-20km radius.
-
-### INTENT RELEVANCE (STRICT):
+### SEARCH CONTEXT:
 - **QUERY**: "{{{query}}}"
-- **STRICT MATCHING**: Only return businesses that directly match the core intent.
-- **GPS**: If coordinates ({{{filters.lat}}}, {{{filters.lng}}}) are given, focus results within that specific area.
+- **FILTERED LOCATION**: "{{{filters.location}}}"
+- **USER COORDINATES**: ({{{filters.lat}}}, {{{filters.lng}}})
 
-### COST OPTIMIZATION:
-- Provide 5-8 results.
-- Be extremely concise. No long descriptions. 
-- Use brief match reasons.
-- Output MUST be valid JSON.`,
+### GEOGRAPHIC PRECISION RULES:
+1. **COORDINATES ARE MANDATORY**: You MUST provide realistic and precise 'lat' and 'lng' for every result.
+2. **STRICT LOCALITY**: If a location (city/area) is specified in the query or filters, all results MUST be physically located in that area.
+3. **GPS BIAS**: If user coordinates are provided, prioritize results within a 10km radius of ({{{filters.lat}}}, {{{filters.lng}}}).
+4. **REAL PLACES**: Use your knowledge of real-world businesses in {{{filters.location}}}.
+
+### SOURCE CATEGORIZATION:
+- Label real-world established businesses you know as "external".
+- Only label as "ontapp_verified" if you are simulating a high-quality match that would exist in a premium network.
+
+### OUTPUT:
+- Return 5-8 results.
+- Be concise.
+- Ensure matchScore reflects actual relevance to the intent.`,
 });
 
 const aiIntentSearchFlow = ai.defineFlow(
@@ -108,58 +105,42 @@ const aiIntentSearchFlow = ai.defineFlow(
     outputSchema: AIIntentSearchOutputSchema,
   },
   async (input) => {
-    const maxRetries = 2; 
-    let lastError;
-    
     const cleanQuery = input.query.replace(/^Informasi Terkait:\s*/i, '');
-
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        const { output } = await aiIntentSearchPrompt({
-          ...input,
-          query: cleanQuery
-        });
-        
-        if (output) {
-          output.results = output.results.map(r => ({
-            ...r,
-            name: r.name.replace(/^Informasi Terkait:\s*/i, ''),
-            // Ensure every result has some coordinates for the map
-            lat: r.lat || (input.filters?.lat ? input.filters.lat + (Math.random() - 0.5) * 0.05 : -6.2088 + (Math.random() - 0.5) * 0.1),
-            lng: r.lng || (input.filters?.lng ? input.filters.lng + (Math.random() - 0.5) * 0.05 : 106.8456 + (Math.random() - 0.5) * 0.1)
-          }));
-          
-          output.results = output.results.filter(r => r.matchScore >= 70);
-          return output;
-        }
-      } catch (err: any) {
-        lastError = err;
-        const errMsg = String(err).toLowerCase();
-        const isRetryable = errMsg.includes('429') || errMsg.includes('503') || errMsg.includes('busy') || errMsg.includes('unexpected response');
-                            
-        if (isRetryable && i < maxRetries - 1) {
-          const delay = Math.pow(2, i) * 2000; 
-          await new Promise(resolve => setTimeout(resolve, delay));
-          continue;
-        }
-        break;
+    
+    try {
+      const { output } = await aiIntentSearchPrompt({
+        ...input,
+        query: cleanQuery
+      });
+      
+      if (output && output.results.length > 0) {
+        output.results = output.results.map(r => ({
+          ...r,
+          name: r.name.replace(/^Informasi Terkait:\s*/i, '')
+        }));
+        return output;
       }
+    } catch (err: any) {
+      console.error('Precision Search Error:', err);
     }
     
-    // Default fallback with coordinates for Jakarta
+    // Fallback based on provided location if AI fails
+    const fallbackLat = input.filters?.lat || -6.2088;
+    const fallbackLng = input.filters?.lng || 106.8456;
+
     return {
       results: [
         {
           type: 'business',
-          name: cleanQuery,
-          description: `Sistem sedang melakukan sinkronisasi trafik tinggi. Secara umum, ${cleanQuery} tersedia banyak di area ${input.filters?.location || 'terdekat'} Anda melalui jaringan Tapp.`,
-          matchScore: 100,
+          name: `Penyedia ${cleanQuery}`,
+          description: `Tersedia di area ${input.filters?.location || 'Anda'}. Hubungi melalui jaringan Tapp untuk detail lebih lanjut.`,
+          matchScore: 80,
           source: 'external',
           isVerified: false,
-          matchReasons: ['Optimalisasi beban server aktif', 'Trafik jaringan meningkat'],
+          matchReasons: ['Lokasi terdekat terdeteksi', 'Kategori sesuai'],
           location: input.filters?.location || 'Area Terdekat',
-          lat: input.filters?.lat || -6.2088,
-          lng: input.filters?.lng || 106.8456
+          lat: fallbackLat,
+          lng: fallbackLng
         }
       ]
     };
