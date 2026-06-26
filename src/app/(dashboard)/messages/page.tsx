@@ -75,6 +75,20 @@ export default function MessagesPage() {
   const getChatsKey = React.useCallback(() => `ontapp_chats_v3_${activeAccount.id}`, [activeAccount.id]);
   const getMsgsKey = React.useCallback(() => `ontapp_msgs_v3_${activeAccount.id}`, [activeAccount.id]);
 
+  // Handle system back button on mobile to close modal instead of leaving page
+  React.useEffect(() => {
+    if (isMobileChatOpen) {
+      window.history.pushState({ modal: 'chat' }, '');
+      const handlePopState = () => {
+        setIsMobileChatOpen(false);
+      };
+      window.addEventListener('popstate', handlePopState);
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
+    }
+  }, [isMobileChatOpen]);
+
   React.useEffect(() => {
     const savedChats = localStorage.getItem(getChatsKey());
     const savedMsgs = localStorage.getItem(getMsgsKey());
@@ -95,7 +109,7 @@ export default function MessagesPage() {
     }
     
     setIsLoaded(true);
-  }, [activeAccount.id, getChatsKey, getMsgsKey, selectedChat]);
+  }, [activeAccount.id, getChatsKey, getMsgsKey]);
 
   React.useEffect(() => {
     if (isLoaded) {
@@ -189,10 +203,18 @@ export default function MessagesPage() {
     }
   };
 
+  const handleCloseMobileChat = () => {
+    if (window.history.state?.modal === 'chat') {
+      window.history.back();
+    } else {
+      setIsMobileChatOpen(false);
+    }
+  };
+
   const ChatHeader = ({ chat }: { chat: any }) => (
     <header className="h-14 border-b border-border px-4 flex items-center justify-between bg-background/50 shrink-0">
       <div className="flex items-center gap-2.5">
-        <button onClick={() => setIsMobileChatOpen(false)} className="md:hidden size-8 flex items-center justify-center text-muted-foreground hover:text-primary active:scale-90 transition-all">
+        <button onClick={handleCloseMobileChat} className="md:hidden size-8 flex items-center justify-center text-muted-foreground hover:text-primary active:scale-90 transition-all">
           <ChevronLeft className="size-5" />
         </button>
         <Avatar className="size-8 border border-border">
@@ -342,8 +364,9 @@ export default function MessagesPage() {
                     <motion.div
                       drag="x"
                       dragConstraints={{ left: -56, right: 0 }}
-                      dragElastic={0.05}
+                      dragElastic={0.12}
                       dragDirectionLock
+                      dragMomentum={false}
                       style={{ touchAction: 'pan-y' }}
                       onClick={() => handleChatSelection(chat)}
                       className={cn(
@@ -389,7 +412,12 @@ export default function MessagesPage() {
         )}
 
         {/* Mobile Chat View Dialog */}
-        <Dialog open={isMobileChatOpen} onOpenChange={setIsMobileChatOpen}>
+        <Dialog 
+          open={isMobileChatOpen} 
+          onOpenChange={(open) => {
+            if (!open) handleCloseMobileChat();
+          }}
+        >
           <DialogContent className="w-[95%] h-[85dvh] md:hidden p-0 border-none rounded-t-3xl bg-card text-foreground outline-none shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 duration-300 [&>button]:hidden">
             {selectedChat && (
               <div className="flex flex-col h-full overflow-hidden">
