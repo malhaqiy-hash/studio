@@ -482,7 +482,7 @@ export default function FeedPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <button onClick={() => handleConnect(post.author)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all">
-                        <ConnectIcon className="size-4.5" />
+                        <ConnectIcon className="size-5" />
                       </button>
                       <button onClick={() => handleShare(post.id)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-4" /></button>
                     </div>
