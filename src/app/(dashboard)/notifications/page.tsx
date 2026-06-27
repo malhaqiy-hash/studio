@@ -334,7 +334,7 @@ export default function NotificationsPage() {
                       <div className="flex items-center gap-1.5 pt-0.5">
                         <Badge className="bg-primary/5 text-primary border-none text-[7px] font-black uppercase px-1.5 h-3.5 flex gap-1 items-center">
                           {req.type === 'connection' ? <Handshake className="size-2" /> : <UserPlus className="size-2" />}
-                          {req.type === 'connection' ? 'Bisnis' : 'Pengikut'}
+                          {req.type === 'connection' ? 'Permintaan Koneksi' : 'Permintaan Mengikuti'}
                         </Badge>
                         <span className="text-[7px] font-black text-slate-300 uppercase">{req.time}</span>
                       </div>
