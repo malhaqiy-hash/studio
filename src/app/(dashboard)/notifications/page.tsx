@@ -4,6 +4,7 @@ import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { 
   Bell, 
   MessageSquare, 
@@ -424,7 +425,7 @@ export default function NotificationsPage() {
           <div className="space-y-0.5">
             <h3 className="text-[12px] font-black uppercase tracking-tight">{t('notif_intel')}</h3>
             <p className="text-white/60 text-[9px] font-medium leading-snug uppercase tracking-widest">
-              Mesin OnTapp memberikan saran personal berdasarkan interaksi jaringan bisnis Anda secara cerdas.
+              Mesin Koolink memberikan saran personal berdasarkan interaksi jaringan bisnis Anda secara cerdas.
             </p>
           </div>
           <Button className="w-full bg-white text-black hover:bg-slate-100 font-black rounded-lg h-9 transition-all uppercase tracking-widest text-[9px]">
