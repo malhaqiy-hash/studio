@@ -87,7 +87,6 @@ export default function ProfilePage() {
   const [isShareSheetOpen, setIsShareSheetOpen] = React.useState(false);
   const [shareUrl, setShareUrl] = React.useState("");
 
-  // Connection management states
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = React.useState(false);
   const [confirmDisconnectId, setConfirmDisconnectId] = React.useState<string | null>(null);
   const [connections, setConnections] = React.useState(MOCK_CONNECTIONS);
@@ -481,38 +480,38 @@ export default function ProfilePage() {
               )}
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Disconnect Confirmation Dialog */}
-      <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && setConfirmDisconnectId(null)}>
-        <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden text-center z-[180]">
-          <div className="space-y-6">
-            <div className="size-16 rounded-[1.5rem] bg-rose-50 text-rose-500 flex items-center justify-center mx-auto shadow-inner">
-               <X className="size-8" />
-            </div>
-            <div className="space-y-2">
-              <DialogTitle className="text-lg font-black uppercase tracking-tight">Putus Koneksi?</DialogTitle>
-              <DialogDescription className="text-[11px] font-medium text-slate-500 leading-relaxed px-4">
-                Tindakan ini akan menghapus akses khusus dan sinergi jaringan antara profil Anda.
-              </DialogDescription>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Button 
-                onClick={handleDisconnect} 
-                className="w-full h-11 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-rose-100"
-              >
-                Putus Koneksi
-              </Button>
-              <Button 
-                variant="ghost" 
-                onClick={() => setConfirmDisconnectId(null)}
-                className="w-full h-10 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 hover:bg-slate-50"
-              >
-                Batal
-              </Button>
-            </div>
-          </div>
+          {/* NESTED Disconnect Confirmation Dialog */}
+          <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && setConfirmDisconnectId(null)}>
+            <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden text-center z-[200]">
+              <div className="space-y-6">
+                <div className="size-16 rounded-[1.5rem] bg-rose-50 text-rose-500 flex items-center justify-center mx-auto shadow-inner">
+                   <X className="size-8" />
+                </div>
+                <div className="space-y-2">
+                  <DialogTitle className="text-lg font-black uppercase tracking-tight">Putus Koneksi?</DialogTitle>
+                  <DialogDescription className="text-[11px] font-medium text-slate-500 leading-relaxed px-4">
+                    Tindakan ini akan menghapus akses khusus dan sinergi jaringan antara profil Anda.
+                  </DialogDescription>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button 
+                    onClick={handleDisconnect} 
+                    className="w-full h-11 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-rose-100"
+                  >
+                    Putus Koneksi
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setConfirmDisconnectId(null)}
+                    className="w-full h-10 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 hover:bg-slate-50"
+                  >
+                    Batal
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </DialogContent>
       </Dialog>
 
