@@ -50,6 +50,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { ShareSheet } from '@/components/share-sheet';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const ConnectIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -354,7 +355,6 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* Connections Dashed Banner Section - Repositioned Below Bio/Edit */}
         <section className="px-3 md:px-5">
            <button 
              onClick={() => setIsConnectionsModalOpen(true)}
@@ -451,7 +451,7 @@ export default function ProfilePage() {
               {connections.length > 0 ? (
                 connections.map((conn) => (
                   <div key={conn.id} className="flex items-center justify-between p-3 rounded-2xl border border-border/50 hover:bg-slate-50 transition-all group">
-                    <div className="flex items-center gap-3 min-w-0">
+                    <Link href="/profile" onClick={() => setIsConnectionsModalOpen(false)} className="flex items-center gap-3 min-w-0 flex-1">
                        <Avatar className="size-11 rounded-xl border border-border shadow-sm">
                           <AvatarImage src={conn.avatar} className="object-cover" />
                           <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">{conn.name[0]}</AvatarFallback>
@@ -462,7 +462,7 @@ export default function ProfilePage() {
                             {conn.type}
                           </Badge>
                        </div>
-                    </div>
+                    </Link>
                     <button 
                       onClick={() => setConfirmDisconnectId(conn.id)}
                       className="size-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-500 active:scale-90 transition-all"
@@ -486,7 +486,7 @@ export default function ProfilePage() {
 
       {/* Disconnect Confirmation Dialog */}
       <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && setConfirmDisconnectId(null)}>
-        <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden text-center">
+        <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden text-center z-[180]">
           <div className="space-y-6">
             <div className="size-16 rounded-[1.5rem] bg-rose-50 text-rose-500 flex items-center justify-center mx-auto shadow-inner">
                <X className="size-8" />
