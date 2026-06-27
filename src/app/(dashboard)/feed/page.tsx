@@ -193,6 +193,7 @@ const INITIAL_POSTS = [
     id: "p1",
     author: "Koolink Intelligence",
     extra: "Enterprise AI Analyst",
+    authorType: 'bisnis',
     avatar: "https://picsum.photos/seed/ontapp/200",
     content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
     time: "Baru saja",
@@ -207,6 +208,7 @@ const INITIAL_POSTS = [
     id: "p2",
     author: "Global Logistics Co.",
     extra: "Logistics & Supply Chain",
+    authorType: 'bisnis',
     avatar: "https://picsum.photos/seed/log/100",
     content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member Koolink hari ini.",
     time: "2 jam yang lalu",
@@ -216,6 +218,20 @@ const INITIAL_POSTS = [
     visibility: 'public',
     displayLocation: 'both',
   },
+  {
+    id: "p3",
+    author: "Andi Wijaya",
+    extra: "Personal Shopper",
+    authorType: 'personal',
+    avatar: "https://picsum.photos/seed/andi/100",
+    content: "Menemukan beberapa produk menarik di pasar lokal hari ini. Sangat merekomendasikan untuk mengecek kategori baru kami.",
+    time: "4 jam yang lalu",
+    stats: { likes: 120, comments: 5 },
+    verified: false,
+    images: ["https://picsum.photos/seed/local/800/400"],
+    visibility: 'public',
+    displayLocation: 'both',
+  }
 ];
 
 export default function FeedPage() {
@@ -226,6 +242,8 @@ export default function FeedPage() {
   const [activeCategory, setActiveCategory] = React.useState('saran');
   const [translations, setTranslations] = React.useState<Record<string, { text: string, show: boolean, loading: boolean }>>({});
   const [likes, setLikes] = React.useState<Record<string, { count: number, active: boolean }>>({});
+  const [followedAuthors, setFollowedAuthors] = React.useState<Record<string, boolean>>({});
+  const [connectedAuthors, setConnectedAuthors] = React.useState<Record<string, boolean>>({});
 
   const [isPostModalOpen, setIsPostModalOpen] = React.useState(false);
   const [postContent, setPostContent] = React.useState("");
@@ -305,7 +323,21 @@ export default function FeedPage() {
     setIsShareSheetOpen(true);
   };
 
+  const handleFollow = (author: string) => {
+    const isAlreadyFollowed = followedAuthors[author];
+    setFollowedAuthors(prev => ({ ...prev, [author]: !isAlreadyFollowed }));
+    toast({
+      title: !isAlreadyFollowed ? `Mengikuti ${author}` : `Berhenti mengikuti ${author}`,
+    });
+  };
+
   const handleConnect = (author: string) => {
+    const isAlreadyConnected = connectedAuthors[author];
+    if (isAlreadyConnected) {
+      toast({ title: "Permintaan Koneksi Sudah Dikirim" });
+      return;
+    }
+    setConnectedAuthors(prev => ({ ...prev, [author]: true }));
     toast({
       title: "Permintaan Koneksi Terkirim",
       description: `Menunggu persetujuan dari ${author} untuk menjalin koneksi bisnis.`
@@ -345,6 +377,7 @@ export default function FeedPage() {
       .map(item => ({
         id: item.id,
         author: activeAccount.name,
+        authorType: activeAccount.type,
         extra: activeAccount.extra,
         avatar: activeAccount.avatar,
         content: item.description || "",
@@ -358,7 +391,7 @@ export default function FeedPage() {
     
     const all = [...userPosts, ...INITIAL_POSTS].filter(p => p.visibility !== 'private' || p.author === activeAccount.name);
     return all.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
-  }, [activeAccount.items, activeAccount.name, activeAccount.avatar, activeAccount.extra, activeAccount.verificationStatus]);
+  }, [activeAccount.items, activeAccount.name, activeAccount.avatar, activeAccount.extra, activeAccount.verificationStatus, activeAccount.type]);
 
   return (
     <DashboardLayout>
@@ -413,6 +446,8 @@ export default function FeedPage() {
             {combinedPosts.map((post) => {
               const trans = translations[post.id];
               const postLike = likes[post.id] || { count: 0, active: false };
+              const isFollowed = followedAuthors[post.author];
+              const isConnected = connectedAuthors[post.author];
               
               return (
                 <Card key={post.id} className="border-border shadow-sm rounded-xl overflow-hidden bg-card">
@@ -430,10 +465,13 @@ export default function FeedPage() {
                         <div className="flex items-center gap-1">
                           <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[13px]">{post.author}</h3></Link>
                           {post.verified && <ShieldCheck className="size-3 text-primary" />}
-                          {post.author !== activeAccount.name && (
+                          {post.author !== activeAccount.name && post.authorType === 'personal' && (
                             <button 
-                              onClick={() => toast({ title: `Mengikuti ${post.author}` })}
-                              className="ml-1 p-1 rounded-full text-primary hover:bg-primary/5 transition-all active:scale-90"
+                              onClick={() => handleFollow(post.author)}
+                              className={cn(
+                                "ml-1 p-1 rounded-full transition-all active:scale-90",
+                                isFollowed ? "text-primary bg-primary/10" : "text-slate-400 hover:bg-primary/5 hover:text-primary"
+                              )}
                             >
                               <UserPlus className="size-3.5" />
                             </button>
@@ -481,9 +519,17 @@ export default function FeedPage() {
                       </button>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => handleConnect(post.author)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all">
-                        <ConnectIcon className="size-5" />
-                      </button>
+                      {post.author !== activeAccount.name && (
+                        <button 
+                          onClick={() => handleConnect(post.author)} 
+                          className={cn(
+                            "p-1.5 transition-all active:scale-90",
+                            isConnected ? "text-primary" : "text-slate-400 hover:text-primary"
+                          )}
+                        >
+                          <ConnectIcon className="size-5" />
+                        </button>
+                      )}
                       <button onClick={() => handleShare(post.id)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-4" /></button>
                     </div>
                   </div>
@@ -555,7 +601,7 @@ export default function FeedPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!zoomedAvatar} onOpenChange={() => setExpandedAvatar(null)}>
+      <Dialog open={!!zoomedAvatar} onOpenChange={setExpandedAvatar}>
         <DialogContent 
           className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
           onClick={() => setExpandedAvatar(null)}
