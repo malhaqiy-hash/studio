@@ -80,7 +80,6 @@ import { useLanguage } from "@/context/language-context";
 import { useAccount, AccountType } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { motion, useMotionValue, useTransform } from "framer-motion";
 import { TappLogo } from "@/components/ui/tapp-logo";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -92,9 +91,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const { activeAccount, availableAccounts, switchAccount, registerAccount, hasInitialized } = useAccount();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = React.useState(false);
-  
-  const sheetY = useMotionValue(0);
-  const dragOpacity = useTransform(sheetY, [0, 300], [1, 0]);
 
   const [isRegModalOpen, setIsRegModalOpen] = React.useState(false);
   const [pendingType, setPendingType] = React.useState<AccountType | null>(null);
@@ -143,12 +139,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       setIsRegModalOpen(true);
     }
   }, [hasInitialized, activeAccount, isRegModalOpen]);
-
-  React.useEffect(() => {
-    if (!isMoreMenuOpen) {
-      sheetY.set(0);
-    }
-  }, [isMoreMenuOpen, sheetY]);
 
   const handleLogout = async () => {
     try {
@@ -251,7 +241,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </DropdownMenuPortal>
               </DropdownMenuSub>
               <DropdownMenuSeparator className="my-1" />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive font-bold text-[12px] px-2.5 py-2.5 rounded-lg focus:bg-destructive/5 cursor-pointer flex gap-2.5"><LogOut className="size-3.5" /> Keluar</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive font-bold text-[12px] px-2.5 py-2 rounded-lg focus:bg-destructive/5 cursor-pointer flex gap-2.5"><LogOut className="size-3.5" /> Keluar</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -271,63 +261,66 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </Link>
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
-              <SheetTrigger asChild><button className="flex flex-col items-center gap-1 hover:text-primary w-full py-1 outline-none transition-all"><Menu className="size-4 md:size-5" /><span>{t('more')}</span></button></SheetTrigger>
+              <SheetTrigger asChild>
+                <button className="flex flex-col items-center gap-1 hover:text-primary w-full py-1 outline-none transition-all">
+                  <Menu className="size-4 md:size-5" />
+                  <span>{t('more')}</span>
+                </button>
+              </SheetTrigger>
               <SheetContent 
-                side="bottom" 
-                className="p-0 h-[80vh] bg-transparent border-none [&>button]:hidden outline-none shadow-none overflow-hidden data-[state=open]:animate-none data-[state=closed]:animate-none"
+                side="right" 
+                className="w-[300px] sm:w-[350px] p-0 bg-card border-l border-border rounded-l-[2rem] shadow-2xl flex flex-col overflow-hidden outline-none"
               >
-                <motion.div 
-                  drag="y"
-                  dragConstraints={{ top: 0, bottom: 0 }}
-                  dragElastic={{ top: 0, bottom: 0.6 }}
-                  style={{ y: sheetY }}
-                  onDragEnd={(_, info) => {
-                    if (info.offset.y > 100 || info.velocity.y > 500) {
-                      setIsMoreMenuOpen(false);
-                    } else {
-                      sheetY.set(0);
-                    }
-                  }}
-                  className="w-full h-full flex flex-col pointer-events-auto"
-                >
-                  <motion.div 
-                    style={{ opacity: dragOpacity }} 
-                    className="w-full h-full flex flex-col bg-card rounded-t-[2rem] border-t border-border shadow-2xl overflow-hidden"
-                  >
-                    <div className="w-full flex flex-col items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
-                      <div className="sheet-handle w-10 h-1 bg-muted rounded-full" />
-                    </div>
-                    <SheetHeader className="p-4 pt-1 pb-3 bg-primary/5 border-b border-border/50">
-                      <div className="flex items-center justify-between">
-                        <SheetTitle className="text-xs font-black flex items-center gap-2 uppercase tracking-tight text-primary">
-                          <LayoutGrid className="size-3.5" />
-                          Koolink Hub
-                        </SheetTitle>
-                        <span className="font-medium text-[8px] text-primary/60 italic lowercase select-none leading-none">{activeAccount?.type}</span>
-                      </div>
-                    </SheetHeader>
-                    <div className="overflow-y-auto h-full pb-32 no-scrollbar">
-                      <div className="flex flex-col divide-y divide-border/40">
-                        {drawerItems.map((item) => (
-                          <Link key={item.href} href={item.href} onClick={() => setIsMoreMenuOpen(false)} className={cn("flex items-center px-6 py-3.5 transition-all gap-5 group", pathname === item.href ? "bg-primary/5 text-primary" : "bg-transparent hover:bg-primary/5")}>
-                            <div className={cn("size-8 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", pathname === item.href ? "bg-primary text-primary-foreground shadow-primary/20" : "bg-muted text-muted-foreground")}><item.icon className="size-4" /></div>
-                            <span className="text-[12px] font-black uppercase tracking-widest">{item.label}</span>
-                            <ChevronRight className="ml-auto size-3 text-muted-foreground/30 group-hover:text-primary transition-colors" />
-                          </Link>
-                        ))}
-                        <div className="px-6 py-5 bg-muted/10">
-                          <div className="flex items-center gap-5 mb-3">
-                            <div className="size-8 rounded-xl bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
-                              <Languages className="size-4.5" />
-                            </div>
-                            <span className="text-[11px] font-black uppercase tracking-widest">Bahasa</span>
-                          </div>
-                          <LanguagePicker />
+                <SheetHeader className="p-6 pt-8 bg-primary/5 border-b border-border/50">
+                  <div className="flex items-center justify-between">
+                    <SheetTitle className="text-sm font-black flex items-center gap-2.5 uppercase tracking-tight text-primary">
+                      <LayoutGrid className="size-4" />
+                      Koolink Hub
+                    </SheetTitle>
+                    <Badge variant="outline" className="font-medium text-[8px] text-primary/60 italic lowercase border-primary/20">{activeAccount?.type}</Badge>
+                  </div>
+                </SheetHeader>
+                <div className="flex-1 overflow-y-auto no-scrollbar">
+                  <div className="flex flex-col divide-y divide-border/40">
+                    {drawerItems.map((item) => (
+                      <Link 
+                        key={item.href} 
+                        href={item.href} 
+                        onClick={() => setIsMoreMenuOpen(false)} 
+                        className={cn(
+                          "flex items-center px-6 py-4 transition-all gap-5 group", 
+                          pathname === item.href ? "bg-primary/5 text-primary" : "bg-transparent hover:bg-primary/5"
+                        )}
+                      >
+                        <div className={cn(
+                          "size-9 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", 
+                          pathname === item.href ? "bg-primary text-primary-foreground shadow-primary/20" : "bg-muted text-muted-foreground"
+                        )}>
+                          <item.icon className="size-4.5" />
                         </div>
+                        <span className="text-[13px] font-black uppercase tracking-widest">{item.label}</span>
+                        <ChevronRight className={cn(
+                          "ml-auto size-3.5 transition-colors",
+                          pathname === item.href ? "text-primary" : "text-muted-foreground/30 group-hover:text-primary"
+                        )} />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-6 bg-muted/10 border-t border-border/40 space-y-5">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="size-8 rounded-lg bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
+                        <Languages className="size-4" />
                       </div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Bahasa Sistem</span>
                     </div>
-                  </motion.div>
-                </motion.div>
+                    <LanguagePicker />
+                  </div>
+                  <div className="pt-2">
+                    <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] text-center italic">© 2025 Koolink Network</p>
+                  </div>
+                </div>
               </SheetContent>
             </Sheet>
           </div>
