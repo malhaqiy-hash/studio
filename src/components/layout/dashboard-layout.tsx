@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -82,6 +81,21 @@ import { useAccount, AccountType } from "@/context/account-context";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { TappLogo } from "@/components/ui/tapp-logo";
+import ConnectionIcon from '@/assets/icons/connection.svg';
+
+const ConnectIcon = ({ className }: { className?: string }) => (
+  <div 
+    className={cn("bg-current", className)}
+    style={{
+      maskImage: `url(${ConnectionIcon.src})`,
+      WebkitMaskImage: `url(${ConnectionIcon.src})`,
+      maskSize: 'contain',
+      maskRepeat: 'no-repeat',
+      maskPosition: 'center',
+      display: 'inline-block'
+    }}
+  />
+);
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -112,7 +126,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: User, label: t('profile'), href: "/profile", roles: ['personal', 'professional', 'bisnis'] },
       { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard", roles: ['personal', 'professional', 'bisnis'] },
       { icon: Bookmark, label: t('saved'), href: "/saved", roles: ['personal', 'professional', 'bisnis'] },
-      { icon: Handshake, label: t('connections'), href: "/connections", roles: ['personal', 'professional', 'bisnis'] },
+      { icon: ConnectIcon, label: t('connections'), href: "/connections", roles: ['personal', 'professional', 'bisnis'] },
       { icon: Users, label: t('communities'), href: "/communities", roles: ['personal', 'professional', 'bisnis'] },
       
       { icon: Radar, label: t('scout'), href: "/scout", roles: ['bisnis', 'professional'] },
@@ -219,7 +233,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <Avatar className="h-6 w-6 rounded-full shadow-sm"><AvatarImage src={activeAccount.avatar} className="object-cover" /><AvatarFallback className="bg-primary text-primary-foreground font-bold text-[8px]">{activeAccount.name[0]}</AvatarFallback></Avatar>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-xl p-1.5 shadow-2xl border-border bg-card outline-none">
+            <DropdownMenuContent align="end" className="w-56 rounded-xl p-1.5 shadow-2xl border-border bg-card outline-none z-[180]">
               <DropdownMenuLabel className="px-2.5 py-1.5 text-[8px] font-bold text-muted-foreground uppercase tracking-widest border-b mb-1">Profil</DropdownMenuLabel>
               <DropdownMenuGroup>
                 <Link href="/profile"><DropdownMenuItem className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg font-bold cursor-pointer hover:bg-primary/5"><div className="size-7 rounded-lg bg-primary/5 flex items-center justify-center text-primary"><User className="size-3.5" /></div><span className="text-[12px]">{t('view_profile')}</span></DropdownMenuItem></Link>
@@ -235,7 +249,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="gap-2.5 px-2.5 py-2.5 rounded-lg font-bold text-[12px]"><UserPlus className="size-3.5" /> Tambah Profil</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card">
+                  <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card z-[180]">
                     <DropdownMenuItem onSelect={() => { setPendingType('personal'); setIsRegModalOpen(true); }} className="font-bold text-[12px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Personal</DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => { setPendingType('professional'); setIsRegModalOpen(true); }} className="font-bold text-[12px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Professional</DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => { setPendingType('bisnis'); setIsRegModalOpen(true); }} className="font-bold text-[12px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Bisnis</DropdownMenuItem>
@@ -271,7 +285,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </SheetTrigger>
               <SheetContent 
                 side="right" 
-                className="w-[280px] sm:w-[320px] p-0 bg-card border-l border-border rounded-l-[2rem] shadow-2xl flex flex-col overflow-hidden outline-none [&>button]:hidden"
+                className="w-[280px] sm:w-[320px] p-0 bg-card border-l border-border rounded-l-[2rem] shadow-2xl flex flex-col overflow-hidden outline-none z-[150] [&>button]:hidden"
               >
                 <div className="flex flex-col h-full overflow-hidden">
                   {/* Enhanced Centered Header with Profile Info */}
@@ -358,7 +372,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
       {/* Onboarding Dialog */}
       <Dialog open={isRegModalOpen} onOpenChange={(open) => { if (activeAccount?.isNew) return; setIsRegModalOpen(open); }}>
-        <DialogContent className="w-[95%] md:max-w-md p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground rounded-[2rem] outline-none [&>button]:hidden">
+        <DialogContent className="w-[95%] md:max-w-md p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground rounded-[2rem] outline-none z-[170] [&>button]:hidden">
           <div className="flex flex-col max-h-[90vh] overflow-y-auto no-scrollbar">
             <div className="flex flex-col items-center justify-center text-center space-y-3 pt-8 pb-5 px-8">
               <TappLogo className="size-14 rounded-2xl shadow-xl shadow-primary/20" />
@@ -406,7 +420,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       <Label className="font-black text-[10px] uppercase tracking-widest text-slate-500 ml-1">Visibilitas Jaringan</Label>
                       <Select value={regFormData.visibility} onValueChange={(val: 'public' | 'private') => setRegFormData({...regFormData, visibility: val})}>
                         <SelectTrigger className="h-11 rounded-xl bg-muted/20 border-none px-4 text-[12px] font-bold shadow-inner focus:ring-2 focus:ring-primary/10"><SelectValue /></SelectTrigger>
-                        <SelectContent className="rounded-xl shadow-xl"><SelectItem value="public">🌍 Publik (Terlihat Semua)</SelectItem><SelectItem value="private">🔒 Privat (Hanya Relasi)</SelectItem></SelectContent>
+                        <SelectContent className="rounded-xl shadow-xl z-[180]"><SelectItem value="public">🌍 Publik (Terlihat Semua)</SelectItem><SelectItem value="private">🔒 Privat (Hanya Relasi)</SelectItem></SelectContent>
                       </Select>
                     </div>
                   </div>
@@ -426,7 +440,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </Dialog>
 
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
-        <DialogContent className="w-[90%] md:max-w-xs rounded-[2rem] p-6 border-none shadow-2xl bg-card text-foreground outline-none [&>button]:hidden">
+        <DialogContent className="w-[90%] md:max-w-xs rounded-[2rem] p-6 border-none shadow-2xl bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <DialogHeader className="text-center"><DialogTitle className="text-base font-black uppercase tracking-tight text-primary">Pilih Media</DialogTitle></DialogHeader>
           <div className="grid gap-3 py-5">
             <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-12 rounded-2xl border-border bg-muted/30 hover:bg-primary/5 hover:border-primary/30 justify-start gap-4 px-5 shadow-sm transition-all"><Smartphone className="size-5 text-primary" /><p className="font-black text-[11px] uppercase tracking-widest">Galeri Perangkat</p></Button>

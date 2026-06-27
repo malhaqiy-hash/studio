@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -31,13 +30,20 @@ import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/context/language-context';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import ConnectionIcon from '@/assets/icons/connection.svg';
 
 const ConnectIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-    <path d="M16 8c1.1 1.1 1.1 2.9 0 4M18 6c2.2 2.2 2.2 5.8 0 8" />
-    <path d="M8 16c-1.1-1.1-1.1-2.9 0-4M6 18c-2.2-2.2-2.2-5.8 0-8" />
-  </svg>
+  <div 
+    className={cn("bg-current", className)}
+    style={{
+      maskImage: `url(${ConnectionIcon.src})`,
+      WebkitMaskImage: `url(${ConnectionIcon.src})`,
+      maskSize: 'contain',
+      maskRepeat: 'no-repeat',
+      maskPosition: 'center',
+      display: 'inline-block'
+    }}
+  />
 );
 
 const MOCK_CONNECTIONS = [
@@ -80,7 +86,7 @@ export default function ConnectionsPage() {
           </Link>
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5 text-primary font-black text-[8px] uppercase tracking-[0.2em]">
-              <Handshake className="size-2.5" />
+              <ConnectIcon className="size-3" />
               {t('connections')}
             </div>
             <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none uppercase">Jaringan Bisnis</h1>
@@ -140,7 +146,7 @@ export default function ConnectionsPage() {
           ) : (
             <div className="py-24 text-center space-y-4 bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-100">
                <div className="size-16 rounded-full bg-white flex items-center justify-center mx-auto shadow-md">
-                  <Handshake className="size-8 text-slate-200" />
+                  <ConnectIcon className="size-8 text-slate-200" />
                </div>
                <div className="space-y-1">
                   <h3 className="text-sm font-black text-slate-900 uppercase">Tidak Ada Relasi</h3>
@@ -158,7 +164,7 @@ export default function ConnectionsPage() {
         </div>
 
         <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && setConfirmDisconnectId(null)}>
-          <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden text-center z-[200]">
+          <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none z-[200] [&>button]:hidden text-center">
             <div className="space-y-6">
               <div className="size-16 rounded-[1.5rem] bg-rose-50 text-rose-500 flex items-center justify-center mx-auto shadow-inner">
                  <X className="size-8" />

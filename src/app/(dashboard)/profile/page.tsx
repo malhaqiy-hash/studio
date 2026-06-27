@@ -51,13 +51,20 @@ import { useToast } from '@/hooks/use-toast';
 import { ShareSheet } from '@/components/share-sheet';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import ConnectionIcon from '@/assets/icons/connection.svg';
 
 const ConnectIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-    <path d="M16 8c1.1 1.1 1.1 2.9 0 4M18 6c2.2 2.2 2.2 5.8 0 8" />
-    <path d="M8 16c-1.1-1.1-1.1-2.9 0-4M6 18c-2.2-2.2-2.2-5.8 0-8" />
-  </svg>
+  <div 
+    className={cn("bg-current", className)}
+    style={{
+      maskImage: `url(${ConnectionIcon.src})`,
+      WebkitMaskImage: `url(${ConnectionIcon.src})`,
+      maskSize: 'contain',
+      maskRepeat: 'no-repeat',
+      maskPosition: 'center',
+      display: 'inline-block'
+    }}
+  />
 );
 
 function getSmartIcon(url: string) {
@@ -438,7 +445,7 @@ export default function ProfilePage() {
 
       {/* Connections List Modal */}
       <Dialog open={isConnectionsModalOpen} onOpenChange={setIsConnectionsModalOpen}>
-        <DialogContent className="w-[95%] md:max-w-md rounded-[2rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
+        <DialogContent className="w-[95%] md:max-w-md rounded-[2rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                <div className="flex items-center gap-3">
@@ -489,7 +496,7 @@ export default function ProfilePage() {
 
           {/* NESTED Disconnect Confirmation Dialog */}
           <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && setConfirmDisconnectId(null)}>
-            <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden text-center z-[200]">
+            <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none z-[200] [&>button]:hidden text-center">
               <div className="space-y-6">
                 <div className="size-16 rounded-[1.5rem] bg-rose-50 text-rose-500 flex items-center justify-center mx-auto shadow-inner">
                    <X className="size-8" />
@@ -522,7 +529,7 @@ export default function ProfilePage() {
       </Dialog>
 
       <Dialog open={isBioModalOpen} onOpenChange={setIsBioModalOpen}>
-        <DialogContent className="w-[90%] md:max-sm rounded-xl p-4 bg-card text-foreground outline-none [&>button]:hidden">
+        <DialogContent className="w-[90%] md:max-sm rounded-xl p-4 bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <DialogHeader><DialogTitle className="text-sm font-bold text-slate-900">Ubah Profil</DialogTitle></DialogHeader>
           <div className="space-y-3 py-2">
             <div className="space-y-1"><Label className="text-[9px] font-bold uppercase text-muted-foreground">Nama Tampilan</Label><Input value={tempAccount.name || ''} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-lg h-9 bg-muted/20 border-none px-3 text-[12px] font-bold" /></div>
@@ -546,13 +553,13 @@ export default function ProfilePage() {
           if (!open) resetContentForm(); 
         }}
       >
-        <DialogContent className="w-[95%] md:max-w-lg rounded-xl p-4 bg-card text-foreground outline-none [&>button]:hidden">
+        <DialogContent className="w-[95%] md:max-w-lg rounded-xl p-4 bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle className="text-sm font-bold text-slate-900">Tambah Konten</DialogTitle>
             <div className="w-24">
               <Select value={newItem.visibility} onValueChange={(val: 'public' | 'private') => setNewItem({ ...newItem, visibility: val })}>
                 <SelectTrigger className="h-7 rounded-lg bg-muted/50 border-none text-[9px] font-bold px-2 shadow-inner"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                <SelectContent className="z-[180]"><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
               </Select>
             </div>
           </DialogHeader>
@@ -563,7 +570,7 @@ export default function ProfilePage() {
                 <SelectTrigger className="rounded-lg h-8 bg-card border-none shadow-sm font-bold text-[10px]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[180]">
                   <SelectItem value="both">🌍 Beranda & Profil</SelectItem>
                   <SelectItem value="feed">🏠 Hanya Beranda</SelectItem>
                   <SelectItem value="profile">👤 Hanya Profil</SelectItem>
@@ -601,7 +608,7 @@ export default function ProfilePage() {
                    <SelectTrigger className="rounded-lg h-8 bg-card border-none shadow-sm font-bold text-[10px]">
                      <SelectValue placeholder="Pilih Kategori" />
                    </SelectTrigger>
-                   <SelectContent>
+                   <SelectContent className="z-[180]">
                       <SelectItem value="new" className="font-black text-accent">+ Buat Kategori Baru</SelectItem>
                       {existingCategories.map(cat => (
                         <SelectItem key={cat} value={cat!}>{cat}</SelectItem>
@@ -636,7 +643,7 @@ export default function ProfilePage() {
       </Dialog>
 
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
-        <DialogContent className="w-[85%] md:max-w-xs rounded-xl p-4 border-none shadow-2xl bg-card text-foreground outline-none [&>button]:hidden">
+        <DialogContent className="w-[85%] md:max-w-xs rounded-xl p-4 border-none shadow-2xl bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <DialogHeader className="text-center"><DialogTitle className="text-[12px] font-black uppercase tracking-tight">Pilih Media</DialogTitle></DialogHeader>
           <div className="grid gap-2 py-3">
             <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-10 rounded-lg border-border bg-muted/50 hover:bg-black/5 justify-start gap-3 px-4 shadow-inner"><Smartphone className="size-4 text-black" /><p className="font-black text-[9px] uppercase tracking-widest">Galeri HP</p></Button>
@@ -648,7 +655,7 @@ export default function ProfilePage() {
 
       <Dialog open={!!zoomedImage} onOpenChange={(open) => !open && setZoomedImage(null)}>
         <DialogContent 
-          className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
+          className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none z-[170] [&>button]:hidden cursor-pointer"
           onClick={() => setZoomedImage(null)}
         >
           {zoomedImage && <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4"><img src={zoomedImage} alt="Zoomed View" className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300 shadow-none border-none" /></div>}

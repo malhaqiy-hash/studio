@@ -45,6 +45,21 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { CardContent } from "@/components/ui/card";
+import ConnectionIcon from '@/assets/icons/connection.svg';
+
+const ConnectIcon = ({ className }: { className?: string }) => (
+  <div 
+    className={cn("bg-current", className)}
+    style={{
+      maskImage: `url(${ConnectionIcon.src})`,
+      WebkitMaskImage: `url(${ConnectionIcon.src})`,
+      maskSize: 'contain',
+      maskRepeat: 'no-repeat',
+      maskPosition: 'center',
+      display: 'inline-block'
+    }}
+  />
+);
 
 const INITIAL_CHATS = [
   { id: 1, name: "Eco Packaging Co", avatar: "https://picsum.photos/seed/eco/100", lastMsg: "Pengiriman telah dilakukan pagi ini.", time: "10:30", unread: 2, status: "online", color: "bg-teal-500/10 text-teal-500" },
@@ -231,7 +246,7 @@ export default function MessagesPage() {
         <DropdownMenuTrigger asChild>
           <button className="size-8 rounded-lg text-muted-foreground hover:text-black flex items-center justify-center outline-none" onClick={(e) => e.stopPropagation()}><MoreVertical className="size-4" /></button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card">
+        <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card z-[180]">
           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); toggleMute(chat.id); }} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><BellOff className="size-3.5" /> {isMuted[chat.id] ? "Aktifkan Suara" : "Senyapkan"}</DropdownMenuItem>
           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleClearHistory(); }} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><Eraser className="size-3.5" /> Bersihkan Riwayat</DropdownMenuItem>
           <div className="h-px bg-border my-1" />
@@ -294,7 +309,7 @@ export default function MessagesPage() {
               <Plus className="size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="top" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card animate-in slide-in-from-bottom-2">
+          <DropdownMenuContent align="start" side="top" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card animate-in slide-in-from-bottom-2 z-[180]">
             <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><ImageIcon className="size-3.5 text-blue-500" /> Foto</DropdownMenuItem>
             <DropdownMenuItem onClick={() => cameraInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><Camera className="size-3.5 text-rose-500" /> Kamera</DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleAction('location')} className="gap-2.5 px-3 py-2.5 rounded-lg font-bold text-[10px] cursor-pointer"><MapPin className="size-3.5 text-emerald-500" /> Lokasi</DropdownMenuItem>
@@ -367,7 +382,7 @@ export default function MessagesPage() {
                     style={{ touchAction: 'pan-y' }}
                     onClick={() => handleChatSelection(chat)}
                     className={cn(
-                      "relative z-10 bg-card transition-colors hover:bg-slate-50 cursor-pointer",
+                      "relative z-10 bg-card transition-colors hover:bg-slate-50/50 cursor-pointer",
                       chat.unread > 0 ? 'border-l-[3px] border-l-black' : ''
                     )}
                   >
@@ -437,7 +452,7 @@ export default function MessagesPage() {
           if (!open) closeChat();
         }}>
           <DialogContent 
-            className="w-[95%] h-[85dvh] max-w-lg p-0 border-none rounded-t-3xl sm:rounded-3xl bg-card text-foreground outline-none shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 duration-300 [&>button]:hidden"
+            className="w-[95%] h-[85dvh] max-w-lg p-0 border-none rounded-t-3xl sm:rounded-3xl bg-card text-foreground outline-none shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 duration-300 z-[170] [&>button]:hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {selectedChat && (

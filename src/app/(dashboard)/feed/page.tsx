@@ -54,6 +54,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { ShareSheet } from "@/components/share-sheet";
 import { motion, useMotionValue, useTransform, useDragControls } from "framer-motion";
+import ConnectionIcon from '@/assets/icons/connection.svg';
 
 const CATEGORIES = [
   { id: 'saran', label: 'Saran' },
@@ -73,11 +74,17 @@ function getSmartIcon(url: string) {
 }
 
 const ConnectIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-    <path d="M16 8c1.1 1.1 1.1 2.9 0 4M18 6c2.2 2.2 2.2 5.8 0 8" />
-    <path d="M8 16c-1.1-1.1-1.1-2.9 0-4M6 18c-2.2-2.2-2.2-5.8 0-8" />
-  </svg>
+  <div 
+    className={cn("bg-current", className)}
+    style={{
+      maskImage: `url(${ConnectionIcon.src})`,
+      WebkitMaskImage: `url(${ConnectionIcon.src})`,
+      maskSize: 'contain',
+      maskRepeat: 'no-repeat',
+      maskPosition: 'center',
+      display: 'inline-block'
+    }}
+  />
 );
 
 function PostMedia({ images }: { images?: string[] }) {
@@ -97,7 +104,7 @@ function PostMedia({ images }: { images?: string[] }) {
           onClick={() => setIsZoomOpen(true)}
         />
         <Dialog open={isZoomOpen} onOpenChange={setIsZoomOpen}>
-          <DialogContent className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-zoom-out" onClick={() => setIsZoomOpen(false)}>
+          <DialogContent className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none z-[170] [&>button]:hidden cursor-zoom-out" onClick={() => setIsZoomOpen(false)}>
             <img src={images[0]} className="max-w-full max-h-full object-contain animate-in zoom-in-95 duration-200" alt="Zoomed View" />
           </DialogContent>
         </Dialog>
@@ -158,7 +165,7 @@ function PostMedia({ images }: { images?: string[] }) {
 
       <Dialog open={isZoomOpen} onOpenChange={setIsZoomOpen}>
         <DialogContent 
-          className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
+          className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none z-[170] [&>button]:hidden cursor-pointer"
           onClick={() => setIsZoomOpen(false)}
         >
           <div className="w-full h-full relative flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
@@ -547,14 +554,14 @@ export default function FeedPage() {
           if (!open) resetForm(); 
         }}
       >
-        <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
+        <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <div className="p-5 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-black uppercase tracking-tight text-slate-900">Buat Postingan</h2>
               <div className="flex gap-2">
                  <Select value={postVisibility} onValueChange={(val: 'public' | 'private') => setPostVisibility(val)}>
                   <SelectTrigger className="h-8 rounded-lg bg-slate-50 border-none text-[9px] font-black uppercase tracking-widest px-2 shadow-inner focus:ring-2 focus:ring-primary/10 transition-all"><SelectValue /></SelectTrigger>
-                  <SelectContent className="rounded-xl shadow-xl"><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
+                  <SelectContent className="rounded-xl shadow-xl z-[180]"><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
                 </Select>
               </div>
             </div>
@@ -566,7 +573,7 @@ export default function FeedPage() {
                   <SelectTrigger className="h-9 rounded-lg bg-slate-50 border-none px-3 text-[11px] font-bold shadow-inner">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl shadow-xl">
+                  <SelectContent className="rounded-xl shadow-xl z-[180]">
                     <SelectItem value="both">🌍 Beranda & Profil</SelectItem>
                     <SelectItem value="feed">🏠 Hanya Beranda</SelectItem>
                     <SelectItem value="profile">👤 Hanya Profil</SelectItem>
@@ -603,7 +610,7 @@ export default function FeedPage() {
 
       <Dialog open={!!zoomedAvatar} onOpenChange={setExpandedAvatar}>
         <DialogContent 
-          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none [&>button]:hidden cursor-pointer"
+          className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none z-[170] [&>button]:hidden cursor-pointer"
           onClick={() => setExpandedAvatar(null)}
         >
           {zoomedAvatar && (
