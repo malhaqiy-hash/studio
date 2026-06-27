@@ -72,6 +72,14 @@ function getSmartIcon(url: string) {
   return <Globe className="size-3" />;
 }
 
+const ConnectIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+    <path d="M16 8c1.1 1.1 1.1 2.9 0 4M18 6c2.2 2.2 2.2 5.8 0 8" />
+    <path d="M8 16c-1.1-1.1-1.1-2.9 0-4M6 18c-2.2-2.2-2.2-5.8 0-8" />
+  </svg>
+);
+
 function PostMedia({ images }: { images?: string[] }) {
   const [activeIdx, setActiveIdx] = React.useState(0);
   const [isZoomOpen, setIsZoomOpen] = React.useState(false);
@@ -297,6 +305,13 @@ export default function FeedPage() {
     setIsShareSheetOpen(true);
   };
 
+  const handleConnect = (author: string) => {
+    toast({
+      title: "Permintaan Koneksi Terkirim",
+      description: `Menunggu persetujuan dari ${author} untuk menjalin koneksi bisnis.`
+    });
+  };
+
   const handleCreatePost = () => {
     if (!postContent.trim() && postImages.length === 0) return;
     addPost({
@@ -465,7 +480,12 @@ export default function FeedPage() {
                         {trans?.loading ? <RefreshCw className="size-4 animate-spin" /> : <Globe className="size-4" />}
                       </button>
                     </div>
-                    <button onClick={() => handleShare(post.id)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-4" /></button>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => handleConnect(post.author)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all">
+                        <ConnectIcon className="size-4.5" />
+                      </button>
+                      <button onClick={() => handleShare(post.id)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-4" /></button>
+                    </div>
                   </div>
                 </Card>
               );

@@ -19,7 +19,9 @@ import {
   VolumeX,
   AlertTriangle,
   AlertCircle,
-  X
+  X,
+  UserCheck,
+  UserPlus
 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
@@ -38,6 +40,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const ICON_MAP = {
   match: Handshake,
@@ -70,11 +74,35 @@ const INITIAL_NOTIFICATIONS = [
   }
 ];
 
+const INITIAL_REQUESTS = [
+  {
+    id: "req1",
+    type: "connection",
+    user: { 
+      name: "Budi Santoso", 
+      avatar: "https://picsum.photos/seed/budi/100",
+      extra: "CEO at TechCorp"
+    },
+    time: "30m ago"
+  },
+  {
+    id: "req2",
+    type: "follow",
+    user: { 
+      name: "Siti Aminah", 
+      avatar: "https://picsum.photos/seed/siti/100",
+      extra: "Professional Designer"
+    },
+    time: "2h ago"
+  }
+];
+
 export default function NotificationsPage() {
   const { t } = useLanguage();
   const { activeAccount } = useAccount();
   const { toast } = useToast();
   const [notifications, setNotifications] = React.useState<any[]>([]);
+  const [requests, setRequests] = React.useState<any[]>(INITIAL_REQUESTS);
   const [isAllRead, setIsAllRead] = React.useState(false);
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [selectedNotification, setSelectedNotification] = React.useState<any>(null);
@@ -141,6 +169,14 @@ export default function NotificationsPage() {
     }
   };
 
+  const handleAcceptRequest = (id: string, name: string, type: string) => {
+    setRequests(prev => prev.filter(r => r.id !== id));
+    toast({ 
+      title: type === 'connection' ? "Koneksi Disetujui" : "Pengikut Diterima",
+      description: `Anda sekarang telah terhubung dengan ${name}.`
+    });
+  };
+
   if (!isLoaded) return null;
 
   return (
@@ -178,137 +214,168 @@ export default function NotificationsPage() {
           </div>
         </header>
 
-        <div className="space-y-1.5 min-h-[300px]">
-          <AnimatePresence initial={false}>
-            {notifications.map((notification) => {
-              const IconComp = ICON_MAP[notification.iconKey as keyof typeof ICON_MAP] || Bell;
-              
-              return (
-                <motion.div
-                  key={notification.id}
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                  className="overflow-hidden"
-                >
-                  <div 
-                    className="relative rounded-xl bg-card border border-border shadow-sm overflow-hidden touch-pan-y cursor-pointer group/card"
-                    onClick={() => handleOpenDetail(notification)}
-                  >
-                    
-                    <div className="absolute inset-y-0 right-0 w-14 flex items-center justify-center bg-rose-500 rounded-r-xl">
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
-                        className="w-full h-full flex flex-col items-center justify-center text-white active:scale-90 transition-transform"
-                      >
-                        <Trash2 className="size-3.5" />
-                        <span className="text-[7px] font-black uppercase mt-0.5">Hapus</span>
-                      </button>
-                    </div>
+        <Tabs defaultValue="activity" className="w-full">
+          <TabsList className="w-full grid grid-cols-2 bg-slate-100 p-1 rounded-xl mb-4">
+            <TabsTrigger value="activity" className="font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm">Aktivitas</TabsTrigger>
+            <TabsTrigger value="requests" className="font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm flex gap-1.5">
+              {t('requests')}
+              {requests.length > 0 && <span className="size-4 rounded-full bg-primary text-white text-[8px] flex items-center justify-center">{requests.length}</span>}
+            </TabsTrigger>
+          </TabsList>
 
-                    <motion.div 
-                      drag="x"
-                      dragConstraints={{ left: -56, right: 0 }}
-                      dragElastic={0.05}
-                      dragDirectionLock
-                      dragMomentum={false}
-                      style={{ touchAction: 'pan-y' }}
-                      className={cn(
-                        "relative z-10 bg-card transition-colors hover:bg-slate-50/50",
-                        notification.unread ? 'border-l-[3px] border-l-black' : 'bg-slate-50'
-                      )}
+          <TabsContent value="activity" className="space-y-1.5 outline-none min-h-[300px]">
+            <AnimatePresence initial={false}>
+              {notifications.map((notification) => {
+                const IconComp = ICON_MAP[notification.iconKey as keyof typeof ICON_MAP] || Bell;
+                
+                return (
+                  <motion.div
+                    key={notification.id}
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    className="overflow-hidden"
+                  >
+                    <div 
+                      className="relative rounded-xl bg-card border border-border shadow-sm overflow-hidden touch-pan-y cursor-pointer group/card"
+                      onClick={() => handleOpenDetail(notification)}
                     >
-                      <CardContent className="p-3 md:p-3.5">
-                        <div className="flex items-start gap-2.5">
-                          <div className={cn("size-9 rounded-xl flex items-center justify-center shrink-0 shadow-inner", notification.color, !notification.unread && "opacity-60")}>
-                            <IconComp className="size-4" />
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-0.5">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-1">
-                                <h3 className={cn("font-black tracking-tight uppercase text-[10px] truncate", notification.unread ? 'text-foreground' : 'text-muted-foreground')}>
-                                  {notification.title}
-                                </h3>
-                                {notification.unread && (
-                                  <span className="size-1.5 bg-black rounded-full animate-pulse shrink-0" />
-                                )}
+                      
+                      <div className="absolute inset-y-0 right-0 w-14 flex items-center justify-center bg-rose-500 rounded-r-xl">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
+                          className="w-full h-full flex flex-col items-center justify-center text-white active:scale-90 transition-transform"
+                        >
+                          <Trash2 className="size-3.5" />
+                          <span className="text-[7px] font-black uppercase mt-0.5">Hapus</span>
+                        </button>
+                      </div>
+
+                      <motion.div 
+                        drag="x"
+                        dragConstraints={{ left: -56, right: 0 }}
+                        dragElastic={0.05}
+                        dragDirectionLock
+                        dragMomentum={false}
+                        style={{ touchAction: 'pan-y' }}
+                        className={cn(
+                          "relative z-10 bg-card transition-colors hover:bg-slate-50/50",
+                          notification.unread ? 'border-l-[3px] border-l-black' : 'bg-slate-50'
+                        )}
+                      >
+                        <CardContent className="p-3 md:p-3.5">
+                          <div className="flex items-start gap-2.5">
+                            <div className={cn("size-9 rounded-xl flex items-center justify-center shrink-0 shadow-inner", notification.color, !notification.unread && "opacity-60")}>
+                              <IconComp className="size-4" />
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-0.5">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1">
+                                  <h3 className={cn("font-black tracking-tight uppercase text-[10px] truncate", notification.unread ? 'text-foreground' : 'text-muted-foreground')}>
+                                    {notification.title}
+                                  </h3>
+                                  {notification.unread && (
+                                    <span className="size-1.5 bg-black rounded-full animate-pulse shrink-0" />
+                                  )}
+                                </div>
+                                <span className="text-[7px] text-muted-foreground font-black uppercase flex items-center gap-0.5 whitespace-nowrap">
+                                  <Clock className="size-2" />
+                                  {notification.time}
+                                </span>
                               </div>
-                              <span className="text-[7px] text-muted-foreground font-black uppercase flex items-center gap-0.5 whitespace-nowrap">
-                                <Clock className="size-2" />
-                                {notification.time}
-                              </span>
-                            </div>
-                            <p className={cn("text-[10px] font-medium leading-snug line-clamp-2", notification.unread ? "text-muted-foreground" : "text-slate-400")}>
-                              {notification.description}
-                            </p>
-                            <div className="pt-1 flex items-center justify-between">
-                               <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[7px] font-black uppercase text-black hover:bg-black/5 rounded-lg transition-colors">
-                                 {t('take_action')}
-                                 <ChevronRight className="size-2 ml-0.5" />
-                               </Button>
-                               
-                               <div className="flex items-center gap-0.5">
-                                 <DropdownMenu>
-                                   <DropdownMenuTrigger asChild>
-                                     <button 
-                                       onClick={(e) => e.stopPropagation()}
-                                       className="size-7 rounded-lg text-muted-foreground hover:text-black hover:bg-black/5 transition-all active:scale-90 outline-none flex items-center justify-center"
-                                     >
-                                       <MoreVertical className="size-3" />
-                                     </button>
-                                   </DropdownMenuTrigger>
-                                   <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-2xl border-border bg-card animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
-                                     <DropdownMenuItem 
-                                       onClick={() => toggleReadStatus(notification.id)}
-                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-[10px]"
-                                     >
-                                       {notification.unread ? (
-                                         <><Eye className="size-3" /> Ditandai Dibaca</>
-                                       ) : (
-                                         <><EyeOff className="size-3" /> Belum Dibaca</>
-                                       )}
-                                     </DropdownMenuItem>
-                                     <DropdownMenuItem 
-                                       onClick={() => handleMute(notification.title)}
-                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer hover:bg-muted text-[10px]"
-                                     >
-                                       <VolumeX className="size-3" /> Senyapkan Akun
-                                     </DropdownMenuItem>
-                                     <DropdownMenuItem 
-                                       onClick={handleReport}
-                                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg font-bold cursor-pointer text-rose-500 hover:bg-rose-50 text-[10px]"
-                                     >
-                                       <AlertTriangle className="size-3" /> Laporkan
-                                     </DropdownMenuItem>
-                                   </DropdownMenuContent>
-                                 </DropdownMenu>
-                               </div>
+                              <p className={cn("text-[10px] font-medium leading-snug line-clamp-2", notification.unread ? "text-muted-foreground" : "text-slate-400")}>
+                                {notification.description}
+                              </p>
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </motion.div>
+                        </CardContent>
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+
+            {notifications.length === 0 && (
+              <div className="py-12 text-center space-y-3 bg-card rounded-2xl border-2 border-dashed border-border/50">
+                 <div className="size-14 rounded-full bg-muted/20 flex items-center justify-center mx-auto shadow-inner">
+                    <Inbox className="size-7 text-muted-foreground/30" />
+                 </div>
+                 <div className="space-y-1 px-4">
+                    <h3 className="text-[11px] font-black text-slate-900 uppercase">Kotak Masuk Bersih</h3>
+                    <p className="text-slate-400 max-w-xs mx-auto font-medium text-[8px] uppercase tracking-widest">
+                      Kami akan memberi tahu Anda jika ada interaksi baru di jaringan.
+                    </p>
+                 </div>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="requests" className="space-y-2 outline-none min-h-[300px]">
+            <AnimatePresence initial={false}>
+              {requests.map((req) => (
+                <motion.div
+                  key={req.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="p-3 bg-card border border-border rounded-xl shadow-sm flex items-center justify-between gap-3 group"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar className="size-10 border border-border shrink-0">
+                      <AvatarImage src={req.user.avatar} className="object-cover" />
+                      <AvatarFallback className="bg-primary/5 text-primary font-black text-[10px]">{req.user.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 space-y-0.5">
+                      <h4 className="text-[12px] font-black text-slate-900 leading-none truncate">{req.user.name}</h4>
+                      <p className="text-[9px] text-muted-foreground font-medium truncate uppercase tracking-widest">{req.user.extra}</p>
+                      <div className="flex items-center gap-1.5 pt-0.5">
+                        <Badge className="bg-primary/5 text-primary border-none text-[7px] font-black uppercase px-1.5 h-3.5 flex gap-1 items-center">
+                          {req.type === 'connection' ? <Handshake className="size-2" /> : <UserPlus className="size-2" />}
+                          {req.type === 'connection' ? 'Bisnis' : 'Pengikut'}
+                        </Badge>
+                        <span className="text-[7px] font-black text-slate-300 uppercase">{req.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-1.5 shrink-0">
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleAcceptRequest(req.id, req.user.name, req.type)}
+                      className="h-7 px-3 rounded-lg bg-black text-white font-black text-[8px] uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+                    >
+                      {req.type === 'connection' ? t('approve') : t('accept')}
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setRequests(prev => prev.filter(r => r.id !== req.id))}
+                      className="h-7 px-2 rounded-lg text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-rose-500 hover:bg-rose-50"
+                    >
+                      Tolak
+                    </Button>
                   </div>
                 </motion.div>
-              );
-            })}
-          </AnimatePresence>
+              ))}
+            </AnimatePresence>
 
-          {notifications.length === 0 && (
-            <div className="py-12 text-center space-y-3 bg-card rounded-2xl border-2 border-dashed border-border/50">
-               <div className="size-14 rounded-full bg-muted/20 flex items-center justify-center mx-auto shadow-inner">
-                  <Inbox className="size-7 text-muted-foreground/30" />
-               </div>
-               <div className="space-y-1 px-4">
-                  <h3 className="text-[11px] font-black text-slate-900 uppercase">Kotak Masuk Bersih</h3>
-                  <p className="text-slate-400 max-w-xs mx-auto font-medium text-[8px] uppercase tracking-widest">
-                    Kami akan memberi tahu Anda jika ada interaksi baru di jaringan.
-                  </p>
-               </div>
-            </div>
-          )}
-        </div>
+            {requests.length === 0 && (
+              <div className="py-12 text-center space-y-3 bg-card rounded-2xl border-2 border-dashed border-border/50">
+                 <div className="size-14 rounded-full bg-muted/20 flex items-center justify-center mx-auto shadow-inner">
+                    <UserCheck className="size-7 text-muted-foreground/30" />
+                 </div>
+                 <div className="space-y-1 px-4">
+                    <h3 className="text-[11px] font-black text-slate-900 uppercase">Tidak Ada Permintaan</h3>
+                    <p className="text-slate-400 max-w-xs mx-auto font-medium text-[8px] uppercase tracking-widest">
+                      Permintaan koneksi atau pengikut baru akan muncul di sini.
+                    </p>
+                 </div>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
 
         <Dialog open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
           <DialogContent className="w-[90%] md:max-w-md rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden overflow-hidden animate-in zoom-in-95 duration-200">
