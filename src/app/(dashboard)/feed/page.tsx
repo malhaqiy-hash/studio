@@ -251,6 +251,7 @@ export default function FeedPage() {
   const [likes, setLikes] = React.useState<Record<string, { count: number, active: boolean }>>({});
   const [followedAuthors, setFollowedAuthors] = React.useState<Record<string, boolean>>({});
   const [connectedAuthors, setConnectedAuthors] = React.useState<Record<string, boolean>>({});
+  const [savedPosts, setSavedPosts] = React.useState<Record<string, boolean>>({});
 
   const [isPostModalOpen, setIsPostModalOpen] = React.useState(false);
   const [postContent, setPostContent] = React.useState("");
@@ -340,14 +341,17 @@ export default function FeedPage() {
 
   const handleConnect = (author: string) => {
     const isAlreadyConnected = connectedAuthors[author];
-    if (isAlreadyConnected) {
-      toast({ title: "Permintaan Koneksi Sudah Dikirim" });
-      return;
-    }
-    setConnectedAuthors(prev => ({ ...prev, [author]: true }));
+    setConnectedAuthors(prev => ({ ...prev, [author]: !isAlreadyConnected }));
     toast({
-      title: "Permintaan Koneksi Terkirim",
-      description: `Menunggu persetujuan dari ${author} untuk menjalin koneksi bisnis.`
+      title: !isAlreadyConnected ? "Permintaan Koneksi Terkirim" : "Permintaan Koneksi Dibatalkan",
+    });
+  };
+
+  const handleSave = (postId: string) => {
+    const isSaved = savedPosts[postId];
+    setSavedPosts(prev => ({ ...prev, [postId]: !isSaved }));
+    toast({
+      title: !isSaved ? "Tersimpan ke Koleksi" : "Dihapus dari Koleksi",
     });
   };
 
@@ -455,6 +459,7 @@ export default function FeedPage() {
               const postLike = likes[post.id] || { count: 0, active: false };
               const isFollowed = followedAuthors[post.author];
               const isConnected = connectedAuthors[post.author];
+              const isSaved = savedPosts[post.id];
               
               return (
                 <Card key={post.id} className="border-border shadow-sm rounded-xl overflow-hidden bg-card">
@@ -496,7 +501,15 @@ export default function FeedPage() {
                     </div>
                     <div className="flex items-center gap-0.5">
                         {post.visibility === 'private' && <Lock className="size-2.5 text-slate-300" />}
-                        <button className="p-1.5 rounded-full text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors"><Bookmark className="size-4" /></button>
+                        <button 
+                          onClick={() => handleSave(post.id)}
+                          className={cn(
+                            "p-1.5 rounded-full transition-all",
+                            isSaved ? "text-primary bg-primary/5" : "text-slate-400 hover:bg-primary/5 hover:text-primary"
+                          )}
+                        >
+                          <Bookmark className={cn("size-4", isSaved && "fill-current")} />
+                        </button>
                     </div>
                   </div>
 

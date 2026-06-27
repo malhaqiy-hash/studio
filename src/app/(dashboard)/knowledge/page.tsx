@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, TrendingUp, Map, Ship, Briefcase, Search, Clock, Bookmark, ChevronRight, Lightbulb } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/language-context";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const ARTICLES = [
   { id: "a1", title: "EU Packaging Regulations 2025", description: "Sustainability standards for B2B distributors.", category: "Logistics", time: "12 min read", image: "https://picsum.photos/seed/eu/800/400" },
@@ -16,7 +18,18 @@ const ARTICLES = [
 
 export default function KnowledgePage() {
   const { t } = useLanguage();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [savedArticles, setSavedArticles] = React.useState<Record<string, boolean>>({});
+
+  const handleToggleSave = (id: string) => {
+    const isSaved = savedArticles[id];
+    setSavedArticles(prev => ({ ...prev, [id]: !isSaved }));
+    toast({
+      title: !isSaved ? "Artikel Disimpan" : "Simpanan Dihapus",
+      description: !isSaved ? "Artikel kini tersedia di koleksi Anda." : "Artikel telah dihapus dari koleksi."
+    });
+  };
 
   return (
     <DashboardLayout>
@@ -61,7 +74,17 @@ export default function KnowledgePage() {
                       <p className="text-slate-500 font-medium text-[11px] line-clamp-2 leading-relaxed">{article.description}</p>
                       <div className="pt-3 flex items-center justify-between border-t border-slate-50">
                          <div className="flex items-center gap-1.5"><div className="size-5 rounded-full bg-slate-100 flex items-center justify-center text-[7px] font-black shadow-inner">T</div><span className="text-[8px] font-black text-slate-400 uppercase">Tapp Intel</span></div>
-                         <div className="flex gap-1"><Button variant="ghost" size="icon" className="size-7 rounded-lg"><Bookmark className="size-3.5" /></Button><Button variant="ghost" size="icon" className="size-7 rounded-lg"><ChevronRight className="size-3.5" /></Button></div>
+                         <div className="flex gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => handleToggleSave(article.id)}
+                              className={cn("size-7 rounded-lg transition-colors", savedArticles[article.id] ? "text-primary bg-primary/5" : "text-slate-300")}
+                            >
+                              <Bookmark className={cn("size-3.5", savedArticles[article.id] && "fill-current")} />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="size-7 rounded-lg"><ChevronRight className="size-3.5" /></Button>
+                         </div>
                       </div>
                    </CardContent>
                 </Card>
