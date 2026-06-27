@@ -70,10 +70,10 @@ function getSmartIcon(url: string) {
 }
 
 const MOCK_CONNECTIONS = [
-  { id: 'conn1', name: 'Andi Wijaya', avatar: 'https://picsum.photos/seed/andi/100', type: 'Professional' },
-  { id: 'conn2', name: 'Budi Santoso', avatar: 'https://picsum.photos/seed/budi/100', type: 'Bisnis' },
-  { id: 'conn3', name: 'Siti Aminah', avatar: 'https://picsum.photos/seed/siti/100', type: 'Personal' },
-  { id: 'conn4', name: 'Rina Kartika', avatar: 'https://picsum.photos/seed/rina/100', type: 'Bisnis' },
+  { id: 'conn1', name: 'Andi Wijaya', avatar: 'https://picsum.photos/seed/f1/100', type: 'Professional' },
+  { id: 'conn2', name: 'Budi Santoso', avatar: 'https://picsum.photos/seed/f2/100', type: 'Bisnis' },
+  { id: 'conn3', name: 'Siti Aminah', avatar: 'https://picsum.photos/seed/f3/100', type: 'Personal' },
+  { id: 'conn4', name: 'Rina Kartika', avatar: 'https://picsum.photos/seed/f4/100', type: 'Bisnis' },
 ];
 
 export default function ProfilePage() {
@@ -347,7 +347,14 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* Connections Dashed Banner Section */}
+        <section className="px-3 md:px-5">
+          <div className="flex items-center justify-between border-b border-border/40 pb-2">
+            <p className="text-slate-700 leading-relaxed font-normal text-[12px] md:text-[13px]">"{activeAccount.bio || 'Membangun koneksi cerdas di Koolink.'}"</p>
+            <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio, locationLink: activeAccount.locationLink }); setIsBioModalOpen(true); }} className="text-[9px] font-bold uppercase text-accent hover:bg-accent/10 px-2 h-6 rounded-lg border border-accent/20 shrink-0 ml-3"><Pencil className="size-2 mr-1" /> Edit</Button>
+          </div>
+        </section>
+
+        {/* Connections Dashed Banner Section - Repositioned Below Bio/Edit */}
         <section className="px-3 md:px-5">
            <button 
              onClick={() => setIsConnectionsModalOpen(true)}
@@ -377,13 +384,6 @@ export default function ProfilePage() {
               </div>
               <MoreVertical className="size-4 text-slate-300 group-hover:text-primary transition-colors" />
            </button>
-        </section>
-
-        <section className="px-3 md:px-5">
-          <div className="flex items-center justify-between border-b border-border/40 pb-2">
-            <p className="text-slate-700 leading-relaxed font-normal text-[12px] md:text-[13px]">"{activeAccount.bio || 'Membangun koneksi cerdas di Koolink.'}"</p>
-            <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio, locationLink: activeAccount.locationLink }); setIsBioModalOpen(true); }} className="text-[9px] font-bold uppercase text-accent hover:bg-accent/10 px-2 h-6 rounded-lg border border-accent/20 shrink-0 ml-3"><Pencil className="size-2 mr-1" /> Edit</Button>
-          </div>
         </section>
 
         <section className="px-3 md:px-5 space-y-3">
