@@ -243,14 +243,12 @@ export default function ConnectionsPage() {
                     </div>
                   </Link>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <button 
                       onClick={() => handleOpenChat(conn)}
-                      className="size-9 rounded-xl bg-slate-50 text-slate-400 hover:text-primary active:scale-90 transition-all"
+                      className="size-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/5 hover:text-primary active:scale-90 transition-all"
                     >
                       <MessageSquare className="size-4" />
-                    </Button>
+                    </button>
                     <button 
                       onClick={() => openDisconnectConfirm(conn.id)}
                       className="size-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-500 active:scale-90 transition-all"
