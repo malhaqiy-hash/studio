@@ -23,6 +23,7 @@ import {
   Link as LinkIcon,
   Smartphone,
   LayoutGrid,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -414,6 +415,14 @@ export default function FeedPage() {
                         <div className="flex items-center gap-1">
                           <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[13px]">{post.author}</h3></Link>
                           {post.verified && <ShieldCheck className="size-3 text-primary" />}
+                          {post.author !== activeAccount.name && (
+                            <button 
+                              onClick={() => toast({ title: `Mengikuti ${post.author}` })}
+                              className="ml-1 p-1 rounded-full text-primary hover:bg-primary/5 transition-all active:scale-90"
+                            >
+                              <UserPlus className="size-3.5" />
+                            </button>
+                          )}
                           {post.locationLink && (
                             <a href={post.locationLink} target="_blank" rel="noopener noreferrer" className="ml-1 text-slate-400 hover:text-primary transition-colors">
                               {getSmartIcon(post.locationLink)}
