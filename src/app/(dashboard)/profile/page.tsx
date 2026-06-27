@@ -136,6 +136,12 @@ export default function ProfilePage() {
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
+
+    if (params.get('showConnections') === 'true') {
+      setIsConnectionsModalOpen(true);
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
   }, [activeAccount.id, resetContentForm, activeAccount.name, activeAccount.bio, activeAccount.locationLink]);
 
   const profileVisibleItems = React.useMemo(() => {
@@ -377,7 +383,7 @@ export default function ProfilePage() {
                   )}
                 </div>
                 <div className="hidden sm:block text-left ml-2">
-                   <p className="text-[10px] font-black text-slate-800 uppercase tracking-tight">Jaringan Koneksi</p>
+                   <p className="text-10px font-black text-slate-800 uppercase tracking-tight">Jaringan Koneksi</p>
                    <p className="text-[9px] font-medium text-slate-400 uppercase tracking-widest">{connections.length} Terhubung</p>
                 </div>
               </div>

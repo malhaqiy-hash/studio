@@ -111,6 +111,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: User, label: t('profile'), href: "/profile", roles: ['personal', 'professional', 'bisnis'] },
       { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard", roles: ['personal', 'professional', 'bisnis'] },
       { icon: Bookmark, label: t('saved'), href: "/saved", roles: ['personal', 'professional', 'bisnis'] },
+      { icon: Handshake, label: t('connections'), href: "/profile?showConnections=true", roles: ['personal', 'professional', 'bisnis'] },
       { icon: Users, label: t('communities'), href: "/communities", roles: ['personal', 'professional', 'bisnis'] },
       
       { icon: Radar, label: t('scout'), href: "/scout", roles: ['bisnis', 'professional'] },

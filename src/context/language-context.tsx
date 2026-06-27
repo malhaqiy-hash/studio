@@ -194,6 +194,7 @@ export const translations = {
   accept: { en: 'Accept', id: 'Terima' },
   approve: { en: 'Approve', id: 'Setuju' },
   connect: { en: 'Connect', id: 'Koneksi' },
+  connections: { en: 'Connections', id: 'Koneksi' },
 
   // AI Assistant
   ai_greet: { en: 'Hello! I am your Koolink assistant. How can I help you today?', id: 'Halo! Saya asisten Koolink Anda. Bagaimana saya bisa membantu Anda hari ini?' },
