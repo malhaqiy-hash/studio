@@ -272,28 +272,26 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 className="w-[280px] sm:w-[320px] p-0 bg-card border-l border-border rounded-l-[2rem] shadow-2xl flex flex-col overflow-hidden outline-none [&>button]:hidden"
               >
                 <div className="flex flex-col h-full overflow-hidden">
-                  {/* Enhanced Header with Profile Info */}
-                  <div className="px-5 pt-14 pb-5 bg-primary/5 border-b border-border/50 shrink-0">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="size-12 border-2 border-primary/20 shadow-md">
-                        <AvatarImage src={activeAccount.avatar} className="object-cover" />
-                        <AvatarFallback className="bg-primary text-primary-foreground font-black text-xs">{activeAccount.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <h2 className="text-[13px] font-black text-slate-900 truncate uppercase tracking-tight">{activeAccount.name}</h2>
-                          {activeAccount.verificationStatus === 'Verified' && <ShieldCheck className="size-3 text-primary" />}
-                        </div>
-                        <Badge variant="outline" className="w-fit h-4 px-1.5 text-[7px] font-black uppercase tracking-widest border-primary/20 bg-white text-primary/80 mt-0.5">
-                          {activeAccount.type}
-                        </Badge>
+                  {/* Enhanced Centered Header with Profile Info */}
+                  <div className="px-5 pt-14 pb-8 border-b border-border/40 shrink-0 flex flex-col items-center text-center">
+                    <Avatar className="size-16 border-2 border-primary/20 shadow-xl mb-3">
+                      <AvatarImage src={activeAccount.avatar} className="object-cover" />
+                      <AvatarFallback className="bg-primary text-primary-foreground font-black text-xl">{activeAccount.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col items-center min-w-0 w-full">
+                      <div className="flex items-center gap-1.5 justify-center mb-1">
+                        <h2 className="text-[14px] font-black text-slate-900 truncate uppercase tracking-tight">{activeAccount.name}</h2>
+                        {activeAccount.verificationStatus === 'Verified' && <ShieldCheck className="size-3.5 text-primary" />}
                       </div>
+                      <Badge variant="outline" className="w-fit h-4 px-2 text-[7px] font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary/80">
+                        {activeAccount.type}
+                      </Badge>
                     </div>
                   </div>
 
                   {/* Scrollable Menu Items */}
                   <div className="flex-1 overflow-y-auto no-scrollbar py-2">
-                    <div className="flex flex-col divide-y divide-border/20">
+                    <div className="flex flex-col divide-y divide-border/10">
                       {drawerItems.map((item) => (
                         <Link 
                           key={item.href} 
@@ -320,12 +318,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
 
-                  {/* System Footer - Increased padding bottom to avoid cutting */}
-                  <div className="p-5 bg-muted/5 border-t border-border/40 space-y-4 shrink-0 pb-24">
+                  {/* System Footer - Pushed to absolute bottom with mt-auto */}
+                  <div className="mt-auto p-5 border-t border-border/40 space-y-4 shrink-0 bg-slate-50/50 pb-8">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <div className="size-7 rounded-lg bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
-                          <Languages className="size-3.5" />
+                        <div className="size-6 rounded-lg bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
+                          <Languages className="size-3" />
                         </div>
                         <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Bahasa Sistem</span>
                       </div>
@@ -345,7 +343,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       <ChevronRight className="size-3 opacity-30 group-hover:translate-x-0.5 transition-transform" />
                     </button>
 
-                    <div className="pt-2">
+                    <div className="pt-1">
                       <p className="text-[7px] font-black text-muted-foreground/30 uppercase tracking-[0.4em] text-center italic">© 2025 Koolink Network</p>
                     </div>
                   </div>
