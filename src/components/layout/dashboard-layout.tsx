@@ -271,9 +271,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 side="right" 
                 className="w-[280px] sm:w-[320px] p-0 bg-card border-l border-border rounded-l-[2rem] shadow-2xl flex flex-col overflow-hidden outline-none [&>button]:hidden"
               >
-                <div className="flex flex-col h-full pt-safe pb-safe">
-                  {/* Enhanced Header with Profile Info */}
-                  <div className="px-5 pt-8 pb-4 bg-primary/5 border-b border-border/50">
+                <div className="flex flex-col h-full overflow-hidden">
+                  {/* Enhanced Header with Profile Info - Increased top padding to avoid panel overlap */}
+                  <div className="px-5 pt-14 pb-5 bg-primary/5 border-b border-border/50 shrink-0">
                     <div className="flex items-center gap-3">
                       <Avatar className="size-12 border-2 border-primary/20 shadow-md">
                         <AvatarImage src={activeAccount.avatar} className="object-cover" />
@@ -291,7 +291,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
 
-                  {/* Scrollable Menu Items with Smaller Font */}
+                  {/* Scrollable Menu Items */}
                   <div className="flex-1 overflow-y-auto no-scrollbar py-2">
                     <div className="flex flex-col divide-y divide-border/20">
                       {drawerItems.map((item) => (
@@ -300,7 +300,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                           href={item.href} 
                           onClick={() => setIsMoreMenuOpen(false)} 
                           className={cn(
-                            "flex items-center px-5 py-3 transition-all gap-4 group", 
+                            "flex items-center px-5 py-3.5 transition-all gap-4 group", 
                             pathname === item.href ? "bg-primary/5 text-primary" : "bg-transparent hover:bg-primary/5"
                           )}
                         >
@@ -321,7 +321,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   </div>
 
                   {/* System Footer - Compact */}
-                  <div className="p-5 bg-muted/5 border-t border-border/40 space-y-4">
+                  <div className="p-5 bg-muted/5 border-t border-border/40 space-y-4 shrink-0 pb-safe">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <div className="size-7 rounded-lg bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
