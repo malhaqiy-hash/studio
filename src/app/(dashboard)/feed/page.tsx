@@ -80,7 +80,7 @@ function PostMedia({ images }: { images?: string[] }) {
 
   if (images.length === 1) {
     return (
-      <div className="relative w-full overflow-hidden rounded-xl border border-border/40 bg-muted/5">
+      <div className="relative w-full overflow-hidden bg-muted/5 border-y border-border/40">
         <img 
           src={images[0]} 
           className="w-full h-auto block max-h-[75vh] object-contain cursor-zoom-in transition-transform duration-500 hover:scale-[1.01]" 
@@ -98,7 +98,7 @@ function PostMedia({ images }: { images?: string[] }) {
 
   return (
     <div 
-      className="relative group/carousel w-full overflow-hidden rounded-xl border border-border/40 bg-muted/5 swiper-media-wrapper"
+      className="relative group/carousel w-full overflow-hidden bg-muted/5 border-y border-border/40 swiper-media-wrapper"
       style={{ touchAction: 'pan-y' }}
       onPointerDown={(e) => e.stopPropagation()}
     >
@@ -182,7 +182,7 @@ function PostMedia({ images }: { images?: string[] }) {
 const INITIAL_POSTS = [
   {
     id: "p1",
-    author: "Tapp Intelligence",
+    author: "Koolink Intelligence",
     extra: "Enterprise AI Analyst",
     avatar: "https://picsum.photos/seed/ontapp/200",
     content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
@@ -199,7 +199,7 @@ const INITIAL_POSTS = [
     author: "Global Logistics Co.",
     extra: "Logistics & Supply Chain",
     avatar: "https://picsum.photos/seed/log/100",
-    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member Tapp hari ini.",
+    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member Koolink hari ini.",
     time: "2 jam yang lalu",
     stats: { likes: 452, comments: 12 },
     verified: true,
@@ -292,7 +292,7 @@ export default function FeedPage() {
   };
 
   const handleShare = (postId: string) => {
-    setShareUrl(`https://tapp.network/post/${postId}`);
+    setShareUrl(`https://koolink.network/post/${postId}`);
     setIsShareSheetOpen(true);
   };
 
@@ -400,6 +400,7 @@ export default function FeedPage() {
               
               return (
                 <Card key={post.id} className="border-border shadow-sm rounded-xl overflow-hidden bg-card">
+                  {/* Padded Header */}
                   <div className="p-3 pb-1.5 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <Avatar 
@@ -430,13 +431,17 @@ export default function FeedPage() {
                     </div>
                   </div>
 
-                  <CardContent className="px-3 py-1.5 space-y-2.5">
+                  {/* Padded Text Content */}
+                  <div className="px-3 py-1.5">
                     <p className="text-slate-700 leading-normal font-medium text-[13px] md:text-[14px] whitespace-pre-wrap">
                       {trans?.show ? trans.text : post.content}
                     </p>
-                    <PostMedia images={post.images} />
-                  </CardContent>
+                  </div>
 
+                  {/* Full Width Media (No Padding) */}
+                  <PostMedia images={post.images} />
+
+                  {/* Padded Footer */}
                   <div className="p-2 pt-1 border-t border-border/40 bg-slate-50/30 flex items-center justify-between">
                     <div className="flex items-center gap-5 text-slate-500">
                       <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1 py-1 transition-all", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
