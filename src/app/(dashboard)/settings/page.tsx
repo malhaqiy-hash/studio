@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -392,7 +393,7 @@ export default function SettingsPage() {
               <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Aktivitas & Interaksi</h3>
               <MenuList items={[
                 { icon: LayoutGrid, label: "Kelola Postingan", desc: "Arsip, Pin, Seluruh Aktivitas", href: "/settings/posts", bg: "bg-primary text-white shadow-primary/20 shadow-lg" },
-                { icon: Handshake, label: "Koneksi", desc: "Daftar Relasi Bisnis", href: "/profile?showConnections=true" },
+                { icon: Handshake, label: "Koneksi", desc: "Daftar Relasi Bisnis", href: "/connections" },
                 { icon: Users, label: "Komunitas", desc: "Grup & Kolaborasi", href: "/communities" },
                 { icon: UserCheck, label: "Hubungan Jaringan", desc: activeAccount.type === 'personal' ? "Pengikut, Mengikuti, Suka" : "Subscribe & Suka", subMenu: "hubungan" },
                 { icon: Bell, label: "Notifikasi", desc: "Push, Chat, Email", href: "/notifications" }
