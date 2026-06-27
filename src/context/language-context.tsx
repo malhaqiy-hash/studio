@@ -108,7 +108,7 @@ export const translations = {
   nearby: { en: 'Nearby (GPS)', id: 'Sekitar (GPS)' },
   results: { en: 'Results', id: 'Hasil' },
   start_search: { en: 'Your Network is Your Net Worth', id: 'Jaringan Anda Adalah Kekayaan Anda' },
-  daily_limit_msg: { en: 'Every connection is a new opportunity to grow. Start building strategic relationships today.', id: 'Setiap koneksi adalah peluang baru untuk tumbuh. Mulai jalin hubungan strategis hari ini.' },
+  daily_limit_msg: { en: 'Every connection is a new opportunity to grow. Start building strategic relationships today.', id: 'Setiap koneksi cerdas adalah peluang baru untuk tumbuh. Mulai jalin hubungan strategis Anda hari ini.' },
   recent_searches: { en: 'Recent Searches', id: 'Pencarian Terakhir' },
   clear_all: { en: 'Clear All', id: 'Hapus Semua' },
   
@@ -125,13 +125,13 @@ export const translations = {
 
   // Module Titles & Descriptions
   ai_backup: { en: 'AI Backup', id: 'Penemuan AI (Backup)' },
-  ai_backup_desc: { en: 'Your discovery history is automatically backed up.', id: 'Riwayat pencarian AI Anda dicadangkan otomatis.' },
+  ai_backup_desc: { en: 'Your discovery history is automatically backed up in Koolink Hub.', id: 'Riwayat pencarian AI Anda dicadangkan otomatis di Koolink Hub.' },
   market_radar: { en: 'Market Radar', id: 'Market Radar' },
   market_radar_desc: { en: 'Daily global AI signals for network efficiency.', id: 'Sinyal AI harian untuk efisiensi jaringan.' },
   opportunity_map: { en: 'Opportunity Map', id: 'Peta Peluang' },
   opportunity_map_desc: { en: 'Visualize global business leads and demands.', id: 'Visualisasikan prospek dan permintaan bisnis global.' },
   registry: { en: 'Koolink Registry', id: 'Registri Koolink' },
-  registry_desc: { en: 'Claim and verify your profile to unlock features.', id: 'Klaim dan verifikasi profil untuk buka fitur.' },
+  registry_desc: { en: 'Claim and verify your profile to unlock Koolink features.', id: 'Klaim dan verifikasi profil untuk buka fitur Koolink.' },
   matchmaker: { en: 'AI Matchmaker', id: 'Pencari Mitra' },
   matchmaker_desc: { en: 'Automated profile analysis every 24 hours.', id: 'Analisis profil otomatis setiap 24 jam.' },
   matches: { en: 'Pairings', id: 'Kecocokan' },

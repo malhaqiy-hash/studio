@@ -72,7 +72,7 @@ const SEARCH_CATEGORIES = [
 
 const DAFTAR_DAERAH = [
   "Jakarta Pusat", "Jakarta Selatan", "Jakarta Barat", "Jakarta Timur", "Jakarta Utara", 
-  "Bandung", "Surabaya", "Semarang", "Kendal", "Yogyakarta", 
+  "Bandung", "Surabaya", "Semarang", "Yogyakarta", 
   "Medan", "Makassar", "Palembang", "Denpasar", "Malang",
   "Banten", "Depok", "Bekasi", "Tangerang", "Bogor"
 ];
@@ -324,7 +324,7 @@ export default function CariPage() {
                   <div className="space-y-3 py-2">
                     <div className="flex items-center gap-2 px-1">
                        <ShieldCheck className="size-4 text-emerald-500" />
-                       <h2 className="text-sm font-black uppercase tracking-tight text-slate-900">Jaringan Internal Tapp</h2>
+                       <h2 className="text-sm font-black uppercase tracking-tight text-slate-900">Jaringan Internal Koolink</h2>
                     </div>
                     <div className="grid gap-2.5">
                       {internalResults.map((acc) => (
@@ -339,7 +339,7 @@ export default function CariPage() {
                                   <h4 className="text-[14px] font-black text-slate-900 leading-tight truncate">{acc.name}</h4>
                                   <ShieldCheck className="size-3 text-emerald-500" />
                                 </div>
-                                <p className="text-slate-500 font-medium text-[11px] leading-snug line-clamp-1 italic">"{acc.bio || 'Membangun koneksi cerdas di Tapp.'}"</p>
+                                <p className="text-slate-500 font-medium text-[11px] leading-snug line-clamp-1 italic">"{acc.bio || 'Membangun koneksi cerdas di Koolink.'}"</p>
                                 <div className="flex items-center gap-2 text-[8px] font-black text-slate-400 uppercase tracking-widest pt-1">
                                   <Badge className="bg-primary/10 text-primary border-none px-1.5 py-0 rounded-md text-[7px] uppercase">{acc.type}</Badge>
                                   <span className="flex items-center gap-1"><MapPin className="size-2" /> Indonesia</span>
@@ -419,13 +419,13 @@ export default function CariPage() {
                 )}
 
                 {!loading && !results && internalResults.length === 0 && (
-                  <div className="py-20 text-center space-y-4">
+                  <div className="py-20 text-center space-y-4 px-6">
                      <div className="size-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto shadow-inner">
                         <Target className="size-8 text-slate-200" />
                      </div>
-                     <div className="space-y-1">
-                        <h3 className="text-sm font-black text-slate-900 uppercase">Temukan Peluang Bisnis</h3>
-                        <p className="text-[10px] text-slate-400 max-w-xs mx-auto font-medium italic">Mulai mencari mitra bisnis terverifikasi dengan kecerdasan hybrid Tapp.</p>
+                     <div className="space-y-2">
+                        <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">{t('start_search')}</h3>
+                        <p className="text-[10px] text-slate-500 max-w-xs mx-auto font-medium italic leading-relaxed">"{t('daily_limit_msg')}"</p>
                      </div>
                   </div>
                 )}
