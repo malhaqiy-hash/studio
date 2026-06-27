@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -32,7 +33,7 @@ import {
 import { useLanguage } from "@/context/language-context";
 import { useAccount } from "@/context/account-context";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,6 +72,97 @@ const DEFAULT_MESSAGES = [
   { id: 'm1', sender: 'other', text: "Halo! Kami sedang meninjau permintaan Anda untuk pesanan kemasan ramah lingkungan.", type: 'text' },
   { id: 'm2', sender: 'me', text: "Bagus. Kabari saya jika sudah siap dikirim.", type: 'text' }
 ];
+
+function ChatItem({ 
+  chat, 
+  isMuted, 
+  deleteChat, 
+  onClick 
+}: { 
+  chat: any, 
+  isMuted: boolean, 
+  deleteChat: (id: number) => void, 
+  onClick: () => void 
+}) {
+  const x = useMotionValue(0);
+  // Only show trash icon when dragging left (x < 0)
+  const trashOpacity = useTransform(x, [-30, 0], [1, 0]);
+
+  return (
+    <div className="relative rounded-xl overflow-hidden bg-slate-100 group/card">
+      {/* Background Action Layer */}
+      <motion.div 
+        style={{ opacity: trashOpacity }}
+        className="absolute inset-y-0 right-0 w-14 flex items-center justify-center bg-rose-500 rounded-r-xl"
+      >
+        <button 
+          onClick={(e) => { e.stopPropagation(); deleteChat(chat.id); }}
+          className="w-full h-full flex flex-col items-center justify-center text-white active:scale-90 transition-transform"
+        >
+          <Trash2 className="size-3.5" />
+          <span className="text-[7px] font-black uppercase mt-0.5">Hapus</span>
+        </button>
+      </motion.div>
+
+      {/* Front Card Layer */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: -56, right: 0 }}
+        dragElastic={0.02}
+        dragDirectionLock
+        dragMomentum={false}
+        style={{ x, touchAction: 'pan-y' }}
+        onClick={onClick}
+        className={cn(
+          "relative z-10 bg-card border border-border shadow-sm rounded-xl transition-colors hover:bg-slate-50/50 cursor-pointer",
+          chat.unread > 0 ? 'border-l-[3px] border-l-black' : ''
+        )}
+      >
+        <CardContent className="p-3 md:p-3.5">
+          <div className="flex items-start gap-3">
+            <div className="relative shrink-0">
+               <Avatar className="size-11 rounded-xl border border-border shadow-inner">
+                  <AvatarImage src={chat.avatar} className="object-cover" />
+                  <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">{chat.name[0]}</AvatarFallback>
+               </Avatar>
+               {chat.status === 'online' && (
+                 <div className="absolute -bottom-0.5 -right-0.5 size-3 bg-emerald-500 border-2 border-card rounded-full" />
+               )}
+            </div>
+            
+            <div className="flex-1 min-w-0 space-y-0.5">
+               <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                     <h3 className="font-black tracking-tight uppercase text-[11px] text-foreground truncate">
+                       {chat.name}
+                     </h3>
+                     {isMuted && <BellOff className="size-2.5 text-muted-foreground/50" />}
+                  </div>
+                  <span className="text-[7px] text-muted-foreground font-black uppercase flex items-center gap-0.5 whitespace-nowrap">
+                    <Clock className="size-2" />
+                    {chat.time}
+                  </span>
+               </div>
+               
+               <p className={cn("text-[10px] font-medium leading-snug line-clamp-1", chat.unread > 0 ? "text-foreground font-bold" : "text-muted-foreground")}>
+                  {chat.lastMsg}
+               </p>
+
+               <div className="pt-1.5 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                     <Badge className={cn("text-[7px] font-black uppercase px-1.5 py-0.5 border-none shadow-none", chat.unread > 0 ? "bg-black text-white" : "bg-muted text-muted-foreground opacity-60")}>
+                       {chat.unread > 0 ? `${chat.unread} Baru` : 'Dibaca'}
+                     </Badge>
+                  </div>
+                  <ChevronRight className="size-3 text-muted-foreground/30 group-hover/card:text-black transition-colors" />
+               </div>
+            </div>
+          </div>
+        </CardContent>
+      </motion.div>
+    </div>
+  );
+}
 
 export default function MessagesPage() {
   const { t, language } = useLanguage();
@@ -362,73 +454,12 @@ export default function MessagesPage() {
                 transition={{ type: "spring", stiffness: 500, damping: 35 }}
                 className="overflow-hidden"
               >
-                <div className="relative rounded-xl bg-card border border-border shadow-sm overflow-hidden group/card">
-                  <div className="absolute inset-y-0 right-0 w-14 flex items-center justify-center bg-rose-500 rounded-r-xl">
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); deleteChat(chat.id); }}
-                      className="w-full h-full flex flex-col items-center justify-center text-white active:scale-90 transition-transform"
-                    >
-                      <Trash2 className="size-3.5" />
-                      <span className="text-[7px] font-black uppercase mt-0.5">Hapus</span>
-                    </button>
-                  </div>
-
-                  <motion.div
-                    drag="x"
-                    dragConstraints={{ left: -56, right: 0 }}
-                    dragElastic={0.05}
-                    dragDirectionLock
-                    dragMomentum={false}
-                    style={{ touchAction: 'pan-y' }}
-                    onClick={() => handleChatSelection(chat)}
-                    className={cn(
-                      "relative z-10 bg-card transition-colors hover:bg-slate-50/50 cursor-pointer",
-                      chat.unread > 0 ? 'border-l-[3px] border-l-black' : ''
-                    )}
-                  >
-                    <CardContent className="p-3 md:p-3.5">
-                      <div className="flex items-start gap-3">
-                        <div className="relative shrink-0">
-                           <Avatar className="size-11 rounded-xl border border-border shadow-inner">
-                              <AvatarImage src={chat.avatar} className="object-cover" />
-                              <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">{chat.name[0]}</AvatarFallback>
-                           </Avatar>
-                           {chat.status === 'online' && (
-                             <div className="absolute -bottom-0.5 -right-0.5 size-3 bg-emerald-500 border-2 border-card rounded-full" />
-                           )}
-                        </div>
-                        
-                        <div className="flex-1 min-w-0 space-y-0.5">
-                           <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-1.5">
-                                 <h3 className="font-black tracking-tight uppercase text-[11px] text-foreground truncate">
-                                   {chat.name}
-                                 </h3>
-                                 {isMuted[chat.id] && <BellOff className="size-2.5 text-muted-foreground/50" />}
-                              </div>
-                              <span className="text-[7px] text-muted-foreground font-black uppercase flex items-center gap-0.5 whitespace-nowrap">
-                                <Clock className="size-2" />
-                                {chat.time}
-                              </span>
-                           </div>
-                           
-                           <p className={cn("text-[10px] font-medium leading-snug line-clamp-1", chat.unread > 0 ? "text-foreground font-bold" : "text-muted-foreground")}>
-                              {chat.lastMsg}
-                           </p>
-
-                           <div className="pt-1.5 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                 <Badge className={cn("text-[7px] font-black uppercase px-1.5 py-0.5 border-none", chat.unread > 0 ? "bg-black text-white" : "bg-muted text-muted-foreground opacity-60")}>
-                                   {chat.unread > 0 ? `${chat.unread} Baru` : 'Dibaca'}
-                                 </Badge>
-                              </div>
-                              <ChevronRight className="size-3 text-muted-foreground/30 group-hover/card:text-black transition-colors" />
-                           </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </motion.div>
-                </div>
+                <ChatItem 
+                  chat={chat}
+                  isMuted={isMuted[chat.id]}
+                  deleteChat={deleteChat}
+                  onClick={() => handleChatSelection(chat)}
+                />
               </motion.div>
             ))}
           </AnimatePresence>
