@@ -114,7 +114,7 @@ export default function ProfilePage() {
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
-  }, [activeAccount.id, resetContentForm]);
+  }, [activeAccount.id, resetContentForm, activeAccount.name, activeAccount.bio, activeAccount.locationLink]);
 
   const profileVisibleItems = React.useMemo(() => {
     const items = (activeAccount.items || []).filter(i => 
@@ -128,7 +128,7 @@ export default function ProfilePage() {
   }, [activeAccount.items]);
 
   const groupedItems = React.useMemo(() => {
-    if (activeAccount.type === 'pribadi') return { 'Inspirasi': profileVisibleItems };
+    if (activeAccount.type === 'personal') return { 'Inspirasi': profileVisibleItems };
     
     const groups: Record<string, ContentItem[]> = {};
     profileVisibleItems.forEach(item => {
@@ -225,12 +225,12 @@ export default function ProfilePage() {
   };
 
   const handleShareProfile = () => {
-    setShareUrl(`https://tapp.network/profile/${activeAccount.id}`);
+    setShareUrl(`https://koolink.network/profile/${activeAccount.id}`);
     setIsShareSheetOpen(true);
   };
 
   const handleSharePost = (id: string) => {
-    setShareUrl(`https://tapp.network/post/${id}`);
+    setShareUrl(`https://koolink.network/post/${id}`);
     setIsShareSheetOpen(true);
   };
 
@@ -282,12 +282,12 @@ export default function ProfilePage() {
               </div>
               <div className="flex flex-col gap-0.5">
                 <div className="flex flex-wrap items-center gap-3 text-muted-foreground font-medium text-[11px] md:text-[13px]">
-                  <span>{activeAccount.extra || 'Tapp Member'}</span>
+                  <span>{activeAccount.extra || 'Koolink Member'}</span>
                   <div className="flex items-center gap-3 ml-auto">
                      <div className="flex flex-col items-center">
                         <span className="text-xs font-bold text-slate-900">1.2k</span>
                         <span className="text-[7px] font-black uppercase opacity-60 flex items-center gap-1">
-                          {activeAccount.type === 'pribadi' ? <><Users className="size-2" /> Pengikut</> : <><Zap className="size-2" /> Subscribe</>}
+                          {activeAccount.type === 'personal' ? <><Users className="size-2" /> Pengikut</> : <><Zap className="size-2" /> Subscribe</>}
                         </span>
                      </div>
                      <div className="flex flex-col items-center text-rose-500">
@@ -311,7 +311,7 @@ export default function ProfilePage() {
 
         <section className="px-3 md:px-5">
           <div className="flex items-center justify-between border-b border-border/40 pb-2">
-            <p className="text-slate-700 leading-relaxed font-normal text-[12px] md:text-[13px]">"{activeAccount.bio || 'Membangun koneksi cerdas di Tapp.'}"</p>
+            <p className="text-slate-700 leading-relaxed font-normal text-[12px] md:text-[13px]">"{activeAccount.bio || 'Membangun koneksi cerdas di Koolink.'}"</p>
             <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio, locationLink: activeAccount.locationLink }); setIsBioModalOpen(true); }} className="text-[9px] font-bold uppercase text-accent hover:bg-accent/10 px-2 h-6 rounded-lg border border-accent/20 shrink-0 ml-3"><Pencil className="size-2 mr-1" /> Edit</Button>
           </div>
         </section>
@@ -331,10 +331,10 @@ export default function ProfilePage() {
                 </div>
                 
                 <div className={cn(
-                  activeAccount.type === 'pribadi' ? "grid grid-cols-2 gap-2.5" : "flex overflow-x-auto no-scrollbar space-x-2.5 px-1 pb-2.5 snap-x"
+                  activeAccount.type === 'personal' ? "grid grid-cols-2 gap-2.5" : "flex overflow-x-auto no-scrollbar space-x-2.5 px-1 pb-2.5 snap-x"
                 )}>
                   {items.map((item) => (
-                    <div key={item.id} className={cn(activeAccount.type === 'pribadi' ? "" : "w-28 md:w-32 flex-shrink-0 snap-start")}>
+                    <div key={item.id} className={cn(activeAccount.type === 'personal' ? "" : "w-28 md:w-32 flex-shrink-0 snap-start")}>
                       <Card className="rounded-xl border-none shadow-md overflow-hidden bg-card hover:shadow-xl transition-all relative group">
                         {item.images && item.images.length > 0 && (
                           <div className="aspect-square w-full overflow-hidden relative cursor-zoom-in" onClick={() => setZoomedImage(item.images![0])}>
@@ -471,7 +471,7 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-          <DialogFooter className="mt-3"><Button onClick={handleAddContent} disabled={!newItem.images?.length || ((activeAccount.type !== 'pribadi') && !newItem.categoryName)} className="w-full h-10 rounded-lg bg-accent font-bold text-white text-[12px] uppercase shadow-lg active:scale-95 transition-all">Posting</Button></DialogFooter>
+          <DialogFooter className="mt-3"><Button onClick={handleAddContent} disabled={!newItem.images?.length || ((activeAccount.type !== 'personal') && !newItem.categoryName)} className="w-full h-10 rounded-lg bg-accent font-bold text-white text-[12px] uppercase shadow-lg active:scale-95 transition-all">Posting</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 

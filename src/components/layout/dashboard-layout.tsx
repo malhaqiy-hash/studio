@@ -112,10 +112,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const getDrawerItems = () => {
     const baseItems = [
-      { icon: User, label: t('profile'), href: "/profile", roles: ['pribadi', 'professional', 'bisnis'] },
-      { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard", roles: ['pribadi', 'professional', 'bisnis'] },
-      { icon: Bookmark, label: t('saved'), href: "/saved", roles: ['pribadi', 'professional', 'bisnis'] },
-      { icon: Users, label: t('communities'), href: "/communities", roles: ['pribadi', 'professional', 'bisnis'] },
+      { icon: User, label: t('profile'), href: "/profile", roles: ['personal', 'professional', 'bisnis'] },
+      { icon: LayoutDashboard, label: t('dashboard'), href: "/dashboard", roles: ['personal', 'professional', 'bisnis'] },
+      { icon: Bookmark, label: t('saved'), href: "/saved", roles: ['personal', 'professional', 'bisnis'] },
+      { icon: Users, label: t('communities'), href: "/communities", roles: ['personal', 'professional', 'bisnis'] },
       
       { icon: Radar, label: t('scout'), href: "/scout", roles: ['bisnis', 'professional'] },
       { icon: Handshake, label: t('matchmaker'), href: "/matchmaker", roles: ['bisnis', 'professional'] },
@@ -123,14 +123,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       { icon: Magnet, label: t('reverse_discovery'), href: "/reverse-discovery", roles: ['bisnis'] },
       { icon: MapIcon, label: t('opportunity_map'), href: "/opportunity-map", roles: ['bisnis'] },
       { icon: Building2, label: t('registry'), href: "/registry", roles: ['bisnis', 'professional'] },
-      { icon: BookOpen, label: t('knowledge'), href: "/knowledge", roles: ['pribadi', 'professional', 'bisnis'] },
+      { icon: BookOpen, label: t('knowledge'), href: "/knowledge", roles: ['personal', 'professional', 'bisnis'] },
 
       { icon: Briefcase, label: t('opportunities'), href: "/opportunities", roles: ['bisnis', 'professional'] },
-      { icon: Sliders, label: t('settings'), href: "/settings", roles: ['pribadi', 'professional', 'bisnis'] },
+      { icon: Sliders, label: t('settings'), href: "/settings", roles: ['personal', 'professional', 'bisnis'] },
     ];
 
     return baseItems.filter(item => 
-      item.roles.includes(activeAccount?.type || 'pribadi') && 
+      item.roles.includes(activeAccount?.type || 'personal') && 
       item.href !== "/feed" && 
       item.href !== "/cari"
     );
@@ -244,7 +244,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuSubTrigger className="gap-2.5 px-2.5 py-2.5 rounded-lg font-bold text-[12px]"><UserPlus className="size-3.5" /> Tambah Profil</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card">
-                    <DropdownMenuItem onSelect={() => { setPendingType('pribadi'); setIsRegModalOpen(true); }} className="font-bold text-[12px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Pribadi</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => { setPendingType('personal'); setIsRegModalOpen(true); }} className="font-bold text-[12px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Personal</DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => { setPendingType('professional'); setIsRegModalOpen(true); }} className="font-bold text-[12px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Professional</DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => { setPendingType('bisnis'); setIsRegModalOpen(true); }} className="font-bold text-[12px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Bisnis</DropdownMenuItem>
                   </DropdownMenuSubContent>
@@ -349,16 +349,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <div className="flex-1 px-6 pb-8 space-y-5">
               {!pendingType ? (
                 <div className="grid gap-3">
-                  {['pribadi', 'professional', 'bisnis'].map((type) => (
+                  {['personal', 'professional', 'bisnis'].map((type) => (
                     <button key={type} type="button" onClick={() => setPendingType(type as AccountType)} className="flex items-center gap-4 p-4 rounded-2xl border-2 border-muted hover:border-primary hover:bg-primary/[0.02] transition-all group text-left shadow-sm">
                       <div className="size-10 rounded-2xl bg-primary/5 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                        {type === 'pribadi' ? <User className="size-5" /> : type === 'professional' ? <ShieldCheck className="size-5" /> : <Briefcase className="size-5" />}
+                        {type === 'personal' ? <User className="size-5" /> : type === 'professional' ? <ShieldCheck className="size-5" /> : <Briefcase className="size-5" />}
                       </div>
                       <div>
                         <h4 className="font-bold text-[14px] text-slate-900 capitalize flex items-center gap-2">
                           Profil <span className="font-medium text-[9px] text-primary/60 italic lowercase font-normal leading-none">{type}</span>
                         </h4>
-                        <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">{type === 'pribadi' ? 'Berbagi inspirasi dan relasi bisnis.' : type === 'professional' ? 'Tampilkan keahlian dan portofolio.' : 'Akses data pasar dan mitra eksklusif.'}</p>
+                        <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">{type === 'personal' ? 'Berbagi inspirasi dan relasi bisnis.' : type === 'professional' ? 'Tampilkan keahlian dan portofolio.' : 'Akses data pasar dan mitra eksklusif.'}</p>
                       </div>
                     </button>
                   ))}

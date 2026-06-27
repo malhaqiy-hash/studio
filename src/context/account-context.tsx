@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 
-export type AccountType = 'pribadi' | 'professional' | 'bisnis';
+export type AccountType = 'personal' | 'professional' | 'bisnis';
 
 export interface ContentItem {
   id: string;
@@ -74,10 +74,10 @@ const DEFAULT_PREFERENCES: AccountPreferences = {
   whoCanSeeSubscribe: 'public',
 };
 
-const DEFAULT_PRIBADI: Account = { 
+const DEFAULT_PERSONAL: Account = { 
   id: 'acc-temp', 
   name: 'Calon Member', 
-  type: 'pribadi', 
+  type: 'personal', 
   avatar: 'https://picsum.photos/seed/temp/100',
   bio: 'Akun sementara sebelum onboarding.',
   isNew: true,
@@ -91,7 +91,7 @@ const STORAGE_KEY_ACTIVE_ID = 'tapp_active_account_id_v1';
 const AccountContext = createContext<AccountContextProps | undefined>(undefined);
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
-  const [accounts, setAccounts] = useState<Account[]>([DEFAULT_PRIBADI]);
+  const [accounts, setAccounts] = useState<Account[]>([DEFAULT_PERSONAL]);
   const [activeAccountId, setActiveAccountId] = useState<string>('acc-temp');
   const [hasInitialized, setHasInitialized] = useState(false);
 
@@ -103,10 +103,11 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
       try {
         const parsed = JSON.parse(savedAccounts);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const migratedAccounts = parsed.map((acc: Account) => ({
+          const migratedAccounts = parsed.map((acc: any) => ({
             ...acc,
+            type: acc.type === 'pribadi' ? 'personal' : acc.type,
             preferences: acc.preferences || DEFAULT_PREFERENCES,
-            items: (acc.items || []).map(item => ({
+            items: (acc.items || []).map((item: any) => ({
               ...item,
               displayLocation: item.displayLocation || 'both',
               isPinned: item.isPinned || false,
@@ -135,7 +136,6 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(accounts));
         localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeAccountId);
       } catch (e: any) {
-        // Handle QuotaExceededError silently to prevent crash
         if (e.name === 'QuotaExceededError') {
           console.warn("Storage quota exceeded. Data will be kept in memory only.");
         }
@@ -160,7 +160,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
       links: data.links || [],
       items: [],
       isNew: false,
-      verificationStatus: data.type === 'pribadi' ? 'Verified' : 'Unverified',
+      verificationStatus: data.type === 'personal' ? 'Verified' : 'Unverified',
       preferences: DEFAULT_PREFERENCES
     };
 
@@ -233,7 +233,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
   }, [activeAccountId]);
 
   const activeAccount = useMemo(() => {
-    return accounts.find(a => a.id === activeAccountId) || accounts[0] || DEFAULT_PRIBADI;
+    return accounts.find(a => a.id === activeAccountId) || accounts[0] || DEFAULT_PERSONAL;
   }, [accounts, activeAccountId]);
 
   const contextValue = useMemo(() => ({ 

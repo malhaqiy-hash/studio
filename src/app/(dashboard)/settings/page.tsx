@@ -28,7 +28,7 @@ import {
   Info, 
   Users, 
   LogOut, 
-  ChevronLeft,
+  ChevronLeft, 
   ChevronRight,
   Zap,
   Smartphone,
@@ -182,12 +182,12 @@ export default function SettingsPage() {
   const renderSubMenuContent = () => {
     switch (activeSubMenu) {
       case "hubungan":
-        const isPribadi = activeAccount.type === 'pribadi';
+        const isPersonal = activeAccount.type === 'personal';
         return (
           <SubMenuLayout title="Hubungan Jaringan">
-            <Tabs defaultValue={isPribadi ? "pengikut" : "subscribe"} className="w-full">
-              <TabsList className="w-full grid h-10 bg-muted/20 rounded-lg p-1 gap-1 mb-4" style={{ gridTemplateColumns: isPribadi ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>
-                {isPribadi ? (
+            <Tabs defaultValue={isPersonal ? "pengikut" : "subscribe"} className="w-full">
+              <TabsList className="w-full grid h-10 bg-muted/20 rounded-lg p-1 gap-1 mb-4" style={{ gridTemplateColumns: isPersonal ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>
+                {isPersonal ? (
                   <>
                     <TabsTrigger value="pengikut" className="rounded-md font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Pengikut</TabsTrigger>
                     <TabsTrigger value="mengikuti" className="rounded-md font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Mengikuti</TabsTrigger>
@@ -391,7 +391,7 @@ export default function SettingsPage() {
               <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Aktivitas & Interaksi</h3>
               <MenuList items={[
                 { icon: LayoutGrid, label: "Kelola Postingan", desc: "Arsip, Pin, Seluruh Aktivitas", href: "/settings/posts", bg: "bg-primary text-white shadow-primary/20 shadow-lg" },
-                { icon: UserCheck, label: "Hubungan Jaringan", desc: activeAccount.type === 'pribadi' ? "Pengikut, Mengikuti, Suka" : "Subscribe & Suka", subMenu: "hubungan" },
+                { icon: UserCheck, label: "Hubungan Jaringan", desc: activeAccount.type === 'personal' ? "Pengikut, Mengikuti, Suka" : "Subscribe & Suka", subMenu: "hubungan" },
                 { icon: Bell, label: "Notifikasi", desc: "Push, Chat, Email", href: "/notifications" }
               ]} />
             </section>
@@ -440,7 +440,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="text-center space-y-0.5 mt-8">
-              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.4em]">Tapp Intelligence Network</p>
+              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.4em]">Koolink Intelligence Network</p>
               <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">© 2025 ALL RIGHTS RESERVED</p>
             </div>
           </>
