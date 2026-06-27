@@ -9,30 +9,29 @@ interface TappLogoProps {
 export function TappLogo({ className, iconClassName, variant = 'default' }: TappLogoProps) {
   return (
     <div className={cn(
-      "relative flex items-center justify-center overflow-hidden shrink-0",
-      variant === 'default' ? "bg-[#0047BB]" : "bg-white",
+      "relative flex items-center justify-center overflow-hidden shrink-0 transition-transform active:scale-95",
+      variant === 'default' ? "bg-primary" : "bg-white",
       className
     )}>
       <svg 
         viewBox="0 0 100 100" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg" 
-        className={cn("w-[65%] h-[65%]", iconClassName)}
+        className={cn("w-[70%] h-[70%]", iconClassName)}
       >
-        {/* A modern, geometric T that doubles as a verification checkmark */}
-        <path 
-          d="M20 40H80M50 40V75C50 75 50 85 65 85H80" 
-          stroke={variant === 'default' ? "white" : "#0047BB"} 
-          strokeWidth="14" 
-          strokeLinecap="round" 
-          strokeLinejoin="round" 
-        />
-        {/* Accent dot symbolizing 'Tap' or connection point */}
+        {/* Modern Radio-style disc logo representing "Koolink" */}
         <circle 
-          cx="80" 
-          cy="40" 
-          r="8" 
-          fill={variant === 'default' ? "white" : "#0047BB"} 
+          cx="50" 
+          cy="50" 
+          r="40" 
+          stroke={variant === 'default' ? "white" : "hsl(var(--primary))"} 
+          strokeWidth="8" 
+        />
+        <circle 
+          cx="50" 
+          cy="50" 
+          r="18" 
+          fill={variant === 'default' ? "white" : "hsl(var(--primary))"} 
         />
       </svg>
     </div>

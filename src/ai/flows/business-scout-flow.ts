@@ -38,7 +38,7 @@ const businessScoutPrompt = ai.definePrompt({
     maxOutputTokens: 500,
     temperature: 0.1
   },
-  prompt: `You are the Tapp AI Business Scout. Your mission is to analyze business signals and identify unmet market demand.
+  prompt: `You are the Koolink AI Business Scout. Your mission is to analyze business signals and identify unmet market demand.
 
 ### Input Data Context:
 {{{context}}}
@@ -55,7 +55,7 @@ const businessScoutPrompt = ai.definePrompt({
 - Suggest a tactical "Suggested Action".
 - Estimate "Potential Value".
 
-Focus on high-growth and emerging niches within the Tapp network.`
+Focus on high-growth and emerging niches within the Koolink network.`
 });
 
 const businessScoutFlow = ai.defineFlow(
@@ -94,7 +94,7 @@ const businessScoutFlow = ai.defineFlow(
         {
           marketGap: "Infrastruktur Logistik Digital",
           reasoning: "Tingginya trafik pencarian rute efisien namun ketersediaan armada terverifikasi masih terbatas.",
-          suggestedAction: "Hubungkan armada lokal dengan sistem manajemen Tapp.",
+          suggestedAction: "Hubungkan armada lokal dengan sistem manajemen Koolink.",
           potentialValue: "$50k - $100k",
           confidenceScore: 95
         },

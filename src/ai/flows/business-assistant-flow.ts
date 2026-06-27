@@ -35,7 +35,7 @@ const businessAssistantPrompt = ai.definePrompt({
     maxOutputTokens: 300, 
     temperature: 0.7
   },
-  prompt: `You are an expert B2B strategic business consultant for the Tapp Global Network.
+  prompt: `You are an expert B2B strategic business consultant for the Koolink Global Network.
 Your goal is to help users navigate the ecosystem, identify high-value strategic partners, and optimize their business pipeline.
 
 User Query: {{{message}}}
@@ -74,7 +74,7 @@ const businessAssistantFlow = ai.defineFlow(
       }
     }
     return { 
-      response: "Terima kasih atas pertanyaannya. Saat ini trafik AI sedang sangat tinggi. Secara umum, saya menyarankan Anda untuk terus memperluas jaringan di Tapp Hub. Silakan tanyakan kembali detailnya dalam beberapa saat." 
+      response: "Terima kasih atas pertanyaannya. Saat ini trafik AI sedang sangat tinggi. Secara umum, saya menyarankan Anda untuk terus memperluas jaringan di Koolink Hub. Silakan tanyakan kembali detailnya dalam beberapa saat." 
     };
   }
 );

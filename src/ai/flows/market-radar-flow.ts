@@ -39,7 +39,7 @@ const marketRadarPrompt = ai.definePrompt({
     maxOutputTokens: 500,
     temperature: 0.1
   },
-  prompt: `You are the Tapp AI Market Radar. Analyze current global trade signals for the region: {{{region}}}.
+  prompt: `You are the Koolink AI Market Radar. Analyze current global trade signals for the region: {{{region}}}.
 
 ### Task:
 1. Detect 3-5 industries with high growth potential.
@@ -88,7 +88,7 @@ const marketRadarFlow = ai.defineFlow(
           industry: "SaaS & AI Infrastructure",
           growthScore: 92,
           signal: "Rising Demand",
-          description: "Meningkatnya kebutuhan otomatisasi di sektor manufaktur regional melalui Tapp Hub.",
+          description: "Meningkatnya kebutuhan otomatisasi di sektor manufaktur regional melalui Koolink Hub.",
           suggestedPivots: ["Adopsi integrasi API", "Layanan cloud lokal"],
           risingProducts: ["AI Analytics Tool", "Security Nodes"]
         },

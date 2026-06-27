@@ -76,7 +76,7 @@ const aiIntentSearchPrompt = ai.definePrompt({
     maxOutputTokens: 1500,
     temperature: 0.2
   },
-  prompt: `You are the Tapp Precision Discovery Engine. Find EXACTLY 5 businesses or products matching the user's intent.
+  prompt: `You are the Koolink Precision Discovery Engine. Find EXACTLY 5 businesses or products matching the user's intent.
 
 ### SEARCH CONTEXT:
 - **QUERY**: "{{{query}}}"
@@ -128,7 +128,7 @@ const aiIntentSearchFlow = ai.defineFlow(
         {
           type: 'business',
           name: `Penyedia ${cleanQuery}`,
-          description: `Tersedia di area ${input.filters?.location || 'Anda'}. Hubungi melalui jaringan Tapp untuk detail lebih lanjut.`,
+          description: `Tersedia di area ${input.filters?.location || 'Anda'}. Hubungi melalui jaringan Koolink untuk detail lebih lanjut.`,
           matchScore: 80,
           source: 'external',
           isVerified: false,

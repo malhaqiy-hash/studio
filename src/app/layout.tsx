@@ -7,7 +7,7 @@ import { AccountProvider } from '@/context/account-context';
 import { AIAssistant } from '@/components/chat/ai-assistant';
 
 export const metadata: Metadata = {
-  title: 'Tapp - Business Discovery Network',
+  title: 'Koolink - Business Discovery Network',
   description: 'AI-powered business social network for discovering products, services, and strategic partners.',
 };
 

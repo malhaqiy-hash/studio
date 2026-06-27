@@ -103,7 +103,7 @@ export const translations = {
   view_profile: { en: 'View Profile', id: 'Lihat Profil' },
   
   // Search Page
-  search_placeholder: { en: 'Search anything in Tapp...', id: 'Cari apa saja di Tapp...' },
+  search_placeholder: { en: 'Search anything in Koolink...', id: 'Cari apa saja di Koolink...' },
   search_now: { en: 'Search Now', id: 'Cari Sekarang' },
   nearby: { en: 'Nearby (GPS)', id: 'Sekitar (GPS)' },
   results: { en: 'Results', id: 'Hasil' },
@@ -130,7 +130,7 @@ export const translations = {
   market_radar_desc: { en: 'Daily global AI signals for network efficiency.', id: 'Sinyal AI harian untuk efisiensi jaringan.' },
   opportunity_map: { en: 'Opportunity Map', id: 'Peta Peluang' },
   opportunity_map_desc: { en: 'Visualize global business leads and demands.', id: 'Visualisasikan prospek dan permintaan bisnis global.' },
-  registry: { en: 'Tapp Registry', id: 'Registri Tapp' },
+  registry: { en: 'Koolink Registry', id: 'Registri Koolink' },
   registry_desc: { en: 'Claim and verify your profile to unlock features.', id: 'Klaim dan verifikasi profil untuk buka fitur.' },
   matchmaker: { en: 'AI Matchmaker', id: 'Pencari Mitra' },
   matchmaker_desc: { en: 'Automated profile analysis every 24 hours.', id: 'Analisis profil otomatis setiap 24 jam.' },
@@ -192,7 +192,7 @@ export const translations = {
   logout: { en: 'Logout', id: 'Keluar' },
 
   // AI Assistant
-  ai_greet: { en: 'Hello! I am your Tapp assistant. How can I help you today?', id: 'Halo! Saya asisten Tapp Anda. Bagaimana saya bisa membantu Anda hari ini?' },
+  ai_greet: { en: 'Hello! I am your Koolink assistant. How can I help you today?', id: 'Halo! Saya asisten Koolink Anda. Bagaimana saya bisa membantu Anda hari ini?' },
   ai_ask_strategy: { en: 'Ask strategy...', id: 'Tanya strategi...' },
   ai_translating: { en: 'Translating...', id: 'Menerjemahkan...' },
   ai_original: { en: 'Show Original', id: 'Lihat Asli' },

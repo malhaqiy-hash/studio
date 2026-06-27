@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -156,7 +155,7 @@ export function AIAssistant() {
           onClick={() => setIsOpen(false)}
         >
           <Card 
-            className="w-full max-w-sm h-[500px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] rounded-[2rem] border-none flex flex-col overflow-hidden bg-card animate-in zoom-in-95 duration-300"
+            className="w-full max-sm h-[500px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] rounded-[2rem] border-none flex flex-col overflow-hidden bg-card animate-in zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             <CardHeader className="bg-primary text-primary-foreground p-4 flex flex-row items-center justify-between border-none">
@@ -165,7 +164,7 @@ export function AIAssistant() {
                   <User className="size-5" />
                 </div>
                 <div className="flex flex-col">
-                  <CardTitle className="text-xs font-black tracking-tight leading-none uppercase">Tapp Intelligence</CardTitle>
+                  <CardTitle className="text-xs font-black tracking-tight leading-none uppercase">Koolink Intelligence</CardTitle>
                   <div className="flex items-center gap-1.5 mt-1">
                     <div className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     <span className="text-[8px] font-black text-white/60 uppercase tracking-widest">{t('ai_active')}</span>

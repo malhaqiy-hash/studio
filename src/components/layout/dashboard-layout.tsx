@@ -213,7 +213,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="flex items-center gap-2">
           <Link href="/feed" className="flex items-center gap-2 active:scale-95 transition-transform">
             <TappLogo className="size-6 rounded-lg shadow-lg shadow-primary/10" />
-            <span className="font-black text-sm tracking-tight text-foreground uppercase">Tapp</span>
+            <span className="font-black text-sm tracking-tight text-foreground uppercase">Koolink</span>
           </Link>
           <span className="font-medium text-[8px] text-primary/60 lowercase italic select-none ml-1 leading-none">{activeAccount?.type}</span>
         </div>
@@ -301,7 +301,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       <div className="flex items-center justify-between">
                         <SheetTitle className="text-xs font-black flex items-center gap-2 uppercase tracking-tight text-primary">
                           <LayoutGrid className="size-3.5" />
-                          Tapp Hub
+                          Koolink Hub
                         </SheetTitle>
                         <span className="font-medium text-[8px] text-primary/60 italic lowercase select-none leading-none">{activeAccount?.type}</span>
                       </div>
