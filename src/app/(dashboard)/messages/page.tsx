@@ -78,7 +78,6 @@ export default function MessagesPage() {
   const getChatsKey = React.useCallback(() => `ontapp_chats_full_${activeAccount.id}`, [activeAccount.id]);
   const getMsgsKey = React.useCallback(() => `ontapp_msgs_full_${activeAccount.id}`, [activeAccount.id]);
 
-  // Handle popstate for Smart-Back navigation
   React.useEffect(() => {
     const handlePopState = () => {
       if (isChatOpen) {
@@ -126,7 +125,6 @@ export default function MessagesPage() {
   const handleChatSelection = (chat: any) => {
     setSelectedChat(chat);
     setIsChatOpen(true);
-    // Push state for mobile back navigation
     if (window.innerWidth < 768) {
       window.history.pushState({ chatOpen: true }, '');
     }
@@ -435,7 +433,6 @@ export default function MessagesPage() {
           )}
         </div>
 
-        {/* Chat Interface Dialog */}
         <Dialog open={isChatOpen} onOpenChange={(open) => {
           if (!open) closeChat();
         }}>
@@ -453,7 +450,6 @@ export default function MessagesPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Hidden Inputs */}
         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'image')} />
         <input type="file" ref={cameraInputRef} className="hidden" accept="image/*" capture="environment" onChange={(e) => handleFileUpload(e, 'image')} />
         <input type="file" ref={docInputRef} className="hidden" onChange={(e) => handleFileUpload(e, 'doc')} />

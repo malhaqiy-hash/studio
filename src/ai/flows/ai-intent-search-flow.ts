@@ -113,7 +113,6 @@ const aiIntentSearchFlow = ai.defineFlow(
           results: output.results.slice(0, 5).map(r => ({
             ...r,
             name: r.name.replace(/^Informasi Terkait:\s*/i, ''),
-            // Generate a seed-based relevant image using the AI-provided keyword
             imageUrl: r.imageUrl?.startsWith('http') 
               ? r.imageUrl 
               : `https://picsum.photos/seed/${encodeURIComponent(r.imageUrl || r.name)}/800/500`
@@ -124,7 +123,6 @@ const aiIntentSearchFlow = ai.defineFlow(
       console.error('Search Flow Error:', err);
     }
     
-    // Fallback if AI fails
     return {
       results: [
         {

@@ -128,7 +128,6 @@ export default function CariPage() {
     setLoading(true);
     setShowSuggestions(false);
     
-    // 1. Search Internal First
     const searchTerm = finalQuery.toLowerCase();
     const matchedAccounts = availableAccounts.filter(acc => 
       acc.name.toLowerCase().includes(searchTerm) || 
@@ -139,7 +138,6 @@ export default function CariPage() {
 
     setInternalResults(matchedAccounts);
 
-    // 2. Search External via AI (Limited to 5 results)
     try {
       const output = await aiIntentSearch({ 
         query: finalQuery || (finalCategory ? `Cari ${finalCategory}` : "Bisnis Terdekat"), 
@@ -219,7 +217,6 @@ export default function CariPage() {
   return (
     <DashboardLayout>
       <div className="max-w-xl mx-auto space-y-4 py-2 px-1 md:px-0 flex flex-col min-h-screen pb-24">
-        {/* Search Input Area - No Banner, Clean Integration */}
         <div className="space-y-2.5 w-full">
           <form onSubmit={(e) => handleSearch(e)} className="space-y-2.5">
             <div className="relative group w-full">
@@ -316,7 +313,6 @@ export default function CariPage() {
           </form>
         </div>
 
-        {/* Results Section */}
         <div className="flex-1 space-y-4">
            {loading ? (
              <div className="space-y-3 py-4">

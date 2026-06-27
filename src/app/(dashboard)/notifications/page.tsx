@@ -310,7 +310,6 @@ export default function NotificationsPage() {
           )}
         </div>
 
-        {/* Notification Detail Dialog (Tap Outside to Close) */}
         <Dialog open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
           <DialogContent className="w-[90%] md:max-w-md rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden overflow-hidden animate-in zoom-in-95 duration-200">
              {selectedNotification && (
