@@ -30,6 +30,7 @@ import {
   Users,
   Zap,
   Pin,
+  MoreVertical,
 } from 'lucide-react';
 import {
   Dialog,
@@ -37,6 +38,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -49,6 +51,14 @@ import { useToast } from '@/hooks/use-toast';
 import { ShareSheet } from '@/components/share-sheet';
 import { cn } from '@/lib/utils';
 
+const ConnectIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+    <path d="M16 8c1.1 1.1 1.1 2.9 0 4M18 6c2.2 2.2 2.2 5.8 0 8" />
+    <path d="M8 16c-1.1-1.1-1.1-2.9 0-4M6 18c-2.2-2.2-2.2-5.8 0-8" />
+  </svg>
+);
+
 function getSmartIcon(url: string) {
   const lower = url.toLowerCase();
   if (lower.includes('maps.google') || lower.includes('goo.gl/maps') || lower.includes('apple.com/maps')) return <MapPin className="size-3" />;
@@ -59,6 +69,13 @@ function getSmartIcon(url: string) {
   return <Globe className="size-3" />;
 }
 
+const MOCK_CONNECTIONS = [
+  { id: 'conn1', name: 'Andi Wijaya', avatar: 'https://picsum.photos/seed/andi/100', type: 'Professional' },
+  { id: 'conn2', name: 'Budi Santoso', avatar: 'https://picsum.photos/seed/budi/100', type: 'Bisnis' },
+  { id: 'conn3', name: 'Siti Aminah', avatar: 'https://picsum.photos/seed/siti/100', type: 'Personal' },
+  { id: 'conn4', name: 'Rina Kartika', avatar: 'https://picsum.photos/seed/rina/100', type: 'Bisnis' },
+];
+
 export default function ProfilePage() {
   const { activeAccount, updateActiveAccount, addPost, removePost } = useAccount();
   const { toast } = useToast();
@@ -68,6 +85,11 @@ export default function ProfilePage() {
   const [isMediaPickerOpen, setIsMediaPickerOpen] = React.useState(false);
   const [isShareSheetOpen, setIsShareSheetOpen] = React.useState(false);
   const [shareUrl, setShareUrl] = React.useState("");
+
+  // Connection management states
+  const [isConnectionsModalOpen, setIsConnectionsModalOpen] = React.useState(false);
+  const [confirmDisconnectId, setConfirmDisconnectId] = React.useState<string | null>(null);
+  const [connections, setConnections] = React.useState(MOCK_CONNECTIONS);
 
   const [mediaTarget, setMediaTarget] = React.useState<'avatar' | 'cover' | 'post'>('avatar');
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
@@ -234,6 +256,14 @@ export default function ProfilePage() {
     setIsShareSheetOpen(true);
   };
 
+  const handleDisconnect = () => {
+    if (confirmDisconnectId) {
+      setConnections(prev => prev.filter(c => c.id !== confirmDisconnectId));
+      setConfirmDisconnectId(null);
+      toast({ title: "Koneksi diputuskan" });
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-xl mx-auto space-y-3 md:space-y-4 pb-20">
@@ -317,6 +347,38 @@ export default function ProfilePage() {
           </div>
         </section>
 
+        {/* Connections Dashed Banner Section */}
+        <section className="px-3 md:px-5">
+           <button 
+             onClick={() => setIsConnectionsModalOpen(true)}
+             className="w-full flex items-center gap-4 p-3 rounded-2xl border-2 border-dashed border-slate-200 hover:border-primary hover:bg-primary/[0.02] transition-all group overflow-hidden"
+           >
+              <div className="size-10 rounded-full bg-primary flex items-center justify-center text-white shrink-0 shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                 <ConnectIcon className="size-6" />
+              </div>
+              <div className="flex-1 flex items-center gap-2 overflow-hidden">
+                <div className="flex -space-x-2.5 overflow-hidden">
+                  {connections.slice(0, 4).map((conn) => (
+                    <Avatar key={conn.id} className="size-8 border-2 border-background shadow-sm">
+                      <AvatarImage src={conn.avatar} className="object-cover" />
+                      <AvatarFallback className="text-[8px] bg-muted">{conn.name[0]}</AvatarFallback>
+                    </Avatar>
+                  ))}
+                  {connections.length > 4 && (
+                    <div className="size-8 rounded-full bg-slate-100 border-2 border-background flex items-center justify-center text-[10px] font-black text-slate-500 shadow-sm">
+                      +{connections.length - 4}
+                    </div>
+                  )}
+                </div>
+                <div className="hidden sm:block text-left ml-2">
+                   <p className="text-[10px] font-black text-slate-800 uppercase tracking-tight">Jaringan Koneksi</p>
+                   <p className="text-[9px] font-medium text-slate-400 uppercase tracking-widest">{connections.length} Terhubung</p>
+                </div>
+              </div>
+              <MoreVertical className="size-4 text-slate-300 group-hover:text-primary transition-colors" />
+           </button>
+        </section>
+
         <section className="px-3 md:px-5">
           <div className="flex items-center justify-between border-b border-border/40 pb-2">
             <p className="text-slate-700 leading-relaxed font-normal text-[12px] md:text-[13px]">"{activeAccount.bio || 'Membangun koneksi cerdas di Koolink.'}"</p>
@@ -368,6 +430,91 @@ export default function ProfilePage() {
           </div>
         </section>
       </div>
+
+      {/* Connections List Modal */}
+      <Dialog open={isConnectionsModalOpen} onOpenChange={setIsConnectionsModalOpen}>
+        <DialogContent className="w-[95%] md:max-w-md rounded-[2rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none [&>button]:hidden">
+          <div className="p-6 space-y-6">
+            <div className="flex items-center justify-between">
+               <div className="flex items-center gap-3">
+                  <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                    <ConnectIcon className="size-5" />
+                  </div>
+                  <DialogTitle className="text-lg font-black uppercase tracking-tight">Koneksi Jaringan</DialogTitle>
+               </div>
+               <button onClick={() => setIsConnectionsModalOpen(false)} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 active:scale-90 transition-all">
+                 <X className="size-4" />
+               </button>
+            </div>
+
+            <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
+              {connections.length > 0 ? (
+                connections.map((conn) => (
+                  <div key={conn.id} className="flex items-center justify-between p-3 rounded-2xl border border-border/50 hover:bg-slate-50 transition-all group">
+                    <div className="flex items-center gap-3 min-w-0">
+                       <Avatar className="size-11 rounded-xl border border-border shadow-sm">
+                          <AvatarImage src={conn.avatar} className="object-cover" />
+                          <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">{conn.name[0]}</AvatarFallback>
+                       </Avatar>
+                       <div className="min-w-0">
+                          <h4 className="font-bold text-[13px] text-slate-900 truncate uppercase tracking-tight">{conn.name}</h4>
+                          <Badge variant="outline" className="text-[7px] h-4 font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary/80">
+                            {conn.type}
+                          </Badge>
+                       </div>
+                    </div>
+                    <button 
+                      onClick={() => setConfirmDisconnectId(conn.id)}
+                      className="size-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-500 active:scale-90 transition-all"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="py-12 text-center space-y-3">
+                   <div className="size-14 rounded-full bg-slate-50 flex items-center justify-center mx-auto shadow-inner">
+                      <ConnectIcon className="size-7 text-slate-200" />
+                   </div>
+                   <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Belum ada koneksi aktif</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Disconnect Confirmation Dialog */}
+      <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && setConfirmDisconnectId(null)}>
+        <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none [&>button]:hidden text-center">
+          <div className="space-y-6">
+            <div className="size-16 rounded-[1.5rem] bg-rose-50 text-rose-500 flex items-center justify-center mx-auto shadow-inner">
+               <X className="size-8" />
+            </div>
+            <div className="space-y-2">
+              <DialogTitle className="text-lg font-black uppercase tracking-tight">Putus Koneksi?</DialogTitle>
+              <DialogDescription className="text-[11px] font-medium text-slate-500 leading-relaxed px-4">
+                Tindakan ini akan menghapus akses khusus dan sinergi jaringan antara profil Anda.
+              </DialogDescription>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button 
+                onClick={handleDisconnect} 
+                className="w-full h-11 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-rose-100"
+              >
+                Putus Koneksi
+              </Button>
+              <Button 
+                variant="ghost" 
+                onClick={() => setConfirmDisconnectId(null)}
+                className="w-full h-10 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 hover:bg-slate-50"
+              >
+                Batal
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isBioModalOpen} onOpenChange={setIsBioModalOpen}>
         <DialogContent className="w-[90%] md:max-sm rounded-xl p-4 bg-card text-foreground outline-none [&>button]:hidden">
