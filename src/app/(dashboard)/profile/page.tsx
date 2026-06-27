@@ -283,13 +283,21 @@ export default function ProfilePage() {
               <div className="flex flex-col gap-0.5">
                 <div className="flex flex-wrap items-center gap-3 text-muted-foreground font-medium text-[11px] md:text-[13px]">
                   <span>{activeAccount.extra || 'Koolink Member'}</span>
-                  <div className="flex items-center gap-3 ml-auto">
+                  <div className="flex items-center gap-4 ml-auto">
                      <div className="flex flex-col items-center">
                         <span className="text-xs font-bold text-slate-900">1.2k</span>
                         <span className="text-[7px] font-black uppercase opacity-60 flex items-center gap-1">
                           {activeAccount.type === 'personal' ? <><Users className="size-2" /> Pengikut</> : <><Zap className="size-2" /> Subscribe</>}
                         </span>
                      </div>
+                     {activeAccount.type === 'personal' && (
+                        <div className="flex flex-col items-center">
+                           <span className="text-xs font-bold text-slate-900">854</span>
+                           <span className="text-[7px] font-black uppercase opacity-60 flex items-center gap-1">
+                             <Users className="size-2" /> Mengikuti
+                           </span>
+                        </div>
+                     )}
                      <div className="flex flex-col items-center text-rose-500">
                         <span className="text-xs font-bold">4.2k</span>
                         <span className="text-[7px] font-black uppercase flex items-center gap-1">
@@ -414,7 +422,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-4 gap-1.5">
               {(newItem.images || []).map((src, i) => (
                 <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-border">
-                  <img src={src} className="w-full h-full object-cover" />
+                  <img src={newItem.images![i]} className="w-full h-full object-cover" />
                   <button onClick={() => setNewItem(prev => ({ ...prev, images: prev.images?.filter((_, idx) => idx !== i) }))} className="absolute top-0.5 right-0.5 size-4 bg-black/60 text-white rounded-full flex items-center justify-center"><X size={8} /></button>
                 </div>
               ))}
