@@ -90,6 +90,25 @@ export default function ConnectionsPage() {
 
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
+  // History synchronization for Stepped UI (Browser Back Button support)
+  React.useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      // Priority 1: Close Disconnect Confirmation if open
+      if (confirmDisconnectId) {
+        setConfirmDisconnectId(null);
+        return;
+      }
+      // Priority 2: Close Chat if open
+      if (isChatOpen) {
+        setIsChatOpen(false);
+        return;
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isChatOpen, confirmDisconnectId]);
+
   React.useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -103,7 +122,12 @@ export default function ConnectionsPage() {
   const handleDisconnect = () => {
     if (confirmDisconnectId) {
       setConnections(prev => prev.filter(c => c.id !== confirmDisconnectId));
+      // Close confirmation dialog without closing chat or leaving page
       setConfirmDisconnectId(null);
+      // Clean up history state if we pushed one for confirmation
+      if (window.history.state?.confirmationOpen) {
+        window.history.back();
+      }
       toast({ title: "Koneksi diputuskan" });
     }
   };
@@ -111,6 +135,28 @@ export default function ConnectionsPage() {
   const handleOpenChat = (conn: any) => {
     setSelectedChat(conn);
     setIsChatOpen(true);
+    // Push state to browser history to catch the back button
+    window.history.pushState({ chatOpen: true }, '');
+  };
+
+  const closeChat = () => {
+    setIsChatOpen(false);
+    // If we're closing manually, but there's a pushState in history, go back to clean it up
+    if (window.history.state?.chatOpen) {
+      window.history.back();
+    }
+  };
+
+  const openDisconnectConfirm = (id: string) => {
+    setConfirmDisconnectId(id);
+    window.history.pushState({ confirmationOpen: true }, '');
+  };
+
+  const closeDisconnectConfirm = () => {
+    setConfirmDisconnectId(null);
+    if (window.history.state?.confirmationOpen) {
+      window.history.back();
+    }
   };
 
   const handleSendText = (e?: React.FormEvent) => {
@@ -206,7 +252,7 @@ export default function ConnectionsPage() {
                       <MessageSquare className="size-4" />
                     </Button>
                     <button 
-                      onClick={() => setConfirmDisconnectId(conn.id)}
+                      onClick={() => openDisconnectConfirm(conn.id)}
                       className="size-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-500 active:scale-90 transition-all"
                     >
                       <X className="size-4" />
@@ -231,13 +277,13 @@ export default function ConnectionsPage() {
         </div>
 
         {/* Chat Dialog */}
-        <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <Dialog open={isChatOpen} onOpenChange={(open) => !open && closeChat()}>
           <DialogContent className="w-[95%] h-[85dvh] max-w-lg p-0 border-none rounded-t-3xl sm:rounded-3xl bg-card text-foreground outline-none shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 duration-300 z-[170] [&>button]:hidden">
             {selectedChat && (
               <div className="flex flex-col h-full overflow-hidden">
                 <header className="h-14 border-b border-border px-4 flex items-center justify-between bg-card shrink-0">
                   <div className="flex items-center gap-2.5">
-                    <button onClick={() => setIsChatOpen(false)} className="size-8 flex items-center justify-center text-muted-foreground hover:text-primary active:scale-90 transition-all">
+                    <button onClick={closeChat} className="size-8 flex items-center justify-center text-muted-foreground hover:text-primary active:scale-90 transition-all">
                       <ChevronLeft className="size-5" />
                     </button>
                     <Avatar className="size-8 border border-border">
@@ -324,7 +370,7 @@ export default function ConnectionsPage() {
         </Dialog>
 
         {/* Disconnect Confirmation Dialog */}
-        <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && setConfirmDisconnectId(null)}>
+        <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && closeDisconnectConfirm()}>
           <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none z-[200] [&>button]:hidden text-center">
             <div className="space-y-6">
               <div className="size-16 rounded-[1.5rem] bg-rose-50 text-rose-500 flex items-center justify-center mx-auto shadow-inner">
@@ -345,7 +391,7 @@ export default function ConnectionsPage() {
                 </Button>
                 <Button 
                   variant="ghost" 
-                  onClick={() => setConfirmDisconnectId(null)}
+                  onClick={closeDisconnectConfirm}
                   className="w-full h-10 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 hover:bg-slate-50"
                 >
                   Batal

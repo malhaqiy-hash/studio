@@ -115,6 +115,28 @@ export default function ProfilePage() {
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Stepped UI Navigation with Browser Back Support
+  React.useEffect(() => {
+    const handlePopState = () => {
+      // Step 1: Close Disconnect Confirmation if open
+      if (confirmDisconnectId) {
+        setConfirmDisconnectId(null);
+        return;
+      }
+      // Step 2: Close Connections List if open
+      if (isConnectionsModalOpen) {
+        setIsConnectionsModalOpen(false);
+        return;
+      }
+      // Step 3: Close other modals
+      if (isBioModalOpen) setIsBioModalOpen(false);
+      if (isContentModalOpen) setIsContentModalOpen(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [confirmDisconnectId, isConnectionsModalOpen, isBioModalOpen, isContentModalOpen]);
+
   const resetContentForm = React.useCallback(() => {
     setNewItem({
       visibility: 'public',
@@ -145,7 +167,7 @@ export default function ProfilePage() {
     }
 
     if (params.get('showConnections') === 'true') {
-      setIsConnectionsModalOpen(true);
+      openConnectionsModal();
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
@@ -181,7 +203,28 @@ export default function ProfilePage() {
   const handleSaveBio = () => {
     updateActiveAccount(tempAccount);
     setIsBioModalOpen(false);
+    if (window.history.state?.modalOpen) window.history.back();
     toast({ title: 'Profil diperbarui' });
+  };
+
+  const openConnectionsModal = () => {
+    setIsConnectionsModalOpen(true);
+    window.history.pushState({ modalOpen: 'connections' }, '');
+  };
+
+  const closeConnectionsModal = () => {
+    setIsConnectionsModalOpen(false);
+    if (window.history.state?.modalOpen === 'connections') window.history.back();
+  };
+
+  const openDisconnectConfirm = (id: string) => {
+    setConfirmDisconnectId(id);
+    window.history.pushState({ modalOpen: 'confirm-disconnect' }, '');
+  };
+
+  const closeDisconnectConfirm = () => {
+    setConfirmDisconnectId(null);
+    if (window.history.state?.modalOpen === 'confirm-disconnect') window.history.back();
   };
 
   const openMediaPicker = (target: 'avatar' | 'cover' | 'post') => {
@@ -255,6 +298,7 @@ export default function ProfilePage() {
       source: 'profile'
     });
     setIsContentModalOpen(false);
+    if (window.history.state?.modalOpen) window.history.back();
     resetContentForm();
     toast({ title: 'Konten dipublikasikan' });
   };
@@ -272,7 +316,7 @@ export default function ProfilePage() {
   const handleDisconnect = () => {
     if (confirmDisconnectId) {
       setConnections(prev => prev.filter(c => c.id !== confirmDisconnectId));
-      setConfirmDisconnectId(null);
+      closeDisconnectConfirm();
       toast({ title: "Koneksi diputuskan" });
     }
   };
@@ -363,13 +407,13 @@ export default function ProfilePage() {
         <section className="px-3 md:px-5">
           <div className="flex items-center justify-between border-b border-border/40 pb-2">
             <p className="text-slate-700 leading-relaxed font-normal text-[12px] md:text-[13px]">"{activeAccount.bio || 'Membangun koneksi cerdas di Koolink.'}"</p>
-            <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio, locationLink: activeAccount.locationLink }); setIsBioModalOpen(true); }} className="text-[9px] font-bold uppercase text-accent hover:bg-accent/10 px-2 h-6 rounded-lg border border-accent/20 shrink-0 ml-3"><Pencil className="size-2 mr-1" /> Edit</Button>
+            <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio, locationLink: activeAccount.locationLink }); setIsBioModalOpen(true); window.history.pushState({ modalOpen: 'edit-bio' }, ''); }} className="text-[9px] font-bold uppercase text-accent hover:bg-accent/10 px-2 h-6 rounded-lg border border-accent/20 shrink-0 ml-3"><Pencil className="size-2 mr-1" /> Edit</Button>
           </div>
         </section>
 
         <section className="px-3 md:px-5">
            <button 
-             onClick={() => setIsConnectionsModalOpen(true)}
+             onClick={openConnectionsModal}
              className="w-full flex items-center gap-4 p-3 rounded-2xl border-2 border-dashed border-slate-200 hover:border-primary hover:bg-primary/[0.02] transition-all group overflow-hidden"
            >
               <div className="size-10 rounded-full bg-primary flex items-center justify-center text-white shrink-0 shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
@@ -401,7 +445,7 @@ export default function ProfilePage() {
         <section className="px-3 md:px-5 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Portofolio & Produk</h3>
-            <Button size="sm" onClick={() => setIsContentModalOpen(true)} className="rounded-lg h-7 bg-accent hover:bg-accent/90 gap-1 font-bold text-[10px] uppercase tracking-widest px-2.5 shadow-lg text-white"><PlusCircle className="size-3" /> Item</Button>
+            <Button size="sm" onClick={() => { setIsContentModalOpen(true); window.history.pushState({ modalOpen: 'add-content' }, ''); }} className="rounded-lg h-7 bg-accent hover:bg-accent/90 gap-1 font-bold text-[10px] uppercase tracking-widest px-2.5 shadow-lg text-white"><PlusCircle className="size-3" /> Item</Button>
           </div>
 
           <div className="flex flex-col space-y-6">
@@ -444,7 +488,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Connections List Modal */}
-      <Dialog open={isConnectionsModalOpen} onOpenChange={setIsConnectionsModalOpen}>
+      <Dialog open={isConnectionsModalOpen} onOpenChange={(open) => !open && closeConnectionsModal()}>
         <DialogContent className="w-[95%] md:max-w-md rounded-[2rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
@@ -454,7 +498,7 @@ export default function ProfilePage() {
                   </div>
                   <DialogTitle className="text-lg font-black uppercase tracking-tight">Koneksi Jaringan</DialogTitle>
                </div>
-               <button onClick={() => setIsConnectionsModalOpen(false)} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 active:scale-90 transition-all">
+               <button onClick={closeConnectionsModal} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 active:scale-90 transition-all">
                  <X className="size-4" />
                </button>
             </div>
@@ -463,7 +507,7 @@ export default function ProfilePage() {
               {connections.length > 0 ? (
                 connections.map((conn) => (
                   <div key={conn.id} className="flex items-center justify-between p-3 rounded-2xl border border-border/50 hover:bg-slate-50 transition-all group">
-                    <Link href="/profile" onClick={() => setIsConnectionsModalOpen(false)} className="flex items-center gap-3 min-w-0 flex-1">
+                    <Link href="/profile" onClick={closeConnectionsModal} className="flex items-center gap-3 min-w-0 flex-1">
                        <Avatar className="size-11 rounded-xl border border-border shadow-sm">
                           <AvatarImage src={conn.avatar} className="object-cover" />
                           <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">{conn.name[0]}</AvatarFallback>
@@ -476,7 +520,7 @@ export default function ProfilePage() {
                        </div>
                     </Link>
                     <button 
-                      onClick={() => setConfirmDisconnectId(conn.id)}
+                      onClick={() => openDisconnectConfirm(conn.id)}
                       className="size-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-500 active:scale-90 transition-all"
                     >
                       <X className="size-4" />
@@ -495,7 +539,7 @@ export default function ProfilePage() {
           </div>
 
           {/* NESTED Disconnect Confirmation Dialog */}
-          <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && setConfirmDisconnectId(null)}>
+          <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && closeDisconnectConfirm()}>
             <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none z-[200] [&>button]:hidden text-center">
               <div className="space-y-6">
                 <div className="size-16 rounded-[1.5rem] bg-rose-50 text-rose-500 flex items-center justify-center mx-auto shadow-inner">
@@ -516,7 +560,7 @@ export default function ProfilePage() {
                   </Button>
                   <Button 
                     variant="ghost" 
-                    onClick={() => setConfirmDisconnectId(null)}
+                    onClick={closeDisconnectConfirm}
                     className="w-full h-10 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 hover:bg-slate-50"
                   >
                     Batal
@@ -528,7 +572,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isBioModalOpen} onOpenChange={setIsBioModalOpen}>
+      <Dialog open={isBioModalOpen} onOpenChange={(open) => !open && (setIsBioModalOpen(false), window.history.state?.modalOpen && window.history.back())}>
         <DialogContent className="w-[90%] md:max-sm rounded-xl p-4 bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <DialogHeader><DialogTitle className="text-sm font-bold text-slate-900">Ubah Profil</DialogTitle></DialogHeader>
           <div className="space-y-3 py-2">
@@ -549,8 +593,11 @@ export default function ProfilePage() {
       <Dialog 
         open={isContentModalOpen} 
         onOpenChange={(open) => {
-          setIsContentModalOpen(open);
-          if (!open) resetContentForm(); 
+          if (!open) {
+            setIsContentModalOpen(false);
+            if (window.history.state?.modalOpen) window.history.back();
+            resetContentForm(); 
+          }
         }}
       >
         <DialogContent className="w-[95%] md:max-w-lg rounded-xl p-4 bg-card text-foreground outline-none z-[170] [&>button]:hidden">
