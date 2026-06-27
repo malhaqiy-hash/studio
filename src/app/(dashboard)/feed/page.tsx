@@ -24,6 +24,9 @@ import {
   Smartphone,
   LayoutGrid,
   UserPlus,
+  Youtube,
+  Video,
+  ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -69,6 +72,9 @@ function getSmartIcon(url: string) {
   if (lower.includes('instagram.com')) return <Instagram className="size-3" />;
   if (lower.includes('linkedin.com')) return <Linkedin className="size-3" />;
   if (lower.includes('facebook.com') || lower.includes('fb.com')) return <Facebook className="size-3" />;
+  if (lower.includes('youtube.com') || lower.includes('youtu.be')) return <Youtube className="size-3" />;
+  if (lower.includes('tiktok.com')) return <Video className="size-3" />;
+  if (lower.includes('shopee.') || lower.includes('tokopedia.com')) return <ShoppingBag className="size-3" />;
   if (lower.includes('wa.me') || lower.includes('whatsapp.com')) return <Smartphone className="size-3" />;
   return <Globe className="size-3" />;
 }
@@ -488,11 +494,6 @@ export default function FeedPage() {
                               <UserPlus className="size-3.5" />
                             </button>
                           )}
-                          {post.locationLink && (
-                            <a href={post.locationLink} target="_blank" rel="noopener noreferrer" className="ml-1 text-slate-400 hover:text-primary transition-colors">
-                              {getSmartIcon(post.locationLink)}
-                            </a>
-                          )}
                         </div>
                         <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
                           {post.time}
@@ -523,35 +524,56 @@ export default function FeedPage() {
                   {/* Full Width Media (No Padding) */}
                   <PostMedia images={post.images} />
 
-                  {/* Padded Footer */}
-                  <div className="p-2 pt-1 border-t border-border/40 bg-slate-50/30 flex items-center justify-between">
-                    <div className="flex items-center gap-5 text-slate-500">
-                      <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1 py-1 transition-all", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
-                        <Heart className={cn("size-4", postLike.active && "fill-rose-500")} />
-                        <span className="text-[11px] font-bold">{postLike.count > 0 ? postLike.count : 'Suka'}</span>
-                      </button>
-                      <button className="flex items-center gap-1 py-1 hover:text-primary transition-colors">
-                        <MessageCircle className="size-4" />
-                        <span className="text-[11px] font-bold">{post.stats.comments > 0 ? post.stats.comments : 'Komentar'}</span>
-                      </button>
-                      <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center py-1", trans?.show ? "text-primary" : "hover:text-primary transition-colors")}>
-                        {trans?.loading ? <RefreshCw className="size-4 animate-spin" /> : <Globe className="size-4" />}
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {post.author !== activeAccount.name && (
-                        <button 
-                          onClick={() => handleConnect(post.author)} 
-                          className={cn(
-                            "p-1.5 transition-all active:scale-90",
-                            isConnected ? "text-primary" : "text-slate-400 hover:text-primary"
-                          )}
-                        >
-                          <ConnectIcon className="size-5" />
+                  {/* Enhanced Footer Area */}
+                  <div className="flex flex-col border-t border-border/40 bg-slate-50/30">
+                    <div className="p-2 pt-1 flex items-center justify-between">
+                      <div className="flex items-center gap-5 text-slate-500">
+                        <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1 py-1 transition-all", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
+                          <Heart className={cn("size-4", postLike.active && "fill-rose-500")} />
+                          <span className="text-[11px] font-bold">{postLike.count > 0 ? postLike.count : 'Suka'}</span>
                         </button>
-                      )}
-                      <button onClick={() => handleShare(post.id)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-4" /></button>
+                        <button className="flex items-center gap-1 py-1 hover:text-primary transition-colors">
+                          <MessageCircle className="size-4" />
+                          <span className="text-[11px] font-bold">{post.stats.comments > 0 ? post.stats.comments : 'Komentar'}</span>
+                        </button>
+                        <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center py-1", trans?.show ? "text-primary" : "hover:text-primary transition-colors")}>
+                          {trans?.loading ? <RefreshCw className="size-4 animate-spin" /> : <Globe className="size-4" />}
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {post.author !== activeAccount.name && (
+                          <button 
+                            onClick={() => handleConnect(post.author)} 
+                            className={cn(
+                              "p-1.5 transition-all active:scale-90",
+                              isConnected ? "text-primary" : "text-slate-400 hover:text-primary"
+                            )}
+                          >
+                            <ConnectIcon className="size-5" />
+                          </button>
+                        )}
+                        <button onClick={() => handleShare(post.id)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-4" /></button>
+                      </div>
                     </div>
+
+                    {/* Platform Links section - Below action bar */}
+                    {post.locationLink && (
+                      <div className="px-3 pb-2 animate-in fade-in slide-in-from-top-1 duration-300">
+                        <a 
+                          href={post.locationLink} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-2 text-primary hover:underline transition-all group"
+                        >
+                          <div className="size-6 rounded-lg bg-primary/10 flex items-center justify-center text-primary shadow-inner group-hover:scale-110 transition-transform">
+                            {getSmartIcon(post.locationLink)}
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[200px]">
+                            {post.locationLink.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
+                          </span>
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </Card>
               );
