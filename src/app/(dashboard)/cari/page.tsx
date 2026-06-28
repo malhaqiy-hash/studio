@@ -91,17 +91,24 @@ const DAFTAR_DAERAH = [
   // International - Asia Pacific
   "Singapore", "Kuala Lumpur", "Bangkok", "Manila", "Ho Chi Minh City", "Hanoi", "Tokyo", "Osaka", 
   "Seoul", "Beijing", "Shanghai", "Guangzhou", "Shenzhen", "Hong Kong", "Taipei", "Sydney", "Melbourne", 
-  "Brisbane", "Perth", "Auckland", "Mumbai", "Delhi", "Bangalore", "Colombo", "Dhaka",
-  // International - Middle East & Africa
-  "Dubai", "Abu Dhabi", "Doha", "Riyadh", "Jeddah", "Istanbul", "Ankara", "Tel Aviv", "Cairo", 
-  "Johannesburg", "Cape Town", "Nairobi", "Lagos", "Casablanca",
+  "Brisbane", "Perth", "Auckland", "Mumbai", "Delhi", "Bangalore", "Colombo", "Dhaka", "Phnom Penh", 
+  "Vientiane", "Yangon", "Karachi", "Lahore", "Islamabad", "Kathmandu", "Ulaanbaatar", "Canberra", "Adelaide", "Christchurch",
+  // International - Middle East
+  "Dubai", "Abu Dhabi", "Doha", "Riyadh", "Jeddah", "Istanbul", "Ankara", "Tel Aviv", "Tehran", "Baghdad", 
+  "Kuwait City", "Muscat", "Manama", "Beirut", "Amman",
+  // International - Africa
+  "Cairo", "Johannesburg", "Cape Town", "Nairobi", "Lagos", "Casablanca", "Addis Ababa", "Accra", "Dakar", 
+  "Luanda", "Algiers", "Tunis", "Alexandria", "Dar es Salaam", "Abidjan", "Kigali", "Kampala", "Khartoum",
   // International - Europe
   "London", "Paris", "Berlin", "Munich", "Frankfurt", "Madrid", "Barcelona", "Rome", "Milan", 
   "Amsterdam", "Brussels", "Zurich", "Geneva", "Vienna", "Prague", "Warsaw", "Stockholm", "Oslo", 
-  "Copenhagen", "Lisbon", "Moscow", "Dublin", "Helsinki",
+  "Copenhagen", "Lisbon", "Moscow", "Dublin", "Helsinki", "Athens", "Budapest", "Bucharest", "Belgrade", 
+  "Sofia", "Kyiv", "Riga", "Vilnius", "Tallinn", "Luxembourg", "Reykjavik", "Bratislava",
   // International - Americas
   "New York", "Los Angeles", "Chicago", "San Francisco", "Miami", "Houston", "Toronto", "Vancouver", 
-  "Mexico City", "Sao Paulo", "Rio de Janeiro", "Buenos Aires", "Santiago", "Lima", "Bogota", "Panama City"
+  "Montreal", "Calgary", "Mexico City", "Guadalajara", "Monterrey", "Sao Paulo", "Rio de Janeiro", 
+  "Buenos Aires", "Santiago", "Lima", "Bogota", "Medellin", "Panama City", "Quito", "Guayaquil", 
+  "Montevideo", "Asuncion", "La Paz", "San Juan", "Santo Domingo", "Havana", "Seattle", "Boston"
 ];
 
 export default function CariPage() {
