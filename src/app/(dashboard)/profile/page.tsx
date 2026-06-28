@@ -32,6 +32,8 @@ import {
   Pin,
   MoreVertical,
   Plus,
+  UserPlus,
+  Radar,
 } from 'lucide-react';
 import {
   Dialog,
@@ -389,7 +391,13 @@ export default function ProfilePage() {
                      <div className="flex flex-col items-center">
                         <span className="text-xs font-bold text-slate-900">1.2k</span>
                         <span className="text-[7px] font-black uppercase opacity-60 flex items-center gap-1">
-                          {activeAccount.type === 'personal' ? <><Users className="size-2" /> Pengikut</> : <><Zap className="size-2" /> Subscribe</>}
+                          {activeAccount.type === 'personal' ? (
+                            <><Users className="size-2" /> Pengikut</>
+                          ) : activeAccount.type === 'professional' ? (
+                            <><UserPlus className="size-2" /> Tambahkan</>
+                          ) : (
+                            <><Radar className="size-2" /> Radar</>
+                          )}
                         </span>
                      </div>
                      {activeAccount.type === 'personal' && (

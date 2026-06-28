@@ -27,6 +27,7 @@ import {
   Youtube,
   Video,
   ShoppingBag,
+  Radar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
@@ -337,12 +338,20 @@ export default function FeedPage() {
     setIsShareSheetOpen(true);
   };
 
-  const handleFollow = (author: string) => {
+  const handleFollow = (author: string, type?: string) => {
     const isAlreadyFollowed = followedAuthors[author];
     setFollowedAuthors(prev => ({ ...prev, [author]: !isAlreadyFollowed }));
-    toast({
-      title: !isAlreadyFollowed ? `Mengikuti ${author}` : `Berhenti mengikuti ${author}`,
-    });
+    
+    let title = "";
+    if (type === 'bisnis') {
+      title = !isAlreadyFollowed ? `Mengikuti Radar ${author}` : `Berhenti mengikuti Radar ${author}`;
+    } else if (type === 'professional') {
+      title = !isAlreadyFollowed ? `Menambahkan ${author}` : `Batal menambahkan ${author}`;
+    } else {
+      title = !isAlreadyFollowed ? `Mengikuti ${author}` : `Berhenti mengikuti ${author}`;
+    }
+
+    toast({ title });
   };
 
   const handleConnect = (author: string) => {
@@ -482,15 +491,19 @@ export default function FeedPage() {
                         <div className="flex items-center gap-1">
                           <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[13px]">{post.author}</h3></Link>
                           {post.verified && <ShieldCheck className="size-3 text-primary" />}
-                          {post.author !== activeAccount.name && post.authorType === 'personal' && (
+                          {post.author !== activeAccount.name && (
                             <button 
-                              onClick={() => handleFollow(post.author)}
+                              onClick={() => handleFollow(post.author, post.authorType)}
                               className={cn(
                                 "ml-1 p-1 rounded-full transition-all active:scale-90",
                                 isFollowed ? "text-primary bg-primary/10" : "text-slate-400 hover:bg-primary/5 hover:text-primary"
                               )}
                             >
-                              <UserPlus className="size-3.5" />
+                              {post.authorType === 'bisnis' ? (
+                                <Radar className="size-3.5" />
+                              ) : (
+                                <UserPlus className="size-3.5" />
+                              )}
                             </button>
                           )}
                         </div>

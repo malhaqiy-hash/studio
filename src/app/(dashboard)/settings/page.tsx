@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -184,7 +183,8 @@ export default function SettingsPage() {
   const renderSubMenuContent = () => {
     switch (activeSubMenu) {
       case "hubungan":
-        const isPersonal = activeAccount.type === 'personal';
+        const type = activeAccount.type;
+        const isPersonal = type === 'personal';
         return (
           <SubMenuLayout title="Hubungan Jaringan">
             <Tabs defaultValue={isPersonal ? "pengikut" : "subscribe"} className="w-full">
@@ -197,7 +197,9 @@ export default function SettingsPage() {
                   </>
                 ) : (
                   <>
-                    <TabsTrigger value="subscribe" className="rounded-md font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Subscriber</TabsTrigger>
+                    <TabsTrigger value="subscribe" className="rounded-md font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">
+                      {type === 'bisnis' ? 'Radar Jaringan' : 'Ditambahkan'}
+                    </TabsTrigger>
                     <TabsTrigger value="suka" className="rounded-md font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Penyuka</TabsTrigger>
                   </>
                 )}
@@ -238,7 +240,7 @@ export default function SettingsPage() {
                     { label: "Siapa dapat melihat Pengikut?", key: "whoCanSeeFollowers" },
                     { label: "Siapa dapat melihat Mengikuti?", key: "whoCanSeeFollowing" },
                     { label: "Siapa dapat melihat Suka?", key: "whoCanSeeLikes" },
-                    { label: "Siapa dapat melihat Subscribe?", key: "whoCanSeeSubscribe" },
+                    { label: activeAccount.type === 'bisnis' ? "Siapa dapat melihat Radar?" : "Siapa dapat melihat Subscribe?", key: "whoCanSeeSubscribe" },
                   ].map((item) => (
                     <div key={item.key} className="p-3 space-y-1.5">
                       <Label className="text-[10px] font-bold uppercase text-slate-600">{item.label}</Label>
@@ -395,7 +397,7 @@ export default function SettingsPage() {
                 { icon: LayoutGrid, label: "Kelola Postingan", desc: "Arsip, Pin, Seluruh Aktivitas", href: "/settings/posts", bg: "bg-primary text-white shadow-primary/20 shadow-lg" },
                 { icon: Handshake, label: "Koneksi", desc: "Daftar Relasi Bisnis", href: "/connections" },
                 { icon: Users, label: "Komunitas", desc: "Grup & Kolaborasi", href: "/communities" },
-                { icon: UserCheck, label: "Hubungan Jaringan", desc: activeAccount.type === 'personal' ? "Pengikut, Mengikuti, Suka" : "Subscribe & Suka", subMenu: "hubungan" },
+                { icon: UserCheck, label: "Hubungan Jaringan", desc: activeAccount.type === 'personal' ? "Pengikut, Mengikuti, Suka" : activeAccount.type === 'bisnis' ? "Radar & Suka" : "Ditambahkan & Suka", subMenu: "hubungan" },
                 { icon: Bell, label: "Notifikasi", desc: "Push, Chat, Email", href: "/notifications" }
               ]} />
             </section>
