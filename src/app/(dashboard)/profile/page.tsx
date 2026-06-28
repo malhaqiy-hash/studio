@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { useAccount, Account, ContentItem } from '@/context/account-context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -91,6 +91,7 @@ const MOCK_EXTERNAL_ACCOUNTS: Record<string, Partial<Account>> = {
 
 export default function ProfilePage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const externalId = searchParams.get('id');
   const { activeAccount, updateActiveAccount, addPost, removePost, availableAccounts } = useAccount();
   const { toast } = useToast();
@@ -330,11 +331,14 @@ export default function ProfilePage() {
 
         {/* Back Button if viewing others */}
         {!isOwnProfile && (
-           <Link href="/connections" className="px-3">
-              <Button variant="ghost" size="sm" className="pl-0 h-6 text-[10px] text-slate-400 hover:text-primary font-black uppercase tracking-widest gap-1.5 active:scale-95 transition-all">
-                <ChevronLeft className="size-3" /> Kembali ke Jaringan
-              </Button>
-           </Link>
+           <div className="px-3">
+              <button 
+                onClick={() => router.back()}
+                className="pl-0 h-6 text-[10px] text-slate-400 hover:text-primary font-black uppercase tracking-widest gap-1.5 active:scale-95 transition-all flex items-center"
+              >
+                <ChevronLeft className="size-3" /> Kembali
+              </button>
+           </div>
         )}
 
         <section className="relative group">
@@ -380,7 +384,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2">
                 <h1 className="text-base md:text-lg font-bold text-slate-900 tracking-tight">{viewingAccount.name}</h1>
                 {viewingAccount.verificationStatus === 'Verified' && <ShieldCheck className="size-3 text-emerald-500" />}
-                <span className="font-medium text-[9px] text-primary/60 italic lowercase select-none ml-1 leading-none">{viewingAccount.type}</span>
+                <span className="font-medium text-[9px] text-primary/60 lowercase italic select-none ml-1 leading-none">{viewingAccount.type}</span>
                 
                 {!isOwnProfile && (
                    <Button onClick={handleFollow} size="sm" className="ml-auto h-7 px-3 rounded-lg bg-primary text-white font-black text-[8px] uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-primary/20">
@@ -518,7 +522,7 @@ export default function ProfilePage() {
                         )}
                         {isOwnProfile && (
                            <div className="absolute top-1 left-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                             <button onClick={(e) => { e.stopPropagation(); handleSharePost(item.id); }} className="size-5 bg-black/60 text-white rounded-lg flex items-center justify-center shadow-lg"><Share2 className="size-2.5" /></button>
+                             <button onClick={(e) => { e.stopPropagation(); toast({ title: 'Tautan disalin' }); }} className="size-5 bg-black/60 text-white rounded-lg flex items-center justify-center shadow-lg"><Share2 className="size-2.5" /></button>
                              <button onClick={(e) => { e.stopPropagation(); removePost(item.id); }} className="size-5 bg-rose-500 text-white rounded-lg flex items-center justify-center shadow-lg"><Trash2 className="size-2.5" /></button>
                            </div>
                         )}
@@ -557,12 +561,37 @@ export default function ProfilePage() {
                   </button>
                </div>
                <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
-                  <div className="py-12 text-center space-y-3">
-                      <div className="size-14 rounded-full bg-slate-50 flex items-center justify-center mx-auto shadow-inner">
-                         <ConnectIcon className="size-7 text-slate-200" />
+                  {Object.values(MOCK_EXTERNAL_ACCOUNTS).map((conn) => (
+                    <button
+                      key={conn.id}
+                      onClick={() => {
+                        router.push(`/profile?id=${conn.id}`);
+                        closeConnectionsModal();
+                      }}
+                      className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all text-left border border-transparent hover:border-slate-100 group"
+                    >
+                      <Avatar className="size-10 rounded-xl border border-border shadow-sm group-hover:scale-105 transition-transform">
+                        <AvatarImage src={conn.avatar} className="object-cover" />
+                        <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{conn.name![0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-[13px] font-black text-slate-900 truncate uppercase tracking-tight">{conn.name}</p>
+                          {conn.verificationStatus === 'Verified' && <ShieldCheck className="size-3 text-emerald-500" />}
+                        </div>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{conn.extra}</p>
                       </div>
-                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Gunakan halaman Jaringan untuk kelola koneksi</p>
-                  </div>
+                    </button>
+                  ))}
+
+                  {Object.keys(MOCK_EXTERNAL_ACCOUNTS).length === 0 && (
+                    <div className="py-12 text-center space-y-3">
+                        <div className="size-14 rounded-full bg-slate-50 flex items-center justify-center mx-auto shadow-inner">
+                           <ConnectIcon className="size-7 text-slate-200" />
+                        </div>
+                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Belum ada koneksi aktif</p>
+                    </div>
+                  )}
                </div>
              </div>
            </DialogContent>
