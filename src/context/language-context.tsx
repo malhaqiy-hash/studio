@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import { BRAND } from '@/config/appConfig';
 
 export type Language = 
   | 'en' | 'id' | 'ja' | 'zh' | 'ko' | 'ar' | 'es' | 'fr' 
@@ -56,7 +57,7 @@ export const LANGUAGES: LanguageOption[] = [
   { code: 'no', label: 'Norwegian', flag: '🇳🇴' },
   { code: 'is', label: 'Icelandic', flag: '🇮🇸' },
   { code: 'ga', label: 'Irish', flag: '🇮🇪' },
-  { code: 'cy', label: 'Welsh', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+  { code: 'cy', label: 'Welsh', flag: '🏴' },
   { code: 'et', label: 'Estonian', flag: '🇪🇪' },
   { code: 'lv', label: 'Latvian', flag: '🇱🇻' },
   { code: 'lt', label: 'Lithuanian', flag: '🇱🇹' },
@@ -103,7 +104,7 @@ export const translations = {
   view_profile: { en: 'View Profile', id: 'Lihat Profil' },
   
   // Search Page
-  search_placeholder: { en: 'Search anything in Koolink...', id: 'Cari apa saja di Koolink...' },
+  search_placeholder: { en: `Search anything in ${BRAND.name}...`, id: `Cari apa saja di ${BRAND.name}...` },
   search_now: { en: 'Search Now', id: 'Cari Sekarang' },
   nearby: { en: 'Nearby (GPS)', id: 'Sekitar (GPS)' },
   results: { en: 'Results', id: 'Hasil' },
@@ -125,13 +126,13 @@ export const translations = {
 
   // Module Titles & Descriptions
   ai_backup: { en: 'AI Backup', id: 'Penemuan AI (Backup)' },
-  ai_backup_desc: { en: 'Your discovery history is automatically backed up in Koolink Hub.', id: 'Riwayat pencarian AI Anda dicadangkan otomatis di Koolink Hub.' },
+  ai_backup_desc: { en: `Your discovery history is automatically backed up in ${BRAND.short} Hub.`, id: `Riwayat pencarian AI Anda dicadangkan otomatis di ${BRAND.short} Hub.` },
   market_radar: { en: 'Market Radar', id: 'Market Radar' },
   market_radar_desc: { en: 'Daily global AI signals for network efficiency.', id: 'Sinyal AI harian untuk efisiensi jaringan.' },
   opportunity_map: { en: 'Opportunity Map', id: 'Peta Peluang' },
   opportunity_map_desc: { en: 'Visualize global business leads and demands.', id: 'Visualisasikan prospek dan permintaan bisnis global.' },
-  registry: { en: 'Koolink Registry', id: 'Registri Koolink' },
-  registry_desc: { en: 'Claim and verify your profile to unlock Koolink features.', id: 'Klaim dan verifikasi profil untuk buka fitur Koolink.' },
+  registry: { en: `${BRAND.short} Registry`, id: `Registri ${BRAND.short}` },
+  registry_desc: { en: `Claim and verify your profile to unlock ${BRAND.short} features.`, id: `Klaim dan verifikasi profil untuk buka fitur ${BRAND.short}.` },
   matchmaker: { en: 'AI Matchmaker', id: 'Pencari Mitra' },
   matchmaker_desc: { en: 'Automated profile analysis every 24 hours.', id: 'Analisis profil otomatis setiap 24 jam.' },
   matches: { en: 'Pairings', id: 'Kecocokan' },
@@ -156,7 +157,7 @@ export const translations = {
   scout_signal: { en: 'Analysis Signal', id: 'Sinyal Analisis' },
   scout_pivot: { en: 'Suggested Pivot', id: 'Saran Pivot' },
   scout_create_opp: { en: 'Create Opportunity from Gap', id: 'Buat Peluang dari Celah' },
-
+  
   // Messages & Notifications
   global_pulse: { en: 'Global Pulse', id: 'Nadi Global' },
   search_chats: { en: 'Search conversations...', id: 'Cari percakapan...' },
@@ -170,7 +171,7 @@ export const translations = {
   take_action: { en: 'Take Action', id: 'Ambil Tindakan' },
   notif_intel: { en: 'Notification Intelligence', id: 'Intelijen Notifikasi' },
   view_insights: { en: 'View Insights Report', id: 'Lihat Laporan Wawasan' },
-
+  
   // Specific Actions & Labels
   claim_profile: { en: 'Claim Profile', id: 'Klaim Profil' },
   accuracy: { en: 'Accuracy', id: 'Akurasi' },
@@ -197,7 +198,7 @@ export const translations = {
   connections: { en: 'Connections', id: 'Koneksi' },
 
   // AI Assistant
-  ai_greet: { en: 'Hello! I am your Koolink assistant. How can I help you today?', id: 'Halo! Saya asisten Koolink Anda. Bagaimana saya bisa membantu Anda hari ini?' },
+  ai_greet: { en: `Hello! I am your ${BRAND.name} assistant. How can I help you today?`, id: `Halo! Saya asisten ${BRAND.name} Anda. Bagaimana saya bisa membantu Anda hari ini?` },
   ai_ask_strategy: { en: 'Ask strategy...', id: 'Tanya strategi...' },
   ai_translating: { en: 'Translating...', id: 'Menerjemahkan...' },
   ai_original: { en: 'Show Original', id: 'Lihat Asli' },
