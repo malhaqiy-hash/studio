@@ -92,7 +92,6 @@ export default function SettingsPage() {
   const [settings, setSettings] = React.useState<SettingsState>(DEFAULT_SETTINGS);
   const [activeSubMenu, setActiveSubMenu] = React.useState<string | null>(null);
 
-  // Stepped Back Navigation Support
   React.useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       if (activeSubMenu) {
@@ -116,7 +115,13 @@ export default function SettingsPage() {
 
   React.useEffect(() => {
     const saved = localStorage.getItem(SETTINGS_KEY);
-    if (saved) { try { const parsed = JSON.parse(saved); setSettings({ ...DEFAULT_SETTINGS, ...parsed }); applyTheme(parsed.theme); } catch (e) { } }
+    if (saved) { 
+      try { 
+        const parsed = JSON.parse(saved); 
+        setSettings({ ...DEFAULT_SETTINGS, ...parsed }); 
+        applyTheme(parsed.theme); 
+      } catch (e) { } 
+    }
     setMounted(true);
   }, []);
 
@@ -162,7 +167,7 @@ export default function SettingsPage() {
     </div>
   );
 
-  const UserListRow = ({ user, actionLabel }: { user: any, actionLabel?: string }) => (
+  const UserListRow = ({ user }: { user: any }) => (
     <button 
       onClick={() => router.push(`/profile?id=${user.id}`)}
       className="w-full flex items-center justify-between p-3 bg-muted/10 rounded-xl border border-transparent hover:border-primary/20 hover:bg-primary/[0.02] transition-all group active:scale-[0.98]"
@@ -206,32 +211,103 @@ export default function SettingsPage() {
                   </>
                 )}
               </TabsList>
-              <TabsContent value="pengikut" className="space-y-1.5 outline-none">{MOCK_RELATIONS.pengikut.map(u => <UserListRow key={u.id} user={u} actionLabel="Ikuti Balik" />)}</TabsContent>
-              <TabsContent value="mengikuti" className="space-y-1.5 outline-none">{MOCK_RELATIONS.mengikuti.map(u => <UserListRow key={u.id} user={u} actionLabel="Berhenti" />)}</TabsContent>
-              <TabsContent value="suka" className="space-y-1.5 outline-none">{MOCK_RELATIONS.suka.map(u => <UserListRow key={u.id} user={u} actionLabel="Hubungkan" />)}</TabsContent>
-              <TabsContent value="subscribe" className="space-y-1.5 outline-none">{MOCK_RELATIONS.subscribe.map(u => <UserListRow key={u.id} user={u} actionLabel="Detail" />)}</TabsContent>
+              <TabsContent value="pengikut" className="space-y-1.5 outline-none">{MOCK_RELATIONS.pengikut.map(u => <UserListRow key={u.id} user={u} />)}</TabsContent>
+              <TabsContent value="mengikuti" className="space-y-1.5 outline-none">{MOCK_RELATIONS.mengikuti.map(u => <UserListRow key={u.id} user={u} />)}</TabsContent>
+              <TabsContent value="suka" className="space-y-1.5 outline-none">{MOCK_RELATIONS.suka.map(u => <UserListRow key={u.id} user={u} />)}</TabsContent>
+              <TabsContent value="subscribe" className="space-y-1.5 outline-none">{MOCK_RELATIONS.subscribe.map(u => <UserListRow key={u.id} user={u} />)}</TabsContent>
             </Tabs>
           </SubMenuLayout>
         );
       case "keamanan_privasi":
+        const privacyItems = [
+          { label: "Siapa dapat melihat Pengikut?", key: "whoCanSeeFollowers" },
+          { label: "Siapa dapat melihat Mengikuti?", key: "whoCanSeeFollowing" },
+          { label: "Siapa dapat melihat Suka?", key: "whoCanSeeLikes" },
+          { 
+            label: activeAccount.type === 'bisnis' ? "Siapa dapat melihat Radar?" : "Siapa dapat melihat Ditambahkan?", 
+            key: "whoCanSeeSubscribe" 
+          }
+        ];
         return (
           <SubMenuLayout title="Keamanan & Privasi">
             <div className="space-y-6">
-              <div className="space-y-2"><h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Kredensial</h3><div className="grid grid-cols-2 gap-2"><button className="p-3 rounded-xl bg-muted/20 border border-border/50 text-[10px] font-black uppercase tracking-tight text-center hover:bg-primary/5 hover:text-primary transition-all">Ubah Password</button><button className="p-3 rounded-xl bg-muted/20 border border-border/50 text-[10px] font-black uppercase tracking-tight text-center hover:bg-primary/5 hover:text-primary transition-all">Aktifkan 2FA</button></div></div>
-              <div className="space-y-3"><h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Kontrol Visibilitas Daftar</h3><div className="bg-card rounded-xl border border-border overflow-hidden divide-y divide-border/50 shadow-sm">{[{ label: "Siapa dapat melihat Pengikut?", key: "whoCanSeeFollowers" },{ label: "Siapa dapat melihat Mengikuti?", key: "whoCanSeeFollowing" },{ label: "Siapa dapat melihat Suka?", key: "whoCanSeeLikes" },{ label: activeAccount.type === 'bisnis' ? "Siapa dapat melihat Radar?" : "Siapa dapat melihat Ditambahkan?", key: "whoCanSeeSubscribe" }].map((item) => (<div key={item.key} className="p-3 space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-600">{item.label}</Label><Select value={activeAccount.preferences?.[item.key as keyof typeof activeAccount.preferences] as string || 'public'} onValueChange={(v) => updatePrivacy(item.key, v)}><SelectTrigger className="rounded-lg h-9 bg-muted/20 border-none font-bold text-[11px] shadow-inner"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl shadow-xl"><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="friends">👥 Diikuti</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></Select></div>))}</div></div>
+              <div className="space-y-2">
+                <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Kredensial</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <button className="p-3 rounded-xl bg-muted/20 border border-border/50 text-[10px] font-black uppercase tracking-tight text-center hover:bg-primary/5 hover:text-primary transition-all">Ubah Password</button>
+                  <button className="p-3 rounded-xl bg-muted/20 border border-border/50 text-[10px] font-black uppercase tracking-tight text-center hover:bg-primary/5 hover:text-primary transition-all">Aktifkan 2FA</button>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Kontrol Visibilitas Daftar</h3>
+                <div className="bg-card rounded-xl border border-border overflow-hidden divide-y divide-border/50 shadow-sm">
+                  {privacyItems.map((item) => (
+                    <div key={item.key} className="p-3 space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-slate-600">{item.label}</Label>
+                      <Select 
+                        value={(activeAccount.preferences?.[item.key as keyof typeof activeAccount.preferences] as string) || 'public'} 
+                        onValueChange={(v) => updatePrivacy(item.key, v)}
+                      >
+                        <SelectTrigger className="rounded-lg h-9 bg-muted/20 border-none font-bold text-[11px] shadow-inner">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl shadow-xl">
+                          <SelectItem value="public">🌍 Publik</SelectItem>
+                          <SelectItem value="friends">👥 Diikuti</SelectItem>
+                          <SelectItem value="private">🔒 Privat</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </SubMenuLayout>
         );
       case "mode":
+        const modes = [
+          { id: 'light', label: 'Terang', icon: Zap, bg: 'bg-amber-50 text-amber-600' },
+          { id: 'dark', label: 'Gelap', icon: Lock, bg: 'bg-slate-900 text-white' },
+          { id: 'system', label: 'Ikuti Sistem', icon: Smartphone, bg: 'bg-muted text-muted-foreground' }
+        ];
         return (
           <SubMenuLayout title="Mode Tampilan">
-            <div className="space-y-3"><div className="grid gap-2">{[{ id: 'light', label: 'Terang', icon: Zap, bg: 'bg-amber-50 text-amber-600' },{ id: 'dark', label: 'Gelap', icon: Lock, bg: 'bg-slate-900 text-white' },{ id: 'system', label: 'Ikuti Sistem', icon: Smartphone, bg: 'bg-muted text-muted-foreground' }].map((m) => (<button key={m.id} onClick={() => handleThemeChange(m.id)} className={cn("w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all active:scale-[0.98]", settings.theme === m.id ? "border-primary bg-primary/[0.02]" : "border-transparent bg-muted/20")}> <div className="flex items-center gap-3"><div className={cn("size-8 rounded-lg flex items-center justify-center shadow-sm", m.bg)}><m.icon className="size-4" /></div><span className="font-black text-[12px] uppercase tracking-wide">{m.label}</span></div> {settings.theme === m.id && <Check className="size-4 text-primary" />}</button>))}</div></div>
+            <div className="space-y-3">
+              <div className="grid gap-2">
+                {modes.map((m) => (
+                  <button key={m.id} onClick={() => handleThemeChange(m.id)} className={cn("w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all active:scale-[0.98]", settings.theme === m.id ? "border-primary bg-primary/[0.02]" : "border-transparent bg-muted/20")}>
+                    <div className="flex items-center gap-3">
+                      <div className={cn("size-8 rounded-lg flex items-center justify-center shadow-sm", m.bg)}><m.icon className="size-4" /></div>
+                      <span className="font-black text-[12px] uppercase tracking-wide">{m.label}</span>
+                    </div> 
+                    {settings.theme === m.id && <Check className="size-4 text-primary" />}
+                  </button>
+                ))}
+              </div>
+            </div>
           </SubMenuLayout>
         );
       case "bahasa":
         return (
           <SubMenuLayout title="Bahasa Sistem">
-            <Card className="rounded-2xl border border-border overflow-hidden"><ScrollArea className="h-[350px]"><div className="flex flex-col divide-y divide-border">{LANGUAGES.map((lang) => (<button key={lang.code} onClick={() => { setLanguage(lang.code); toast({ title: `Bahasa diubah ke ${lang.label}` }); }} className={cn("w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors", language === lang.code ? "bg-primary/[0.02]" : "bg-transparent")}> <div className="flex items-center gap-3"><span className="text-xl">{lang.flag}</span><div className="flex flex-col"><span className="font-bold text-[13px] text-slate-900">{lang.label}</span><span className="text-[9px] font-black uppercase text-muted-foreground opacity-60">{lang.code}</span></div></div> {language === lang.code && <Check className="size-4 text-primary" />}</button>))}</div></ScrollArea></Card>
+            <Card className="rounded-2xl border border-border overflow-hidden">
+              <ScrollArea className="h-[350px]">
+                <div className="flex flex-col divide-y divide-border">
+                  {LANGUAGES.map((lang) => (
+                    <button key={lang.code} onClick={() => { setLanguage(lang.code); toast({ title: `Bahasa diubah ke ${lang.label}` }); }} className={cn("w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors", language === lang.code ? "bg-primary/[0.02]" : "bg-transparent")}>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{lang.flag}</span>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-[13px] text-slate-900">{lang.label}</span>
+                          <span className="text-[9px] font-black uppercase text-muted-foreground opacity-60">{lang.code}</span>
+                        </div>
+                      </div>
+                      {language === lang.code && <Check className="size-4 text-primary" />}
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </Card>
           </SubMenuLayout>
         );
       default: return null;
@@ -240,7 +316,15 @@ export default function SettingsPage() {
 
   const MenuRow = ({ item }: { item: any }) => (
     <button onClick={() => { if (item.subMenu) openSubMenu(item.subMenu); else if (item.href && item.href !== '#') router.push(item.href); }} className="w-full flex items-center justify-between p-3.5 hover:bg-muted/50 transition-colors group">
-      <div className="flex items-center gap-3 text-left"><div className={cn("size-8 rounded-lg flex items-center justify-center shadow-sm", item.bg || "bg-muted text-muted-foreground")}><item.icon className="size-4" /></div><div className="flex flex-col"><h4 className="font-bold text-[13px] leading-none group-hover:text-primary transition-colors">{item.label}</h4>{item.desc && <p className="text-[9px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}</div></div>
+      <div className="flex items-center gap-3 text-left">
+        <div className={cn("size-8 rounded-lg flex items-center justify-center shadow-sm", item.bg || "bg-muted text-muted-foreground")}>
+          <item.icon className="size-4" />
+        </div>
+        <div className="flex flex-col">
+          <h4 className="font-bold text-[13px] leading-none group-hover:text-primary transition-colors">{item.label}</h4>
+          {item.desc && <p className="text-[9px] text-muted-foreground font-medium mt-1 uppercase tracking-widest">{item.desc}</p>}
+        </div>
+      </div>
       <ChevronRight className="size-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
     </button>
   );
@@ -250,12 +334,71 @@ export default function SettingsPage() {
       <div className="max-w-xl mx-auto space-y-6 pb-24 pt-2 px-1">
         {activeSubMenu ? renderSubMenuContent() : (
           <>
-            <header className="space-y-0.5"><h1 className="text-xl font-black tracking-tight text-foreground uppercase">{t('settings')}</h1><p className="text-muted-foreground text-[10px] font-medium uppercase tracking-widest">Manajemen sistem dan ekosistem</p></header>
-            <section className="space-y-2"><h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Akun & Keamanan</h3><div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border"><MenuRow item={{ icon: User, label: "Kelola Akun", desc: "Profil, Tipe Akun, Lencana", href: "/profile?edit=true", bg: "bg-primary text-white" }} /><MenuRow item={{ icon: ShieldCheck, label: "Izin Keamanan & Privasi", desc: "Enkripsi & Visibilitas", subMenu: "keamanan_privasi" }} /></div></section>
-            <section className="space-y-2"><h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Aktivitas & Interaksi</h3><div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border"><MenuRow item={{ icon: LayoutGrid, label: "Kelola Postingan", desc: "Arsip, Pin, Aktivitas", href: "/settings/posts", bg: "bg-primary text-white" }} /><MenuRow item={{ icon: Handshake, label: "Koneksi", desc: "Relasi Bisnis", href: "/connections" }} /><MenuRow item={{ icon: Users, label: "Komunitas", desc: "Grup Kolaborasi", href: "/communities" }} /><MenuRow item={{ icon: UserCheck, label: "Hubungan Jaringan", desc: "Pengikut & Suka", subMenu: "hubungan" }} /><MenuRow item={{ icon: Bell, label: "Notifikasi", desc: "Push, Chat, Email", href: "/notifications" }} /></div></section>
-            <section className="space-y-2"><h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Sistem & Tampilan</h3><div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border"><MenuRow item={{ icon: Palette, label: "Mode Tampilan", desc: "Tema Antarmuka", subMenu: "mode" }} /><MenuRow item={{ icon: Languages, label: "Bahasa", desc: "Lokalisasi", subMenu: "bahasa" }} /></div></section>
-            <section className="space-y-2"><h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Bantuan</h3><div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border"><MenuRow item={{ icon: HelpCircle, label: "Pusat Bantuan", href: "/knowledge" }} /><MenuRow item={{ icon: Info, label: "Info Aplikasi", href: "/settings/info" }} /></div></section>
-            <div className="space-y-2 pt-4"><div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border shadow-sm"><button onClick={() => { const nextAcc = availableAccounts.find(a => a.id !== activeAccount.id) || availableAccounts[0]; switchAccount(nextAcc.id); router.push("/profile"); }} className="w-full flex items-center justify-between p-4 hover:bg-muted/50 group"><div className="flex items-center gap-3"><div className="size-8 rounded-lg bg-primary text-white flex items-center justify-center shadow-lg"><Users className="size-4" /></div><span className="font-bold text-[13px] group-hover:text-primary">Beralih Akun</span></div><ChevronRight className="size-3.5 text-muted-foreground/30 group-hover:text-primary" /></button><button onClick={handleLogout} className="w-full flex items-center justify-between p-4 hover:bg-rose-50 group"><div className="flex items-center gap-3 text-rose-600"><div className="size-8 rounded-lg bg-rose-100 flex items-center justify-center"><LogOut className="size-4" /></div><span className="font-black text-[13px] uppercase tracking-wide">Logout</span></div><ChevronRight className="size-3.5 text-rose-300 group-hover:text-rose-600" /></button></div></div>
+            <header className="space-y-0.5">
+              <h1 className="text-xl font-black tracking-tight text-foreground uppercase">{t('settings')}</h1>
+              <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-widest">Manajemen sistem dan ekosistem</p>
+            </header>
+            
+            <section className="space-y-2">
+              <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Akun & Keamanan</h3>
+              <div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border">
+                <MenuRow item={{ icon: User, label: "Kelola Akun", desc: "Profil, Tipe Akun, Lencana", href: "/profile?edit=true", bg: "bg-primary text-white" }} />
+                <MenuRow item={{ icon: ShieldCheck, label: "Izin Keamanan & Privasi", desc: "Enkripsi & Visibilitas", subMenu: "keamanan_privasi" }} />
+              </div>
+            </section>
+
+            <section className="space-y-2">
+              <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Aktivitas & Interaksi</h3>
+              <div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border">
+                <MenuRow item={{ icon: LayoutGrid, label: "Kelola Postingan", desc: "Arsip, Pin, Aktivitas", href: "/settings/posts", bg: "bg-primary text-white" }} />
+                <MenuRow item={{ icon: Handshake, label: "Koneksi", desc: "Relasi Bisnis", href: "/connections" }} />
+                <MenuRow item={{ icon: Users, label: "Komunitas", desc: "Grup Kolaborasi", href: "/communities" }} />
+                <MenuRow item={{ icon: UserCheck, label: "Hubungan Jaringan", desc: "Pengikut & Suka", subMenu: "hubungan" }} />
+                <MenuRow item={{ icon: Bell, label: "Notifikasi", desc: "Push, Chat, Email", href: "/notifications" }} />
+              </div>
+            </section>
+
+            <section className="space-y-2">
+              <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Sistem & Tampilan</h3>
+              <div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border">
+                <MenuRow item={{ icon: Palette, label: "Mode Tampilan", desc: "Tema Antarmuka", subMenu: "mode" }} />
+                <MenuRow item={{ icon: Languages, label: "Bahasa", desc: "Lokalisasi", subMenu: "bahasa" }} />
+              </div>
+            </section>
+
+            <section className="space-y-2">
+              <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Bantuan</h3>
+              <div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border">
+                <MenuRow item={{ icon: HelpCircle, label: "Pusat Bantuan", href: "/knowledge" }} />
+                <MenuRow item={{ icon: Info, label: "Info Aplikasi", href: "/settings/info" }} />
+              </div>
+            </section>
+
+            <div className="space-y-2 pt-4">
+              <div className="flex flex-col bg-card rounded-xl border border-border overflow-hidden divide-y divide-border shadow-sm">
+                <button 
+                  onClick={() => { 
+                    const nextAcc = availableAccounts.find(a => a.id !== activeAccount.id) || availableAccounts[0]; 
+                    switchAccount(nextAcc.id); 
+                    router.push("/profile"); 
+                  }} 
+                  className="w-full flex items-center justify-between p-4 hover:bg-muted/50 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="size-8 rounded-lg bg-primary text-white flex items-center justify-center shadow-lg"><Users className="size-4" /></div>
+                    <span className="font-bold text-[13px] group-hover:text-primary">Beralih Akun</span>
+                  </div>
+                  <ChevronRight className="size-3.5 text-muted-foreground/30 group-hover:text-primary" />
+                </button>
+                <button onClick={handleLogout} className="w-full flex items-center justify-between p-4 hover:bg-rose-50 group">
+                  <div className="flex items-center gap-3 text-rose-600">
+                    <div className="size-8 rounded-lg bg-rose-100 flex items-center justify-center"><LogOut className="size-4" /></div>
+                    <span className="font-black text-[13px] uppercase tracking-wide">Logout</span>
+                  </div>
+                  <ChevronRight className="size-3.5 text-rose-300 group-hover:text-rose-600" />
+                </button>
+              </div>
+            </div>
           </>
         )}
       </div>

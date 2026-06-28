@@ -148,10 +148,8 @@ export default function ProfilePage() {
 
   const isOwnProfile = viewingAccount.id === activeAccount.id || availableAccounts.some(a => a.id === viewingAccount.id);
 
-  // Stepped Navigation Sync (History handling)
   React.useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      // Close in reverse order of expected stack
       if (isMediaPickerOpen) { setIsMediaPickerOpen(false); return; }
       if (isStatsModalOpen) { setIsStatsModalOpen(false); return; }
       if (isConnectionsModalOpen) { setIsConnectionsModalOpen(false); return; }
@@ -159,18 +157,15 @@ export default function ProfilePage() {
       if (isContentModalOpen) { setIsContentModalOpen(false); return; }
       if (isShareSheetOpen) { setIsShareSheetOpen(false); return; }
     };
-
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, [isBioModalOpen, isContentModalOpen, isMediaPickerOpen, isShareSheetOpen, isConnectionsModalOpen, isStatsModalOpen]);
 
-  // Utility to push state and open
   const pushAndSet = (setter: (val: boolean) => void, val: boolean, key: string) => {
     if (val) window.history.pushState({ modal: key }, '');
     setter(val);
   };
 
-  // Utility to close modal and handle history back
   const closeWithHistory = (setter: (val: boolean) => void, key: string) => {
     if (window.history.state?.modal === key) {
       window.history.back();

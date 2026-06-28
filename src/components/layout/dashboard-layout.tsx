@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -215,7 +216,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-body relative">
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       
-      {/* Header Fixed - Enlarged slightly to h-12 */}
+      {/* Header Fixed - Enlarged slightly for fit */}
       <header className="fixed top-0 left-0 right-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-12 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2.5">
           <Link href="/feed" className="flex items-center gap-2.5 active:scale-95 transition-transform">
@@ -264,7 +265,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* Main Content Area - Padding top adjusted for h-12 */}
+      {/* Main Content Area */}
       <main className="flex-1 pt-12 pb-16 px-3 w-full relative max-w-2xl mx-auto overflow-x-clip">
         {children}
       </main>
@@ -291,24 +292,24 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 className="w-[280px] sm:w-[320px] p-0 bg-card border-l border-border rounded-l-[2rem] shadow-2xl flex flex-col overflow-hidden outline-none z-[150] [&>button]:hidden"
               >
                 <div className="flex flex-col h-full overflow-hidden">
-                  {/* Drawer Profile */}
-                  <div className="px-5 pt-10 pb-6 border-b border-border/40 shrink-0 flex flex-col items-center text-center">
-                    <Avatar className="size-14 border-2 border-primary/20 shadow-xl mb-2.5">
+                  {/* Drawer Profile - Scaled Down for Fit */}
+                  <div className="px-5 pt-8 pb-5 border-b border-border/40 shrink-0 flex flex-col items-center text-center">
+                    <Avatar className="size-12 border-2 border-primary/20 shadow-xl mb-2">
                       <AvatarImage src={activeAccount.avatar} className="object-cover" />
                       <AvatarFallback className="bg-primary text-primary-foreground font-black text-lg">{activeAccount.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col items-center min-w-0 w-full">
                       <div className="flex items-center gap-1.5 justify-center mb-0.5">
-                        <h2 className="text-[13px] font-black text-slate-900 truncate uppercase tracking-tight">{activeAccount.name}</h2>
-                        {activeAccount.verificationStatus === 'Verified' && <ShieldCheck className="size-3 text-primary" />}
+                        <h2 className="text-[12px] font-black text-slate-900 truncate uppercase tracking-tight">{activeAccount.name}</h2>
+                        {activeAccount.verificationStatus === 'Verified' && <ShieldCheck className="size-2.5 text-primary" />}
                       </div>
-                      <Badge variant="outline" className="w-fit h-3.5 px-1.5 text-[6px] font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary/80">
+                      <Badge variant="outline" className="w-fit h-3 px-1.5 text-[5px] font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary/80">
                         {activeAccount.type}
                       </Badge>
                     </div>
                   </div>
 
-                  {/* Drawer Items */}
+                  {/* Drawer Items - Compact Sizing */}
                   <div className="flex-1 overflow-y-auto no-scrollbar py-1">
                     <div className="flex flex-col divide-y divide-border/10">
                       {drawerItems.map((item) => (
@@ -317,19 +318,19 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                           href={item.href} 
                           onClick={() => setIsMoreMenuOpen(false)} 
                           className={cn(
-                            "flex items-center px-5 py-2.5 transition-all gap-3.5 group", 
+                            "flex items-center px-5 py-2 transition-all gap-3 group", 
                             pathname === item.href ? "bg-primary/5 text-primary" : "bg-transparent hover:bg-primary/5"
                           )}
                         >
                           <div className={cn(
-                            "size-7 rounded-lg flex items-center justify-center transition-all group-hover:scale-105 shadow-sm", 
+                            "size-6 rounded-lg flex items-center justify-center transition-all group-hover:scale-105 shadow-sm", 
                             pathname === item.href ? "bg-primary text-primary-foreground shadow-primary/20" : "bg-muted text-muted-foreground"
                           )}>
-                            <item.icon className="size-3 md:size-3.5" />
+                            <item.icon className="size-3" />
                           </div>
-                          <span className="text-[9px] font-black uppercase tracking-widest">{item.label}</span>
+                          <span className="text-[8px] font-black uppercase tracking-widest">{item.label}</span>
                           <ChevronRight className={cn(
-                            "ml-auto size-2.5 transition-colors",
+                            "ml-auto size-2 transition-colors",
                             pathname === item.href ? "text-primary" : "text-muted-foreground/30 group-hover:text-primary"
                           )} />
                         </Link>
@@ -337,33 +338,33 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
 
-                  {/* Drawer Footer */}
+                  {/* Drawer Footer - Scaled Down */}
                   <div className="mt-auto p-4 border-t border-border/40 space-y-3 shrink-0 bg-slate-50/50 pb-6">
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2 ml-1">
-                        <div className="size-4 rounded-md bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
+                        <div className="size-3 rounded-md bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
                           <Languages className="size-2" />
                         </div>
-                        <span className="text-[7px] font-black uppercase tracking-widest text-muted-foreground">Bahasa Sistem</span>
+                        <span className="text-[6px] font-black uppercase tracking-widest text-muted-foreground">Bahasa Sistem</span>
                       </div>
                       <LanguagePicker />
                     </div>
                     
                     <button 
                       onClick={handleLogout}
-                      className="w-full flex items-center justify-between p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all group"
+                      className="w-full flex items-center justify-between p-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all group"
                     >
                       <div className="flex items-center gap-2">
-                        <div className="size-5 rounded-md bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-200">
-                          <LogOut className="size-2.5" />
+                        <div className="size-4 rounded-md bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-200">
+                          <LogOut className="size-2" />
                         </div>
-                        <span className="text-[8px] font-black uppercase tracking-widest">Keluar Sesi</span>
+                        <span className="text-[7px] font-black uppercase tracking-widest">Keluar Sesi</span>
                       </div>
                       <ChevronRight className="size-2 opacity-30 group-hover:translate-x-0.5 transition-transform" />
                     </button>
 
                     <div className="pt-0.5">
-                      <p className="text-[5px] font-black text-muted-foreground/30 uppercase tracking-[0.4em] text-center italic">© 2025 Koolink Network</p>
+                      <p className="text-[4px] font-black text-muted-foreground/30 uppercase tracking-[0.4em] text-center italic">© 2025 Koolink Network</p>
                     </div>
                   </div>
                 </div>
