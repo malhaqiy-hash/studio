@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { BRAND } from '@/config/appConfig';
 
 interface TappLogoProps {
   className?: string;
@@ -18,8 +19,10 @@ export function TappLogo({ className, iconClassName, variant = 'default' }: Tapp
         fill="none" 
         xmlns="http://www.w3.org/2000/svg" 
         className={cn("w-[70%] h-[70%]", iconClassName)}
+        role="img"
+        aria-label={`${BRAND.name} logo`}
       >
-        {/* Modern Radio-style disc logo representing "Koolink" */}
+        {/* Modern Radio-style disc logo representing the brand */}
         <circle 
           cx="50" 
           cy="50" 
