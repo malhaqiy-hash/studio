@@ -31,6 +31,7 @@ import {
   Zap,
   Pin,
   MoreVertical,
+  Plus,
 } from 'lucide-react';
 import {
   Dialog,
@@ -100,6 +101,7 @@ export default function ProfilePage() {
 
   const [mediaTarget, setMediaTarget] = React.useState<'avatar' | 'cover' | 'post'>('avatar');
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
+  const [tempLinks, setTempLinks] = React.useState<string[]>([]);
   
   const [isNewCategory, setIsNewCategory] = React.useState(false);
   const [isCloudLoading, setIsCloudLoading] = React.useState(false);
@@ -115,20 +117,16 @@ export default function ProfilePage() {
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Stepped UI Navigation with Browser Back Support
   React.useEffect(() => {
     const handlePopState = () => {
-      // Step 1: Close Disconnect Confirmation if open
       if (confirmDisconnectId) {
         setConfirmDisconnectId(null);
         return;
       }
-      // Step 2: Close Connections List if open
       if (isConnectionsModalOpen) {
         setIsConnectionsModalOpen(false);
         return;
       }
-      // Step 3: Close other modals
       if (isBioModalOpen) setIsBioModalOpen(false);
       if (isContentModalOpen) setIsContentModalOpen(false);
     };
@@ -159,8 +157,8 @@ export default function ProfilePage() {
       setTempAccount({ 
         name: activeAccount.name, 
         bio: activeAccount.bio, 
-        locationLink: activeAccount.locationLink 
       });
+      setTempLinks(activeAccount.links || []);
       setIsBioModalOpen(true);
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
@@ -171,7 +169,7 @@ export default function ProfilePage() {
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
-  }, [activeAccount.id, resetContentForm, activeAccount.name, activeAccount.bio, activeAccount.locationLink]);
+  }, [activeAccount.id, resetContentForm, activeAccount.name, activeAccount.bio, activeAccount.links]);
 
   const profileVisibleItems = React.useMemo(() => {
     const items = (activeAccount.items || []).filter(i => 
@@ -201,10 +199,27 @@ export default function ProfilePage() {
   }, [activeAccount.items]);
 
   const handleSaveBio = () => {
-    updateActiveAccount(tempAccount);
+    updateActiveAccount({
+      ...tempAccount,
+      links: tempLinks.filter(l => l.trim() !== '')
+    });
     setIsBioModalOpen(false);
     if (window.history.state?.modalOpen) window.history.back();
     toast({ title: 'Profil diperbarui' });
+  };
+
+  const handleAddTempLink = () => {
+    setTempLinks([...tempLinks, '']);
+  };
+
+  const handleUpdateTempLink = (index: number, value: string) => {
+    const newLinks = [...tempLinks];
+    newLinks[index] = value;
+    setTempLinks(newLinks);
+  };
+
+  const handleRemoveTempLink = (index: number) => {
+    setTempLinks(tempLinks.filter((_, i) => i !== index));
   };
 
   const openConnectionsModal = () => {
@@ -393,21 +408,48 @@ export default function ProfilePage() {
                      </div>
                   </div>
                 </div>
-                {activeAccount.locationLink && (
-                  <a href={activeAccount.locationLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-accent font-bold text-[9px] uppercase tracking-widest hover:underline mt-0.5">
-                    {getSmartIcon(activeAccount.locationLink)}
-                    Tautan Profil
-                  </a>
-                )}
               </div>
             </div>
           </div>
         </section>
 
         <section className="px-3 md:px-5">
-          <div className="flex items-center justify-between border-b border-border/40 pb-2">
-            <p className="text-slate-700 leading-relaxed font-normal text-[12px] md:text-[13px]">"{activeAccount.bio || 'Membangun koneksi cerdas di Koolink.'}"</p>
-            <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio, locationLink: activeAccount.locationLink }); setIsBioModalOpen(true); window.history.pushState({ modalOpen: 'edit-bio' }, ''); }} className="text-[9px] font-bold uppercase text-accent hover:bg-accent/10 px-2 h-6 rounded-lg border border-accent/20 shrink-0 ml-3"><Pencil className="size-2 mr-1" /> Edit</Button>
+          <div className="flex flex-col gap-3 border-b border-border/40 pb-4">
+            <div className="flex items-start justify-between">
+              <div className="text-slate-700 leading-relaxed font-normal text-[12px] md:text-[13px] whitespace-pre-wrap flex-1">
+                {activeAccount.bio ? `"${activeAccount.bio}"` : '"Membangun koneksi cerdas di Koolink."'}
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => { 
+                  setTempAccount({ name: activeAccount.name, bio: activeAccount.bio }); 
+                  setTempLinks(activeAccount.links || []);
+                  setIsBioModalOpen(true); 
+                  window.history.pushState({ modalOpen: 'edit-bio' }, ''); 
+                }} 
+                className="text-[9px] font-bold uppercase text-accent hover:bg-accent/10 px-2 h-6 rounded-lg border border-accent/20 shrink-0 ml-3"
+              >
+                <Pencil className="size-2 mr-1" /> Edit
+              </Button>
+            </div>
+            
+            {activeAccount.links && activeAccount.links.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {activeAccount.links.map((link, idx) => (
+                  <a 
+                    key={idx} 
+                    href={link} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="flex items-center gap-1.5 text-accent font-bold text-[9px] uppercase tracking-widest hover:underline bg-accent/5 px-2 py-1 rounded-md border border-accent/10 transition-all hover:bg-accent/10"
+                  >
+                    {getSmartIcon(link)}
+                    {link.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -538,7 +580,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* NESTED Disconnect Confirmation Dialog */}
           <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && closeDisconnectConfirm()}>
             <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none z-[200] [&>button]:hidden text-center">
               <div className="space-y-6">
@@ -572,21 +613,76 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Profile Modal Updated for Multi-Links */}
       <Dialog open={isBioModalOpen} onOpenChange={(open) => !open && (setIsBioModalOpen(false), window.history.state?.modalOpen && window.history.back())}>
-        <DialogContent className="w-[90%] md:max-sm rounded-xl p-4 bg-card text-foreground outline-none z-[170] [&>button]:hidden">
-          <DialogHeader><DialogTitle className="text-sm font-bold text-slate-900">Ubah Profil</DialogTitle></DialogHeader>
-          <div className="space-y-3 py-2">
-            <div className="space-y-1"><Label className="text-[9px] font-bold uppercase text-muted-foreground">Nama Tampilan</Label><Input value={tempAccount.name || ''} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-lg h-9 bg-muted/20 border-none px-3 text-[12px] font-bold" /></div>
-            <div className="space-y-1"><Label className="text-[9px] font-bold uppercase text-muted-foreground">Bio</Label><Textarea value={tempAccount.bio || ''} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} className="rounded-lg bg-muted/20 border-none min-h-[60px] px-3 text-[12px] font-medium" /></div>
-            <div className="space-y-1">
-              <Label className="text-[9px] font-bold uppercase text-muted-foreground">Link Alamat/Web</Label>
-              <div className="relative">
-                <div className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">{tempAccount.locationLink ? getSmartIcon(tempAccount.locationLink) : <LinkIcon className="size-3" />}</div>
-                <Input value={tempAccount.locationLink || ''} onChange={(e) => setTempAccount({ ...tempAccount, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-lg h-9 bg-muted/20 border-none pl-8 text-[12px] font-medium shadow-inner" />
+        <DialogContent className="w-[95%] md:max-w-md rounded-2xl p-0 border-none shadow-2xl bg-card text-foreground outline-none z-[170] [&>button]:hidden overflow-hidden flex flex-col max-h-[90vh]">
+          <DialogHeader className="p-6 pb-2">
+            <DialogTitle className="text-base font-black uppercase tracking-tight text-slate-900">Ubah Profil</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto no-scrollbar p-6 pt-2 space-y-5">
+            <div className="space-y-1.5">
+              <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Nama Tampilan</Label>
+              <Input value={tempAccount.name || ''} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-xl h-10 bg-muted/20 border-none px-4 text-[13px] font-bold shadow-inner" />
+            </div>
+            
+            <div className="space-y-1.5">
+              <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Bio (Dapat Ganti Paragraf)</Label>
+              <Textarea 
+                value={tempAccount.bio || ''} 
+                onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} 
+                placeholder="Ceritakan visi atau deskripsi Anda..."
+                className="rounded-xl bg-muted/20 border-none min-h-[120px] px-4 py-3 text-[13px] font-medium shadow-inner resize-none" 
+              />
+              <p className="text-[8px] text-muted-foreground italic ml-1">* Teks akan memanjang ke bawah secara otomatis.</p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Tautan Jaringan</Label>
+                <button 
+                  onClick={handleAddTempLink}
+                  className="flex items-center gap-1 text-accent hover:text-accent/80 transition-colors text-[9px] font-black uppercase tracking-widest"
+                >
+                  <Plus className="size-3" /> Tambah Link
+                </button>
+              </div>
+              
+              <div className="space-y-2">
+                {tempLinks.map((link, idx) => (
+                  <div key={idx} className="flex gap-2 animate-in slide-in-from-top-1 duration-200">
+                    <div className="relative flex-1 group">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-accent">
+                        {link ? getSmartIcon(link) : <LinkIcon className="size-3.5" />}
+                      </div>
+                      <Input 
+                        value={link} 
+                        onChange={(e) => handleUpdateTempLink(idx, e.target.value)} 
+                        placeholder="https://..." 
+                        className="rounded-xl h-10 bg-muted/20 border-none pl-10 text-[12px] font-medium shadow-inner" 
+                      />
+                    </div>
+                    <button 
+                      onClick={() => handleRemoveTempLink(idx)}
+                      className="size-10 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition-all active:scale-90"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                ))}
+                
+                {tempLinks.length === 0 && (
+                  <div className="py-4 text-center border-2 border-dashed border-border/50 rounded-xl bg-muted/5">
+                     <p className="text-[10px] text-muted-foreground font-medium">Belum ada tautan ditambahkan.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-          <DialogFooter><Button onClick={handleSaveBio} className="w-full h-10 rounded-lg bg-accent font-bold text-white text-[12px] uppercase tracking-widest shadow-lg active:scale-95 transition-all">Simpan</Button></DialogFooter>
+          <DialogFooter className="p-6 pt-2 bg-slate-50/50">
+            <Button onClick={handleSaveBio} className="w-full h-12 rounded-xl bg-accent font-black text-white text-[11px] uppercase tracking-widest shadow-xl shadow-accent/20 active:scale-95 transition-all">
+              Simpan Perubahan
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

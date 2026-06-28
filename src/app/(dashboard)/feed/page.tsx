@@ -208,7 +208,7 @@ const INITIAL_POSTS = [
     extra: "Enterprise AI Analyst",
     authorType: 'bisnis',
     avatar: "https://picsum.photos/seed/ontapp/200",
-    content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara. Ini adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
+    content: "Permintaan pasar untuk solusi AI infrastruktur di sektor manufaktur meningkat 40% di wilayah Asia Tenggara.\n\nIni adalah waktu yang tepat untuk memperbarui katalog produk Anda.",
     time: "Baru saja",
     stats: { likes: 1200, comments: 84 },
     verified: true,
@@ -223,7 +223,7 @@ const INITIAL_POSTS = [
     extra: "Logistics & Supply Chain",
     authorType: 'bisnis',
     avatar: "https://picsum.photos/seed/log/100",
-    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat. Hubungi kami untuk penawaran khusus member Koolink hari ini.",
+    content: "Kami baru saja membuka rute pengiriman baru antara Jakarta dan Surabaya dengan efisiensi waktu 20% lebih cepat.\n\nHubungi kami untuk penawaran khusus member Koolink hari ini.",
     time: "2 jam yang lalu",
     stats: { likes: 452, comments: 12 },
     verified: true,
@@ -237,7 +237,7 @@ const INITIAL_POSTS = [
     extra: "Personal Shopper",
     authorType: 'personal',
     avatar: "https://picsum.photos/seed/andi/100",
-    content: "Menemukan beberapa produk menarik di pasar lokal hari ini. Sangat merekomendasikan untuk mengecek kategori baru kami.",
+    content: "Menemukan beberapa produk menarik di pasar lokal hari ini.\n\nSangat merekomendasikan untuk mengecek kategori baru kami.",
     time: "4 jam yang lalu",
     stats: { likes: 120, comments: 5 },
     verified: false,
@@ -415,7 +415,6 @@ export default function FeedPage() {
       <div className="flex flex-col max-w-xl mx-auto relative px-1 md:px-0 min-h-screen">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
-        {/* Sticky category bar adjusted to top-[44px] (restored header height) */}
         <div className="sticky top-[44px] z-40 bg-background/95 backdrop-blur-md py-1.5 overflow-x-auto no-scrollbar border-b border-border/40 px-2 transition-all flex items-center justify-center gap-6">
           {CATEGORIES.map((cat) => (
             <button
@@ -612,7 +611,7 @@ export default function FeedPage() {
                 </Select>
               </div>
 
-              <Textarea placeholder="Apa yang Anda pikirkan?" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-slate-50/50 p-3 text-[14px] font-medium focus-visible:ring-2 focus-visible:ring-primary/10 resize-none shadow-inner" />
+              <Textarea placeholder="Apa yang Anda pikirkan? (Mendukung ganti paragraf)" value={postContent} onChange={(e) => setPostContent(e.target.value)} className="min-h-[120px] rounded-xl border-none bg-slate-50/50 p-3 text-[14px] font-medium focus-visible:ring-2 focus-visible:ring-primary/10 resize-none shadow-inner" />
               
               <div className="relative group">
                 <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary">{postLocationLink ? getSmartIcon(postLocationLink) : <LinkIcon className="size-3.5" />}</div>
