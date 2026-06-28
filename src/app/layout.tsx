@@ -1,14 +1,15 @@
-import type { Metadata } from 'next';
+import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { LanguageProvider } from '@/context/language-context';
 import { AccountProvider } from '@/context/account-context';
 import { AIAssistant } from '@/components/chat/ai-assistant';
+import { BRAND } from '@/config/appConfig';
 
 export const metadata: Metadata = {
-  title: 'Koolink - Business Discovery Network',
-  description: 'AI-powered business social network for discovering products, services, and strategic partners.',
+  title: `${BRAND.name} - Business Discovery Network`,
+  description: `${BRAND.name} — AI-powered business discovery and intelligence.`,
 };
 
 export default function RootLayout({
