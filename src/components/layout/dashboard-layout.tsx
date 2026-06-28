@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -216,73 +215,74 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-body relative">
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       
-      {/* Header Fixed - Berada paling atas layar */}
-      <header className="fixed top-0 left-0 right-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-11 flex items-center justify-between shadow-sm">
+      {/* Header Fixed - Shrunk from h-11 to h-10 (40px) */}
+      <header className="fixed top-0 left-0 right-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-10 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <Link href="/feed" className="flex items-center gap-2 active:scale-95 transition-transform">
-            <TappLogo className="size-6 rounded-lg shadow-lg shadow-primary/10" />
-            <span className="font-black text-sm tracking-tight text-foreground uppercase">Koolink</span>
+            <TappLogo className="size-5 rounded-md shadow-lg shadow-primary/10" />
+            <span className="font-black text-xs tracking-tight text-foreground uppercase">Koolink</span>
           </Link>
-          <span className="font-medium text-[8px] text-primary/60 lowercase italic select-none ml-1 leading-none">{activeAccount?.type}</span>
+          <span className="font-medium text-[7px] text-primary/60 lowercase italic select-none ml-1 leading-none">{activeAccount?.type}</span>
         </div>
         
-        <div className="flex items-center gap-1.5">
-          <Link href="/messages"><Button variant="ghost" size="icon" className="size-7 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><MessageSquare className="size-4" /></Button></Link>
-          <Link href="/notifications"><Button variant="ghost" size="icon" className="relative size-7 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><Bell className="size-4" /><span className="absolute top-1 right-1 size-1.5 bg-primary rounded-full ring-2 ring-background"></span></Button></Link>
+        <div className="flex items-center gap-1">
+          <Link href="/messages"><Button variant="ghost" size="icon" className="size-7 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><MessageSquare className="size-3.5" /></Button></Link>
+          <Link href="/notifications"><Button variant="ghost" size="icon" className="relative size-7 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><Bell className="size-3.5" /><span className="absolute top-1.5 right-1.5 size-1 bg-primary rounded-full ring-2 ring-background"></span></Button></Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center rounded-full border-2 border-primary/10 hover:border-primary transition p-0.5 outline-none">
-                <Avatar className="h-6 w-6 rounded-full shadow-sm"><AvatarImage src={activeAccount.avatar} className="object-cover" /><AvatarFallback className="bg-primary text-primary-foreground font-bold text-[8px]">{activeAccount.name[0]}</AvatarFallback></Avatar>
+              <button className="flex items-center rounded-full border border-primary/10 hover:border-primary transition p-0.5 outline-none ml-0.5">
+                <Avatar className="h-5 w-5 rounded-full shadow-sm"><AvatarImage src={activeAccount.avatar} className="object-cover" /><AvatarFallback className="bg-primary text-primary-foreground font-bold text-[7px]">{activeAccount.name[0]}</AvatarFallback></Avatar>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-xl p-1.5 shadow-2xl border-border bg-card outline-none z-[180]">
-              <DropdownMenuLabel className="px-2.5 py-1.5 text-[8px] font-bold text-muted-foreground uppercase tracking-widest border-b mb-1">Profil</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-52 rounded-xl p-1 shadow-2xl border-border bg-card outline-none z-[180]">
+              <DropdownMenuLabel className="px-2 py-1 text-[7px] font-bold text-muted-foreground uppercase tracking-widest border-b mb-1">Profil</DropdownMenuLabel>
               <DropdownMenuGroup>
-                <Link href="/profile"><DropdownMenuItem className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg font-bold cursor-pointer hover:bg-primary/5"><div className="size-7 rounded-lg bg-primary/5 flex items-center justify-center text-primary"><User className="size-3.5" /></div><span className="text-[12px]">{t('view_profile')}</span></DropdownMenuItem></Link>
+                <Link href="/profile"><DropdownMenuItem className="flex items-center gap-2 px-2 py-2 rounded-lg font-bold cursor-pointer hover:bg-primary/5"><div className="size-6 rounded-md bg-primary/5 flex items-center justify-center text-primary"><User className="size-3" /></div><span className="text-[11px]">{t('view_profile')}</span></DropdownMenuItem></Link>
                 <DropdownMenuSeparator className="my-1" />
                 {availableAccounts.filter(a => !a.isNew).map((acc) => (
-                  <DropdownMenuItem key={acc.id} onSelect={() => { switchAccount(acc.id); router.push("/profile"); }} className={cn("flex items-center justify-between px-2.5 py-2 rounded-lg font-bold cursor-pointer mb-0.5", activeAccount.id === acc.id ? "bg-primary/5 text-primary" : "focus:bg-primary/5")}>
-                    <div className="flex items-center gap-2.5"><Avatar className="size-7 rounded-lg shadow-sm"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="text-[9px] bg-muted font-black">{acc.name[0]}</AvatarFallback></Avatar><div className="flex flex-col"><span className="text-[12px] leading-none mb-0.5">{acc.name}</span><span className="font-medium text-[8px] text-muted-foreground/70 italic lowercase leading-none">{acc.type}</span></div></div>
-                    {activeAccount.id === acc.id && <Check className="size-3" />}
+                  <DropdownMenuItem key={acc.id} onSelect={() => { switchAccount(acc.id); router.push("/profile"); }} className={cn("flex items-center justify-between px-2 py-1.5 rounded-lg font-bold cursor-pointer mb-0.5", activeAccount.id === acc.id ? "bg-primary/5 text-primary" : "focus:bg-primary/5")}>
+                    <div className="flex items-center gap-2"><Avatar className="size-6 rounded-md shadow-sm"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="text-[8px] bg-muted font-black">{acc.name[0]}</AvatarFallback></Avatar><div className="flex flex-col"><span className="text-[11px] leading-none mb-0.5">{acc.name}</span><span className="font-medium text-[7px] text-muted-foreground/70 italic lowercase leading-none">{acc.type}</span></div></div>
+                    {activeAccount.id === acc.id && <Check className="size-2.5" />}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
               <DropdownMenuSeparator className="my-1" />
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="gap-2.5 px-2.5 py-2.5 rounded-lg font-bold text-[12px]"><UserPlus className="size-3.5" /> Tambah Profil</DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger className="gap-2 px-2 py-2 rounded-lg font-bold text-[11px]"><UserPlus className="size-3" /> Tambah Profil</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[140px] bg-card z-[180]">
-                    <DropdownMenuItem onSelect={() => { setPendingType('personal'); setIsRegModalOpen(true); }} className="font-bold text-[12px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Personal</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => { setPendingType('professional'); setIsRegModalOpen(true); }} className="font-bold text-[12px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Professional</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => { setPendingType('bisnis'); setIsRegModalOpen(true); }} className="font-bold text-[12px] px-2.5 py-2 rounded-lg cursor-pointer hover:bg-primary/5">Bisnis</DropdownMenuItem>
+                  <DropdownMenuSubContent className="rounded-xl border-border shadow-xl p-1 min-w-[130px] bg-card z-[180]">
+                    <DropdownMenuItem onSelect={() => { setPendingType('personal'); setIsRegModalOpen(true); }} className="font-bold text-[11px] px-2 py-1.5 rounded-lg cursor-pointer hover:bg-primary/5">Personal</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => { setPendingType('professional'); setIsRegModalOpen(true); }} className="font-bold text-[11px] px-2 py-1.5 rounded-lg cursor-pointer hover:bg-primary/5">Professional</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => { setPendingType('bisnis'); setIsRegModalOpen(true); }} className="font-bold text-[11px] px-2 py-1.5 rounded-lg cursor-pointer hover:bg-primary/5">Bisnis</DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
               <DropdownMenuSeparator className="my-1" />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive font-bold text-[12px] px-2.5 py-2 rounded-lg focus:bg-destructive/5 cursor-pointer flex gap-2.5"><LogOut className="size-3.5" /> Keluar</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive font-bold text-[11px] px-2 py-2 rounded-lg focus:bg-destructive/5 cursor-pointer flex gap-2"><LogOut className="size-3" /> Keluar</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
 
-      {/* Main Content Area - Memiliki padding-top h-11 (44px) agar konten tidak tertutup header fixed */}
-      <main className="flex-1 pt-11 pb-20 px-3 w-full relative max-w-2xl mx-auto overflow-x-clip">
+      {/* Main Content Area - Padding top matches h-10 (40px) */}
+      <main className="flex-1 pt-10 pb-16 px-3 w-full relative max-w-2xl mx-auto overflow-x-clip">
         {children}
       </main>
 
+      {/* Bottom Nav - Shrunk from h-12 md:h-14 to h-11 md:h-12 (44px/48px) */}
       <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t bg-background/95 backdrop-blur-md pb-safe shadow-xl">
-        <div className="grid grid-cols-3 h-12 md:h-14 items-center justify-items-center text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-muted-foreground relative">
-          <Link href="/feed" className={cn("flex flex-col items-center gap-1 w-full py-1 transition-all", pathname === "/feed" ? "text-primary scale-105" : "hover:text-primary")}>
-            <Rss className="size-4 md:size-5" /><span>{t('feed')}</span>
+        <div className="grid grid-cols-3 h-11 md:h-12 items-center justify-items-center text-[7px] md:text-[8px] font-bold uppercase tracking-widest text-muted-foreground relative">
+          <Link href="/feed" className={cn("flex flex-col items-center gap-0.5 w-full py-1 transition-all", pathname === "/feed" ? "text-primary scale-105" : "hover:text-primary")}>
+            <Rss className="size-3.5 md:size-4" /><span>{t('feed')}</span>
           </Link>
-          <Link href="/cari" className={cn("flex flex-col items-center gap-1 w-full py-1 transition-all", pathname === "/cari" ? "text-primary scale-105" : "hover:text-primary")}>
-            <Search className="size-4 md:size-5" /><span>{t('search')}</span>
+          <Link href="/cari" className={cn("flex flex-col items-center gap-0.5 w-full py-1 transition-all", pathname === "/cari" ? "text-primary scale-105" : "hover:text-primary")}>
+            <Search className="size-3.5 md:size-4" /><span>{t('search')}</span>
           </Link>
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             <Sheet open={isMoreMenuOpen} onOpenChange={setIsMoreMenuOpen}>
               <SheetTrigger asChild>
-                <button className="flex flex-col items-center gap-1 hover:text-primary w-full py-1 outline-none transition-all">
-                  <Menu className="size-4 md:size-5" />
+                <button className="flex flex-col items-center gap-0.5 hover:text-primary w-full py-1 outline-none transition-all">
+                  <Menu className="size-3.5 md:size-4" />
                   <span>{t('more')}</span>
                 </button>
               </SheetTrigger>
@@ -315,17 +315,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                           href={item.href} 
                           onClick={() => setIsMoreMenuOpen(false)} 
                           className={cn(
-                            "flex items-center px-5 py-3.5 transition-all gap-4 group", 
+                            "flex items-center px-5 py-3 transition-all gap-4 group", 
                             pathname === item.href ? "bg-primary/5 text-primary" : "bg-transparent hover:bg-primary/5"
                           )}
                         >
                           <div className={cn(
-                            "size-8 rounded-lg flex items-center justify-center transition-all group-hover:scale-105 shadow-sm", 
+                            "size-7 rounded-lg flex items-center justify-center transition-all group-hover:scale-105 shadow-sm", 
                             pathname === item.href ? "bg-primary text-primary-foreground shadow-primary/20" : "bg-muted text-muted-foreground"
                           )}>
-                            <item.icon className="size-3.5 md:size-4" />
+                            <item.icon className="size-3 md:size-3.5" />
                           </div>
-                          <span className="text-[11px] font-black uppercase tracking-widest">{item.label}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
                           <ChevronRight className={cn(
                             "ml-auto size-3 transition-colors",
                             pathname === item.href ? "text-primary" : "text-muted-foreground/30 group-hover:text-primary"
@@ -338,29 +338,29 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <div className="mt-auto p-5 border-t border-border/40 space-y-4 shrink-0 bg-slate-50/50 pb-8">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <div className="size-6 rounded-lg bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
-                          <Languages className="size-3" />
+                        <div className="size-5 rounded-md bg-muted text-muted-foreground flex items-center justify-center shadow-sm">
+                          <Languages className="size-2.5" />
                         </div>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Bahasa Sistem</span>
+                        <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Bahasa Sistem</span>
                       </div>
                       <LanguagePicker />
                     </div>
                     
                     <button 
                       onClick={handleLogout}
-                      className="w-full flex items-center justify-between p-2.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all group"
+                      className="w-full flex items-center justify-between p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all group"
                     >
                       <div className="flex items-center gap-2.5">
-                        <div className="size-7 rounded-lg bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-200">
-                          <LogOut className="size-3.5" />
+                        <div className="size-6 rounded-md bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-200">
+                          <LogOut className="size-3" />
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest">Keluar Sesi</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest">Keluar Sesi</span>
                       </div>
-                      <ChevronRight className="size-3 opacity-30 group-hover:translate-x-0.5 transition-transform" />
+                      <ChevronRight className="size-2.5 opacity-30 group-hover:translate-x-0.5 transition-transform" />
                     </button>
 
                     <div className="pt-1">
-                      <p className="text-[7px] font-black text-muted-foreground/30 uppercase tracking-[0.4em] text-center italic">© 2025 Koolink Network</p>
+                      <p className="text-[6px] font-black text-muted-foreground/30 uppercase tracking-[0.4em] text-center italic">© 2025 Koolink Network</p>
                     </div>
                   </div>
                 </div>

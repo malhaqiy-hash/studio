@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -416,14 +415,14 @@ export default function FeedPage() {
       <div className="flex flex-col max-w-xl mx-auto relative px-1 md:px-0 min-h-screen">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
-        {/* Kontainer Fixed/Sticky untuk Bilah Kategori - Memastikan posisi top-[44px] (tinggi header) */}
-        <div className="sticky top-[44px] z-40 bg-background/95 backdrop-blur-md py-2.5 overflow-x-auto no-scrollbar border-b border-border/40 px-2 transition-all flex items-center justify-center gap-6">
+        {/* Sticky category bar adjusted to top-[40px] (new shrunk header height) */}
+        <div className="sticky top-[40px] z-40 bg-background/95 backdrop-blur-md py-1.5 overflow-x-auto no-scrollbar border-b border-border/40 px-2 transition-all flex items-center justify-center gap-6">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
               className={cn(
-                "text-[12px] font-black uppercase tracking-widest transition-all shrink-0",
+                "text-[11px] font-black uppercase tracking-widest transition-all shrink-0",
                 activeCategory === cat.id 
                   ? "text-primary scale-105" 
                   : "text-slate-400 hover:text-slate-600"
@@ -434,9 +433,9 @@ export default function FeedPage() {
           ))}
           <button 
             onClick={() => setIsPostModalOpen(true)}
-            className="flex items-center justify-center size-7 rounded-full bg-primary/5 text-primary hover:bg-primary/10 transition-all shrink-0 active:scale-90"
+            className="flex items-center justify-center size-6 rounded-full bg-primary/5 text-primary hover:bg-primary/10 transition-all shrink-0 active:scale-90"
           >
-            <Plus className="size-4" />
+            <Plus className="size-3.5" />
           </button>
         </div>
 

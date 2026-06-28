@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -316,7 +315,7 @@ export default function MessagesPage() {
   };
 
   const ChatHeader = ({ chat }: { chat: any }) => (
-    <header className="h-14 border-b border-border px-4 flex items-center justify-between bg-card shrink-0">
+    <header className="h-12 border-b border-border px-4 flex items-center justify-between bg-card shrink-0">
       <div className="flex items-center gap-2.5">
         <button onClick={closeChat} className="size-8 flex items-center justify-center text-muted-foreground hover:text-primary active:scale-90 transition-all">
           <ChevronLeft className="size-5" />

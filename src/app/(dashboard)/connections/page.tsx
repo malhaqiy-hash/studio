@@ -274,12 +274,12 @@ export default function ConnectionsPage() {
           )}
         </div>
 
-        {/* Chat Dialog */}
+        {/* Chat Dialog Adjusted Header height from h-14 to h-12 */}
         <Dialog open={isChatOpen} onOpenChange={(open) => !open && closeChat()}>
           <DialogContent className="w-[95%] h-[85dvh] max-w-lg p-0 border-none rounded-t-3xl sm:rounded-3xl bg-card text-foreground outline-none shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 duration-300 z-[170] [&>button]:hidden">
             {selectedChat && (
               <div className="flex flex-col h-full overflow-hidden">
-                <header className="h-14 border-b border-border px-4 flex items-center justify-between bg-card shrink-0">
+                <header className="h-12 border-b border-border px-4 flex items-center justify-between bg-card shrink-0">
                   <div className="flex items-center gap-2.5">
                     <button onClick={closeChat} className="size-8 flex items-center justify-center text-muted-foreground hover:text-primary active:scale-90 transition-all">
                       <ChevronLeft className="size-5" />
