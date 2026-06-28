@@ -71,12 +71,37 @@ const SEARCH_CATEGORIES = [
 ];
 
 const DAFTAR_DAERAH = [
-  "Jakarta Pusat", "Jakarta Selatan", "Jakarta Barat", "Jakarta Timur", "Jakarta Utara", 
-  "Bandung", "Surabaya", "Semarang", "Yogyakarta", "Solo",
-  "Medan", "Makassar", "Palembang", "Denpasar", "Malang",
-  "Banten", "Depok", "Bekasi", "Tangerang", "Bogor", "Cimahi",
-  "Balikpapan", "Banjarmasin", "Pontianak", "Samarinda", "Manado", "Ambon", "Jayapura",
-  "Aceh", "Lampung", "Pekanbaru", "Batam", "Jambi", "Padang", "Mataram", "Kupang"
+  // Indonesia - Jawa & Bali
+  "Jakarta", "Jakarta Pusat", "Jakarta Selatan", "Jakarta Barat", "Jakarta Timur", "Jakarta Utara", 
+  "Bandung", "Surabaya", "Semarang", "Yogyakarta", "Solo", "Malang", "Depok", "Bekasi", "Tangerang", 
+  "Bogor", "Cimahi", "Cirebon", "Sukabumi", "Tasikmalaya", "Serang", "Tangerang Selatan", "Denpasar",
+  "Probolinggo", "Pasuruan", "Mojokerto", "Madiun", "Kediri", "Blitar", "Batu", "Pekalongan", "Tegal", 
+  "Salatiga", "Magelang", "Banten",
+  // Indonesia - Sumatra
+  "Medan", "Palembang", "Aceh", "Banda Aceh", "Lampung", "Bandar Lampung", "Pekanbaru", "Batam", "Jambi", 
+  "Padang", "Bengkulu", "Pangkal Pinang", "Tanjung Pinang", "Binjai", "Pematang Siantar", "Lubuklinggau", 
+  "Prabumulih", "Dumai",
+  // Indonesia - Kalimantan
+  "Balikpapan", "Banjarmasin", "Pontianak", "Samarinda", "Palangkaraya", "Tarakan", "Banjarbaru", "Singkawang", "Bontang",
+  // Indonesia - Sulawesi
+  "Makassar", "Manado", "Palu", "Kendari", "Bitung", "Gorontalo", "Palopo", "Parepare", "Bau-Bau",
+  // Indonesia - Nusa Tenggara, Maluku, Papua
+  "Mataram", "Kupang", "Ambon", "Jayapura", "Sorong", "Ternate", "Tual", "Tidore", "Bima", "Manokwari",
+  
+  // International - Asia Pacific
+  "Singapore", "Kuala Lumpur", "Bangkok", "Manila", "Ho Chi Minh City", "Hanoi", "Tokyo", "Osaka", 
+  "Seoul", "Beijing", "Shanghai", "Guangzhou", "Shenzhen", "Hong Kong", "Taipei", "Sydney", "Melbourne", 
+  "Brisbane", "Perth", "Auckland", "Mumbai", "Delhi", "Bangalore", "Colombo", "Dhaka",
+  // International - Middle East & Africa
+  "Dubai", "Abu Dhabi", "Doha", "Riyadh", "Jeddah", "Istanbul", "Ankara", "Tel Aviv", "Cairo", 
+  "Johannesburg", "Cape Town", "Nairobi", "Lagos", "Casablanca",
+  // International - Europe
+  "London", "Paris", "Berlin", "Munich", "Frankfurt", "Madrid", "Barcelona", "Rome", "Milan", 
+  "Amsterdam", "Brussels", "Zurich", "Geneva", "Vienna", "Prague", "Warsaw", "Stockholm", "Oslo", 
+  "Copenhagen", "Lisbon", "Moscow", "Dublin", "Helsinki",
+  // International - Americas
+  "New York", "Los Angeles", "Chicago", "San Francisco", "Miami", "Houston", "Toronto", "Vancouver", 
+  "Mexico City", "Sao Paulo", "Rio de Janeiro", "Buenos Aires", "Santiago", "Lima", "Bogota", "Panama City"
 ];
 
 export default function CariPage() {
@@ -185,7 +210,7 @@ export default function CariPage() {
     setActiveLocation(val);
     const filtered = DAFTAR_DAERAH.filter(d => 
       d.toLowerCase().includes(val.toLowerCase())
-    );
+    ).slice(0, 15); // Show top 15 matches
     setFilteredRegions(filtered);
     setShowSuggestions(val.length > 0 && filtered.length > 0);
   };
@@ -288,7 +313,7 @@ export default function CariPage() {
                     if (activeLocation.length > 0) {
                       const filtered = DAFTAR_DAERAH.filter(d => 
                         d.toLowerCase().includes(activeLocation.toLowerCase())
-                      );
+                      ).slice(0, 15);
                       setFilteredRegions(filtered);
                       setShowSuggestions(filtered.length > 0);
                     }
@@ -307,7 +332,10 @@ export default function CariPage() {
                 )}
 
                 {showSuggestions && (
-                  <div className="absolute top-full left-0 right-0 mt-1.5 z-[150] bg-white border border-slate-100 rounded-xl shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)] max-h-48 overflow-y-auto no-scrollbar p-1 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="absolute top-full left-0 right-0 mt-1.5 z-[150] bg-white border border-slate-100 rounded-xl shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)] max-h-56 overflow-y-auto no-scrollbar p-1 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="px-2.5 py-1.5 border-b border-slate-50 mb-1">
+                      <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Saran Wilayah</span>
+                    </div>
                     {filteredRegions.map((region, i) => (
                       <button
                         key={i}
