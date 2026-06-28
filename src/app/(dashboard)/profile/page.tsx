@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { useAccount, Account, ContentItem } from '@/context/account-context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,12 +29,12 @@ import {
   Link as LinkIcon,
   Share2,
   Users,
-  Zap,
   Pin,
   MoreVertical,
   Plus,
   UserPlus,
   Radar,
+  ChevronLeft
 } from 'lucide-react';
 import {
   Dialog,
@@ -80,15 +81,18 @@ function getSmartIcon(url: string) {
   return <Globe className="size-3" />;
 }
 
-const MOCK_CONNECTIONS = [
-  { id: 'conn1', name: 'Andi Wijaya', avatar: 'https://picsum.photos/seed/f1/100', type: 'Professional' },
-  { id: 'conn2', name: 'Budi Santoso', avatar: 'https://picsum.photos/seed/f2/100', type: 'Bisnis' },
-  { id: 'conn3', name: 'Siti Aminah', avatar: 'https://picsum.photos/seed/f3/100', type: 'Personal' },
-  { id: 'conn4', name: 'Rina Kartika', avatar: 'https://picsum.photos/seed/f4/100', type: 'Bisnis' },
-];
+// Data simulasi untuk akun eksternal
+const MOCK_EXTERNAL_ACCOUNTS: Record<string, Partial<Account>> = {
+  'conn1': { id: 'conn1', name: 'Andi Wijaya', type: 'professional', avatar: 'https://picsum.photos/seed/f1/100', bio: 'Expert Software Architect specializing in Cloud Infrastructure.', extra: 'Architect at TechCorp', links: ['https://linkedin.com'], verificationStatus: 'Verified' },
+  'conn2': { id: 'conn2', name: 'Budi Santoso', type: 'bisnis', avatar: 'https://picsum.photos/seed/f2/100', bio: 'Penyedia solusi logistik regional terpercaya sejak 1998.', extra: 'CEO FastTrack Logistics', links: ['https://google.com/maps'], verificationStatus: 'Verified' },
+  'conn3': { id: 'conn3', name: 'Siti Aminah', type: 'personal', avatar: 'https://picsum.photos/seed/f3/100', bio: 'Coffee lover & Business enthusiast.', extra: 'Entitas Kreatif', links: ['https://instagram.com'] },
+  'conn4': { id: 'conn4', name: 'Rina Kartika', type: 'bisnis', avatar: 'https://picsum.photos/seed/f4/100', bio: 'Distributor resmi bahan pangan organik.', extra: 'Global Food Solutions', links: ['https://facebook.com'], verificationStatus: 'Verified' },
+};
 
 export default function ProfilePage() {
-  const { activeAccount, updateActiveAccount, addPost, removePost } = useAccount();
+  const searchParams = useSearchParams();
+  const externalId = searchParams.get('id');
+  const { activeAccount, updateActiveAccount, addPost, removePost, availableAccounts } = useAccount();
   const { toast } = useToast();
 
   const [isBioModalOpen, setIsBioModalOpen] = React.useState(false);
@@ -99,7 +103,6 @@ export default function ProfilePage() {
 
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = React.useState(false);
   const [confirmDisconnectId, setConfirmDisconnectId] = React.useState<string | null>(null);
-  const [connections, setConnections] = React.useState(MOCK_CONNECTIONS);
 
   const [mediaTarget, setMediaTarget] = React.useState<'avatar' | 'cover' | 'post'>('avatar');
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
@@ -118,6 +121,23 @@ export default function ProfilePage() {
   
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Cek apakah sedang melihat profil orang lain atau milik sendiri
+  const viewingAccount = React.useMemo(() => {
+    if (!externalId) return activeAccount;
+    
+    // Cek apakah ID ada di akun milik user sendiri (switchable)
+    const myOtherAcc = availableAccounts.find(a => a.id === externalId);
+    if (myOtherAcc) return myOtherAcc;
+
+    // Jika tidak ada di milik sendiri, cari di data eksternal
+    const external = MOCK_EXTERNAL_ACCOUNTS[externalId];
+    if (external) return external as Account;
+
+    return activeAccount;
+  }, [externalId, activeAccount, availableAccounts]);
+
+  const isOwnProfile = viewingAccount.id === activeAccount.id || availableAccounts.some(a => a.id === viewingAccount.id);
 
   React.useEffect(() => {
     const handlePopState = () => {
@@ -155,7 +175,7 @@ export default function ProfilePage() {
     setIsContentModalOpen(false);
     
     const params = new URLSearchParams(window.location.search);
-    if (params.get('edit') === 'true') {
+    if (params.get('edit') === 'true' && isOwnProfile) {
       setTempAccount({ 
         name: activeAccount.name, 
         bio: activeAccount.bio, 
@@ -165,16 +185,10 @@ export default function ProfilePage() {
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
-
-    if (params.get('showConnections') === 'true') {
-      openConnectionsModal();
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    }
-  }, [activeAccount.id, resetContentForm, activeAccount.name, activeAccount.bio, activeAccount.links]);
+  }, [activeAccount.id, resetContentForm, activeAccount.name, activeAccount.bio, activeAccount.links, isOwnProfile]);
 
   const profileVisibleItems = React.useMemo(() => {
-    const items = (activeAccount.items || []).filter(i => 
+    const items = (viewingAccount.items || []).filter(i => 
       !i.isArchived && (i.displayLocation === 'profile' || i.displayLocation === 'both')
     );
     return [...items].sort((a, b) => {
@@ -182,10 +196,10 @@ export default function ProfilePage() {
       if (!a.isPinned && b.isPinned) return 1;
       return 0;
     });
-  }, [activeAccount.items]);
+  }, [viewingAccount.items]);
 
   const groupedItems = React.useMemo(() => {
-    if (activeAccount.type === 'personal') return { 'Inspirasi': profileVisibleItems };
+    if (viewingAccount.type === 'personal') return { 'Inspirasi': profileVisibleItems };
     
     const groups: Record<string, ContentItem[]> = {};
     profileVisibleItems.forEach(item => {
@@ -194,13 +208,14 @@ export default function ProfilePage() {
       groups[cat].push(item);
     });
     return groups;
-  }, [profileVisibleItems, activeAccount.type]);
+  }, [profileVisibleItems, viewingAccount.type]);
 
   const existingCategories = React.useMemo(() => {
-    return Array.from(new Set((activeAccount.items || []).map(i => i.categoryName).filter(Boolean)));
-  }, [activeAccount.items]);
+    return Array.from(new Set((viewingAccount.items || []).map(i => i.categoryName).filter(Boolean)));
+  }, [viewingAccount.items]);
 
   const handleSaveBio = () => {
+    if (!isOwnProfile) return;
     updateActiveAccount({
       ...tempAccount,
       links: tempLinks.filter(l => l.trim() !== '')
@@ -210,19 +225,13 @@ export default function ProfilePage() {
     toast({ title: 'Profil diperbarui' });
   };
 
-  const handleAddTempLink = () => {
-    setTempLinks([...tempLinks, '']);
-  };
-
+  const handleAddTempLink = () => setTempLinks([...tempLinks, '']);
   const handleUpdateTempLink = (index: number, value: string) => {
     const newLinks = [...tempLinks];
     newLinks[index] = value;
     setTempLinks(newLinks);
   };
-
-  const handleRemoveTempLink = (index: number) => {
-    setTempLinks(tempLinks.filter((_, i) => i !== index));
-  };
+  const handleRemoveTempLink = (index: number) => setTempLinks(tempLinks.filter((_, i) => i !== index));
 
   const openConnectionsModal = () => {
     setIsConnectionsModalOpen(true);
@@ -234,17 +243,8 @@ export default function ProfilePage() {
     if (window.history.state?.modalOpen === 'connections') window.history.back();
   };
 
-  const openDisconnectConfirm = (id: string) => {
-    setConfirmDisconnectId(id);
-    window.history.pushState({ modalOpen: 'confirm-disconnect' }, '');
-  };
-
-  const closeDisconnectConfirm = () => {
-    setConfirmDisconnectId(null);
-    if (window.history.state?.modalOpen === 'confirm-disconnect') window.history.back();
-  };
-
   const openMediaPicker = (target: 'avatar' | 'cover' | 'post') => {
+    if (!isOwnProfile) return;
     setMediaTarget(target);
     setIsMediaPickerOpen(true);
   };
@@ -277,29 +277,23 @@ export default function ProfilePage() {
 
   const handleCloudSource = (source: 'drive' | 'photos') => {
     setIsCloudLoading(true);
-    toast({ title: `Menghubungkan ke ${source === 'drive' ? 'Drive' : 'Photos'}...` });
-    
     setTimeout(() => {
       const simulatedUrl = mediaTarget === 'cover' 
         ? `https://picsum.photos/seed/cover${Date.now()}/1640/624`
         : `https://picsum.photos/seed/img${Date.now()}/500/500`;
       
-      if (mediaTarget === 'avatar') {
-        updateActiveAccount({ avatar: simulatedUrl });
-      } else if (mediaTarget === 'cover') {
-        updateActiveAccount({ cover: simulatedUrl });
-      } else if (mediaTarget === 'post') {
-        setNewItem(prev => ({ ...prev, images: [...(prev.images || []), simulatedUrl] }));
-      }
+      if (mediaTarget === 'avatar') updateActiveAccount({ avatar: simulatedUrl });
+      else if (mediaTarget === 'cover') updateActiveAccount({ cover: simulatedUrl });
+      else if (mediaTarget === 'post') setNewItem(prev => ({ ...prev, images: [...(prev.images || []), simulatedUrl] }));
       
       setIsCloudLoading(false);
       setIsMediaPickerOpen(false);
-      toast({ title: "Media berhasil disinkronkan" });
     }, 1500);
   };
 
   const handleAddContent = () => {
-    if ((activeAccount.type === 'bisnis' || activeAccount.type === 'professional') && !newItem.categoryName) {
+    if (!isOwnProfile) return;
+    if ((viewingAccount.type === 'bisnis' || viewingAccount.type === 'professional') && !newItem.categoryName) {
       toast({ variant: "destructive", title: "Kategori wajib diisi." });
       return;
     }
@@ -321,21 +315,12 @@ export default function ProfilePage() {
   };
 
   const handleShareProfile = () => {
-    setShareUrl(`https://koolink.network/profile/${activeAccount.id}`);
+    setShareUrl(`https://koolink.network/profile/${viewingAccount.id}`);
     setIsShareSheetOpen(true);
   };
 
-  const handleSharePost = (id: string) => {
-    setShareUrl(`https://koolink.network/post/${id}`);
-    setIsShareSheetOpen(true);
-  };
-
-  const handleDisconnect = () => {
-    if (confirmDisconnectId) {
-      setConnections(prev => prev.filter(c => c.id !== confirmDisconnectId));
-      closeDisconnectConfirm();
-      toast({ title: "Koneksi diputuskan" });
-    }
+  const handleFollow = () => {
+     toast({ title: `Mengikuti ${viewingAccount.name}` });
   };
 
   return (
@@ -343,22 +328,33 @@ export default function ProfilePage() {
       <div className="max-w-xl mx-auto space-y-3 md:space-y-4 pb-20">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
 
+        {/* Back Button if viewing others */}
+        {!isOwnProfile && (
+           <Link href="/connections" className="px-3">
+              <Button variant="ghost" size="sm" className="pl-0 h-6 text-[10px] text-slate-400 hover:text-primary font-black uppercase tracking-widest gap-1.5 active:scale-95 transition-all">
+                <ChevronLeft className="size-3" /> Kembali ke Jaringan
+              </Button>
+           </Link>
+        )}
+
         <section className="relative group">
           <div className="aspect-[1640/624] w-full bg-muted border-b border-border relative overflow-hidden rounded-xl">
             <img 
-              src={activeAccount.cover || `https://picsum.photos/seed/${activeAccount.id}_cover/1640/624`} 
+              src={viewingAccount.cover || `https://picsum.photos/seed/${viewingAccount.id}_cover/1640/624`} 
               alt="Cover" 
               className="w-full h-full object-cover opacity-90" 
             />
             <div className="absolute top-3 right-3 flex gap-1.5">
-              <Button 
-                onClick={() => openMediaPicker('cover')} 
-                variant="outline" 
-                size="icon"
-                className="size-7 bg-background/80 backdrop-blur text-accent border-none rounded-lg shadow-lg active:scale-90 transition-transform"
-              >
-                <Camera className="size-3.5" />
-              </Button>
+              {isOwnProfile && (
+                <Button 
+                  onClick={() => openMediaPicker('cover')} 
+                  variant="outline" 
+                  size="icon"
+                  className="size-7 bg-background/80 backdrop-blur text-accent border-none rounded-lg shadow-lg active:scale-90 transition-transform"
+                >
+                  <Camera className="size-3.5" />
+                </Button>
+              )}
               <Button 
                 onClick={handleShareProfile} 
                 variant="outline" 
@@ -373,41 +369,41 @@ export default function ProfilePage() {
           <div className="px-3 md:px-5 -mt-8 md:-mt-10 flex flex-col items-start gap-2">
             <div className="relative group/avatar">
               <Avatar className="size-16 md:size-24 border-[3px] border-background dark:border-card shadow-lg rounded-2xl">
-                <AvatarImage src={activeAccount.avatar} className="object-cover" />
-                <AvatarFallback className="bg-accent/10 text-accent font-bold text-base">{activeAccount.name[0]}</AvatarFallback>
+                <AvatarImage src={viewingAccount.avatar} className="object-cover" />
+                <AvatarFallback className="bg-accent/10 text-accent font-bold text-base">{viewingAccount.name[0]}</AvatarFallback>
               </Avatar>
-              <button onClick={() => openMediaPicker('avatar')} className="absolute bottom-0 right-0 size-6 bg-accent text-white rounded-lg flex items-center justify-center border-2 border-background shadow-lg hover:scale-105 active:scale-95 transition-all"><Pencil className="size-3" /></button>
+              {isOwnProfile && (
+                <button onClick={() => openMediaPicker('avatar')} className="absolute bottom-0 right-0 size-6 bg-accent text-white rounded-lg flex items-center justify-center border-2 border-background shadow-lg hover:scale-105 active:scale-95 transition-all"><Pencil className="size-3" /></button>
+              )}
             </div>
             <div className="space-y-0 w-full">
               <div className="flex items-center gap-2">
-                <h1 className="text-base md:text-lg font-bold text-slate-900 tracking-tight">{activeAccount.name}</h1>
-                {activeAccount.verificationStatus === 'Verified' && <ShieldCheck className="size-3 text-emerald-500" />}
-                <span className="font-medium text-[9px] text-primary/60 italic lowercase select-none ml-1 leading-none">{activeAccount.type}</span>
+                <h1 className="text-base md:text-lg font-bold text-slate-900 tracking-tight">{viewingAccount.name}</h1>
+                {viewingAccount.verificationStatus === 'Verified' && <ShieldCheck className="size-3 text-emerald-500" />}
+                <span className="font-medium text-[9px] text-primary/60 italic lowercase select-none ml-1 leading-none">{viewingAccount.type}</span>
+                
+                {!isOwnProfile && (
+                   <Button onClick={handleFollow} size="sm" className="ml-auto h-7 px-3 rounded-lg bg-primary text-white font-black text-[8px] uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-primary/20">
+                      {viewingAccount.type === 'bisnis' ? <><Radar className="size-2.5 mr-1" /> Pantau Radar</> : <><UserPlus className="size-2.5 mr-1" /> Tambahkan</>}
+                   </Button>
+                )}
               </div>
               <div className="flex flex-col gap-0.5">
                 <div className="flex flex-wrap items-center gap-3 text-muted-foreground font-medium text-[11px] md:text-[13px]">
-                  <span>{activeAccount.extra || 'Koolink Member'}</span>
+                  <span>{viewingAccount.extra || 'Koolink Member'}</span>
                   <div className="flex items-center gap-4 ml-auto">
                      <div className="flex flex-col items-center">
                         <span className="text-xs font-bold text-slate-900">1.2k</span>
                         <span className="text-[7px] font-black uppercase opacity-60 flex items-center gap-1">
-                          {activeAccount.type === 'personal' ? (
+                          {viewingAccount.type === 'personal' ? (
                             <><Users className="size-2" /> Pengikut</>
-                          ) : activeAccount.type === 'professional' ? (
+                          ) : viewingAccount.type === 'professional' ? (
                             <><UserPlus className="size-2" /> Tambahkan</>
                           ) : (
                             <><Radar className="size-2" /> Radar</>
                           )}
                         </span>
                      </div>
-                     {activeAccount.type === 'personal' && (
-                        <div className="flex flex-col items-center">
-                           <span className="text-xs font-bold text-slate-900">854</span>
-                           <span className="text-[7px] font-black uppercase opacity-60 flex items-center gap-1">
-                             <Users className="size-2" /> Mengikuti
-                           </span>
-                        </div>
-                     )}
                      <div className="flex flex-col items-center text-rose-500">
                         <span className="text-xs font-bold">4.2k</span>
                         <span className="text-[7px] font-black uppercase flex items-center gap-1">
@@ -425,26 +421,28 @@ export default function ProfilePage() {
           <div className="flex flex-col gap-3 border-b border-border/40 pb-4">
             <div className="flex items-start justify-between">
               <div className="text-slate-700 leading-relaxed font-normal text-[12px] md:text-[13px] whitespace-pre-wrap flex-1">
-                {activeAccount.bio ? `"${activeAccount.bio}"` : '"Membangun koneksi cerdas di Koolink."'}
+                {viewingAccount.bio ? `"${viewingAccount.bio}"` : '"Membangun koneksi cerdas di Koolink."'}
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => { 
-                  setTempAccount({ name: activeAccount.name, bio: activeAccount.bio }); 
-                  setTempLinks(activeAccount.links || []);
-                  setIsBioModalOpen(true); 
-                  window.history.pushState({ modalOpen: 'edit-bio' }, ''); 
-                }} 
-                className="text-[9px] font-bold uppercase text-accent hover:bg-accent/10 px-2 h-6 rounded-lg border border-accent/20 shrink-0 ml-3"
-              >
-                <Pencil className="size-2 mr-1" /> Edit
-              </Button>
+              {isOwnProfile && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => { 
+                    setTempAccount({ name: activeAccount.name, bio: activeAccount.bio }); 
+                    setTempLinks(activeAccount.links || []);
+                    setIsBioModalOpen(true); 
+                    window.history.pushState({ modalOpen: 'edit-bio' }, ''); 
+                  }} 
+                  className="text-[9px] font-bold uppercase text-accent hover:bg-accent/10 px-2 h-6 rounded-lg border border-accent/20 shrink-0 ml-3"
+                >
+                  <Pencil className="size-2 mr-1" /> Edit
+                </Button>
+              )}
             </div>
             
-            {activeAccount.links && activeAccount.links.length > 0 && (
+            {viewingAccount.links && viewingAccount.links.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-1">
-                {activeAccount.links.map((link, idx) => (
+                {viewingAccount.links.map((link, idx) => (
                   <a 
                     key={idx} 
                     href={link} 
@@ -461,41 +459,40 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        <section className="px-3 md:px-5">
-           <button 
-             onClick={openConnectionsModal}
-             className="w-full flex items-center gap-4 p-3 rounded-2xl border-2 border-dashed border-slate-200 hover:border-primary hover:bg-primary/[0.02] transition-all group overflow-hidden"
-           >
-              <div className="size-10 rounded-full bg-primary flex items-center justify-center text-white shrink-0 shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-                 <ConnectIcon className="size-6" />
-              </div>
-              <div className="flex-1 flex items-center gap-2 overflow-hidden">
-                <div className="flex -space-x-2.5 overflow-hidden">
-                  {connections.slice(0, 4).map((conn) => (
-                    <Avatar key={conn.id} className="size-8 border-2 border-background shadow-sm">
-                      <AvatarImage src={conn.avatar} className="object-cover" />
-                      <AvatarFallback className="text-[8px] bg-muted">{conn.name[0]}</AvatarFallback>
-                    </Avatar>
-                  ))}
-                  {connections.length > 4 && (
-                    <div className="size-8 rounded-full bg-slate-100 border-2 border-background flex items-center justify-center text-[10px] font-black text-slate-500 shadow-sm">
-                      +{connections.length - 4}
-                    </div>
-                  )}
-                </div>
-                <div className="hidden sm:block text-left ml-2">
-                   <p className="text-10px font-black text-slate-800 uppercase tracking-tight">Jaringan Koneksi</p>
-                   <p className="text-[9px] font-medium text-slate-400 uppercase tracking-widest">{connections.length} Terhubung</p>
-                </div>
-              </div>
-              <MoreVertical className="size-4 text-slate-300 group-hover:text-primary transition-colors" />
-           </button>
-        </section>
+        {isOwnProfile && (
+           <section className="px-3 md:px-5">
+              <button 
+                onClick={openConnectionsModal}
+                className="w-full flex items-center gap-4 p-3 rounded-2xl border-2 border-dashed border-slate-200 hover:border-primary hover:bg-primary/[0.02] transition-all group overflow-hidden"
+              >
+                 <div className="size-10 rounded-full bg-primary flex items-center justify-center text-white shrink-0 shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                    <ConnectIcon className="size-6" />
+                 </div>
+                 <div className="flex-1 flex items-center gap-2 overflow-hidden">
+                   <div className="flex -space-x-2.5 overflow-hidden">
+                     {[...Array(4)].map((_, i) => (
+                       <Avatar key={i} className="size-8 border-2 border-background shadow-sm">
+                         <AvatarImage src={`https://picsum.photos/seed/p${i}/100`} />
+                         <AvatarFallback className="text-[8px] bg-muted">U</AvatarFallback>
+                       </Avatar>
+                     ))}
+                   </div>
+                   <div className="hidden sm:block text-left ml-2">
+                      <p className="text-10px font-black text-slate-800 uppercase tracking-tight">Jaringan Koneksi</p>
+                      <p className="text-[9px] font-medium text-slate-400 uppercase tracking-widest">Koneksi Aktif</p>
+                   </div>
+                 </div>
+                 <MoreVertical className="size-4 text-slate-300 group-hover:text-primary transition-colors" />
+              </button>
+           </section>
+        )}
 
         <section className="px-3 md:px-5 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Portofolio & Produk</h3>
-            <Button size="sm" onClick={() => { setIsContentModalOpen(true); window.history.pushState({ modalOpen: 'add-content' }, ''); }} className="rounded-lg h-7 bg-accent hover:bg-accent/90 gap-1 font-bold text-[10px] uppercase tracking-widest px-2.5 shadow-lg text-white"><PlusCircle className="size-3" /> Item</Button>
+            {isOwnProfile && (
+              <Button size="sm" onClick={() => { setIsContentModalOpen(true); window.history.pushState({ modalOpen: 'add-content' }, ''); }} className="rounded-lg h-7 bg-accent hover:bg-accent/90 gap-1 font-bold text-[10px] uppercase tracking-widest px-2.5 shadow-lg text-white"><PlusCircle className="size-3" /> Item</Button>
+            )}
           </div>
 
           <div className="flex flex-col space-y-6">
@@ -507,10 +504,10 @@ export default function ProfilePage() {
                 </div>
                 
                 <div className={cn(
-                  activeAccount.type === 'personal' ? "grid grid-cols-2 gap-2.5" : "flex overflow-x-auto no-scrollbar space-x-2.5 px-1 pb-2.5 snap-x"
+                  viewingAccount.type === 'personal' ? "grid grid-cols-2 gap-2.5" : "flex overflow-x-auto no-scrollbar space-x-2.5 px-1 pb-2.5 snap-x"
                 )}>
-                  {items.map((item) => (
-                    <div key={item.id} className={cn(activeAccount.type === 'personal' ? "" : "w-28 md:w-32 flex-shrink-0 snap-start")}>
+                  {items.length > 0 ? items.map((item) => (
+                    <div key={item.id} className={cn(viewingAccount.type === 'personal' ? "" : "w-28 md:w-32 flex-shrink-0 snap-start")}>
                       <Card className="rounded-xl border-none shadow-md overflow-hidden bg-card hover:shadow-xl transition-all relative group">
                         {item.images && item.images.length > 0 && (
                           <div className="aspect-square w-full overflow-hidden relative cursor-zoom-in" onClick={() => setZoomedImage(item.images![0])}>
@@ -519,17 +516,23 @@ export default function ProfilePage() {
                             {item.isPinned && <div className="absolute top-1 right-1 bg-accent text-white p-0.5 rounded-full shadow-lg"><Pin className="size-2 fill-white" /></div>}
                           </div>
                         )}
-                        <div className="absolute top-1 left-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                          <button onClick={(e) => { e.stopPropagation(); handleSharePost(item.id); }} className="size-5 bg-black/60 text-white rounded-lg flex items-center justify-center shadow-lg"><Share2 className="size-2.5" /></button>
-                          <button onClick={(e) => { e.stopPropagation(); removePost(item.id); }} className="size-5 bg-rose-500 text-white rounded-lg flex items-center justify-center shadow-lg"><Trash2 className="size-2.5" /></button>
-                        </div>
+                        {isOwnProfile && (
+                           <div className="absolute top-1 left-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                             <button onClick={(e) => { e.stopPropagation(); handleSharePost(item.id); }} className="size-5 bg-black/60 text-white rounded-lg flex items-center justify-center shadow-lg"><Share2 className="size-2.5" /></button>
+                             <button onClick={(e) => { e.stopPropagation(); removePost(item.id); }} className="size-5 bg-rose-500 text-white rounded-lg flex items-center justify-center shadow-lg"><Trash2 className="size-2.5" /></button>
+                           </div>
+                        )}
                         <CardContent className="p-1.5 space-y-0">
                           <h5 className="font-black text-slate-900 text-[11px] truncate leading-none">{item.title}</h5>
                           <p className="text-slate-400 text-[9px] font-medium line-clamp-2 leading-tight h-5 mt-0.5">{item.description}</p>
                         </CardContent>
                       </Card>
                     </div>
-                  ))}
+                  )) : (
+                     <div className="col-span-2 py-10 text-center opacity-40">
+                        <p className="text-[10px] font-black uppercase tracking-widest">Belum ada konten publik.</p>
+                     </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -537,278 +540,114 @@ export default function ProfilePage() {
         </section>
       </div>
 
-      {/* Connections List Modal */}
-      <Dialog open={isConnectionsModalOpen} onOpenChange={(open) => !open && closeConnectionsModal()}>
-        <DialogContent className="w-[95%] md:max-w-md rounded-[2rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none z-[170] [&>button]:hidden">
-          <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-               <div className="flex items-center gap-3">
-                  <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                    <ConnectIcon className="size-5" />
+      {/* Connections List Modal (Hanya untuk pemilik) */}
+      {isOwnProfile && (
+         <Dialog open={isConnectionsModalOpen} onOpenChange={(open) => !open && closeConnectionsModal()}>
+           <DialogContent className="w-[95%] md:max-w-md rounded-[2rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none z-[170] [&>button]:hidden">
+             <div className="p-6 space-y-6">
+               <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                     <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                       <ConnectIcon className="size-5" />
+                     </div>
+                     <DialogTitle className="text-lg font-black uppercase tracking-tight">Koneksi Jaringan</DialogTitle>
                   </div>
-                  <DialogTitle className="text-lg font-black uppercase tracking-tight">Koneksi Jaringan</DialogTitle>
+                  <button onClick={closeConnectionsModal} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 active:scale-90 transition-all">
+                    <X className="size-4" />
+                  </button>
                </div>
-               <button onClick={closeConnectionsModal} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 active:scale-90 transition-all">
-                 <X className="size-4" />
-               </button>
-            </div>
-
-            <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
-              {connections.length > 0 ? (
-                connections.map((conn) => (
-                  <div key={conn.id} className="flex items-center justify-between p-3 rounded-2xl border border-border/50 hover:bg-slate-50 transition-all group">
-                    <Link href="/profile" onClick={closeConnectionsModal} className="flex items-center gap-3 min-w-0 flex-1">
-                       <Avatar className="size-11 rounded-xl border border-border shadow-sm">
-                          <AvatarImage src={conn.avatar} className="object-cover" />
-                          <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">{conn.name[0]}</AvatarFallback>
-                       </Avatar>
-                       <div className="min-w-0">
-                          <h4 className="font-bold text-[13px] text-slate-900 truncate uppercase tracking-tight">{conn.name}</h4>
-                          <Badge variant="outline" className="text-[7px] h-4 font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary/80">
-                            {conn.type}
-                          </Badge>
-                       </div>
-                    </Link>
-                    <button 
-                      onClick={() => openDisconnectConfirm(conn.id)}
-                      className="size-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-500 active:scale-90 transition-all"
-                    >
-                      <X className="size-4" />
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="py-12 text-center space-y-3">
-                   <div className="size-14 rounded-full bg-slate-50 flex items-center justify-center mx-auto shadow-inner">
-                      <ConnectIcon className="size-7 text-slate-200" />
-                   </div>
-                   <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Belum ada koneksi aktif</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <Dialog open={!!confirmDisconnectId} onOpenChange={(open) => !open && closeDisconnectConfirm()}>
-            <DialogContent className="w-[90%] md:max-w-[320px] rounded-[2rem] border-none shadow-2xl p-6 bg-card text-foreground outline-none z-[200] [&>button]:hidden text-center">
-              <div className="space-y-6">
-                <div className="size-16 rounded-[1.5rem] bg-rose-50 text-rose-500 flex items-center justify-center mx-auto shadow-inner">
-                   <X className="size-8" />
-                </div>
-                <div className="space-y-2">
-                  <DialogTitle className="text-lg font-black uppercase tracking-tight">Putus Koneksi?</DialogTitle>
-                  <DialogDescription className="text-[11px] font-medium text-slate-500 leading-relaxed px-4">
-                    Tindakan ini akan menghapus akses khusus dan sinergi jaringan antara profil Anda.
-                  </DialogDescription>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Button 
-                    onClick={handleDisconnect} 
-                    className="w-full h-11 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-rose-100"
-                  >
-                    Putus Koneksi
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    onClick={closeDisconnectConfirm}
-                    className="w-full h-10 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 hover:bg-slate-50"
-                  >
-                    Batal
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Profile Modal Updated for Multi-Links */}
-      <Dialog open={isBioModalOpen} onOpenChange={(open) => !open && (setIsBioModalOpen(false), window.history.state?.modalOpen && window.history.back())}>
-        <DialogContent className="w-[95%] md:max-w-md rounded-2xl p-0 border-none shadow-2xl bg-card text-foreground outline-none z-[170] [&>button]:hidden overflow-hidden flex flex-col max-h-[90vh]">
-          <DialogHeader className="p-6 pb-2">
-            <DialogTitle className="text-base font-black uppercase tracking-tight text-slate-900">Ubah Profil</DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto no-scrollbar p-6 pt-2 space-y-5">
-            <div className="space-y-1.5">
-              <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Nama Tampilan</Label>
-              <Input value={tempAccount.name || ''} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-xl h-10 bg-muted/20 border-none px-4 text-[13px] font-bold shadow-inner" />
-            </div>
-            
-            <div className="space-y-1.5">
-              <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Bio (Dapat Ganti Paragraf)</Label>
-              <Textarea 
-                value={tempAccount.bio || ''} 
-                onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} 
-                placeholder="Ceritakan visi atau deskripsi Anda..."
-                className="rounded-xl bg-muted/20 border-none min-h-[120px] px-4 py-3 text-[13px] font-medium shadow-inner resize-none" 
-              />
-              <p className="text-[8px] text-muted-foreground italic ml-1">* Teks akan memanjang ke bawah secara otomatis.</p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between px-1">
-                <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Tautan Jaringan</Label>
-                <button 
-                  onClick={handleAddTempLink}
-                  className="flex items-center gap-1 text-accent hover:text-accent/80 transition-colors text-[9px] font-black uppercase tracking-widest"
-                >
-                  <Plus className="size-3" /> Tambah Link
-                </button>
-              </div>
-              
-              <div className="space-y-2">
-                {tempLinks.map((link, idx) => (
-                  <div key={idx} className="flex gap-2 animate-in slide-in-from-top-1 duration-200">
-                    <div className="relative flex-1 group">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-accent">
-                        {link ? getSmartIcon(link) : <LinkIcon className="size-3.5" />}
+               <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
+                  <div className="py-12 text-center space-y-3">
+                      <div className="size-14 rounded-full bg-slate-50 flex items-center justify-center mx-auto shadow-inner">
+                         <ConnectIcon className="size-7 text-slate-200" />
                       </div>
-                      <Input 
-                        value={link} 
-                        onChange={(e) => handleUpdateTempLink(idx, e.target.value)} 
-                        placeholder="https://..." 
-                        className="rounded-xl h-10 bg-muted/20 border-none pl-10 text-[12px] font-medium shadow-inner" 
-                      />
+                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Gunakan halaman Jaringan untuk kelola koneksi</p>
+                  </div>
+               </div>
+             </div>
+           </DialogContent>
+         </Dialog>
+      )}
+
+      {/* Modals lainnya (hanya aktif jika isOwnProfile true) */}
+      {isOwnProfile && (
+         <>
+            <Dialog open={isBioModalOpen} onOpenChange={(open) => !open && (setIsBioModalOpen(false), window.history.state?.modalOpen && window.history.back())}>
+              <DialogContent className="w-[95%] md:max-w-md rounded-2xl p-0 border-none shadow-2xl bg-card text-foreground outline-none z-[170] [&>button]:hidden overflow-hidden flex flex-col max-h-[90vh]">
+                <DialogHeader className="p-6 pb-2">
+                  <DialogTitle className="text-base font-black uppercase tracking-tight text-slate-900">Ubah Profil</DialogTitle>
+                </DialogHeader>
+                <div className="flex-1 overflow-y-auto no-scrollbar p-6 pt-2 space-y-5">
+                  <div className="space-y-1.5">
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Nama Tampilan</Label>
+                    <Input value={tempAccount.name || ''} onChange={(e) => setTempAccount({ ...tempAccount, name: e.target.value })} className="rounded-xl h-10 bg-muted/20 border-none px-4 text-[13px] font-bold shadow-inner" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Bio</Label>
+                    <Textarea value={tempAccount.bio || ''} onChange={(e) => setTempAccount({ ...tempAccount, bio: e.target.value })} className="rounded-xl bg-muted/20 border-none min-h-[120px] px-4 py-3 text-[13px] font-medium shadow-inner resize-none" />
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between px-1">
+                      <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Tautan Jaringan</Label>
+                      <button onClick={handleAddTempLink} className="flex items-center gap-1 text-accent text-[9px] font-black uppercase">
+                        <Plus className="size-3" /> Tambah Link
+                      </button>
                     </div>
-                    <button 
-                      onClick={() => handleRemoveTempLink(idx)}
-                      className="size-10 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition-all active:scale-90"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
-                  </div>
-                ))}
-                
-                {tempLinks.length === 0 && (
-                  <div className="py-4 text-center border-2 border-dashed border-border/50 rounded-xl bg-muted/5">
-                     <p className="text-[10px] text-muted-foreground font-medium">Belum ada tautan ditambahkan.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="p-6 pt-2 bg-slate-50/50">
-            <Button onClick={handleSaveBio} className="w-full h-12 rounded-xl bg-accent font-black text-white text-[11px] uppercase tracking-widest shadow-xl shadow-accent/20 active:scale-95 transition-all">
-              Simpan Perubahan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog 
-        open={isContentModalOpen} 
-        onOpenChange={(open) => {
-          if (!open) {
-            setIsContentModalOpen(false);
-            if (window.history.state?.modalOpen) window.history.back();
-            resetContentForm(); 
-          }
-        }}
-      >
-        <DialogContent className="w-[95%] md:max-w-lg rounded-xl p-4 bg-card text-foreground outline-none z-[170] [&>button]:hidden">
-          <DialogHeader className="flex flex-row items-center justify-between">
-            <DialogTitle className="text-sm font-bold text-slate-900">Tambah Konten</DialogTitle>
-            <div className="w-24">
-              <Select value={newItem.visibility} onValueChange={(val: 'public' | 'private') => setNewItem({ ...newItem, visibility: val })}>
-                <SelectTrigger className="h-7 rounded-lg bg-muted/50 border-none text-[9px] font-bold px-2 shadow-inner"><SelectValue /></SelectTrigger>
-                <SelectContent className="z-[180]"><SelectItem value="public">🌍 Publik</SelectItem><SelectItem value="private">🔒 Privat</SelectItem></SelectContent>
-              </Select>
-            </div>
-          </DialogHeader>
-          <div className="space-y-3 pt-2 overflow-y-auto max-h-[60vh] no-scrollbar">
-            <div className="space-y-1.5 p-2.5 bg-muted/20 rounded-xl">
-              <Label className="font-black text-[8px] uppercase tracking-widest text-muted-foreground">Lokasi Tampilan Konten</Label>
-              <Select value={newItem.displayLocation} onValueChange={(val: any) => setNewItem({ ...newItem, displayLocation: val })}>
-                <SelectTrigger className="rounded-lg h-8 bg-card border-none shadow-sm font-bold text-[10px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="z-[180]">
-                  <SelectItem value="both">🌍 Beranda & Profil</SelectItem>
-                  <SelectItem value="feed">🏠 Hanya Beranda</SelectItem>
-                  <SelectItem value="profile">👤 Hanya Profil</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-4 gap-1.5">
-              {(newItem.images || []).map((src, i) => (
-                <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-border">
-                  <img src={newItem.images![i]} className="w-full h-full object-cover" />
-                  <button onClick={() => setNewItem(prev => ({ ...prev, images: prev.images?.filter((_, idx) => idx !== i) }))} className="absolute top-0.5 right-0.5 size-4 bg-black/60 text-white rounded-full flex items-center justify-center"><X size={8} /></button>
-                </div>
-              ))}
-              <div onClick={() => openMediaPicker('post')} className="aspect-square rounded-lg bg-muted/30 border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:bg-accent/5 transition-colors">
-                <PlusCircle className="size-5 text-muted-foreground" />
-              </div>
-            </div>
-
-            {(activeAccount.type === 'bisnis' || activeAccount.type === 'professional') && (
-              <div className="space-y-1.5 p-2.5 bg-muted/20 rounded-xl">
-                 <Label className="font-black text-[8px] uppercase tracking-widest text-muted-foreground">Kategori Postingan *</Label>
-                 <Select 
-                   value={isNewCategory ? "new" : (newItem.categoryName || '')} 
-                   onValueChange={(val) => {
-                     if (val === 'new') {
-                       setIsNewCategory(true);
-                       setNewItem({...newItem, categoryName: ''});
-                     } else {
-                       setIsNewCategory(false);
-                       setNewItem({...newItem, categoryName: val});
-                     }
-                   }}
-                 >
-                   <SelectTrigger className="rounded-lg h-8 bg-card border-none shadow-sm font-bold text-[10px]">
-                     <SelectValue placeholder="Pilih Kategori" />
-                   </SelectTrigger>
-                   <SelectContent className="z-[180]">
-                      <SelectItem value="new" className="font-black text-accent">+ Buat Kategori Baru</SelectItem>
-                      {existingCategories.map(cat => (
-                        <SelectItem key={cat} value={cat!}>{cat}</SelectItem>
+                    <div className="space-y-2">
+                      {tempLinks.map((link, idx) => (
+                        <div key={idx} className="flex gap-2">
+                          <Input value={link} onChange={(e) => handleUpdateTempLink(idx, e.target.value)} placeholder="https://..." className="rounded-xl h-10 bg-muted/20 border-none px-4 text-[12px]" />
+                          <button onClick={() => handleRemoveTempLink(idx)} className="size-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center"><Trash2 className="size-4" /></button>
+                        </div>
                       ))}
-                   </SelectContent>
-                 </Select>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter className="p-6 pt-2 bg-slate-50/50">
+                  <Button onClick={handleSaveBio} className="w-full h-12 rounded-xl bg-accent font-black text-white text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all">Simpan Perubahan</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
-                 {isNewCategory && (
-                   <Input 
-                     autoFocus
-                     placeholder="Nama Kategori Baru" 
-                     value={newItem.categoryName || ''} 
-                     onChange={(e) => setNewItem({...newItem, categoryName: e.target.value})} 
-                     className="rounded-lg h-8 bg-white border-black/10 focus:border-black transition-all font-bold px-2 text-[10px]"
-                   />
-                 )}
-              </div>
-            )}
-
-            <div className="space-y-1"><Label className="font-bold text-[9px] uppercase text-muted-foreground">Judul Item</Label><Input value={newItem.title || ''} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-lg h-9 bg-muted/20 border-none px-3 text-[12px] font-bold" /></div>
-            <div className="space-y-1"><Label className="font-bold text-[9px] uppercase text-muted-foreground">Deskripsi</Label><Textarea value={newItem.description || ''} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="rounded-lg bg-muted/20 border-none min-h-[60px] px-3 text-[12px] font-medium" /></div>
-            <div className="space-y-1">
-              <Label className="font-bold text-[9px] uppercase text-muted-foreground">Link Alamat/Web</Label>
-              <div className="relative">
-                <div className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">{newItem.locationLink ? getSmartIcon(newItem.locationLink) : <LinkIcon className="size-3" />}</div>
-                <Input value={newItem.locationLink || ''} onChange={(e) => setNewItem({ ...newItem, locationLink: e.target.value })} placeholder="https://maps.google.com/..." className="rounded-lg h-9 bg-muted/20 border-none pl-8 text-[12px] font-medium shadow-inner" />
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="mt-3"><Button onClick={handleAddContent} disabled={!newItem.images?.length || ((activeAccount.type !== 'personal') && !newItem.categoryName)} className="w-full h-10 rounded-lg bg-accent font-bold text-white text-[12px] uppercase shadow-lg active:scale-95 transition-all">Posting</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <Dialog open={isContentModalOpen} onOpenChange={(open) => !open && (setIsContentModalOpen(false), window.history.state?.modalOpen && window.history.back(), resetContentForm())}>
+              <DialogContent className="w-[95%] md:max-w-lg rounded-xl p-4 bg-card text-foreground outline-none z-[170] [&>button]:hidden">
+                <DialogHeader className="flex flex-row items-center justify-between">
+                  <DialogTitle className="text-sm font-bold text-slate-900">Tambah Konten</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3 pt-2 overflow-y-auto max-h-[60vh] no-scrollbar">
+                   <div className="grid grid-cols-4 gap-1.5">
+                    {(newItem.images || []).map((src, i) => (
+                      <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-border">
+                        <img src={src} className="w-full h-full object-cover" />
+                        <button onClick={() => setNewItem(prev => ({ ...prev, images: prev.images?.filter((_, idx) => idx !== i) }))} className="absolute top-0.5 right-0.5 size-4 bg-black/60 text-white rounded-full flex items-center justify-center"><X size={8} /></button>
+                      </div>
+                    ))}
+                    <div onClick={() => openMediaPicker('post')} className="aspect-square rounded-lg bg-muted/30 border-2 border-dashed border-border flex items-center justify-center cursor-pointer">
+                      <PlusCircle className="size-5 text-muted-foreground" />
+                    </div>
+                  </div>
+                  <Input placeholder="Judul" value={newItem.title || ''} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="rounded-lg h-9 bg-muted/20 border-none px-3 text-[12px] font-bold" />
+                  <Textarea placeholder="Deskripsi" value={newItem.description || ''} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="rounded-lg bg-muted/20 border-none min-h-[60px] px-3 text-[12px]" />
+                </div>
+                <DialogFooter className="mt-3"><Button onClick={handleAddContent} disabled={!newItem.images?.length} className="w-full h-10 rounded-lg bg-accent font-bold text-white text-[12px] uppercase active:scale-95 transition-all">Posting</Button></DialogFooter>
+              </DialogContent>
+            </Dialog>
+         </>
+      )}
 
       <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
         <DialogContent className="w-[85%] md:max-w-xs rounded-xl p-4 border-none shadow-2xl bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <DialogHeader className="text-center"><DialogTitle className="text-[12px] font-black uppercase tracking-tight">Pilih Media</DialogTitle></DialogHeader>
           <div className="grid gap-2 py-3">
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-10 rounded-lg border-border bg-muted/50 hover:bg-black/5 justify-start gap-3 px-4 shadow-inner"><Smartphone className="size-4 text-black" /><p className="font-black text-[9px] uppercase tracking-widest">Galeri HP</p></Button>
-            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-10 rounded-lg border-border bg-muted/50 hover:bg-black/5 justify-start gap-3 px-4 shadow-inner"><Cloud className="size-4 text-black" /><p className="font-black text-[9px] uppercase tracking-widest">Layanan Cloud</p></Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-10 rounded-lg border-border bg-muted/50 hover:bg-black/5 justify-start gap-3 px-4"><Smartphone className="size-4 text-black" /><p className="font-black text-[9px] uppercase tracking-widest">Galeri HP</p></Button>
+            <Button variant="outline" disabled={isCloudLoading} onClick={() => handleCloudSource('drive')} className="h-10 rounded-lg border-border bg-muted/50 hover:bg-black/5 justify-start gap-3 px-4"><Cloud className="size-4 text-black" /><p className="font-black text-[9px] uppercase tracking-widest">Layanan Cloud</p></Button>
           </div>
           <DialogFooter><Button variant="ghost" onClick={() => setIsMediaPickerOpen(false)} className="w-full font-black text-[9px] uppercase text-muted-foreground hover:bg-transparent">Batal</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!zoomedImage} onOpenChange={(open) => !open && setZoomedImage(null)}>
-        <DialogContent 
-          className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none z-[170] [&>button]:hidden cursor-pointer"
-          onClick={() => setZoomedImage(null)}
-        >
+        <DialogContent className="max-w-[100vw] w-screen h-screen p-0 m-0 bg-black/98 border-none shadow-none flex items-center justify-center overflow-hidden outline-none z-[170] [&>button]:hidden cursor-pointer" onClick={() => setZoomedImage(null)}>
           {zoomedImage && <div className="w-full h-full max-h-[90vh] flex items-center justify-center p-4"><img src={zoomedImage} alt="Zoomed View" className="max-w-full max-h-full object-contain rounded-xl animate-in zoom-in-95 duration-300 shadow-none border-none" /></div>}
         </DialogContent>
       </Dialog>

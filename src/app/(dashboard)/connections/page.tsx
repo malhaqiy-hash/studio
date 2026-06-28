@@ -93,12 +93,10 @@ export default function ConnectionsPage() {
   // History synchronization for Stepped UI (Browser Back Button support)
   React.useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      // Priority 1: Close Disconnect Confirmation if open
       if (confirmDisconnectId) {
         setConfirmDisconnectId(null);
         return;
       }
-      // Priority 2: Close Chat if open
       if (isChatOpen) {
         setIsChatOpen(false);
         return;
@@ -122,9 +120,7 @@ export default function ConnectionsPage() {
   const handleDisconnect = () => {
     if (confirmDisconnectId) {
       setConnections(prev => prev.filter(c => c.id !== confirmDisconnectId));
-      // Close confirmation dialog without closing chat or leaving page
       setConfirmDisconnectId(null);
-      // Clean up history state if we pushed one for confirmation
       if (window.history.state?.confirmationOpen) {
         window.history.back();
       }
@@ -135,13 +131,11 @@ export default function ConnectionsPage() {
   const handleOpenChat = (conn: any) => {
     setSelectedChat(conn);
     setIsChatOpen(true);
-    // Push state to browser history to catch the back button
     window.history.pushState({ chatOpen: true }, '');
   };
 
   const closeChat = () => {
     setIsChatOpen(false);
-    // If we're closing manually, but there's a pushState in history, go back to clean it up
     if (window.history.state?.chatOpen) {
       window.history.back();
     }
@@ -221,7 +215,7 @@ export default function ConnectionsPage() {
             filteredConnections.map((conn) => (
               <Card key={conn.id} className="rounded-2xl border-slate-100 shadow-sm hover:shadow-md transition-all group overflow-hidden bg-card">
                 <CardContent className="p-3 flex items-center justify-between gap-3">
-                  <Link href="/profile" className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80 transition-opacity">
+                  <Link href={`/profile?id=${conn.id}`} className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80 transition-opacity">
                     <div className="relative shrink-0">
                       <Avatar className="size-12 rounded-xl border border-border shadow-sm">
                         <AvatarImage src={conn.avatar} className="object-cover" />
@@ -274,7 +268,7 @@ export default function ConnectionsPage() {
           )}
         </div>
 
-        {/* Chat Dialog Adjusted Header height from h-14 to h-12 */}
+        {/* Chat Dialog */}
         <Dialog open={isChatOpen} onOpenChange={(open) => !open && closeChat()}>
           <DialogContent className="w-[95%] h-[85dvh] max-w-lg p-0 border-none rounded-t-3xl sm:rounded-3xl bg-card text-foreground outline-none shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 duration-300 z-[170] [&>button]:hidden">
             {selectedChat && (
