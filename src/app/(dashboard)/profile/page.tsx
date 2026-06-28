@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -89,6 +88,21 @@ const MOCK_EXTERNAL_ACCOUNTS: Record<string, Partial<Account>> = {
   'conn4': { id: 'conn4', name: 'Rina Kartika', type: 'bisnis', avatar: 'https://picsum.photos/seed/f4/100', bio: 'Distributor resmi bahan pangan organik.', extra: 'Global Food Solutions', links: ['https://facebook.com'], verificationStatus: 'Verified' },
 };
 
+const MOCK_STATS_DATA = {
+  followers: [
+    { id: 'conn1', name: 'Andi Wijaya', avatar: 'https://picsum.photos/seed/f1/100', extra: 'Software Architect' },
+    { id: 'conn3', name: 'Siti Aminah', avatar: 'https://picsum.photos/seed/f3/100', extra: 'Creative Entity' },
+  ],
+  following: [
+    { id: 'conn2', name: 'Budi Santoso', avatar: 'https://picsum.photos/seed/f2/100', extra: 'Logistics CEO' },
+    { id: 'conn4', name: 'Rina Kartika', avatar: 'https://picsum.photos/seed/f4/100', extra: 'Food Distributor' },
+  ],
+  likes: [
+    { id: 'conn1', name: 'Andi Wijaya', avatar: 'https://picsum.photos/seed/f1/100', extra: 'Software Architect' },
+    { id: 'conn4', name: 'Rina Kartika', avatar: 'https://picsum.photos/seed/f4/100', extra: 'Food Distributor' },
+  ]
+};
+
 export default function ProfilePage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -103,7 +117,8 @@ export default function ProfilePage() {
   const [shareUrl, setShareUrl] = React.useState("");
 
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = React.useState(false);
-  const [confirmDisconnectId, setConfirmDisconnectId] = React.useState<string | null>(null);
+  const [isStatsModalOpen, setIsStatsModalOpen] = React.useState(false);
+  const [statsTab, setStatsTab] = React.useState<'followers' | 'following' | 'likes'>('followers');
 
   const [mediaTarget, setMediaTarget] = React.useState<'avatar' | 'cover' | 'post'>('avatar');
   const [tempAccount, setTempAccount] = React.useState<Partial<Account>>({});
@@ -134,21 +149,21 @@ export default function ProfilePage() {
 
   const isOwnProfile = viewingAccount.id === activeAccount.id || availableAccounts.some(a => a.id === viewingAccount.id);
 
-  // Efek untuk menutup modal saat navigasi terjadi
   React.useEffect(() => {
     setIsConnectionsModalOpen(false);
     setIsBioModalOpen(false);
     setIsContentModalOpen(false);
+    setIsStatsModalOpen(false);
   }, [externalId]);
 
   React.useEffect(() => {
     const handlePopState = () => {
-      if (confirmDisconnectId) {
-        setConfirmDisconnectId(null);
-        return;
-      }
       if (isConnectionsModalOpen) {
         setIsConnectionsModalOpen(false);
+        return;
+      }
+      if (isStatsModalOpen) {
+        setIsStatsModalOpen(false);
         return;
       }
       if (isBioModalOpen) setIsBioModalOpen(false);
@@ -157,7 +172,39 @@ export default function ProfilePage() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [confirmDisconnectId, isConnectionsModalOpen, isBioModalOpen, isContentModalOpen]);
+  }, [isConnectionsModalOpen, isStatsModalOpen, isBioModalOpen, isContentModalOpen]);
+
+  const checkStatsPermission = (type: 'followers' | 'following' | 'likes' | 'subscribe') => {
+    if (isOwnProfile) return true;
+    
+    const prefKey = type === 'followers' ? 'whoCanSeeFollowers' : 
+                   type === 'following' ? 'whoCanSeeFollowing' : 
+                   type === 'likes' ? 'whoCanSeeLikes' : 'whoCanSeeSubscribe';
+    
+    const visibility = viewingAccount.preferences?.[prefKey as keyof typeof viewingAccount.preferences] || 'public';
+    
+    if (visibility === 'public') return true;
+    if (visibility === 'private') return false;
+    
+    // For 'friends' (mutual connections), we'd check if activeAccount is in viewingAccount connections
+    // For MVP, we'll return false to be safe unless public
+    return false;
+  };
+
+  const handleStatClick = (tab: 'followers' | 'following' | 'likes') => {
+    const permType = tab === 'followers' && viewingAccount.type !== 'personal' ? 'subscribe' : tab;
+    if (!checkStatsPermission(permType as any)) {
+      toast({ 
+        variant: "destructive", 
+        title: "Akses Dibatasi", 
+        description: "Akun ini membatasi siapa yang dapat melihat daftar ini." 
+      });
+      return;
+    }
+    setStatsTab(tab);
+    setIsStatsModalOpen(true);
+    window.history.pushState({ modalOpen: 'stats' }, '');
+  };
 
   const resetContentForm = React.useCallback(() => {
     setNewItem({
@@ -291,11 +338,6 @@ export default function ProfilePage() {
 
   const handleAddContent = () => {
     if (!isOwnProfile) return;
-    if ((viewingAccount.type === 'bisnis' || viewingAccount.type === 'professional') && !newItem.categoryName) {
-      toast({ variant: "destructive", title: "Kategori wajib diisi." });
-      return;
-    }
-    
     addPost({
       images: newItem.images || [],
       title: newItem.title || 'Katalog Baru',
@@ -392,7 +434,7 @@ export default function ProfilePage() {
                 <div className="flex flex-wrap items-center gap-3 text-muted-foreground font-medium text-[11px] md:text-[13px]">
                   <span>{viewingAccount.extra || 'Koolink Member'}</span>
                   <div className="flex items-center gap-4 ml-auto">
-                     <div className="flex flex-col items-center">
+                     <button onClick={() => handleStatClick('followers')} className="flex flex-col items-center hover:opacity-70 transition-opacity">
                         <span className="text-xs font-bold text-slate-900">1.2k</span>
                         <span className="text-[7px] font-black uppercase opacity-60 flex items-center gap-1">
                           {viewingAccount.type === 'personal' ? (
@@ -403,13 +445,19 @@ export default function ProfilePage() {
                             <><Radar className="size-2" /> Radar</>
                           )}
                         </span>
-                     </div>
-                     <div className="flex flex-col items-center text-rose-500">
+                     </button>
+                     <button onClick={() => handleStatClick('following')} className="flex flex-col items-center hover:opacity-70 transition-opacity">
+                        <span className="text-xs font-bold text-slate-900">840</span>
+                        <span className="text-[7px] font-black uppercase opacity-60 flex items-center gap-1">
+                          Mengikuti
+                        </span>
+                     </button>
+                     <button onClick={() => handleStatClick('likes')} className="flex flex-col items-center text-rose-500 hover:opacity-70 transition-opacity">
                         <span className="text-xs font-bold">4.2k</span>
                         <span className="text-[7px] font-black uppercase flex items-center gap-1">
                           <Heart className="size-2 fill-rose-500" /> Suka
                         </span>
-                     </div>
+                     </button>
                   </div>
                 </div>
               </div>
@@ -539,6 +587,45 @@ export default function ProfilePage() {
           </div>
         </section>
       </div>
+
+      {/* Stats Modal (Followers/Following/Likes) */}
+      <Dialog open={isStatsModalOpen} onOpenChange={(open) => !open && setIsStatsModalOpen(false)}>
+        <DialogContent className="w-[95%] md:max-w-md rounded-[2rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none z-[170] [&>button]:hidden">
+          <div className="p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-lg font-black uppercase tracking-tight">
+                {statsTab === 'followers' ? (viewingAccount.type === 'personal' ? 'Pengikut' : viewingAccount.type === 'bisnis' ? 'Radar' : 'Ditambahkan') : 
+                 statsTab === 'following' ? 'Mengikuti' : 'Penyuka'}
+              </DialogTitle>
+              <button onClick={() => setIsStatsModalOpen(false)} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 active:scale-90 transition-all">
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
+              {(MOCK_STATS_DATA[statsTab as keyof typeof MOCK_STATS_DATA] || []).map((acc) => (
+                <button
+                  key={acc.id}
+                  onClick={() => {
+                    setIsStatsModalOpen(false);
+                    router.push(`/profile?id=${acc.id}`);
+                  }}
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all text-left border border-transparent hover:border-slate-100 group"
+                >
+                  <Avatar className="size-10 rounded-xl border border-border shadow-sm group-hover:scale-105 transition-transform">
+                    <AvatarImage src={acc.avatar} className="object-cover" />
+                    <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{acc.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-black text-slate-900 truncate uppercase tracking-tight">{acc.name}</p>
+                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{acc.extra}</p>
+                  </div>
+                  <ChevronLeft className="size-3 text-slate-300 rotate-180 group-hover:text-primary transition-colors" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {isOwnProfile && (
          <Dialog open={isConnectionsModalOpen} onOpenChange={(open) => !open && closeConnectionsModal()}>

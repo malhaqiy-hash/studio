@@ -164,16 +164,19 @@ export default function SettingsPage() {
 
   const UserListRow = ({ user, actionLabel }: { user: any, actionLabel?: string }) => (
     <div className="flex items-center justify-between p-3 bg-muted/10 rounded-xl border border-transparent hover:border-border transition-all">
-      <div className="flex items-center gap-2.5">
-        <Avatar className="size-8 rounded-lg border border-border">
+      <button 
+        onClick={() => router.push(`/profile?id=${user.id}`)}
+        className="flex items-center gap-2.5 text-left group"
+      >
+        <Avatar className="size-8 rounded-lg border border-border group-hover:scale-105 transition-transform">
           <AvatarImage src={user.avatar} className="object-cover" />
           <AvatarFallback className="bg-primary/5 font-bold text-[10px] text-primary">{user.name[0]}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
-          <span className="font-bold text-[13px] leading-none mb-0.5">{user.name}</span>
+          <span className="font-bold text-[13px] leading-none mb-0.5 group-hover:text-primary transition-colors">{user.name}</span>
           <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">{user.extra}</span>
         </div>
-      </div>
+      </button>
       <Button variant="outline" size="sm" className="h-7 rounded-lg text-[8px] font-black uppercase tracking-widest px-2.5 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all">
         {actionLabel || 'Lihat'}
       </Button>
@@ -234,13 +237,13 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Kontrol Visibilitas</h3>
+                <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Kontrol Visibilitas Daftar</h3>
                 <div className="bg-card rounded-xl border border-border overflow-hidden divide-y divide-border/50 shadow-sm">
                   {[
                     { label: "Siapa dapat melihat Pengikut?", key: "whoCanSeeFollowers" },
                     { label: "Siapa dapat melihat Mengikuti?", key: "whoCanSeeFollowing" },
                     { label: "Siapa dapat melihat Suka?", key: "whoCanSeeLikes" },
-                    { label: activeAccount.type === 'bisnis' ? "Siapa dapat melihat Radar?" : "Siapa dapat melihat Subscribe?", key: "whoCanSeeSubscribe" },
+                    { label: activeAccount.type === 'bisnis' ? "Siapa dapat melihat Radar?" : "Siapa dapat melihat Ditambahkan?", key: "whoCanSeeSubscribe" },
                   ].map((item) => (
                     <div key={item.key} className="p-3 space-y-1.5">
                       <Label className="text-[10px] font-bold uppercase text-slate-600">{item.label}</Label>
@@ -252,9 +255,9 @@ export default function SettingsPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl shadow-xl">
-                          <SelectItem value="public">🌍 Publik</SelectItem>
-                          <SelectItem value="friends">👥 Diikuti</SelectItem>
-                          <SelectItem value="private">🔒 Privat</SelectItem>
+                          <SelectItem value="public">🌍 Publik (Semua)</SelectItem>
+                          <SelectItem value="friends">👥 Diikuti (Relasi)</SelectItem>
+                          <SelectItem value="private">🔒 Privat (Hanya Saya)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
