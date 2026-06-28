@@ -215,7 +215,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-body relative overflow-x-hidden">
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       
-      <header className="sticky top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-11 flex items-center justify-between shadow-sm">
+      {/* Header Fixed so it never scrolls away */}
+      <header className="fixed top-0 left-0 right-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-11 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <Link href="/feed" className="flex items-center gap-2 active:scale-95 transition-transform">
             <TappLogo className="size-6 rounded-lg shadow-lg shadow-primary/10" />
@@ -263,7 +264,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 pb-20 pt-2 px-3 w-full relative max-w-2xl mx-auto">
+      {/* Main Content Area with padding-top to account for fixed header */}
+      <main className="flex-1 pt-11 pb-20 px-3 w-full relative max-w-2xl mx-auto">
         {children}
       </main>
 

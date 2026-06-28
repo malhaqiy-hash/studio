@@ -412,17 +412,7 @@ export default function FeedPage() {
 
   return (
     <DashboardLayout>
-      <motion.div 
-        drag="x"
-        dragControls={dragControls}
-        dragListener={false}
-        onPointerDown={startDrag}
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.15}
-        onDragEnd={handleDragEnd}
-        style={{ x: dragX }}
-        className="flex flex-col max-w-xl mx-auto relative px-1 md:px-0 min-h-[calc(100vh-8rem)]"
-      >
+      <div className="flex flex-col max-w-xl mx-auto relative px-1 md:px-0 min-h-[calc(100vh-8rem)]">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
         <motion.div 
@@ -435,8 +425,12 @@ export default function FeedPage() {
           <span className="text-[9px] font-black uppercase tracking-widest bg-primary text-white px-2.5 py-1 rounded-full">Buat Postingan</span>
         </motion.div>
 
-        {/* Sticky Category Bar - Adjusted top to sit below h-11 dashboard header */}
-        <div className="flex items-center justify-center gap-5 mb-3 sticky top-11 z-20 bg-background/80 backdrop-blur-md py-2 overflow-x-auto no-scrollbar border-b border-border/40 px-2 transition-all">
+        {/* 
+          Sticky Category Bar - MOVED OUTSIDE motion.div. 
+          Sticky elements DO NOT work correctly inside a transformed parent (motion.div with drag).
+          The position 'fixed' in DashboardLayout header is top-0, so sticky top-11 stays exactly below it.
+        */}
+        <div className="flex items-center justify-center gap-5 sticky top-11 z-30 bg-background/80 backdrop-blur-md py-2 overflow-x-auto no-scrollbar border-b border-border/40 px-2 transition-all">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
@@ -459,129 +453,136 @@ export default function FeedPage() {
           </button>
         </div>
 
-        <div className="flex-1">
-          <div className="space-y-3 pb-20">
-            {combinedPosts.map((post) => {
-              const trans = translations[post.id];
-              const postLike = likes[post.id] || { count: 0, active: false };
-              const isFollowed = followedAuthors[post.author];
-              const isConnected = connectedAuthors[post.author];
-              const isSaved = savedPosts[post.id];
-              
-              return (
-                <Card key={post.id} className="border-border shadow-sm rounded-xl overflow-hidden bg-card">
-                  {/* Padded Header */}
-                  <div className="p-3 pb-1.5 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <Avatar 
-                        className="size-9 border border-border cursor-pointer"
-                        onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
-                      >
-                        <AvatarImage src={post.avatar} className="object-cover" />
-                        <AvatarFallback className="bg-primary/5 text-primary font-black text-[10px]">{post.author[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1">
-                          <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[13px]">{post.author}</h3></Link>
-                          {post.verified && <ShieldCheck className="size-3 text-primary" />}
-                          {post.author !== activeAccount.name && post.authorType === 'personal' && (
-                            <button 
-                              onClick={() => handleFollow(post.author)}
-                              className={cn(
-                                "ml-1 p-1 rounded-full transition-all active:scale-90",
-                                isFollowed ? "text-primary bg-primary/10" : "text-slate-400 hover:bg-primary/5 hover:text-primary"
-                              )}
-                            >
-                              <UserPlus className="size-3.5" />
-                            </button>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
-                          {post.time}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-0.5">
-                        {post.visibility === 'private' && <Lock className="size-2.5 text-slate-300" />}
-                        <button 
-                          onClick={() => handleSave(post.id)}
-                          className={cn(
-                            "p-1.5 rounded-full transition-all",
-                            isSaved ? "text-primary bg-primary/5" : "text-slate-400 hover:bg-primary/5 hover:text-primary"
-                          )}
+        <motion.div 
+          drag="x"
+          dragControls={dragControls}
+          dragListener={false}
+          onPointerDown={startDrag}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.15}
+          onDragEnd={handleDragEnd}
+          style={{ x: dragX }}
+          className="flex flex-col relative"
+        >
+          <div className="flex-1 mt-3">
+            <div className="space-y-3 pb-20">
+              {combinedPosts.map((post) => {
+                const trans = translations[post.id];
+                const postLike = likes[post.id] || { count: 0, active: false };
+                const isFollowed = followedAuthors[post.author];
+                const isConnected = connectedAuthors[post.author];
+                const isSaved = savedPosts[post.id];
+                
+                return (
+                  <Card key={post.id} className="border-border shadow-sm rounded-xl overflow-hidden bg-card">
+                    <div className="p-3 pb-1.5 flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <Avatar 
+                          className="size-9 border border-border cursor-pointer"
+                          onClick={() => post.avatar && setExpandedAvatar(post.avatar)}
                         >
-                          <Bookmark className={cn("size-4", isSaved && "fill-current")} />
-                        </button>
-                    </div>
-                  </div>
-
-                  {/* Padded Text Content */}
-                  <div className="px-3 py-1.5">
-                    <p className="text-slate-700 leading-normal font-medium text-[13px] md:text-[14px] whitespace-pre-wrap">
-                      {trans?.show ? trans.text : post.content}
-                    </p>
-                  </div>
-
-                  {/* Full Width Media (No Padding) */}
-                  <PostMedia images={post.images} />
-
-                  {/* Enhanced Footer Area */}
-                  <div className="flex flex-col border-t border-border/40 bg-slate-50/30">
-                    <div className="p-2 pt-1 flex items-center justify-between">
-                      <div className="flex items-center gap-5 text-slate-500">
-                        <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1 py-1 transition-all", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
-                          <Heart className={cn("size-4", postLike.active && "fill-rose-500")} />
-                          <span className="text-[11px] font-bold">{postLike.count > 0 ? postLike.count : 'Suka'}</span>
-                        </button>
-                        <button className="flex items-center gap-1 py-1 hover:text-primary transition-colors">
-                          <MessageCircle className="size-4" />
-                          <span className="text-[11px] font-bold">{post.stats.comments > 0 ? post.stats.comments : 'Komentar'}</span>
-                        </button>
-                        <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center py-1", trans?.show ? "text-primary" : "hover:text-primary transition-colors")}>
-                          {trans?.loading ? <RefreshCw className="size-4 animate-spin" /> : <Globe className="size-4" />}
-                        </button>
+                          <AvatarImage src={post.avatar} className="object-cover" />
+                          <AvatarFallback className="bg-primary/5 text-primary font-black text-[10px]">{post.author[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1">
+                            <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[13px]">{post.author}</h3></Link>
+                            {post.verified && <ShieldCheck className="size-3 text-primary" />}
+                            {post.author !== activeAccount.name && post.authorType === 'personal' && (
+                              <button 
+                                onClick={() => handleFollow(post.author)}
+                                className={cn(
+                                  "ml-1 p-1 rounded-full transition-all active:scale-90",
+                                  isFollowed ? "text-primary bg-primary/10" : "text-slate-400 hover:bg-primary/5 hover:text-primary"
+                                )}
+                              >
+                                <UserPlus className="size-3.5" />
+                              </button>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                            {post.time}
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        {post.author !== activeAccount.name && (
+                      <div className="flex items-center gap-0.5">
+                          {post.visibility === 'private' && <Lock className="size-2.5 text-slate-300" />}
                           <button 
-                            onClick={() => handleConnect(post.author)} 
+                            onClick={() => handleSave(post.id)}
                             className={cn(
-                              "p-1.5 transition-all active:scale-90",
-                              isConnected ? "text-primary" : "text-slate-400 hover:text-primary"
+                              "p-1.5 rounded-full transition-all",
+                              isSaved ? "text-primary bg-primary/5" : "text-slate-400 hover:bg-primary/5 hover:text-primary"
                             )}
                           >
-                            <ConnectIcon className="size-5" />
+                            <Bookmark className={cn("size-4", isSaved && "fill-current")} />
                           </button>
-                        )}
-                        <button onClick={() => handleShare(post.id)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-4" /></button>
                       </div>
                     </div>
 
-                    {/* Platform Links section - Below action bar */}
-                    {post.locationLink && (
-                      <div className="px-3 pb-2 animate-in fade-in slide-in-from-top-1 duration-300">
-                        <a 
-                          href={post.locationLink} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="flex items-center gap-2 text-primary hover:underline transition-all group"
-                        >
-                          <div className="size-6 rounded-lg bg-primary/10 flex items-center justify-center text-primary shadow-inner group-hover:scale-110 transition-transform">
-                            {getSmartIcon(post.locationLink)}
-                          </div>
-                          <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[200px]">
-                            {post.locationLink.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
-                          </span>
-                        </a>
+                    <div className="px-3 py-1.5">
+                      <p className="text-slate-700 leading-normal font-medium text-[13px] md:text-[14px] whitespace-pre-wrap">
+                        {trans?.show ? trans.text : post.content}
+                      </p>
+                    </div>
+
+                    <PostMedia images={post.images} />
+
+                    <div className="flex flex-col border-t border-border/40 bg-slate-50/30">
+                      <div className="p-2 pt-1 flex items-center justify-between">
+                        <div className="flex items-center gap-5 text-slate-500">
+                          <button onClick={() => handleLike(post.id)} className={cn("flex items-center gap-1 py-1 transition-all", postLike.active ? "text-rose-500" : "hover:text-rose-500")}>
+                            <Heart className={cn("size-4", postLike.active && "fill-rose-500")} />
+                            <span className="text-[11px] font-bold">{postLike.count > 0 ? postLike.count : 'Suka'}</span>
+                          </button>
+                          <button className="flex items-center gap-1 py-1 hover:text-primary transition-colors">
+                            <MessageCircle className="size-4" />
+                            <span className="text-[11px] font-bold">{post.stats.comments > 0 ? post.stats.comments : 'Komentar'}</span>
+                          </button>
+                          <button onClick={() => handleTranslate(post.id, post.content)} className={cn("flex items-center py-1", trans?.show ? "text-primary" : "hover:text-primary transition-colors")}>
+                            {trans?.loading ? <RefreshCw className="size-4 animate-spin" /> : <Globe className="size-4" />}
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {post.author !== activeAccount.name && (
+                            <button 
+                              onClick={() => handleConnect(post.author)} 
+                              className={cn(
+                                "p-1.5 transition-all active:scale-90",
+                                isConnected ? "text-primary" : "text-slate-400 hover:text-primary"
+                              )}
+                            >
+                              <ConnectIcon className="size-5" />
+                            </button>
+                          )}
+                          <button onClick={() => handleShare(post.id)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-4" /></button>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </Card>
-              );
-            })}
+
+                      {post.locationLink && (
+                        <div className="px-3 pb-2 animate-in fade-in slide-in-from-top-1 duration-300">
+                          <a 
+                            href={post.locationLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="flex items-center gap-2 text-primary hover:underline transition-all group"
+                          >
+                            <div className="size-6 rounded-lg bg-primary/10 flex items-center justify-center text-primary shadow-inner group-hover:scale-110 transition-transform">
+                              {getSmartIcon(post.locationLink)}
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[200px]">
+                              {post.locationLink.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
+                            </span>
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
 
       <Dialog 
         open={isPostModalOpen} 
