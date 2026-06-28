@@ -34,7 +34,9 @@ import {
   ArrowRight,
   ExternalLink,
   ShieldCheck,
-  Navigation
+  Navigation,
+  Clock,
+  History
 } from 'lucide-react';
 import { aiIntentSearch, type AIIntentSearchOutput } from "@/ai/flows/ai-intent-search-flow";
 import { useLanguage } from "@/context/language-context";
@@ -51,6 +53,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAccount } from "@/context/account-context";
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 const SEARCH_CATEGORIES = [
   { id: 'professional_personal', label: 'Profesional/Pribadi', icon: User },
@@ -74,25 +77,47 @@ const DAFTAR_DAERAH = [
   "Jakarta", "Bandung", "Surabaya", "Medan", "Semarang", "Yogyakarta", "Solo", "Malang", "Depok", "Bekasi", "Tangerang", "Bogor", "Denpasar", "Makassar", "Palembang", "Pekanbaru", "Banjarmasin", "Balikpapan", "Pontianak", "Samarinda", "Manado", "Mataram", "Kupang", "Jayapura", "Ambon", "Banda Aceh", "Lampung", "Jambi", "Padang", "Bengkulu", "Pangkal Pinang", "Tanjung Pinang", "Serang", "Tegal", "Cirebon", "Sukabumi", "Tasikmalaya", "Purwokerto", "Kediri", "Madiun", "Mojokerto", "Pasuruan", "Probolinggo", "Blitar", "Batu", "Singkawang", "Bontang", "Tarakan", "Banjarbaru", "Palangkaraya", "Gorontalo", "Palu", "Kendari", "Bitung", "Parepare", "Palopo", "Bau-Bau", "Sorong", "Manokwari", "Ternate", "Tidore", "Bima", "Singapore", "Kuala Lumpur", "Bangkok", "Manila", "Ho Chi Minh City", "Tokyo", "Seoul", "Beijing", "Shanghai", "Hong Kong", "Taipei", "Sydney", "Melbourne", "Dubai", "Abu Dhabi", "Riyadh", "London", "Paris", "Berlin", "Madrid", "Rome", "Amsterdam", "New York", "Los Angeles", "Chicago", "Toronto", "Mexico City", "Sao Paulo", "Buenos Aires"
 ];
 
+const STORAGE_KEY_HISTORY = 'koolink_search_history_v1';
+
 export default function CariPage() {
   const { language, t } = useLanguage();
-  const { availableAccounts } = useAccount();
+  const { availableAccounts, activeAccount } = useAccount();
   const { toast } = useToast();
   
   const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<AIIntentSearchOutput | null>(null);
   const [internalResults, setInternalResults] = React.useState<any[]>([]);
+  const [searchHistory, setSearchHistory] = React.useState<string[]>([]);
   
   const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
   const [activeLocation, setActiveLocation] = React.useState("");
-  const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = React.useState(false);
+  const [showHistorySuggestions, setShowHistorySuggestions] = React.useState(false);
   const [filteredRegions, setFilteredRegions] = React.useState<string[]>([]);
   const [isSourcePickerOpen, setIsSourcePickerOpen] = React.useState(false);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
-  const suggestionRef = React.useRef<HTMLDivElement>(null);
+  const locationSuggestionRef = React.useRef<HTMLDivElement>(null);
+  const historySuggestionRef = React.useRef<HTMLDivElement>(null);
+
+  // Load history on mount
+  React.useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY_HISTORY);
+    if (saved) {
+      try {
+        setSearchHistory(JSON.parse(saved));
+      } catch (e) {
+        setSearchHistory([]);
+      }
+    }
+  }, []);
+
+  // Save history on change
+  React.useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(searchHistory));
+  }, [searchHistory]);
 
   React.useEffect(() => {
     const detectLocation = async () => {
@@ -111,8 +136,11 @@ export default function CariPage() {
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
+      if (locationSuggestionRef.current && !locationSuggestionRef.current.contains(event.target as Node)) {
+        setShowLocationSuggestions(false);
+      }
+      if (historySuggestionRef.current && !historySuggestionRef.current.contains(event.target as Node)) {
+        setShowHistorySuggestions(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -133,7 +161,16 @@ export default function CariPage() {
     if (!finalQuery && !finalCategory) return;
     
     setLoading(true);
-    setShowSuggestions(false);
+    setShowLocationSuggestions(false);
+    setShowHistorySuggestions(false);
+
+    // Update history (logic: unique items, most recent at top)
+    if (finalQuery) {
+      setSearchHistory(prev => {
+        const filtered = prev.filter(h => h.toLowerCase() !== finalQuery.toLowerCase());
+        return [finalQuery, ...filtered].slice(0, 10);
+      });
+    }
     
     const searchTerm = finalQuery.toLowerCase();
     const matchedAccounts = availableAccounts.filter(acc => 
@@ -181,7 +218,7 @@ export default function CariPage() {
       d.toLowerCase().includes(val.toLowerCase())
     ).slice(0, 15);
     setFilteredRegions(filtered);
-    setShowSuggestions(val.length > 0 && filtered.length > 0);
+    setShowLocationSuggestions(val.length > 0 && filtered.length > 0);
   };
 
   const handleVoiceSearch = () => {
@@ -194,6 +231,15 @@ export default function CariPage() {
       handleSearch(undefined, transcript);
     };
     recognition.start();
+  };
+
+  const removeFromHistory = (item: string) => {
+    setSearchHistory(prev => prev.filter(h => h !== item));
+  };
+
+  const clearHistory = () => {
+    setSearchHistory([]);
+    toast({ title: "Riwayat pencarian dihapus" });
   };
 
   const getTypeIcon = (type: string) => {
@@ -220,16 +266,20 @@ export default function CariPage() {
   return (
     <DashboardLayout>
       <div className="max-w-xl mx-auto flex flex-col min-h-screen pb-24">
-        {/* Sticky Search Header - top matches h-12 header height */}
+        {/* Sticky Search Header */}
         <div className="sticky top-[48px] z-40 bg-background/95 backdrop-blur-md pt-2 pb-4 px-1 md:px-0 border-b border-border/40">
           <form onSubmit={(e) => handleSearch(e)} className="space-y-2.5">
-            <div className="relative group w-full">
+            <div className="relative group w-full" ref={historySuggestionRef}>
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                 <Search className="size-3.5 text-slate-400 group-focus-within:text-primary transition-colors" />
               </div>
               <Input 
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setShowHistorySuggestions(true);
+                }}
+                onFocus={() => setShowHistorySuggestions(searchHistory.length > 0)}
                 placeholder={t('search_placeholder')}
                 className="h-10 pl-9 pr-24 rounded-xl border-slate-100 bg-slate-50/50 text-[13px] font-medium focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all shadow-inner"
               />
@@ -246,6 +296,40 @@ export default function CariPage() {
                 <button type="button" onClick={handleVoiceSearch} className="size-8 flex items-center justify-center rounded-lg bg-white text-slate-400 border border-slate-100 shadow-sm hover:text-primary active:scale-90 transition-all"><Mic className="size-3.5" /></button>
                 <button type="button" onClick={() => setIsSourcePickerOpen(true)} className="size-8 flex items-center justify-center rounded-lg bg-white text-slate-400 border border-slate-100 shadow-sm hover:text-primary active:scale-90 transition-all"><Camera className="size-3.5" /></button>
               </div>
+
+              {/* Search History Suggestions */}
+              {showHistorySuggestions && searchHistory.length > 0 && !query && (
+                <div className="absolute top-full left-0 right-0 mt-1.5 z-[150] bg-white border border-slate-100 rounded-xl shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)] overflow-hidden p-1 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="px-2.5 py-1.5 border-b border-slate-50 flex items-center justify-between">
+                    <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><History className="size-2" /> {t('recent_searches')}</span>
+                    <button onClick={clearHistory} className="text-[7px] font-black text-rose-500 uppercase hover:underline">{t('clear_all')}</button>
+                  </div>
+                  <div className="max-h-56 overflow-y-auto no-scrollbar">
+                    {searchHistory.map((item, i) => (
+                      <div key={i} className="flex items-center group/item">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setQuery(item);
+                            handleSearch(undefined, item);
+                          }}
+                          className="flex-1 flex items-center gap-2.5 px-2.5 py-2 text-left hover:bg-slate-50 transition-all"
+                        >
+                          <Clock className="size-3 text-slate-300" />
+                          <span className="text-[11px] font-bold text-slate-700">{item}</span>
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => removeFromHistory(item)}
+                          className="size-8 flex items-center justify-center text-slate-300 hover:text-rose-500 opacity-0 group-hover/item:opacity-100 transition-all"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <Button type="submit" disabled={loading} className="w-full h-10 rounded-xl bg-primary text-primary-foreground font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/10 flex gap-1.5 active:scale-[0.98] transition-all">
@@ -272,7 +356,7 @@ export default function CariPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <div className="relative group w-full" ref={suggestionRef}>
+              <div className="relative group w-full" ref={locationSuggestionRef}>
                 <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
                   <MapPin className="size-3 text-primary/60" />
                 </div>
@@ -285,7 +369,7 @@ export default function CariPage() {
                         d.toLowerCase().includes(activeLocation.toLowerCase())
                       ).slice(0, 15);
                       setFilteredRegions(filtered);
-                      setShowSuggestions(filtered.length > 0);
+                      setShowLocationSuggestions(filtered.length > 0);
                     }
                   }}
                   placeholder={language === 'id' ? "Wilayah..." : "Location..."}
@@ -294,14 +378,14 @@ export default function CariPage() {
                 {activeLocation !== "" && (
                   <button 
                     type="button" 
-                    onClick={() => { setActiveLocation(""); setShowSuggestions(false); }}
+                    onClick={() => { setActiveLocation(""); setShowLocationSuggestions(false); }}
                     className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-destructive transition-colors"
                   >
                     <X className="size-3" />
                   </button>
                 )}
 
-                {showSuggestions && (
+                {showLocationSuggestions && (
                   <div className="absolute top-full left-0 right-0 mt-1.5 z-[150] bg-white border border-slate-100 rounded-xl shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)] max-h-56 overflow-y-auto no-scrollbar p-1 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="px-2.5 py-1.5 border-b border-slate-50 mb-1">
                       <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Saran Wilayah</span>
@@ -312,7 +396,7 @@ export default function CariPage() {
                         type="button"
                         onClick={() => {
                           setActiveLocation(region);
-                          setShowSuggestions(false);
+                          setShowLocationSuggestions(false);
                           handleSearch(undefined, query, activeCategory, region);
                         }}
                         className="w-full flex items-center gap-2.5 px-2.5 py-2.5 text-left hover:bg-primary/5 rounded-lg transition-all border-b last:border-none border-slate-50 group"
@@ -344,7 +428,7 @@ export default function CariPage() {
                     </div>
                     <div className="grid gap-2.5">
                       {internalResults.map((acc) => (
-                        <Link key={acc.id} href={`/profile`}>
+                        <Link key={acc.id} href={`/profile?id=${acc.id}`}>
                           <Card className="rounded-2xl border-none shadow-sm bg-white overflow-hidden hover:shadow-md transition-all group">
                             <CardContent className="p-3.5 flex items-center gap-3">
                               <div className="size-12 rounded-xl bg-primary/5 text-primary flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary group-hover:text-white transition-all duration-300">
