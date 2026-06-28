@@ -415,8 +415,8 @@ export default function FeedPage() {
       <div className="flex flex-col max-w-xl mx-auto relative px-1 md:px-0 min-h-screen">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
         
-        {/* Sticky category bar adjusted to top-[40px] (new shrunk header height) */}
-        <div className="sticky top-[40px] z-40 bg-background/95 backdrop-blur-md py-1.5 overflow-x-auto no-scrollbar border-b border-border/40 px-2 transition-all flex items-center justify-center gap-6">
+        {/* Sticky category bar adjusted to top-[44px] (restored header height) */}
+        <div className="sticky top-[44px] z-40 bg-background/95 backdrop-blur-md py-1.5 overflow-x-auto no-scrollbar border-b border-border/40 px-2 transition-all flex items-center justify-center gap-6">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
