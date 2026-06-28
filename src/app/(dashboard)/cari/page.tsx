@@ -71,44 +71,7 @@ const SEARCH_CATEGORIES = [
 ];
 
 const DAFTAR_DAERAH = [
-  // Indonesia - Jawa & Bali
-  "Jakarta", "Jakarta Pusat", "Jakarta Selatan", "Jakarta Barat", "Jakarta Timur", "Jakarta Utara", 
-  "Bandung", "Surabaya", "Semarang", "Yogyakarta", "Solo", "Malang", "Depok", "Bekasi", "Tangerang", 
-  "Bogor", "Cimahi", "Cirebon", "Sukabumi", "Tasikmalaya", "Serang", "Tangerang Selatan", "Denpasar",
-  "Probolinggo", "Pasuruan", "Mojokerto", "Madiun", "Kediri", "Blitar", "Batu", "Pekalongan", "Tegal", 
-  "Salatiga", "Magelang", "Banten",
-  // Indonesia - Sumatra
-  "Medan", "Palembang", "Aceh", "Banda Aceh", "Lampung", "Bandar Lampung", "Pekanbaru", "Batam", "Jambi", 
-  "Padang", "Bengkulu", "Pangkal Pinang", "Tanjung Pinang", "Binjai", "Pematang Siantar", "Lubuklinggau", 
-  "Prabumulih", "Dumai",
-  // Indonesia - Kalimantan
-  "Balikpapan", "Banjarmasin", "Pontianak", "Samarinda", "Palangkaraya", "Tarakan", "Banjarbaru", "Singkawang", "Bontang",
-  // Indonesia - Sulawesi
-  "Makassar", "Manado", "Palu", "Kendari", "Bitung", "Gorontalo", "Palopo", "Parepare", "Bau-Bau",
-  // Indonesia - Nusa Tenggara, Maluku, Papua
-  "Mataram", "Kupang", "Ambon", "Jayapura", "Sorong", "Ternate", "Tual", "Tidore", "Bima", "Manokwari",
-  
-  // International - Asia Pacific
-  "Singapore", "Kuala Lumpur", "Bangkok", "Manila", "Ho Chi Minh City", "Hanoi", "Tokyo", "Osaka", 
-  "Seoul", "Beijing", "Shanghai", "Guangzhou", "Shenzhen", "Hong Kong", "Taipei", "Sydney", "Melbourne", 
-  "Brisbane", "Perth", "Auckland", "Mumbai", "Delhi", "Bangalore", "Colombo", "Dhaka", "Phnom Penh", 
-  "Vientiane", "Yangon", "Karachi", "Lahore", "Islamabad", "Kathmandu", "Ulaanbaatar", "Canberra", "Adelaide", "Christchurch",
-  // International - Middle East
-  "Dubai", "Abu Dhabi", "Doha", "Riyadh", "Jeddah", "Istanbul", "Ankara", "Tel Aviv", "Tehran", "Baghdad", 
-  "Kuwait City", "Muscat", "Manama", "Beirut", "Amman",
-  // International - Africa
-  "Cairo", "Johannesburg", "Cape Town", "Nairobi", "Lagos", "Casablanca", "Addis Ababa", "Accra", "Dakar", 
-  "Luanda", "Algiers", "Tunis", "Alexandria", "Dar es Salaam", "Abidjan", "Kigali", "Kampala", "Khartoum",
-  // International - Europe
-  "London", "Paris", "Berlin", "Munich", "Frankfurt", "Madrid", "Barcelona", "Rome", "Milan", 
-  "Amsterdam", "Brussels", "Zurich", "Geneva", "Vienna", "Prague", "Warsaw", "Stockholm", "Oslo", 
-  "Copenhagen", "Lisbon", "Moscow", "Dublin", "Helsinki", "Athens", "Budapest", "Bucharest", "Belgrade", 
-  "Sofia", "Kyiv", "Riga", "Vilnius", "Tallinn", "Luxembourg", "Reykjavik", "Bratislava",
-  // International - Americas
-  "New York", "Los Angeles", "Chicago", "San Francisco", "Miami", "Houston", "Toronto", "Vancouver", 
-  "Montreal", "Calgary", "Mexico City", "Guadalajara", "Monterrey", "Sao Paulo", "Rio de Janeiro", 
-  "Buenos Aires", "Santiago", "Lima", "Bogota", "Medellin", "Panama City", "Quito", "Guayaquil", 
-  "Montevideo", "Asuncion", "La Paz", "San Juan", "Santo Domingo", "Havana", "Seattle", "Boston"
+  "Jakarta", "Bandung", "Surabaya", "Medan", "Semarang", "Yogyakarta", "Solo", "Malang", "Depok", "Bekasi", "Tangerang", "Bogor", "Denpasar", "Makassar", "Palembang", "Pekanbaru", "Banjarmasin", "Balikpapan", "Pontianak", "Samarinda", "Manado", "Mataram", "Kupang", "Jayapura", "Ambon", "Banda Aceh", "Lampung", "Jambi", "Padang", "Bengkulu", "Pangkal Pinang", "Tanjung Pinang", "Serang", "Tegal", "Cirebon", "Sukabumi", "Tasikmalaya", "Purwokerto", "Kediri", "Madiun", "Mojokerto", "Pasuruan", "Probolinggo", "Blitar", "Batu", "Singkawang", "Bontang", "Tarakan", "Banjarbaru", "Palangkaraya", "Gorontalo", "Palu", "Kendari", "Bitung", "Parepare", "Palopo", "Bau-Bau", "Sorong", "Manokwari", "Ternate", "Tidore", "Bima", "Singapore", "Kuala Lumpur", "Bangkok", "Manila", "Ho Chi Minh City", "Tokyo", "Seoul", "Beijing", "Shanghai", "Hong Kong", "Taipei", "Sydney", "Melbourne", "Dubai", "Abu Dhabi", "Riyadh", "London", "Paris", "Berlin", "Madrid", "Rome", "Amsterdam", "New York", "Los Angeles", "Chicago", "Toronto", "Mexico City", "Sao Paulo", "Buenos Aires"
 ];
 
 export default function CariPage() {
@@ -146,7 +109,6 @@ export default function CariPage() {
     detectLocation();
   }, []);
 
-  // Handle clicking outside of suggestions to close them
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
@@ -217,7 +179,7 @@ export default function CariPage() {
     setActiveLocation(val);
     const filtered = DAFTAR_DAERAH.filter(d => 
       d.toLowerCase().includes(val.toLowerCase())
-    ).slice(0, 15); // Show top 15 matches
+    ).slice(0, 15);
     setFilteredRegions(filtered);
     setShowSuggestions(val.length > 0 && filtered.length > 0);
   };
@@ -257,8 +219,9 @@ export default function CariPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-xl mx-auto space-y-4 py-2 px-1 md:px-0 flex flex-col min-h-screen pb-24">
-        <div className="space-y-2.5 w-full">
+      <div className="max-w-xl mx-auto flex flex-col min-h-screen pb-24">
+        {/* Sticky Search Header */}
+        <div className="sticky top-[44px] z-40 bg-background/95 backdrop-blur-md pt-2 pb-4 px-1 md:px-0 border-b border-border/40">
           <form onSubmit={(e) => handleSearch(e)} className="space-y-2.5">
             <div className="relative group w-full">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -365,7 +328,8 @@ export default function CariPage() {
           </form>
         </div>
 
-        <div className="flex-1 space-y-4">
+        {/* Results Area */}
+        <div className="flex-1 space-y-4 py-4 px-1 md:px-0">
            {loading ? (
              <div className="space-y-3 py-4">
                 {[1, 2, 3].map(i => <div key={i} className="h-24 w-full bg-slate-50 animate-pulse rounded-2xl" />)}
