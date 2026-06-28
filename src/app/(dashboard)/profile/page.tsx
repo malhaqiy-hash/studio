@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -388,7 +389,7 @@ export default function ProfilePage() {
           <div className="flex flex-col gap-3 border-b border-border/40 pb-4">
             <div className="flex items-start justify-between">
               <div className="text-slate-700 leading-relaxed font-normal text-[12px] md:text-[13px] whitespace-pre-wrap flex-1">
-                {viewingAccount.bio ? `"${viewingAccount.bio}"` : '"Membangun koneksi cerdas di Koolink."'}
+                {viewingAccount.bio ? viewingAccount.bio : 'Membangun koneksi cerdas di Koolink.'}
               </div>
               {isOwnProfile && (
                 <Button variant="ghost" size="sm" onClick={() => { setTempAccount({ name: activeAccount.name, bio: activeAccount.bio }); setTempLinks(activeAccount.links || []); pushAndSet(setIsBioModalOpen, true, 'edit'); }} className="text-[9px] font-bold uppercase text-accent hover:bg-accent/10 px-2 h-6 rounded-lg border border-accent/20 shrink-0 ml-3">
@@ -492,9 +493,22 @@ export default function ProfilePage() {
             </div>
             <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
               {(MOCK_STATS_DATA[statsTab as keyof typeof MOCK_STATS_DATA] || []).map((acc) => (
-                <button key={acc.id} onClick={() => { setIsStatsModalOpen(false); router.push(`/profile?id=${acc.id}`); }} className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all text-left border border-transparent hover:border-slate-100 group">
-                  <Avatar className="size-10 rounded-xl border border-border shadow-sm group-hover:scale-105 transition-transform"><AvatarImage src={acc.avatar} className="object-cover" /><AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{acc.name[0]}</AvatarFallback></Avatar>
-                  <div className="flex-1 min-w-0"><p className="text-[13px] font-black text-slate-900 truncate uppercase tracking-tight">{acc.name}</p><p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{acc.extra}</p></div>
+                <button 
+                  key={acc.id} 
+                  onClick={() => { 
+                    setIsStatsModalOpen(false); 
+                    router.push(`/profile?id=${acc.id}`);
+                  }} 
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-primary/[0.03] hover:border-primary/20 transition-all text-left border border-transparent active:scale-[0.98] group"
+                >
+                  <Avatar className="size-10 rounded-xl border border-border shadow-sm group-hover:scale-105 transition-transform">
+                    <AvatarImage src={acc.avatar} className="object-cover" />
+                    <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{acc.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-black text-slate-900 truncate uppercase tracking-tight">{acc.name}</p>
+                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{acc.extra}</p>
+                  </div>
                   <ChevronLeft className="size-3 text-slate-300 rotate-180 group-hover:text-primary transition-colors" />
                 </button>
               ))}
@@ -515,9 +529,26 @@ export default function ProfilePage() {
             </div>
             <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
                {Object.values(MOCK_EXTERNAL_ACCOUNTS).map((conn) => (
-                 <button key={conn.id} onClick={() => { setIsConnectionsModalOpen(false); router.push(`/profile?id=${conn.id}`); }} className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all text-left border border-transparent hover:border-slate-100 group">
-                   <Avatar className="size-10 rounded-xl border border-border shadow-sm group-hover:scale-105 transition-transform"><AvatarImage src={conn.avatar} className="object-cover" /><AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{conn.name![0]}</AvatarFallback></Avatar>
-                   <div className="flex-1 min-w-0"><div className="flex items-center gap-1.5"><p className="text-[13px] font-black text-slate-900 truncate uppercase tracking-tight">{conn.name}</p>{conn.verificationStatus === 'Verified' && <ShieldCheck className="size-3 text-emerald-500" />}</div><p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{conn.extra}</p></div>
+                 <button 
+                   key={conn.id} 
+                   onClick={() => { 
+                     setIsConnectionsModalOpen(false); 
+                     router.push(`/profile?id=${conn.id}`); 
+                   }} 
+                   className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-primary/[0.03] hover:border-primary/20 transition-all text-left border border-transparent active:scale-[0.98] group"
+                 >
+                   <Avatar className="size-10 rounded-xl border border-border shadow-sm group-hover:scale-105 transition-transform">
+                     <AvatarImage src={conn.avatar} className="object-cover" />
+                     <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{conn.name![0]}</AvatarFallback>
+                   </Avatar>
+                   <div className="flex-1 min-w-0">
+                     <div className="flex items-center gap-1.5">
+                       <p className="text-[13px] font-black text-slate-900 truncate uppercase tracking-tight">{conn.name}</p>
+                       {conn.verificationStatus === 'Verified' && <ShieldCheck className="size-3 text-emerald-500" />}
+                     </div>
+                     <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{conn.extra}</p>
+                   </div>
+                   <ChevronLeft className="size-3 text-slate-300 rotate-180 group-hover:text-primary transition-colors" />
                  </button>
                ))}
             </div>

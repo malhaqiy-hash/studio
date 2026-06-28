@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -62,21 +63,21 @@ const DEFAULT_SETTINGS: SettingsState = {
 
 const MOCK_RELATIONS = {
   pengikut: [
-    { id: 'u1', name: 'Andi Wijaya', avatar: 'https://picsum.photos/seed/u1/100', extra: 'Distributor Kopi' },
-    { id: 'u2', name: 'Siti Aminah', avatar: 'https://picsum.photos/seed/u2/100', extra: 'Pemasok Kemasan' },
-    { id: 'u3', name: 'Budi Santoso', avatar: 'https://picsum.photos/seed/u3/100', extra: 'Logistik Regional' },
+    { id: 'conn1', name: 'Andi Wijaya', avatar: 'https://picsum.photos/seed/f1/100', extra: 'Distributor Kopi' },
+    { id: 'conn2', name: 'Siti Aminah', avatar: 'https://picsum.photos/seed/f2/100', extra: 'Pemasok Kemasan' },
+    { id: 'conn3', name: 'Budi Santoso', avatar: 'https://picsum.photos/seed/f3/100', extra: 'Logistik Regional' },
   ],
   mengikuti: [
-    { id: 'u4', name: 'Alpha Tech', avatar: 'https://picsum.photos/seed/u4/100', extra: 'Solusi AI' },
-    { id: 'u5', name: 'Global Logistics', avatar: 'https://picsum.photos/seed/u5/100', extra: 'Cargo Udara' },
+    { id: 'conn4', name: 'Alpha Tech', avatar: 'https://picsum.photos/seed/f4/100', extra: 'Solusi AI' },
+    { id: 'conn2', name: 'Global Logistics', avatar: 'https://picsum.photos/seed/f2/100', extra: 'Cargo Udara' },
   ],
   suka: [
-    { id: 'u6', name: 'Rina Kartika', avatar: 'https://picsum.photos/seed/u6/100', extra: 'Desain Produk' },
-    { id: 'u7', name: 'Hendra Gunawan', avatar: 'https://picsum.photos/seed/u7/100', extra: 'Export Manager' },
+    { id: 'conn1', name: 'Rina Kartika', avatar: 'https://picsum.photos/seed/f1/100', extra: 'Desain Produk' },
+    { id: 'conn3', name: 'Hendra Gunawan', avatar: 'https://picsum.photos/seed/f3/100', extra: 'Export Manager' },
   ],
   subscribe: [
-    { id: 'u8', name: 'Indo Retail Corp', avatar: 'https://picsum.photos/seed/u8/100', extra: 'Premium Member' },
-    { id: 'u9', name: 'Eco Pack Solutions', avatar: 'https://picsum.photos/seed/u9/100', extra: 'Partner Bisnis' },
+    { id: 'conn4', name: 'Indo Retail Corp', avatar: 'https://picsum.photos/seed/f4/100', extra: 'Premium Member' },
+    { id: 'conn1', name: 'Eco Pack Solutions', avatar: 'https://picsum.photos/seed/f1/100', extra: 'Partner Bisnis' },
   ]
 };
 
@@ -162,13 +163,25 @@ export default function SettingsPage() {
   );
 
   const UserListRow = ({ user, actionLabel }: { user: any, actionLabel?: string }) => (
-    <div className="flex items-center justify-between p-3 bg-muted/10 rounded-xl border border-transparent hover:border-border transition-all">
-      <button onClick={() => router.push(`/profile?id=${user.id}`)} className="flex items-center gap-2.5 text-left group">
-        <Avatar className="size-8 rounded-lg border border-border group-hover:scale-105 transition-transform"><AvatarImage src={user.avatar} className="object-cover" /><AvatarFallback className="bg-primary/5 font-bold text-[10px] text-primary">{user.name[0]}</AvatarFallback></Avatar>
-        <div className="flex flex-col"><span className="font-bold text-[13px] leading-none mb-0.5 group-hover:text-primary transition-colors">{user.name}</span><span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">{user.extra}</span></div>
-      </button>
-      <Button variant="outline" size="sm" className="h-7 rounded-lg text-[8px] font-black uppercase tracking-widest px-2.5 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all">{actionLabel || 'Lihat'}</Button>
-    </div>
+    <button 
+      onClick={() => router.push(`/profile?id=${user.id}`)}
+      className="w-full flex items-center justify-between p-3 bg-muted/10 rounded-xl border border-transparent hover:border-primary/20 hover:bg-primary/[0.02] transition-all group active:scale-[0.98]"
+    >
+      <div className="flex items-center gap-2.5 text-left">
+        <Avatar className="size-9 rounded-lg border border-border group-hover:scale-105 transition-transform">
+          <AvatarImage src={user.avatar} className="object-cover" />
+          <AvatarFallback className="bg-primary/5 font-bold text-[10px] text-primary">{user.name[0]}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <span className="font-bold text-[13px] leading-none mb-0.5 group-hover:text-primary transition-colors">{user.name}</span>
+          <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">{user.extra}</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-[8px] font-black uppercase text-primary opacity-0 group-hover:opacity-100 transition-opacity">Profil</span>
+        <ChevronRight className="size-3 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+      </div>
+    </button>
   );
 
   const renderSubMenuContent = () => {
