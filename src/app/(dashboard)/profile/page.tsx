@@ -151,7 +151,7 @@ export default function ProfilePage() {
   // Stepped Navigation Sync (History handling)
   React.useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      // Close in order of stack
+      // Close in reverse order of expected stack
       if (isMediaPickerOpen) { setIsMediaPickerOpen(false); return; }
       if (isStatsModalOpen) { setIsStatsModalOpen(false); return; }
       if (isConnectionsModalOpen) { setIsConnectionsModalOpen(false); return; }
@@ -168,6 +168,15 @@ export default function ProfilePage() {
   const pushAndSet = (setter: (val: boolean) => void, val: boolean, key: string) => {
     if (val) window.history.pushState({ modal: key }, '');
     setter(val);
+  };
+
+  // Utility to close modal and handle history back
+  const closeWithHistory = (setter: (val: boolean) => void, key: string) => {
+    if (window.history.state?.modal === key) {
+      window.history.back();
+    } else {
+      setter(false);
+    }
   };
 
   const checkStatsPermission = (type: 'followers' | 'following' | 'likes' | 'subscribe') => {
@@ -231,8 +240,7 @@ export default function ProfilePage() {
   const handleSaveBio = () => {
     if (!isOwnProfile) return;
     updateActiveAccount({ ...tempAccount, links: tempLinks.filter(l => l.trim() !== '') });
-    if (window.history.state?.modal === 'edit') window.history.back();
-    setIsBioModalOpen(false);
+    closeWithHistory(setIsBioModalOpen, 'edit');
     toast({ title: 'Profil diperbarui' });
   };
 
@@ -268,8 +276,7 @@ export default function ProfilePage() {
         };
         reader.readAsDataURL(files[0]);
       }
-      if (window.history.state?.modal === 'media') window.history.back();
-      setIsMediaPickerOpen(false);
+      closeWithHistory(setIsMediaPickerOpen, 'media');
     }
   };
 
@@ -281,8 +288,7 @@ export default function ProfilePage() {
       else if (mediaTarget === 'cover') updateActiveAccount({ cover: simUrl });
       else if (mediaTarget === 'post') setNewItem(prev => ({ ...prev, images: [...(prev.images || []), simUrl] }));
       setIsCloudLoading(false);
-      if (window.history.state?.modal === 'media') window.history.back();
-      setIsMediaPickerOpen(false);
+      closeWithHistory(setIsMediaPickerOpen, 'media');
     }, 1500);
   };
 
@@ -298,8 +304,7 @@ export default function ProfilePage() {
       categoryName: newItem.categoryName,
       source: 'profile'
     });
-    if (window.history.state?.modal === 'content') window.history.back();
-    setIsContentModalOpen(false);
+    closeWithHistory(setIsContentModalOpen, 'content');
     resetContentForm();
     toast({ title: 'Konten dipublikasikan' });
   };
@@ -484,12 +489,12 @@ export default function ProfilePage() {
         </section>
       </div>
 
-      <Dialog open={isStatsModalOpen} onOpenChange={(o) => { if(!o && window.history.state?.modal === 'stats') window.history.back(); setIsStatsModalOpen(o); }}>
+      <Dialog open={isStatsModalOpen} onOpenChange={(o) => { if(!o) closeWithHistory(setIsStatsModalOpen, 'stats'); }}>
         <DialogContent className="w-[95%] md:max-w-md rounded-[2rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-lg font-black uppercase tracking-tight">{statsTab === 'followers' ? 'Pengikut' : statsTab === 'following' ? 'Mengikuti' : 'Penyuka'}</DialogTitle>
-              <button onClick={() => window.history.back()} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 active:scale-90 transition-all"><X className="size-4" /></button>
+              <button onClick={() => closeWithHistory(setIsStatsModalOpen, 'stats')} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 active:scale-90 transition-all"><X className="size-4" /></button>
             </div>
             <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
               {(MOCK_STATS_DATA[statsTab as keyof typeof MOCK_STATS_DATA] || []).map((acc) => (
@@ -517,7 +522,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isConnectionsModalOpen} onOpenChange={(o) => { if(!o && window.history.state?.modal === 'connections') window.history.back(); setIsConnectionsModalOpen(o); }}>
+      <Dialog open={isConnectionsModalOpen} onOpenChange={(o) => { if(!o) closeWithHistory(setIsConnectionsModalOpen, 'connections'); }}>
         <DialogContent className="w-[95%] md:max-w-md rounded-[2rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
@@ -525,7 +530,7 @@ export default function ProfilePage() {
                   <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner"><ConnectIcon className="size-5" /></div>
                   <DialogTitle className="text-lg font-black uppercase tracking-tight">Koneksi Jaringan</DialogTitle>
                </div>
-               <button onClick={() => window.history.back()} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 active:scale-90 transition-all"><X className="size-4" /></button>
+               <button onClick={() => closeWithHistory(setIsConnectionsModalOpen, 'connections')} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 active:scale-90 transition-all"><X className="size-4" /></button>
             </div>
             <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
                {Object.values(MOCK_EXTERNAL_ACCOUNTS).map((conn) => (
@@ -556,7 +561,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isBioModalOpen} onOpenChange={(o) => { if(!o && window.history.state?.modal === 'edit') window.history.back(); setIsBioModalOpen(o); }}>
+      <Dialog open={isBioModalOpen} onOpenChange={(o) => { if(!o) closeWithHistory(setIsBioModalOpen, 'edit'); }}>
         <DialogContent className="w-[95%] md:max-w-md rounded-2xl p-0 border-none shadow-2xl bg-card text-foreground outline-none z-[170] [&>button]:hidden overflow-hidden flex flex-col max-h-[90vh]">
           <DialogHeader className="p-6 pb-2"><DialogTitle className="text-base font-black uppercase tracking-tight text-slate-900">Ubah Profil</DialogTitle></DialogHeader>
           <div className="flex-1 overflow-y-auto no-scrollbar p-6 pt-2 space-y-5">
@@ -571,7 +576,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isContentModalOpen} onOpenChange={(o) => { if(!o && window.history.state?.modal === 'content') window.history.back(); setIsContentModalOpen(o); }}>
+      <Dialog open={isContentModalOpen} onOpenChange={(o) => { if(!o) closeWithHistory(setIsContentModalOpen, 'content'); }}>
         <DialogContent className="w-[95%] md:max-w-lg rounded-xl p-4 bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <DialogHeader className="flex flex-row items-center justify-between"><DialogTitle className="text-sm font-bold text-slate-900">Tambah Konten</DialogTitle></DialogHeader>
           <div className="space-y-3 pt-2 overflow-y-auto max-h-[60vh] no-scrollbar">
@@ -586,14 +591,14 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isMediaPickerOpen} onOpenChange={(o) => { if(!o && window.history.state?.modal === 'media') window.history.back(); setIsMediaPickerOpen(o); }}>
+      <Dialog open={isMediaPickerOpen} onOpenChange={(o) => { if(!o) closeWithHistory(setIsMediaPickerOpen, 'media'); }}>
         <DialogContent className="w-[85%] md:max-w-xs rounded-xl p-4 border-none shadow-2xl bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <DialogHeader className="text-center"><DialogTitle className="text-[12px] font-black uppercase tracking-tight">Pilih Media</DialogTitle></DialogHeader>
           <div className="grid gap-2 py-3">
             <Button variant="outline" disabled={isCloudLoading} onClick={() => fileInputRef.current?.click()} className="h-10 rounded-lg border-border bg-muted/50 hover:bg-black/5 justify-start gap-3 px-4"><Smartphone className="size-4 text-black" /><p className="font-black text-[9px] uppercase tracking-widest">Galeri HP</p></Button>
             <Button variant="outline" disabled={isCloudLoading} onClick={handleCloudSource} className="h-10 rounded-lg border-border bg-muted/50 hover:bg-black/5 justify-start gap-3 px-4"><Cloud className="size-4 text-black" /><p className="font-black text-[9px] uppercase tracking-widest">Layanan Cloud</p></Button>
           </div>
-          <DialogFooter><Button variant="ghost" onClick={() => window.history.back()} className="w-full font-black text-[9px] uppercase text-muted-foreground hover:bg-transparent">Batal</Button></DialogFooter>
+          <DialogFooter><Button variant="ghost" onClick={() => closeWithHistory(setIsMediaPickerOpen, 'media')} className="w-full font-black text-[9px] uppercase text-muted-foreground hover:bg-transparent">Batal</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -603,7 +608,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      <ShareSheet isOpen={isShareSheetOpen} onOpenChange={(o) => { if(!o && window.history.state?.modal === 'share') window.history.back(); setIsShareSheetOpen(o); }} postUrl={shareUrl} />
+      <ShareSheet isOpen={isShareSheetOpen} onOpenChange={(o) => { if(!o) closeWithHistory(setIsShareSheetOpen, 'share'); }} postUrl={shareUrl} />
     </DashboardLayout>
   );
 }

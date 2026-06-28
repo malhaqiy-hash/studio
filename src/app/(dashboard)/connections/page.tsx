@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -113,16 +114,13 @@ export default function ConnectionsPage() {
     }
   }, [messages, isChatOpen]);
 
-  const filteredConnections = connections.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const handleDisconnect = () => {
     if (confirmDisconnectId) {
       setConnections(prev => prev.filter(c => c.id !== confirmDisconnectId));
-      setConfirmDisconnectId(null);
       if (window.history.state?.confirmationOpen) {
         window.history.back();
+      } else {
+        setConfirmDisconnectId(null);
       }
       toast({ title: "Koneksi diputuskan" });
     }
@@ -135,9 +133,10 @@ export default function ConnectionsPage() {
   };
 
   const closeChat = () => {
-    setIsChatOpen(false);
     if (window.history.state?.chatOpen) {
       window.history.back();
+    } else {
+      setIsChatOpen(false);
     }
   };
 
@@ -147,9 +146,10 @@ export default function ConnectionsPage() {
   };
 
   const closeDisconnectConfirm = () => {
-    setConfirmDisconnectId(null);
     if (window.history.state?.confirmationOpen) {
       window.history.back();
+    } else {
+      setConfirmDisconnectId(null);
     }
   };
 
@@ -179,6 +179,10 @@ export default function ConnectionsPage() {
     }
     toast({ title: "Aksi berhasil dikirim" });
   };
+
+  const filteredConnections = connections.filter(c => 
+    c.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <DashboardLayout>

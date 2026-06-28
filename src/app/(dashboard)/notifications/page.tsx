@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -89,8 +90,11 @@ export default function NotificationsPage() {
   };
 
   const closeDetail = () => {
-    if (window.history.state?.notifOpen) window.history.back();
-    else setSelectedNotification(null);
+    if (window.history.state?.notifOpen) {
+      window.history.back();
+    } else {
+      setSelectedNotification(null);
+    }
   };
 
   if (!isLoaded) return null;

@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -286,14 +287,46 @@ export default function FeedPage() {
     setPostDisplayLocation('both');
   }, []);
 
+  // Stepped back navigation for feed modals
   React.useEffect(() => {
-    resetForm();
-    setIsPostModalOpen(false); 
-  }, [activeAccount.id, resetForm]);
+    const handlePopState = () => {
+      if (isPostModalOpen) { setIsPostModalOpen(false); return; }
+      if (isShareSheetOpen) { setIsShareSheetOpen(false); return; }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isPostModalOpen, isShareSheetOpen]);
+
+  const handleOpenPostModal = () => {
+    setIsPostModalOpen(true);
+    window.history.pushState({ postModal: true }, '');
+  };
+
+  const handleClosePostModal = () => {
+    if (window.history.state?.postModal) {
+      window.history.back();
+    } else {
+      setIsPostModalOpen(false);
+    }
+  };
+
+  const handleOpenShare = (postId: string) => {
+    setShareUrl(`https://koolink.network/post/${postId}`);
+    setIsShareSheetOpen(true);
+    window.history.pushState({ shareSheet: true }, '');
+  };
+
+  const handleCloseShare = () => {
+    if (window.history.state?.shareSheet) {
+      window.history.back();
+    } else {
+      setIsShareSheetOpen(false);
+    }
+  };
 
   const handleDragEnd = (event: any, info: any) => {
     if (info.offset.x > 100) {
-      setIsPostModalOpen(true);
+      handleOpenPostModal();
     }
   };
 
@@ -331,11 +364,6 @@ export default function FeedPage() {
     } catch (err) {
       setTranslations(prev => ({ ...prev, [postId]: { text: "", show: false, loading: false } }));
     }
-  };
-
-  const handleShare = (postId: string) => {
-    setShareUrl(`https://koolink.network/post/${postId}`);
-    setIsShareSheetOpen(true);
   };
 
   const handleFollow = (author: string, type?: string) => {
@@ -381,7 +409,7 @@ export default function FeedPage() {
       locationLink: postLocationLink,
       source: 'feed'
     });
-    setIsPostModalOpen(false);
+    handleClosePostModal();
     resetForm();
     toast({ title: "Postingan terkirim" });
   };
@@ -440,7 +468,7 @@ export default function FeedPage() {
             </button>
           ))}
           <button 
-            onClick={() => setIsPostModalOpen(true)}
+            onClick={handleOpenPostModal}
             className="flex items-center justify-center size-6 rounded-full bg-primary/5 text-primary hover:bg-primary/10 transition-all shrink-0 active:scale-90"
           >
             <Plus className="size-3.5" />
@@ -489,7 +517,7 @@ export default function FeedPage() {
                       </Avatar>
                       <div className="flex flex-col">
                         <div className="flex items-center gap-1">
-                          <Link href="/profile" className="hover:underline"><h3 className="font-bold text-slate-900 text-[13px]">{post.author}</h3></Link>
+                          <Link href={`/profile?id=${post.id}`} className="hover:underline"><h3 className="font-bold text-slate-900 text-[13px]">{post.author}</h3></Link>
                           {post.verified && <ShieldCheck className="size-3 text-primary" />}
                           {post.author !== activeAccount.name && (
                             <button 
@@ -561,7 +589,7 @@ export default function FeedPage() {
                             <ConnectIcon className="size-5" />
                           </button>
                         )}
-                        <button onClick={() => handleShare(post.id)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-4" /></button>
+                        <button onClick={() => handleOpenShare(post.id)} className="p-1.5 text-slate-400 hover:text-primary active:scale-90 transition-all"><Share2 className="size-4" /></button>
                       </div>
                     </div>
 
@@ -592,10 +620,7 @@ export default function FeedPage() {
 
       <Dialog 
         open={isPostModalOpen} 
-        onOpenChange={(open) => {
-          setIsPostModalOpen(open);
-          if (!open) resetForm(); 
-        }}
+        onOpenChange={(open) => !open && handleClosePostModal()}
       >
         <DialogContent className="w-[95%] md:max-w-lg rounded-2xl p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none z-[170] [&>button]:hidden">
           <div className="p-5 space-y-3">
@@ -664,7 +689,7 @@ export default function FeedPage() {
         </DialogContent>
       </Dialog>
 
-      <ShareSheet isOpen={isShareSheetOpen} onOpenChange={setIsShareSheetOpen} postUrl={shareUrl} />
+      <ShareSheet isOpen={isShareSheetOpen} onOpenChange={(o) => !o && handleCloseShare()} postUrl={shareUrl} />
       
     </DashboardLayout>
   );
