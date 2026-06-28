@@ -435,7 +435,8 @@ export default function FeedPage() {
           <span className="text-[9px] font-black uppercase tracking-widest bg-primary text-white px-2.5 py-1 rounded-full">Buat Postingan</span>
         </motion.div>
 
-        <div className="flex items-center justify-center gap-5 mb-3 sticky top-0 z-20 bg-background/80 backdrop-blur-md py-2 overflow-x-auto no-scrollbar border-b border-border/40 px-2">
+        {/* Sticky Category Bar - Adjusted top to sit below h-11 dashboard header */}
+        <div className="flex items-center justify-center gap-5 mb-3 sticky top-11 z-20 bg-background/80 backdrop-blur-md py-2 overflow-x-auto no-scrollbar border-b border-border/40 px-2 transition-all">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
