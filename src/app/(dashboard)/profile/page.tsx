@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -81,7 +82,6 @@ function getSmartIcon(url: string) {
   return <Globe className="size-3" />;
 }
 
-// Data simulasi untuk akun eksternal
 const MOCK_EXTERNAL_ACCOUNTS: Record<string, Partial<Account>> = {
   'conn1': { id: 'conn1', name: 'Andi Wijaya', type: 'professional', avatar: 'https://picsum.photos/seed/f1/100', bio: 'Expert Software Architect specializing in Cloud Infrastructure.', extra: 'Architect at TechCorp', links: ['https://linkedin.com'], verificationStatus: 'Verified' },
   'conn2': { id: 'conn2', name: 'Budi Santoso', type: 'bisnis', avatar: 'https://picsum.photos/seed/f2/100', bio: 'Penyedia solusi logistik regional terpercaya sejak 1998.', extra: 'CEO FastTrack Logistics', links: ['https://google.com/maps'], verificationStatus: 'Verified' },
@@ -123,22 +123,23 @@ export default function ProfilePage() {
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Cek apakah sedang melihat profil orang lain atau milik sendiri
   const viewingAccount = React.useMemo(() => {
     if (!externalId) return activeAccount;
-    
-    // Cek apakah ID ada di akun milik user sendiri (switchable)
     const myOtherAcc = availableAccounts.find(a => a.id === externalId);
     if (myOtherAcc) return myOtherAcc;
-
-    // Jika tidak ada di milik sendiri, cari di data eksternal
     const external = MOCK_EXTERNAL_ACCOUNTS[externalId];
     if (external) return external as Account;
-
     return activeAccount;
   }, [externalId, activeAccount, availableAccounts]);
 
   const isOwnProfile = viewingAccount.id === activeAccount.id || availableAccounts.some(a => a.id === viewingAccount.id);
+
+  // Efek untuk menutup modal saat navigasi terjadi
+  React.useEffect(() => {
+    setIsConnectionsModalOpen(false);
+    setIsBioModalOpen(false);
+    setIsContentModalOpen(false);
+  }, [externalId]);
 
   React.useEffect(() => {
     const handlePopState = () => {
@@ -210,10 +211,6 @@ export default function ProfilePage() {
     });
     return groups;
   }, [profileVisibleItems, viewingAccount.type]);
-
-  const existingCategories = React.useMemo(() => {
-    return Array.from(new Set((viewingAccount.items || []).map(i => i.categoryName).filter(Boolean)));
-  }, [viewingAccount.items]);
 
   const handleSaveBio = () => {
     if (!isOwnProfile) return;
@@ -329,7 +326,6 @@ export default function ProfilePage() {
       <div className="max-w-xl mx-auto space-y-3 md:space-y-4 pb-20">
         <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
 
-        {/* Back Button if viewing others */}
         {!isOwnProfile && (
            <div className="px-3">
               <button 
@@ -388,7 +384,7 @@ export default function ProfilePage() {
                 
                 {!isOwnProfile && (
                    <Button onClick={handleFollow} size="sm" className="ml-auto h-7 px-3 rounded-lg bg-primary text-white font-black text-[8px] uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-primary/20">
-                      {viewingAccount.type === 'bisnis' ? <><Radar className="size-2.5 mr-1" /> Pantau Radar</> : <><UserPlus className="size-2.5 mr-1" /> Tambahkan</>}
+                      {viewingAccount.type === 'bisnis' ? <><Radar className="size-2.5 mr-1" /> Radar</> : <><UserPlus className="size-2.5 mr-1" /> Tambahkan</>}
                    </Button>
                 )}
               </div>
@@ -482,7 +478,7 @@ export default function ProfilePage() {
                      ))}
                    </div>
                    <div className="hidden sm:block text-left ml-2">
-                      <p className="text-10px font-black text-slate-800 uppercase tracking-tight">Jaringan Koneksi</p>
+                      <p className="text-10px font-black text-slate-800 uppercase tracking-tight">Koneksi Jaringan</p>
                       <p className="text-[9px] font-medium text-slate-400 uppercase tracking-widest">Koneksi Aktif</p>
                    </div>
                  </div>
@@ -544,7 +540,6 @@ export default function ProfilePage() {
         </section>
       </div>
 
-      {/* Connections List Modal (Hanya untuk pemilik) */}
       {isOwnProfile && (
          <Dialog open={isConnectionsModalOpen} onOpenChange={(open) => !open && closeConnectionsModal()}>
            <DialogContent className="w-[95%] md:max-w-md rounded-[2rem] p-0 border-none shadow-2xl overflow-hidden bg-card text-foreground outline-none z-[170] [&>button]:hidden">
@@ -565,8 +560,8 @@ export default function ProfilePage() {
                     <button
                       key={conn.id}
                       onClick={() => {
+                        setIsConnectionsModalOpen(false);
                         router.push(`/profile?id=${conn.id}`);
-                        closeConnectionsModal();
                       }}
                       className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all text-left border border-transparent hover:border-slate-100 group"
                     >
@@ -583,25 +578,15 @@ export default function ProfilePage() {
                       </div>
                     </button>
                   ))}
-
-                  {Object.keys(MOCK_EXTERNAL_ACCOUNTS).length === 0 && (
-                    <div className="py-12 text-center space-y-3">
-                        <div className="size-14 rounded-full bg-slate-50 flex items-center justify-center mx-auto shadow-inner">
-                           <ConnectIcon className="size-7 text-slate-200" />
-                        </div>
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Belum ada koneksi aktif</p>
-                    </div>
-                  )}
                </div>
              </div>
            </DialogContent>
          </Dialog>
       )}
 
-      {/* Modals lainnya (hanya aktif jika isOwnProfile true) */}
       {isOwnProfile && (
          <>
-            <Dialog open={isBioModalOpen} onOpenChange={(open) => !open && (setIsBioModalOpen(false), window.history.state?.modalOpen && window.history.back())}>
+            <Dialog open={isBioModalOpen} onOpenChange={(open) => !open && setIsBioModalOpen(false)}>
               <DialogContent className="w-[95%] md:max-w-md rounded-2xl p-0 border-none shadow-2xl bg-card text-foreground outline-none z-[170] [&>button]:hidden overflow-hidden flex flex-col max-h-[90vh]">
                 <DialogHeader className="p-6 pb-2">
                   <DialogTitle className="text-base font-black uppercase tracking-tight text-slate-900">Ubah Profil</DialogTitle>
@@ -638,7 +623,7 @@ export default function ProfilePage() {
               </DialogContent>
             </Dialog>
 
-            <Dialog open={isContentModalOpen} onOpenChange={(open) => !open && (setIsContentModalOpen(false), window.history.state?.modalOpen && window.history.back(), resetContentForm())}>
+            <Dialog open={isContentModalOpen} onOpenChange={(open) => !open && setIsContentModalOpen(false)}>
               <DialogContent className="w-[95%] md:max-w-lg rounded-xl p-4 bg-card text-foreground outline-none z-[170] [&>button]:hidden">
                 <DialogHeader className="flex flex-row items-center justify-between">
                   <DialogTitle className="text-sm font-bold text-slate-900">Tambah Konten</DialogTitle>
