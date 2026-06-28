@@ -72,9 +72,11 @@ const SEARCH_CATEGORIES = [
 
 const DAFTAR_DAERAH = [
   "Jakarta Pusat", "Jakarta Selatan", "Jakarta Barat", "Jakarta Timur", "Jakarta Utara", 
-  "Bandung", "Surabaya", "Semarang", "Yogyakarta", 
+  "Bandung", "Surabaya", "Semarang", "Yogyakarta", "Solo",
   "Medan", "Makassar", "Palembang", "Denpasar", "Malang",
-  "Banten", "Depok", "Bekasi", "Tangerang", "Bogor"
+  "Banten", "Depok", "Bekasi", "Tangerang", "Bogor", "Cimahi",
+  "Balikpapan", "Banjarmasin", "Pontianak", "Samarinda", "Manado", "Ambon", "Jayapura",
+  "Aceh", "Lampung", "Pekanbaru", "Batam", "Jambi", "Padang", "Mataram", "Kupang"
 ];
 
 export default function CariPage() {
@@ -110,6 +112,17 @@ export default function CariPage() {
       }
     };
     detectLocation();
+  }, []);
+
+  // Handle clicking outside of suggestions to close them
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleSearch = async (
@@ -170,15 +183,11 @@ export default function CariPage() {
 
   const handleLocationChange = (val: string) => {
     setActiveLocation(val);
-    if (val.length > 0) {
-      const filtered = DAFTAR_DAERAH.filter(d => 
-        d.toLowerCase().includes(val.toLowerCase())
-      );
-      setFilteredRegions(filtered);
-      setShowSuggestions(filtered.length > 0);
-    } else {
-      setShowSuggestions(false);
-    }
+    const filtered = DAFTAR_DAERAH.filter(d => 
+      d.toLowerCase().includes(val.toLowerCase())
+    );
+    setFilteredRegions(filtered);
+    setShowSuggestions(val.length > 0 && filtered.length > 0);
   };
 
   const handleVoiceSearch = () => {
@@ -275,7 +284,15 @@ export default function CariPage() {
                 <Input 
                   value={activeLocation}
                   onChange={(e) => handleLocationChange(e.target.value)}
-                  onFocus={() => activeLocation.length > 0 && setShowSuggestions(true)}
+                  onFocus={() => {
+                    if (activeLocation.length > 0) {
+                      const filtered = DAFTAR_DAERAH.filter(d => 
+                        d.toLowerCase().includes(activeLocation.toLowerCase())
+                      );
+                      setFilteredRegions(filtered);
+                      setShowSuggestions(filtered.length > 0);
+                    }
+                  }}
                   placeholder={language === 'id' ? "Wilayah..." : "Location..."}
                   className="h-8 pl-7 pr-7 rounded-lg border-slate-100 bg-slate-50/50 text-[9px] font-black uppercase tracking-widest focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all shadow-inner"
                 />
