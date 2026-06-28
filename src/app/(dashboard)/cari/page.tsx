@@ -220,8 +220,8 @@ export default function CariPage() {
   return (
     <DashboardLayout>
       <div className="max-w-xl mx-auto flex flex-col min-h-screen pb-24">
-        {/* Sticky Search Header */}
-        <div className="sticky top-[44px] z-40 bg-background/95 backdrop-blur-md pt-2 pb-4 px-1 md:px-0 border-b border-border/40">
+        {/* Sticky Search Header - top matches h-12 header height */}
+        <div className="sticky top-[48px] z-40 bg-background/95 backdrop-blur-md pt-2 pb-4 px-1 md:px-0 border-b border-border/40">
           <form onSubmit={(e) => handleSearch(e)} className="space-y-2.5">
             <div className="relative group w-full">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">

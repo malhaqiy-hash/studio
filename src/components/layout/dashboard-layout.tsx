@@ -215,23 +215,23 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-body relative">
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       
-      {/* Header Fixed - Restored to h-11 (44px) */}
-      <header className="fixed top-0 left-0 right-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-11 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-2">
-          <Link href="/feed" className="flex items-center gap-2 active:scale-95 transition-transform">
-            <TappLogo className="size-5 rounded-md shadow-lg shadow-primary/10" />
-            <span className="font-black text-xs tracking-tight text-foreground uppercase">Koolink</span>
+      {/* Header Fixed - Enlarged slightly to h-12 */}
+      <header className="fixed top-0 left-0 right-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-12 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <Link href="/feed" className="flex items-center gap-2.5 active:scale-95 transition-transform">
+            <TappLogo className="size-6 rounded-md shadow-lg shadow-primary/10" />
+            <span className="font-black text-sm tracking-tight text-foreground uppercase">Koolink</span>
           </Link>
-          <span className="font-medium text-[7px] text-primary/60 lowercase italic select-none ml-1 leading-none">{activeAccount?.type}</span>
+          <span className="font-medium text-[9px] text-primary/60 lowercase italic select-none ml-1 leading-none">{activeAccount?.type}</span>
         </div>
         
-        <div className="flex items-center gap-1">
-          <Link href="/messages"><Button variant="ghost" size="icon" className="size-8 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><MessageSquare className="size-4" /></Button></Link>
-          <Link href="/notifications"><Button variant="ghost" size="icon" className="relative size-8 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><Bell className="size-4" /><span className="absolute top-2 right-2 size-1.5 bg-primary rounded-full ring-2 ring-background"></span></Button></Link>
+        <div className="flex items-center gap-1.5">
+          <Link href="/messages"><Button variant="ghost" size="icon" className="size-9 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><MessageSquare className="size-5" /></Button></Link>
+          <Link href="/notifications"><Button variant="ghost" size="icon" className="relative size-9 text-foreground/70 hover:bg-primary/5 hover:text-primary rounded-full transition"><Bell className="size-5" /><span className="absolute top-2 right-2 size-1.5 bg-primary rounded-full ring-2 ring-background"></span></Button></Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center rounded-full border border-primary/10 hover:border-primary transition p-0.5 outline-none ml-1">
-                <Avatar className="h-6 w-6 rounded-full shadow-sm"><AvatarImage src={activeAccount.avatar} className="object-cover" /><AvatarFallback className="bg-primary text-primary-foreground font-bold text-[8px]">{activeAccount.name[0]}</AvatarFallback></Avatar>
+                <Avatar className="h-7 w-7 rounded-full shadow-sm"><AvatarImage src={activeAccount.avatar} className="object-cover" /><AvatarFallback className="bg-primary text-primary-foreground font-bold text-[10px]">{activeAccount.name[0]}</AvatarFallback></Avatar>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52 rounded-xl p-1 shadow-2xl border-border bg-card outline-none z-[180]">
@@ -264,12 +264,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* Main Content Area - Padding top matches h-11 (44px) */}
-      <main className="flex-1 pt-11 pb-16 px-3 w-full relative max-w-2xl mx-auto overflow-x-clip">
+      {/* Main Content Area - Padding top adjusted for h-12 */}
+      <main className="flex-1 pt-12 pb-16 px-3 w-full relative max-w-2xl mx-auto overflow-x-clip">
         {children}
       </main>
 
-      {/* Bottom Nav - Restored to h-12 (48px) */}
+      {/* Bottom Nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t bg-background/95 backdrop-blur-md pb-safe shadow-xl">
         <div className="grid grid-cols-3 h-12 md:h-14 items-center justify-items-center text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-muted-foreground relative">
           <Link href="/feed" className={cn("flex flex-col items-center gap-1 w-full py-1 transition-all", pathname === "/feed" ? "text-primary scale-105" : "hover:text-primary")}>
@@ -291,7 +291,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 className="w-[280px] sm:w-[320px] p-0 bg-card border-l border-border rounded-l-[2rem] shadow-2xl flex flex-col overflow-hidden outline-none z-[150] [&>button]:hidden"
               >
                 <div className="flex flex-col h-full overflow-hidden">
-                  {/* Drawer Profile - Shrunk pt/pb and avatar */}
+                  {/* Drawer Profile */}
                   <div className="px-5 pt-10 pb-6 border-b border-border/40 shrink-0 flex flex-col items-center text-center">
                     <Avatar className="size-14 border-2 border-primary/20 shadow-xl mb-2.5">
                       <AvatarImage src={activeAccount.avatar} className="object-cover" />
@@ -308,7 +308,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
 
-                  {/* Drawer Items - Shrunk vertical padding py-2 */}
+                  {/* Drawer Items */}
                   <div className="flex-1 overflow-y-auto no-scrollbar py-1">
                     <div className="flex flex-col divide-y divide-border/10">
                       {drawerItems.map((item) => (
@@ -337,7 +337,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
 
-                  {/* Drawer Footer - Shrunk padding and elements */}
+                  {/* Drawer Footer */}
                   <div className="mt-auto p-4 border-t border-border/40 space-y-3 shrink-0 bg-slate-50/50 pb-6">
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2 ml-1">
