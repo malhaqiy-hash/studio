@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -212,10 +213,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground font-body relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-background text-foreground font-body relative">
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       
-      {/* Header Fixed so it never scrolls away */}
+      {/* Header Fixed - Berada paling atas layar */}
       <header className="fixed top-0 left-0 right-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md px-4 h-11 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <Link href="/feed" className="flex items-center gap-2 active:scale-95 transition-transform">
@@ -264,8 +265,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* Main Content Area with padding-top to account for fixed header */}
-      <main className="flex-1 pt-11 pb-20 px-3 w-full relative max-w-2xl mx-auto">
+      {/* Main Content Area - Memiliki padding-top h-11 (44px) agar konten tidak tertutup header fixed */}
+      <main className="flex-1 pt-11 pb-20 px-3 w-full relative max-w-2xl mx-auto overflow-x-clip">
         {children}
       </main>
 
@@ -290,7 +291,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 className="w-[280px] sm:w-[320px] p-0 bg-card border-l border-border rounded-l-[2rem] shadow-2xl flex flex-col overflow-hidden outline-none z-[150] [&>button]:hidden"
               >
                 <div className="flex flex-col h-full overflow-hidden">
-                  {/* Enhanced Centered Header with Profile Info */}
                   <div className="px-5 pt-14 pb-8 border-b border-border/40 shrink-0 flex flex-col items-center text-center">
                     <Avatar className="size-16 border-2 border-primary/20 shadow-xl mb-3">
                       <AvatarImage src={activeAccount.avatar} className="object-cover" />
@@ -307,7 +307,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
 
-                  {/* Scrollable Menu Items */}
                   <div className="flex-1 overflow-y-auto no-scrollbar py-2">
                     <div className="flex flex-col divide-y divide-border/10">
                       {drawerItems.map((item) => (
@@ -336,7 +335,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
 
-                  {/* System Footer - Pushed to absolute bottom with mt-auto */}
                   <div className="mt-auto p-5 border-t border-border/40 space-y-4 shrink-0 bg-slate-50/50 pb-8">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
