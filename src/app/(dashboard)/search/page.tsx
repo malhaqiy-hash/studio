@@ -1,5 +1,6 @@
 "use client";
 
+import { ImageIcon } from 'lucide-react';
 import * as React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent } from "@/components/ui/card";

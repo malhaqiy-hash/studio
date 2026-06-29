@@ -88,8 +88,8 @@ const ConnectIcon = ({ className }: { className?: string }) => (
   <div 
     className={cn("bg-current", className)}
     style={{
-      maskImage: `url(${ConnectionIcon.src})`,
-      WebkitMaskImage: `url(${ConnectionIcon.src})`,
+      maskImage: `url(${(ConnectionIcon as any).src})`,
+      WebkitMaskImage: `url(${(ConnectionIcon as any).src})`,
       maskSize: 'contain',
       maskRepeat: 'no-repeat',
       maskPosition: 'center',

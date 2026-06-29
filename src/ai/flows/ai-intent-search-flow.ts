@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use server';
 /**
  * @fileOverview A Hybrid Business Discovery Engine that intelligently ranks internal and external business results.

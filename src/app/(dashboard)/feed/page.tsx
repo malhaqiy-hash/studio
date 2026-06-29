@@ -85,8 +85,8 @@ const ConnectIcon = ({ className }: { className?: string }) => (
   <div 
     className={cn("bg-current", className)}
     style={{
-      maskImage: `url(${ConnectionIcon.src})`,
-      WebkitMaskImage: `url(${ConnectionIcon.src})`,
+      maskImage: `url(${(ConnectionIcon as any).src})`,
+      WebkitMaskImage: `url(${(ConnectionIcon as any).src})`,
       maskSize: 'contain',
       maskRepeat: 'no-repeat',
       maskPosition: 'center',
@@ -676,7 +676,7 @@ export default function FeedPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!zoomedAvatar} onOpenChange={setExpandedAvatar}>
+      <Dialog open={!!zoomedAvatar} onOpenChange={(open) => { if (!open) setExpandedAvatar(null); }}>
         <DialogContent 
           className="max-w-screen-lg p-0 bg-black/95 border-none shadow-none flex items-center justify-center overflow-hidden outline-none z-[170] [&>button]:hidden cursor-pointer"
           onClick={() => setExpandedAvatar(null)}

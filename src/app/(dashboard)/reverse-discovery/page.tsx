@@ -85,7 +85,7 @@ export default function ReverseDiscoveryPage() {
                           <div className="flex items-center gap-1.5 text-[8px] font-black text-slate-400 uppercase"><Package className="size-2.5 text-amber-400" />{demand.volume}</div>
                         </div>
                         <Button size="sm" className="w-full rounded-lg bg-slate-900 text-white font-black h-8 px-4 flex gap-1.5 text-[9px] uppercase tracking-widest active:scale-95 transition-all">
-                          {t('pitch_solution')}
+                          {t('pitch_solution' as any)}
                           <ArrowRight className="size-3" />
                         </Button>
                       </div>

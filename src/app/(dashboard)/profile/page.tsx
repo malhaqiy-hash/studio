@@ -62,8 +62,8 @@ const ConnectIcon = ({ className }: { className?: string }) => (
   <div 
     className={cn("bg-current", className)}
     style={{
-      maskImage: `url(${ConnectionIcon.src})`,
-      WebkitMaskImage: `url(${ConnectionIcon.src})`,
+      maskImage: `url(${(ConnectionIcon as any).src})`,
+      WebkitMaskImage: `url(${(ConnectionIcon as any).src})`,
       maskSize: 'contain',
       maskRepeat: 'no-repeat',
       maskPosition: 'center',
@@ -104,7 +104,7 @@ const MOCK_STATS_DATA = {
   ]
 };
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const externalId = searchParams.get('id');
@@ -605,5 +605,13 @@ export default function ProfilePage() {
 
       <ShareSheet isOpen={isShareSheetOpen} onOpenChange={(o) => { if(!o) closeWithHistory(setIsShareSheetOpen, 'share'); }} postUrl={shareUrl} />
     </DashboardLayout>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-pulse text-slate-400 text-[10px] font-black uppercase tracking-widest">Memuat...</div></div>}>
+      <ProfilePageContent />
+    </React.Suspense>
   );
 }

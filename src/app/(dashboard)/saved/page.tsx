@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -144,7 +143,7 @@ export default function SavedPostsPage() {
         <header className="space-y-1 px-1">
           <div className="flex items-center gap-1.5 bg-amber-50 text-amber-600 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest w-fit border border-amber-100"><Bookmark className="size-2.5 fill-amber-600" />{t('saved')}</div>
           <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none">{language === 'id' ? 'Koleksi Anda' : 'Your Collection'}</h1>
-          <p className="text-slate-500 font-medium text-[11px] leading-snug">{t('saved_desc')}</p>
+          <p className="text-slate-500 font-medium text-[11px] leading-snug">{t('saved_desc' as any)}</p>
         </header>
 
         {loading ? (

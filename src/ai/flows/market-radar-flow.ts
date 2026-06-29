@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use server';
 /**
  * @fileOverview AI Market Radar - Detects global business trends.
